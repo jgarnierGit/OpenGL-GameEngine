@@ -20,7 +20,7 @@ public abstract class ShaderProgram {
 	    
 	    private static FloatBuffer matrixBuffer = BufferUtils.createFloatBuffer(16);
 	     
-	    public ShaderProgram(Path vertexFile,Path fragmentFile){
+	    public ShaderProgram(Path vertexFile,Path fragmentFile) throws FileNotFoundException{
 	        vertexShaderID = loadShader(vertexFile,GL20.GL_VERTEX_SHADER);
 	        fragmentShaderID = loadShader(fragmentFile,GL20.GL_FRAGMENT_SHADER);
 	        programID = GL20.glCreateProgram();
@@ -87,18 +87,13 @@ public abstract class ShaderProgram {
 	        GL20.glBindAttribLocation(programID, attribute, variableName);
 	    }
 	     
-	    private static int loadShader(Path pathFile, int type){
+	    private static int loadShader(Path pathFile, int type) throws FileNotFoundException{
 	        StringBuilder shaderSource = new StringBuilder();
-	        try{
 	        	Scanner file = new Scanner(pathFile.toFile());
 	        	while(file.hasNextLine()) {
 	        		String line = file.nextLine();
 	        		shaderSource.append(line).append("\n");
 	        	}
-	        }catch (FileNotFoundException e) {
-	        	System.err.println("Couldn't find "+ pathFile.toString());
-	        	System.exit(-1);
-			}
 	        int shaderID = GL20.glCreateShader(type);
 	        GL20.glShaderSource(shaderID, shaderSource);
 	        GL20.glCompileShader(shaderID);

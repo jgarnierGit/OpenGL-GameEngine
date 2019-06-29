@@ -1,5 +1,6 @@
 package renderEngine;
 
+import java.io.FileNotFoundException;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,7 +28,7 @@ public class MasterRenderer {
 	private static final float GREEN = 0.98f;
 	
 	
-	private StaticShader shader = new StaticShader();
+	private StaticShader shader;
 	private EntityRenderer renderer;
 	private TerrainRenderer terrainRenderer;
 	//TODO FIXME instanciation + composition  is this a good idea?
@@ -38,7 +39,8 @@ public class MasterRenderer {
 	
 	private HashMap<Model3D, List<Entity>> entities = new HashMap<>();
 	
-	public MasterRenderer() {
+	public MasterRenderer() throws FileNotFoundException {
+		shader = new StaticShader();
 		enableCulling();
 		createProjectionMatrix();
 		renderer = new EntityRenderer(shader, projectionMatrix);
