@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.lwjgl.opengl.GL11;
@@ -24,8 +25,8 @@ public class MTLLoader {
      * @return the loaded <code>Shader</code>
 	 * @throws IOException 
      */
-    public static TextureContainer loadModel(File file) throws IOException {
-    	return MTLLoader.loadModel(new Scanner(file));
+    public static TextureContainer loadModel(File file, Logger logger) throws IOException {
+    	return MTLLoader.loadModel(new Scanner(file),logger);
     }
 
     /**
@@ -33,8 +34,8 @@ public class MTLLoader {
      * @return the loaded <code>Shader</code>
      * @throws IOException 
      */
-    public static TextureContainer loadModel(InputStream stream) throws IOException {
-    	return MTLLoader.loadModel(new Scanner(stream));
+    public static TextureContainer loadModel(InputStream stream, Logger logger) throws IOException {
+    	return MTLLoader.loadModel(new Scanner(stream), logger);
     }
 
     /**
@@ -43,7 +44,7 @@ public class MTLLoader {
      * @return the loaded <code>Shader</code>
      * @throws IOException 
      */
-    public static TextureContainer loadModel(Scanner sc) throws IOException {
+    public static TextureContainer loadModel(Scanner sc, Logger logger) throws IOException {
     	ArrayList<Integer> textureIds = new ArrayList<>();
     	ArrayList<Vector3f> diffuseColor = new ArrayList<>();
         while (sc.hasNextLine()) {
@@ -63,7 +64,7 @@ public class MTLLoader {
                 		try {
                 			textureIds.add(TextureLoader.getTexture("PNG", new FileInputStream(lineContent[0])).getTextureID());
                 		} catch(FileNotFoundException e1) {
-                			System.err.println("File not found "+ lineContent[0] +" specified in MTL file.");
+                			System.err.println("["+ logger.getName() +"] File not found "+ lineContent[0] +" specified in MTL file. ");
                 		}
                     	break;
                     default:

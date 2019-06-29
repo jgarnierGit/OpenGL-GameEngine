@@ -1,10 +1,5 @@
 package models;
 
-import java.io.FileNotFoundException;
-
-import models.imports.Cube;
-import models.imports.Grass;
-import models.imports.Plane;
 import renderEngine.Loader;
 
 public abstract class Model3D {
@@ -12,7 +7,7 @@ public abstract class Model3D {
 	private Container3D container3D;
 	protected TextureContainer textureContainer;
 	
-	protected Model3D(Container3D container3D, TextureContainer textureContainer, Loader loader) throws FileNotFoundException {
+	protected Model3D(Container3D container3D, TextureContainer textureContainer, Loader loader) {
 		this.container3D = container3D;
 		this.textureContainer = textureContainer;
 		vaoID = loader.load3DContainerToVAO(this.container3D);
