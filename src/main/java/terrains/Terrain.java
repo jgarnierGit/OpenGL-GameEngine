@@ -31,10 +31,10 @@ public class Terrain extends Model3D {
 
 	private static TextureContainer importTextures() {
 		TextureContainer mixedTextures = BlendedTexturesContainer.create()
-				.addTexture("grassFlowers.png")
-				.addTexture("mud.png")
-				.addTexture("path.png")
 				.addTexture("grass.png")
+				.addTexture("mud.png")
+				.addTexture("grassFlowers.png")
+				.addTexture("path.png")
 				.addBlendTexturesAndBuild("blendMap.png");
 		return mixedTextures;
 	}
