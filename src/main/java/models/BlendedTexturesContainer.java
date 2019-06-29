@@ -5,14 +5,15 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Optional;
 
 import org.newdawn.slick.opengl.TextureLoader;
 
 public class BlendedTexturesContainer implements TextureContainer{
-	private ArrayList<TextureData> textures = new ArrayList<>();
+	private Optional<ArrayList<TextureData>> textures;
 	
 	public static class MixedTexturesBuilder {
-		public ArrayList<TextureData> textures = new ArrayList<>();
+		public Optional<ArrayList<TextureData>> textures = Optional.of(new ArrayList<>());
 		
 		public MixedTexturesBuilder addTexture(String textureName) {	
 			File file = Paths.get(BlendedTexturesContainer.resourceTexturePath.toString(), textureName).toFile();
@@ -23,20 +24,23 @@ public class BlendedTexturesContainer implements TextureContainer{
 		public BlendedTexturesContainer addBlendTexturesAndBuild(String textureName) {
 			File file = Paths.get(BlendedTexturesContainer.resourceTexturePath.toString(), textureName).toFile();
 			registerTextureId(file);
+			if(textures.get().isEmpty()) {
+				textures = Optional.empty();
+			}
 			return new BlendedTexturesContainer(textures);
 		}
 		
 		private void registerTextureId(File file) {
 			try {
-				textures.add(new TextureData(TextureLoader.getTexture("PNG", new FileInputStream(file)).getTextureID()));
+				textures.get().add(new TextureData(TextureLoader.getTexture("PNG", new FileInputStream(file)).getTextureID()));
 			} catch (IOException e) {
 				System.err.println("Texture "+ file.getPath() +" "+ file.getName() +" not found");
 			}
 		}
 	}
 
-	private BlendedTexturesContainer(ArrayList<TextureData> textures) {
-		this.textures = textures;
+	private BlendedTexturesContainer(Optional<ArrayList<TextureData>> textures2) {
+		this.textures = textures2;
 	}
 
 	public static MixedTexturesBuilder create() {
@@ -44,7 +48,7 @@ public class BlendedTexturesContainer implements TextureContainer{
 	}
 
 	@Override
-	public ArrayList<TextureData> getTextures() {
+	public Optional<ArrayList<TextureData>> getTextures() {
 		return textures;
 	}
 	

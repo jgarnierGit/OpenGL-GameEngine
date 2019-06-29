@@ -74,14 +74,16 @@ public class EntityRenderer{
 		GL20.glEnableVertexAttribArray(VBOIndex.POSITION_INDEX);
 		GL20.glEnableVertexAttribArray(VBOIndex.TEXTURE_INDEX);
 		GL20.glEnableVertexAttribArray(VBOIndex.NORMAL_INDEX);
-		TextureData texture = model.getTextureContainer().getTextures().get(0);
-		if(texture.isHasTransparency()) {
-			MasterRenderer.disableCulling();
+		if(model.getTextureContainer().getTextures().isPresent()) {
+			TextureData texture = model.getTextureContainer().getTextures().get().get(0);
+			if(texture.isHasTransparency()) {
+				MasterRenderer.disableCulling();
+			}
+			shader.loadFakeLighting(texture.isUseFakeLighting());
+			shader.loadShineVariables(texture.getShineDamper(), texture.getReflectivity());
+			GL13.glActiveTexture(GLTextureIDIncrementer.GL_TEXTURE_IDS.get(0));
+			GL11.glBindTexture(GL11.GL_TEXTURE_2D, texture.getTextureID());
 		}
-		shader.loadFakeLighting(texture.isUseFakeLighting());
-		shader.loadShineVariables(texture.getShineDamper(), texture.getReflectivity());
-		GL13.glActiveTexture(GLTextureIDIncrementer.GL_TEXTURE_IDS.get(0));
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, texture.getTextureID());
 	}
 	
 	/**

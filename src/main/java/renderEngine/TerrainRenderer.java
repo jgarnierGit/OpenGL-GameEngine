@@ -48,7 +48,10 @@ public class TerrainRenderer{
 		GL20.glEnableVertexAttribArray(VBOIndex.POSITION_INDEX);
 		GL20.glEnableVertexAttribArray(VBOIndex.TEXTURE_INDEX);
 		GL20.glEnableVertexAttribArray(VBOIndex.NORMAL_INDEX);
-		bindTextures(model.getTextureContainer().getTextures());
+		if(model.getTextureContainer().getTextures().isPresent()) {
+			bindTextures(model.getTextureContainer().getTextures().get());
+		}
+
 		shader.loadShineVariables(1, 0);
 	}
 	

@@ -73,7 +73,7 @@ public class MTLLoader {
         }
         sc.close();
     	TextureContainer textureData = SimpleTextureContainer.create()
-    			.setTexture(textureIds.get(0))
+    			.setTexture(textureIds)
     			.build();
         return textureData;
     }

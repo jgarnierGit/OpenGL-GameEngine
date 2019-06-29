@@ -41,8 +41,9 @@ public abstract class Model3D {
 	 * @param value
 	 */
 	public void setReflectivity(int textureID, int value) {
-		this.textureContainer.getTextures().get(textureID).setReflectivity(value);
-		
+		if(this.textureContainer.getTextures().isPresent()) {
+			this.textureContainer.getTextures().get().get(textureID).setReflectivity(value);
+		}
 	}
 	
 	/**
@@ -51,7 +52,9 @@ public abstract class Model3D {
 	 * @param value
 	 */
 	public void setShineDamper(int textureID, int value) {
-		this.textureContainer.getTextures().get(textureID).setShineDamper(value);
+		if(this.textureContainer.getTextures().isPresent()) {
+			this.textureContainer.getTextures().get().get(textureID).setShineDamper(value);
+		}
 	}
 	
 	/**
@@ -60,7 +63,9 @@ public abstract class Model3D {
 	 * @param value
 	 */
 	public void setHasTransparency(int textureID, boolean value) {
-		this.textureContainer.getTextures().get(textureID).setHasTransparency(value);
+		if(this.textureContainer.getTextures().isPresent()) {
+			this.textureContainer.getTextures().get().get(textureID).setHasTransparency(value);
+		}
 	}
 	
 	/**
@@ -69,6 +74,8 @@ public abstract class Model3D {
 	 * @param value
 	 */
 	public void setUseFakeLighting(int textureID, boolean value) {
-		this.textureContainer.getTextures().get(textureID).setUseFakeLighting(value);
+		if(this.textureContainer.getTextures().isPresent()) {
+			this.textureContainer.getTextures().get().get(textureID).setUseFakeLighting(value);
+		}
 	}
 }

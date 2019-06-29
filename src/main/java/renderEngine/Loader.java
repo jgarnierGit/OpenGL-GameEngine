@@ -69,7 +69,9 @@ public class Loader {
 	}
 	
 	public void loadTextureToVAO(TextureContainer textureContainer) {
-		textures.addAll(textureContainer.getTextures().parallelStream().map(TextureData::getTextureID).collect(Collectors.toList()));
+		if(textureContainer.getTextures().isPresent()) {
+			textures.addAll(textureContainer.getTextures().get().stream().map(TextureData::getTextureID).collect(Collectors.toList()));
+		}
 	}
 
 	/**
