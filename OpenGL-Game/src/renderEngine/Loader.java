@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
@@ -21,6 +22,7 @@ import org.newdawn.slick.opengl.TextureLoader;
 import models.Container3D;
 import models.Model3D;
 import models.TextureContainer;
+import models.TextureData;
 
 /**
  * Handles the loading of geometry data into VAOs. It also keeps track of all
@@ -67,7 +69,7 @@ public class Loader {
 	}
 	
 	public void loadTextureToVAO(TextureContainer textureContainer) {
-		textures.add(textureContainer.getTextureID());
+		textures.addAll(textureContainer.getTextures().parallelStream().map(TextureData::getTextureID).collect(Collectors.toList()));
 	}
 
 	/**

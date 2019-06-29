@@ -12,8 +12,10 @@ import org.lwjglx.util.vector.Matrix4f;
 import entities.Entity;
 import models.Model3D;
 import models.TextureContainer;
+import models.TextureData;
 import renderEngine.Loader.VBOIndex;
 import shaderManager.StaticShader;
+import toolbox.GLTextureIDIncrementer;
 import toolbox.Maths;
 
 /**
@@ -62,6 +64,7 @@ public class EntityRenderer{
 	}
 
 	 /** 
+	  * TODO do same thing as in TerrainRenderer and maybe refactor to merge the 2 renderer ?
 	 * Before we can render a VAO it needs to be made active, and we can do this
 	 * by binding it. We also need to enable the relevant attributes of the VAO,
 	 * which in this case is just attribute 0 where we stored the position data.
@@ -71,14 +74,14 @@ public class EntityRenderer{
 		GL20.glEnableVertexAttribArray(VBOIndex.POSITION_INDEX);
 		GL20.glEnableVertexAttribArray(VBOIndex.TEXTURE_INDEX);
 		GL20.glEnableVertexAttribArray(VBOIndex.NORMAL_INDEX);
-		TextureContainer texture = model.getTextureContainer();
+		TextureData texture = model.getTextureContainer().getTextures().get(0);
 		if(texture.isHasTransparency()) {
 			MasterRenderer.disableCulling();
 		}
 		shader.loadFakeLighting(texture.isUseFakeLighting());
 		shader.loadShineVariables(texture.getShineDamper(), texture.getReflectivity());
-		GL13.glActiveTexture(GL13.GL_TEXTURE0);
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, model.getTextureContainer().getTextureID());
+		GL13.glActiveTexture(GLTextureIDIncrementer.GL_TEXTURE_IDS.get(0));
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, texture.getTextureID());
 	}
 	
 	/**

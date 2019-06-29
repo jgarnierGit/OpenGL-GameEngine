@@ -9,50 +9,37 @@ import org.lwjglx.util.vector.Vector2f;
 import org.lwjglx.util.vector.Vector3f;
 
 import models.Container3D;
+import models.Container3DImpl;
+import models.GeneratedModelContainer;
+import models.BlendedTexturesContainer;
 import models.Model3D;
 import models.TextureContainer;
 import renderEngine.Loader;
 
-/**
- * not extending {GeneratedModel} to avoid surchage of import*() methods in Model3D.
- * Maybe refactor if generated models multiplicates...
- * @author chezmoi
- *
- */
-public class Terrain {
+public class Terrain extends Model3D {
 	private static final float SIZE = 800;
 	private static final int VERTEX_COUNT = 128;
 
 	private float x;
 	private float z;
-	
-	//TODO try to refactor with Model3D as sole endpoint.
-	private int vaoID;
-	private Container3D container3D;
-	private TextureContainer backgroundTexture;
-	private TextureContainer rTexture;
-	private TextureContainer gTexture;
-	private TextureContainer bTexture;
-	private TextureContainer blendMap;
 
 	public Terrain (int gridX, int gridZ, Loader loader) throws FileNotFoundException {
-		this.backgroundTexture = new TextureContainer(Paths.get("./", "resources", "2D", "grass.png").toFile());
-		this.rTexture = new TextureContainer(Paths.get("./", "resources", "2D", "grassFlowers.png").toFile());
-		this.gTexture = new TextureContainer(Paths.get("./", "resources", "2D", "mud.png").toFile());
-		this.bTexture = new TextureContainer(Paths.get("./", "resources", "2D", "path.png").toFile());
-		this.blendMap = new TextureContainer(Paths.get("./", "resources", "2D", "blendMap.png").toFile());
-		this.container3D = generateTerrain(loader);
-		loader.load3DContainerToVAO(this.container3D);
-		/**loader.loadTextureToVAO(this.backgroundTexture);
-		loader.loadTextureToVAO(this.rTexture);
-		loader.loadTextureToVAO(this.gTexture);
-		loader.loadTextureToVAO(this.bTexture);
-		loader.loadTextureToVAO(this.blendMap);**/
+		super(generateTerrain(), importTextures(), loader);
 		this.x = gridX*SIZE;
 		this.z = gridZ*SIZE;
 	}
 
-	private Container3D generateTerrain(Loader loader){
+	private static TextureContainer importTextures() {
+		TextureContainer mixedTextures = BlendedTexturesContainer.create()
+				.addTexture("grassFlowers.png")
+				.addTexture("mud.png")
+				.addTexture("path.png")
+				.addTexture("grass.png")
+				.addBlendTexturesAndBuild("blendMap.png");
+		return mixedTextures;
+	}
+
+	private static Container3D generateTerrain(){
 		ArrayList<Vector3f> positions = new ArrayList<>();
 		ArrayList<Vector3f> normalsVector = new ArrayList<>();
 		ArrayList<Vector2f> textures = new ArrayList<>();
@@ -88,44 +75,14 @@ public class Terrain {
 				vertexIndices.add(bottomRight);
 			}
 		}
-		return new Container3D(vertexIndices, positions, textures, normalsVector);
+		return new GeneratedModelContainer(vertexIndices, positions, textures, normalsVector);
 	}
 
-	public float getX() {
+	public  float getX() {
 		return x;
 	}
 
 	public float getZ() {
 		return z;
 	}
-	
-	public TextureContainer getBackgroundTexture() {
-		return backgroundTexture;
-	}
-	public TextureContainer getrTexture() {
-		return rTexture;
-	}
-	public TextureContainer getgTexture() {
-		return gTexture;
-	}
-	public TextureContainer getbTexture() {
-		return bTexture;
-	}
-	public TextureContainer getBlendMap() {
-		return blendMap;
-	}
-	
-	/**
-	 * @return The ID of the VAO which contains the data about all the geometry
-	 *         of this model.
-	 */
-	public int getVaoID() {
-		return vaoID;
-	}
-
-	public Container3D getContainer3D() {
-		return this.container3D;
-	}
-
-
 }

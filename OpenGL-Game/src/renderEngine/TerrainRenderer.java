@@ -1,5 +1,6 @@
 package renderEngine;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.lwjgl.opengl.GL11;
@@ -10,10 +11,11 @@ import org.lwjglx.util.vector.Matrix4f;
 import org.lwjglx.util.vector.Vector3f;
 
 import models.Model3D;
-import models.TextureContainer;
+import models.TextureData;
 import renderEngine.Loader.VBOIndex;
 import shaderManager.TerrainShader;
 import terrains.Terrain;
+import toolbox.GLTextureIDIncrementer;
 import toolbox.Maths;
 
 public class TerrainRenderer{
@@ -27,8 +29,8 @@ public class TerrainRenderer{
 		shader.stop();
 	}
 	
-	public void render(List<Terrain> terrains) {
-		for(Terrain terrain : terrains) {
+	public void render(List<Model3D> terrains) {
+		for(Model3D terrain : terrains) {
 			prepareTerrain(terrain);
 			loadTerrain(terrain);
 			GL11.glDrawElements(GL11.GL_TRIANGLES, MasterRenderer.storeDataInIntBuffer(terrain.getContainer3D().getFlatIndices()));
@@ -41,37 +43,29 @@ public class TerrainRenderer{
 	 * by binding it. We also need to enable the relevant attributes of the VAO,
 	 * which in this case is just attribute 0 where we stored the position data.
 	 */
-	private void prepareTerrain(Terrain model) {
+	private void prepareTerrain(Model3D model) {
 		GL30.glBindVertexArray(model.getVaoID());
 		GL20.glEnableVertexAttribArray(VBOIndex.POSITION_INDEX);
 		GL20.glEnableVertexAttribArray(VBOIndex.TEXTURE_INDEX);
 		GL20.glEnableVertexAttribArray(VBOIndex.NORMAL_INDEX);
-		bindTextures(model);
+		bindTextures(model.getTextureContainer().getTextures());
 		shader.loadShineVariables(1, 0);
 	}
 	
-	private void bindTextures(Terrain model) {
-		GL13.glActiveTexture(GL13.GL_TEXTURE0);
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, model.getBackgroundTexture().getTextureID());
-		
-		GL13.glActiveTexture(GL13.GL_TEXTURE1);
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, model.getrTexture().getTextureID());
-
-		GL13.glActiveTexture(GL13.GL_TEXTURE2);
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, model.getgTexture().getTextureID());
-		
-		GL13.glActiveTexture(GL13.GL_TEXTURE3);
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, model.getbTexture().getTextureID());
-		
-		GL13.glActiveTexture(GL13.GL_TEXTURE4);
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, model.getBlendMap().getTextureID());
+	// TODO code may be duplicated with entityRenderer
+	private void bindTextures(ArrayList<TextureData> textureContainer) {
+		for(int i =0; i< textureContainer.size() && i<33; i++) {
+			GL13.glActiveTexture(GLTextureIDIncrementer.GL_TEXTURE_IDS.get(i));
+			GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureContainer.get(i).getTextureID());
+		}
 	}
 
 	/**
 	 * Rendering active {Entity}
 	 * @param entity
 	 */
-	private void loadTerrain(Terrain terrain) {
+	private void loadTerrain(Model3D modelTerrain) {
+		Terrain terrain = (Terrain) modelTerrain;
 		Matrix4f transformationMatrix = Maths.createTransformationMatrix(new Vector3f(terrain.getX(),0, terrain.getZ()), 0, 0, 0, 1);
 		shader.loadTransformationMatrix(transformationMatrix);
 	}

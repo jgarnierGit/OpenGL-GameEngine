@@ -22,10 +22,9 @@ public class MasterRenderer {
 	private static final float FOV = 70;
 	private static final float NEAR_PLANE = 0.1f;
 	private static final float FAR_PLANE = 1000;
-	
-	private static final float RED = 0.5f;
-	private static final float BLUE = 0.5f;
-	private static final float GREEN = 0.5f;
+	private static final float RED = 0.49f;
+	private static final float BLUE = 0.89f;
+	private static final float GREEN = 0.98f;
 	
 	
 	private StaticShader shader = new StaticShader();
@@ -33,7 +32,7 @@ public class MasterRenderer {
 	private TerrainRenderer terrainRenderer;
 	//TODO FIXME instanciation + composition  is this a good idea?
 	private TerrainShader terrainShader = new TerrainShader();
-	private List<Terrain> terrains = new ArrayList<>();
+	private List<Model3D> terrains = new ArrayList<>();
 	
 	private Matrix4f projectionMatrix;
 	
@@ -74,7 +73,7 @@ public class MasterRenderer {
 		
 	}
 	
-	public void processTerrain(Terrain terrain) {
+	public void processTerrain(Model3D terrain) {
 		terrains.add(terrain);
 	}
 	

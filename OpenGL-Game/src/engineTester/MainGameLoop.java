@@ -12,8 +12,10 @@ import org.lwjglx.util.vector.Vector3f;
 import entities.Camera;
 import entities.Entity;
 import entities.Light;
-import models.Imported3DModel;
+import models.Imported3DModelContainer;
 import models.Model3D;
+import models.imports.Cube;
+import models.imports.Grass;
 import renderEngine.DisplayManager;
 import renderEngine.Loader;
 import renderEngine.MasterRenderer;
@@ -50,18 +52,18 @@ public class MainGameLoop {
 
 		DisplayManager.createDisplay();
 		Loader loader = new Loader();
+		
+		Model3D cube = new Cube(loader);
+		Model3D grass = new Grass(loader);
 
 		// Cube semi ko
 		//plane // OK
-		Model3D model = Model3D.importCube(loader);
-		Model3D grass = Model3D.importGrass(loader);
-		//loader.loadModelToVAO(model);
 
 		//Entity entity = new Entity(model, new Vector3f(0,0,-2),0,0,0,1);
 		Light sun = new Light(new Vector3f(0,0,1), new Vector3f(1,1,1));
 		
-		Terrain terrain = new Terrain(0, 0, loader);
-		//Terrain terrain2 = new Terrain(1, 0, loader);
+		Model3D terrain = new Terrain(0,0,loader);
+		Model3D terrain2 = new Terrain(1,0,loader);
 		
 		Camera camera = new Camera();
 		// Run the rendering loop until the user has attempted to close
@@ -75,7 +77,7 @@ public class MainGameLoop {
 			float x = random.nextFloat() * 100 - 50;
 			float y = random.nextFloat() * 100 - 50;
 			float z = random.nextFloat() *- 300;
-			cubes.add(new Entity(model, new Vector3f(x,y,z), random.nextFloat() * 180, random.nextFloat() * 180, 0, 1f));
+			cubes.add(new Entity(cube, new Vector3f(x,y,z), random.nextFloat() * 180, random.nextFloat() * 180, 0, 1f));
 		}
 		
 		for(int i=0;i<200; i++) {
@@ -101,7 +103,7 @@ public class MainGameLoop {
 				masterRenderer.processEntity(entityGrass);
 			}
 			masterRenderer.processTerrain(terrain);
-			//masterRenderer.processTerrain(terrain2);
+			masterRenderer.processTerrain(terrain2);
 			masterRenderer.render(sun, camera);
 			DisplayManager.updateDisplay();
 		}

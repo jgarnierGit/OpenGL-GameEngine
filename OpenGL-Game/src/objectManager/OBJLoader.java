@@ -41,6 +41,8 @@ import org.lwjglx.util.vector.Vector2f;
 import org.lwjglx.util.vector.Vector3f;
 
 import models.Container3D;
+import models.Container3DImpl;
+import models.GeneratedModelContainer;
 
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -240,7 +242,7 @@ public class OBJLoader {
 
 		};
 		
-		Container3D importedModel = new Container3D(vertexIndices,vertices, getOrderedVectors(textures,loaderVertexFaces, Vertex::getTextureIndex), getOrderedVectors(normals,loaderVertexFaces, Vertex::getNormalIndex));
+		Container3D importedModel = new GeneratedModelContainer(vertexIndices,vertices, getOrderedVectors(textures,loaderVertexFaces, Vertex::getTextureIndex), getOrderedVectors(normals,loaderVertexFaces, Vertex::getNormalIndex));
 		return importedModel;
 	}
 
