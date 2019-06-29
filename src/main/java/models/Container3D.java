@@ -9,7 +9,7 @@ import org.lwjglx.util.vector.Vector2f;
 import org.lwjglx.util.vector.Vector3f;
 
 public interface Container3D {
-	static final Path resourcePath = Paths.get("./", "resources", "3D");
+	static final Path resourcePath = Paths.get("./", "src", "main", "resources", "3D");
 	
 	public ArrayList<Integer> getVertexIndices();
 	public ArrayList<Vector3f> getPositions();

@@ -22,17 +22,18 @@ public class MTLLoader {
 	 /**
      * @param file the file to be loaded
      * @return the loaded <code>Shader</code>
-     * @throws java.io.FileNotFoundException thrown if the Shader file is not found
+	 * @throws IOException 
      */
-    public static TextureContainer loadModel(File file) throws FileNotFoundException {
+    public static TextureContainer loadModel(File file) throws IOException {
     	return MTLLoader.loadModel(new Scanner(file));
     }
 
     /**
      * @param stream the stream to be loaded
      * @return the loaded <code>Shader</code>
+     * @throws IOException 
      */
-    public static TextureContainer loadModel(InputStream stream) {
+    public static TextureContainer loadModel(InputStream stream) throws IOException {
     	return MTLLoader.loadModel(new Scanner(stream));
     }
 
@@ -40,8 +41,9 @@ public class MTLLoader {
      * TODO finish parser for multi texture and mixed textures and colors.
      * @param sc the <code>Shader</code> to be loaded
      * @return the loaded <code>Shader</code>
+     * @throws IOException 
      */
-    public static TextureContainer loadModel(Scanner sc) {
+    public static TextureContainer loadModel(Scanner sc) throws IOException {
     	ArrayList<Integer> textureIds = new ArrayList<>();
     	ArrayList<Vector3f> diffuseColor = new ArrayList<>();
         while (sc.hasNextLine()) {
@@ -61,10 +63,7 @@ public class MTLLoader {
                 		try {
                 			textureIds.add(TextureLoader.getTexture("PNG", new FileInputStream(lineContent[0])).getTextureID());
                 		} catch(FileNotFoundException e1) {
-                			System.err.println("File not found "+ lineContent[0]);
-                		}
-                		catch (IOException e) {
-                			e.printStackTrace();
+                			System.err.println("File not found "+ lineContent[0] +" specified in MTL file.");
                 		}
                     	break;
                     default:

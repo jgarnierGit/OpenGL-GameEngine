@@ -3,6 +3,7 @@ package engineTester;
 import static org.lwjgl.glfw.GLFW.*;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -38,9 +39,9 @@ public class MainGameLoop {
 	 * into a VAO. This VAO is then rendered to the screen every frame.
 	 * 
 	 * @param args
-	 * @throws FileNotFoundException 
+	 * @throws IOException 
 	 */
-	public static void main(String[] args) throws FileNotFoundException {
+	public static void main(String[] args) throws IOException {
 		// Set the error handling code: all GLFW errors will be printed to the system error stream (just like println)
 		errorCallback = GLFWErrorCallback.createPrint(System.err).set();
 		glfwSetErrorCallback(errorCallback);
