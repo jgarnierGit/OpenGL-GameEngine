@@ -50,9 +50,16 @@ public class TerrainRenderer{
 		GL20.glEnableVertexAttribArray(VBOIndex.NORMAL_INDEX);
 		if(model.getTextureContainer().getTextures().isPresent()) {
 			bindTextures(model.getTextureContainer().getTextures().get());
+		}else {
+			useNoTexture();
 		}
 
 		shader.loadShineVariables(1, 0);
+	}
+	
+	private void useNoTexture() {
+		GL13.glActiveTexture(GLTextureIDIncrementer.GL_TEXTURE_IDS.get(0));
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
 	}
 	
 	// TODO code may be duplicated with entityRenderer

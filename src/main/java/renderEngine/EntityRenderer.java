@@ -84,6 +84,14 @@ public class EntityRenderer{
 			GL13.glActiveTexture(GLTextureIDIncrementer.GL_TEXTURE_IDS.get(0));
 			GL11.glBindTexture(GL11.GL_TEXTURE_2D, texture.getTextureID());
 		}
+		else {
+			 useNoTexture();
+		}
+	}
+	
+	private void useNoTexture() {
+		GL13.glActiveTexture(GLTextureIDIncrementer.GL_TEXTURE_IDS.get(0));
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
 	}
 	
 	/**
