@@ -2,10 +2,10 @@ package renderEngine;
 
 import static org.lwjgl.glfw.GLFW.*;
 
-import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 
 import org.lwjgl.system.MemoryUtil;
+import org.lwjglx.Sys;
 
 /**
  * This class contains all the methods needed to set-up, maintain, and close a LWJGL display.
@@ -19,6 +19,10 @@ public class DisplayManager {
 	public static final int HEIGHT = 720;//for debug
 	private static final String TITLE = "Our First Display";
 	public static long WINDOW_ID;
+	
+	private static double lastFrameTime;
+	private static float delta;
+	
 	
 	/**
 	 * Creates a display window on which we can render our game. The dimensions
@@ -58,7 +62,9 @@ public class DisplayManager {
 		// LWJGL detects the context that is current in the current thread,
 		// creates the GLCapabilities instance and makes the OpenGL
 		// bindings available for use.
+		lastFrameTime = getCurrentTime();
 		GL.createCapabilities();
+
 	}
 
 	/**
@@ -73,12 +79,18 @@ public class DisplayManager {
 		//need to understand. You can simply see this method as updating the window contents.
 		glfwPollEvents();
 		glfwSwapBuffers(WINDOW_ID); // swap the color buffers
+		double currentFrameTime = getCurrentTime();
+		delta = (float) (currentFrameTime - lastFrameTime) / 1000f;
+		lastFrameTime = currentFrameTime;
 		// replace old Display.update();
 		// Poll for window events. The key callback above will only be
 		// invoked during this call.
 
 	}
-
+	
+	public static float getFrameTimeSeconds(){
+		return delta;
+	}
 	/**
 	 * This closes the window when the game is closed.
 	 */
@@ -91,6 +103,14 @@ public class DisplayManager {
 
 	public static boolean isRunning() {
 		return !glfwWindowShouldClose(WINDOW_ID);
+	}
+	
+	/**
+	 * Timer has changed between lwjgl 2 and 3, now and because java is much stronger on time consistency , we can use direct function.
+	 * @return
+	 */
+	private static double getCurrentTime() {
+		return glfwGetTime() * 1000;
 	}
 
 }

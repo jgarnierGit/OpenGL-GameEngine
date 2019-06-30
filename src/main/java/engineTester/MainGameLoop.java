@@ -2,7 +2,6 @@ package engineTester;
 
 import static org.lwjgl.glfw.GLFW.*;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
@@ -13,10 +12,11 @@ import org.lwjglx.util.vector.Vector3f;
 import entities.Camera;
 import entities.Entity;
 import entities.Light;
-import models.Imported3DModelContainer;
+import entities.Player;
 import models.Model3D;
 import models.imports.Cube;
 import models.imports.Grass;
+import models.imports.JM;
 import renderEngine.DisplayManager;
 import renderEngine.Loader;
 import renderEngine.MasterRenderer;
@@ -56,6 +56,10 @@ public class MainGameLoop {
 		
 		Model3D cube = new Cube(loader);
 		Model3D grass = new Grass(loader);
+		
+		// TODO fix mapping seems like it didnt work.
+		Model3D jm = new JM(loader);
+		Player player = new Player(jm, new Vector3f(0,-5,-10), 0, 0, 0, 1);
 
 		// Cube semi ko
 		//plane // OK
@@ -95,11 +99,16 @@ public class MainGameLoop {
 		while (DisplayManager.isRunning()) {
 			// game logic
 			//entity.increasePosition(0, 0, -0.01f);
+			
+			// TODO implements  move() on multithread
 			camera.move();
+			player.move();
+			
 			for(Entity entityCube : cubes) {
 				entityCube.increaseRotation(0.3f, 0.3f, 0.6f);
 				masterRenderer.processEntity(entityCube);
 			}
+			masterRenderer.processEntity(player);
 			for(Entity entityGrass : grasses) {
 				masterRenderer.processEntity(entityGrass);
 			}
