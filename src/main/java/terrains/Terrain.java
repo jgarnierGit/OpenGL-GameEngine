@@ -1,15 +1,12 @@
 package terrains;
 
 import java.io.FileNotFoundException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import org.lwjglx.util.vector.Vector2f;
 import org.lwjglx.util.vector.Vector3f;
 
 import models.Container3D;
-import models.Container3DImpl;
 import models.GeneratedModelContainer;
 import models.BlendedTexturesContainer;
 import models.Model3D;

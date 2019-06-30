@@ -17,7 +17,6 @@ import entities.Light;
 import models.Model3D;
 import shaderManager.StaticShader;
 import shaderManager.TerrainShader;
-import terrains.Terrain;
 
 public class MasterRenderer {
 	private static final float FOV = 70;

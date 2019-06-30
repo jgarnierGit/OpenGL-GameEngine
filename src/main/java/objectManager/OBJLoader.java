@@ -41,7 +41,6 @@ import org.lwjglx.util.vector.Vector2f;
 import org.lwjglx.util.vector.Vector3f;
 
 import models.Container3D;
-import models.Container3DImpl;
 import models.GeneratedModelContainer;
 
 import org.apache.commons.lang3.ArrayUtils;

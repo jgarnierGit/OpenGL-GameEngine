@@ -11,7 +11,6 @@ import org.lwjglx.util.vector.Matrix4f;
 
 import entities.Entity;
 import models.Model3D;
-import models.TextureContainer;
 import models.TextureData;
 import renderEngine.Loader.VBOIndex;
 import shaderManager.StaticShader;

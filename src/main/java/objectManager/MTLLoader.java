@@ -10,14 +10,11 @@ import java.util.Scanner;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL13;
 import org.lwjglx.util.vector.Vector3f;
 import org.newdawn.slick.opengl.TextureLoader;
 
 import models.SimpleTextureContainer;
 import models.TextureContainer;
-import models.TextureData;
 
 public class MTLLoader {
 	 /**
