@@ -9,7 +9,6 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 import org.lwjglx.util.vector.Matrix4f;
-import org.lwjglx.util.vector.Vector2f;
 import org.lwjglx.util.vector.Vector3f;
 
 
@@ -94,6 +93,7 @@ public abstract class ShaderProgram {
 	        		String line = file.nextLine();
 	        		shaderSource.append(line).append("\n");
 	        	}
+	        	file.close();
 	        int shaderID = GL20.glCreateShader(type);
 	        GL20.glShaderSource(shaderID, shaderSource);
 	        GL20.glCompileShader(shaderID);
