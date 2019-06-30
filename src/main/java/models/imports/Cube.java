@@ -13,7 +13,8 @@ public class Cube extends Model3D{
 	private final static Logger logger = Logger.getLogger(Cube.class.getName());
 	
 	public Cube(Loader loader) throws IOException {
-		super(Imported3DModelContainer.importModel(OBJECT_DESCRIPTOR),Imported3DModelContainer.importTexture(TEXTURE_DESCRIPTOR, logger),loader);
+		super(Imported3DModelContainer.importModel(OBJECT_DESCRIPTOR),
+				Imported3DModelContainer.importTexture(TEXTURE_DESCRIPTOR, logger),loader);
 		super.setReflectivity(0,1);//TODO may be not change value in classes because it will be fastidious.
 		super.setShineDamper(0,10);
 		/**

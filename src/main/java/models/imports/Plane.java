@@ -14,6 +14,7 @@ public class Plane extends Model3D{
 	private final static Logger logger = Logger.getLogger(Plane.class.getName());
 	
 	public Plane(Loader loader) throws FileNotFoundException, IOException{
-		super(Imported3DModelContainer.importModel(OBJECT_DESCRIPTOR),Imported3DModelContainer.importTexture(TEXTURE_DESCRIPTOR, logger),loader);
+		super(Imported3DModelContainer.importModel(OBJECT_DESCRIPTOR),
+				Imported3DModelContainer.importTexture(TEXTURE_DESCRIPTOR, logger),loader);
 	}
 }

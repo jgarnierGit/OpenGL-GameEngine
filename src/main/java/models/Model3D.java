@@ -1,5 +1,7 @@
 package models;
 
+import java.util.Objects;
+
 import renderEngine.Loader;
 
 public abstract class Model3D {
@@ -8,6 +10,7 @@ public abstract class Model3D {
 	protected TextureContainer textureContainer;
 	
 	protected Model3D(Container3D container3D, TextureContainer textureContainer, Loader loader) {
+		Objects.requireNonNull(loader);
 		this.container3D = container3D;
 		this.textureContainer = textureContainer;
 		vaoID = loader.load3DContainerToVAO(this.container3D);
