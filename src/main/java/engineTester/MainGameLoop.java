@@ -70,7 +70,7 @@ public class MainGameLoop {
 		Model3D terrain = new Terrain(0,0,loader);
 		Model3D terrain2 = new Terrain(1,0,loader);
 		
-		Camera camera = new Camera();
+		Camera camera = new Camera(player);
 		// Run the rendering loop until the user has attempted to close
 		// the window or has pressed the ESCAPE key.
 		
@@ -101,9 +101,10 @@ public class MainGameLoop {
 			//entity.increasePosition(0, 0, -0.01f);
 			
 			// TODO implements  move() on multithread
-			camera.move();
-			player.move();
+			// TODO maybe not possible for glfwSetCursorPosCallback / glfwSetMouseButtonCallback / glfwSetKeyCallback ... => must be called in main Thread
 			
+			player.move();
+			camera.move();
 			for(Entity entityCube : cubes) {
 				entityCube.increaseRotation(0.3f, 0.3f, 0.6f);
 				masterRenderer.processEntity(entityCube);

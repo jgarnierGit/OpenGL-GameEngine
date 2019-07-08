@@ -1,15 +1,32 @@
 package entities;
 
 import static org.lwjgl.glfw.GLFW.*;
+
+import org.lwjgl.glfw.GLFWCursorPosCallback;
+import org.lwjgl.glfw.GLFWMouseButtonCallback;
+import org.lwjgl.glfw.GLFWScrollCallback;
+import org.lwjglx.input.Mouse;
 import org.lwjglx.util.vector.Vector3f;
 
 import renderEngine.DisplayManager;
 
 public class Camera {
-	private Vector3f position = new Vector3f(0,0,3);
-	private float pitch = 0;
+	
+	private float distanceFromPlayer;
+	private float angleAroundPlayer;
+	
+	private Vector3f position = new Vector3f(0,10,0);
+	private float pitch = 20;
 	private float yaw = 0;
 	private float roll = 0;
+	
+	private Player player;
+	
+	
+	public Camera(Player player) {
+		this.player = player;
+	}
+
 	public Vector3f getPosition() {
 		return position;
 	}
@@ -40,7 +57,66 @@ public class Camera {
 	public float getRoll() {
 		return roll;
 	}
-	public Camera() {
+	
+	private void calculateCameraPosition(float horizontalDist, float verticalDist) {
+		float theta = player.getRotY() + angleAroundPlayer;
+		float offsetX = (float) (horizontalDist * Math.sin(Math.toRadians(theta)));
+		float offsetZ = (float) (horizontalDist * Math.cos(Math.toRadians(theta)));
+		position.x = player.getPositions().x - offsetX;
+		position.z = player.getPositions().z - offsetZ;
+		position.y = player.getPositions().y + verticalDist;
+	}
+	
+	private float calculateHorizontalDistance() {
+		return (float) (distanceFromPlayer * Math.cos(Math.toRadians(pitch)));
+	}
+	
+	private float calculateVerticalDistance() {
+		return (float) (distanceFromPlayer * Math.sin(Math.toRadians(pitch)));
+	}
+
+	private void calculateZoom() {
+		glfwSetScrollCallback(DisplayManager.WINDOW_ID, new GLFWScrollCallback() {
+			@Override
+			public void invoke(long window, double xoffset, double yoffset) {
+				float zoomLevel = (float) yoffset * 0.1f;
+				distanceFromPlayer -= zoomLevel;
+			}
+		});
+	}
+	
+	private void calculatePitch() {
+		glfwSetMouseButtonCallback(DisplayManager.WINDOW_ID, new GLFWMouseButtonCallback() {
+			@Override
+			public void invoke(long window, int button, int action, int mods) {
+				if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
+					glfwSetCursorPosCallback(DisplayManager.WINDOW_ID, new GLFWCursorPosCallback() {
+						@Override
+						public void invoke(long window, double xpos, double ypos) {
+							float pitchChange = (float) ypos * 0.1f;
+							pitch -= pitchChange;
+						}
+					});
+				}
+			}
+		});
+	}
+	
+	private void calculateAngleAroundPlayer() {
+		glfwSetMouseButtonCallback(DisplayManager.WINDOW_ID, new GLFWMouseButtonCallback() {
+			@Override
+			public void invoke(long window, int button, int action, int mods) {
+				if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+					glfwSetCursorPosCallback(DisplayManager.WINDOW_ID, new GLFWCursorPosCallback() {
+						@Override
+						public void invoke(long window, double xpos, double ypos) {
+							float angleChange = (float) xpos * 0.1f;
+							angleAroundPlayer -= angleChange;
+						}
+					});
+				}
+			}
+		});
 	}
 	
 	/**
@@ -48,31 +124,13 @@ public class Camera {
 	 * Tip : english keyboard.
 	 */
 	public void move() {
-		glfwSetKeyCallback(DisplayManager.WINDOW_ID, (window, key, scancode, action, mods) -> {
-			if ( key == GLFW_KEY_W && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
-				position.z-=1f;
-			}
-			if ( key == GLFW_KEY_Q && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
-				position.x+=1f;
-			}
-			if(key == GLFW_KEY_D && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
-				position.x-=1f;
-			}
-			if(key == GLFW_KEY_Z && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
-				position.y+=1f;
-			}
-			if(key == GLFW_KEY_X && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
-				position.y-=1f;
-			}
-			if(key == GLFW_KEY_Y && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
-				yaw+=1f;
-			}
-			if(key == GLFW_KEY_R && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
-				roll+=1f;
-			}
-			if(key == GLFW_KEY_T && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
-				pitch+=1f;
-			}
-		});
+		calculatePitch();
+		calculateAngleAroundPlayer();
+		
+		calculateZoom();
+		float horizontalDist = calculateHorizontalDistance();
+		float verticalDist = calculateVerticalDistance();
+		calculateCameraPosition(horizontalDist,verticalDist);
+		this.yaw = 180 - (player.getRotY() + angleAroundPlayer);
 	}
 }
