@@ -9,8 +9,8 @@ import models.Model3D;
 import renderEngine.Loader;
 
 public class JM extends Model3D{
-	private static final String OBJECT_DESCRIPTOR = "JM2.obj";
-	private static final String TEXTURE_DESCRIPTOR = "JM2.mtl";
+	private static final String OBJECT_DESCRIPTOR = "JM.obj";
+	private static final String TEXTURE_DESCRIPTOR = "JM.mtl";
 	private final static Logger logger = Logger.getLogger(JM.class.getName());
 	
 	public JM(Loader loader) throws FileNotFoundException, IOException {
