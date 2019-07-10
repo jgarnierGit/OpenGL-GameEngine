@@ -13,6 +13,7 @@ import entities.Camera;
 import entities.Entity;
 import entities.Light;
 import entities.Player;
+import entities.UserInputHandler;
 import models.Model3D;
 import models.imports.Cube;
 import models.imports.Grass;
@@ -97,11 +98,10 @@ public class MainGameLoop {
 		}
 		MasterRenderer masterRenderer = new MasterRenderer();
 		while (DisplayManager.isRunning()) {
+			UserInputHandler.updateMouseInputHandler();
+			UserInputHandler.updateKeyboardInputHandler();
 			// game logic
 			//entity.increasePosition(0, 0, -0.01f);
-			
-			// TODO implements  move() on multithread
-			// TODO maybe not possible for glfwSetCursorPosCallback / glfwSetMouseButtonCallback / glfwSetKeyCallback ... => must be called in main Thread
 			
 			player.move();
 			camera.move();

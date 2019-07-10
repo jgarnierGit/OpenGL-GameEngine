@@ -1,8 +1,6 @@
 package entities;
 
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.glfw.GLFW.glfwSetKeyCallback;
-
 import org.lwjglx.util.vector.Vector3f;
 
 import models.Model3D;
@@ -50,25 +48,27 @@ public class Player extends Entity {
 	}
 	
 	private void checkInputs() {
-		glfwSetKeyCallback(DisplayManager.WINDOW_ID, (window, key, scancode, action, mods) -> {
-			if ( key == GLFW_KEY_UP && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+			if (UserInputHandler.isActive(GLFW_KEY_W)) {
 				currentSpeed = RUN_SPEED;
-			}else if( key == GLFW_KEY_DOWN && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+			}
+			if(UserInputHandler.isActive(GLFW_KEY_S)) {
 				currentSpeed = -RUN_SPEED;
-			}else {
+			}
+			if(!UserInputHandler.isActive(GLFW_KEY_W) && !UserInputHandler.isActive(GLFW_KEY_S)){
 				currentSpeed = 0;
 			}
-			if(key == GLFW_KEY_LEFT && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+			if(UserInputHandler.isActive(GLFW_KEY_A)) {
 				currentTurnSpeed = - TURN_FLOAT;
-			}else if(key == GLFW_KEY_RIGHT && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+			}
+			if(UserInputHandler.isActive(GLFW_KEY_D)) {
 				currentTurnSpeed = TURN_FLOAT;
-			}else {
+			}
+			if(!UserInputHandler.isActive(GLFW_KEY_A) && !UserInputHandler.isActive(GLFW_KEY_D)){
 				currentTurnSpeed = 0;
 			}
-			if(key == GLFW_KEY_SPACE && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+			if(UserInputHandler.isActive(GLFW_KEY_SPACE)) {
 				jump();
 			}
-		});
 	}
 
 }
