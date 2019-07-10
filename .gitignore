@@ -4,4 +4,4 @@ bin
 *.log
 target
 .settings
-.blend1
+*.blend1
