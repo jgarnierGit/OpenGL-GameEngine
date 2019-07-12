@@ -279,6 +279,10 @@ public class OBJLoader {
 	 */
 	private static <T> ArrayList<T> getOrderedVectors(List<T> coordinates, ArrayList<Vertex> vertexOrderedByIndices, Function<Vertex, Integer> method) {
 		ArrayList<T> orderedVectors = new ArrayList<>();
+		if(coordinates.isEmpty()) {
+			return orderedVectors;
+		}
+		
 		List<Integer> sortedIndexes = vertexOrderedByIndices.stream().sorted(Comparator.comparingInt(Vertex::getIndiceIndex)).map(vertex -> method.apply(vertex)).collect(Collectors.toList());
 		for(Integer index : sortedIndexes) {
 			orderedVectors.add(coordinates.get(index));
