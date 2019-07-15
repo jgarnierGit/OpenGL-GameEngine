@@ -10,6 +10,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 import org.lwjglx.util.vector.Matrix4f;
 import org.lwjglx.util.vector.Vector3f;
+import org.lwjglx.util.vector.Vector4f;
 
 
 public abstract class ShaderProgram {
@@ -48,6 +49,10 @@ public abstract class ShaderProgram {
 	    protected void loadVector(int location, Vector3f vector) {
 	    	GL20.glUniform3f(location, vector.getX(), vector.getY(), vector.getZ());
 	    }
+	    
+		public void loadVector(int location, Vector4f vector) {
+			GL20.glUniform4f(location, vector.getX(), vector.getY(), vector.getZ(), vector.getW());
+		}
 	    
 	    protected void loadBoolean(int location, boolean value) {
 	    	float toLoad = 0;

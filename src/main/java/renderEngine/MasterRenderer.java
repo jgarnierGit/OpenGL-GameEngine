@@ -82,7 +82,7 @@ public class MasterRenderer {
 	 * TODO adapt logic to process list based on same texture but different models?
 	 * @param entity
 	 */
-	public void processEntity(Entity entity) {
+	public void processEntity(Entity entity) { //TODO review this method, weird logic
 		Model3D entityModel = entity.getModel();
 		List<Entity> batch = entities.getOrDefault(entityModel, new ArrayList<>());
 		if(batch.isEmpty()) {

@@ -6,11 +6,13 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Scanner;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.lwjglx.util.vector.Vector3f;
+import org.lwjglx.util.vector.Vector4f;
 import org.newdawn.slick.opengl.TextureLoader;
 
 import models.SimpleTextureContainer;
@@ -42,8 +44,9 @@ public class MTLLoader {
      * @throws IOException 
      */
     public static TextureContainer loadModel(Scanner sc, Logger logger) throws IOException {
-    	ArrayList<Integer> textureIds = new ArrayList<>();
-    	ArrayList<Vector3f> diffuseColor = new ArrayList<>();
+    	HashMap<String, ArrayList<Integer>> textureIdsMTL = new HashMap<>();
+    	HashMap<String, ArrayList<Vector4f>> diffuseColorMTL = new HashMap<>();
+    	String currentMTL = "";
         while (sc.hasNextLine()) {
             String ln = sc.nextLine();
             if (ln == null || ln.equals("") || ln.startsWith("#")) {
@@ -52,14 +55,20 @@ public class MTLLoader {
                 String lineType = split[0];
                 String[] lineContent = ArrayUtils.remove(split, 0);
                 switch (lineType) {
-                    case "kd": // diffuse color
-                    	diffuseColor.add(new Vector3f(Float.parseFloat(lineContent[0]),
+                	case "newmtl":
+                		currentMTL = lineContent[0];
+                		textureIdsMTL.put(lineContent[0], new ArrayList<>());
+                		diffuseColorMTL.put(lineContent[0], new ArrayList<>());
+                	break;
+                    case "Kd": // diffuse color
+                    	diffuseColorMTL.get(currentMTL).add(new Vector4f(Float.parseFloat(lineContent[0]),
                         		Float.parseFloat(lineContent[1]),
-                        		Float.parseFloat(lineContent[2])));
+                        		Float.parseFloat(lineContent[2]),
+                        		1f));
                         break;
                     case "map_Kd":
                 		try {
-                			textureIds.add(TextureLoader.getTexture("PNG", new FileInputStream(lineContent[0])).getTextureID());
+                			textureIdsMTL.get(currentMTL).add(TextureLoader.getTexture("PNG", new FileInputStream(lineContent[0])).getTextureID());
                 		} catch(FileNotFoundException e1) {
                 			System.err.println("["+ logger.getName() +"] File not found "+ lineContent[0] +" specified in MTL file. ");
                 		}
@@ -71,7 +80,8 @@ public class MTLLoader {
         }
         sc.close();
     	TextureContainer textureData = SimpleTextureContainer.create()
-    			.setTexture(textureIds)
+    			.setColors(diffuseColorMTL)
+    			.addTextureIDs(textureIdsMTL) //TODO builder is not appropriate since i may instanciate TextureContainer with textures (int) or colors (Vector4f)
     			.build();
         return textureData;
     }

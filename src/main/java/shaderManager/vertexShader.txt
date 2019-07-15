@@ -4,7 +4,10 @@ in vec3 position;
 in vec2 textureCoords;
 in vec3 normals;
 
+
 out vec2 pass_textureCoords;
+out vec4 pass_color;
+out float pass_useImage;
 out vec3 surfaceNormal;
 out vec3 tolightVector;
 out vec3 toCameraVector;
@@ -16,6 +19,8 @@ uniform mat4 viewMatrix;
 uniform vec3 lightPosition;
 
 uniform float useFakeLighting;
+uniform float useImage;
+uniform vec4 color;
 
 const float density = 0.003;
 const float gradient = 6;
@@ -26,7 +31,8 @@ void main(void){
 	vec4 positionRelativeToCam = viewMatrix * worldPosition;
 	gl_Position = projectionMatrix * positionRelativeToCam;
 	pass_textureCoords = textureCoords;
-	
+	pass_color = color;
+	pass_useImage = useImage;
 	vec3 actualNormals = normals;
 	if(useFakeLighting > 0.5){
 		actualNormals = vec3(0.0,1.0,0.0);

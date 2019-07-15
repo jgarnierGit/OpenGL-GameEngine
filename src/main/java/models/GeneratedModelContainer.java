@@ -1,6 +1,8 @@
 package models;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Optional;
 
 import org.lwjglx.util.vector.Vector2f;
 import org.lwjglx.util.vector.Vector3f;
@@ -9,9 +11,9 @@ public class GeneratedModelContainer implements Container3D {
 	
 	private Container3DImpl containerData;
 
-	public GeneratedModelContainer(ArrayList<Integer> vertexIndices, ArrayList<Vector3f> vertices,
-			ArrayList<Vector2f> textureIndices, ArrayList<Vector3f> normalIndices) {
-		containerData = new Container3DImpl(vertexIndices, vertices, textureIndices, normalIndices);
+	public GeneratedModelContainer(ArrayList<Integer> vertexIndicesMTL, ArrayList<Vector3f> vertices,
+			Optional<ArrayList<Vector2f>> textureIndices, Optional<ArrayList<String>> colorsIndices, ArrayList<Vector3f> normalIndices) {
+		containerData = new Container3DImpl(vertexIndicesMTL, vertices, textureIndices, colorsIndices, normalIndices);
 	}
 
 	@Override
@@ -22,11 +24,6 @@ public class GeneratedModelContainer implements Container3D {
 	@Override
 	public ArrayList<Vector3f> getPositions() {
 		return containerData.positions;
-	}
-
-	@Override
-	public ArrayList<Vector2f> getTextures() {
-		return containerData.textures;
 	}
 
 	@Override
@@ -49,5 +46,20 @@ public class GeneratedModelContainer implements Container3D {
 	public ArrayList<Float> getFlatNormals() {
 		return containerData.getFlatNormals();
 	}
+
+	@Override
+	public TextureConfig getTextureConfig() {
+		return containerData.getTextureConfig();
+	}
+
+	/** @Override
+	public void addIsTexturedVertex(boolean simpleColor) {
+		containerData.addIsTexturedVertex(simpleColor);
+	}
+
+	@Override
+	public ArrayList<Boolean> getFlatIndicesUsingTexture() {
+		return containerData.getFlatIndicesUsingTexture();
+	} **/
 
 }

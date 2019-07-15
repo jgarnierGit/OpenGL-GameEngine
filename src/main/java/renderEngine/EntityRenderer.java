@@ -1,5 +1,6 @@
 package renderEngine;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -73,24 +74,39 @@ public class EntityRenderer{
 		GL20.glEnableVertexAttribArray(VBOIndex.POSITION_INDEX);
 		GL20.glEnableVertexAttribArray(VBOIndex.TEXTURE_INDEX);
 		GL20.glEnableVertexAttribArray(VBOIndex.NORMAL_INDEX);
-		if(model.getTextureContainer().getTextures().isPresent()) {
-			TextureData texture = model.getTextureContainer().getTextures().get().get(0);
-			if(texture.isHasTransparency()) {
-				MasterRenderer.disableCulling();
-			}
-			shader.loadFakeLighting(texture.isUseFakeLighting());
-			shader.loadShineVariables(texture.getShineDamper(), texture.getReflectivity());
-			GL13.glActiveTexture(GLTextureIDIncrementer.GL_TEXTURE_IDS.get(0));
-			GL11.glBindTexture(GL11.GL_TEXTURE_2D, texture.getTextureID());
+		if(!model.getTextureContainer().getTextures().isEmpty()) {
+			bindTextures(model.getTextureContainer().getTextures(),model.getContainer3D().getTextureConfig().getUsingImage());
 		}
 		else {
 			 useNoTexture();
 		}
 	}
 	
+	private void bindTextures(ArrayList<TextureData> textureContainer, Boolean usingImage) {
+		shader.setUseImage(usingImage);
+		for(int i =0; i< textureContainer.size() && i<33; i++) {
+			TextureData texture = textureContainer.get(i);
+			if(texture.isHasTransparency()) {
+				MasterRenderer.disableCulling();
+			}
+			shader.loadFakeLighting(texture.isUseFakeLighting());
+			shader.loadShineVariables(texture.getShineDamper(), texture.getReflectivity()); //TODO extract from texture to TextureConfig
+			
+			if(!usingImage) { //TODO FIXME not working, tree has no TextureData, because uses only colors. But expected TextureData
+				shader.setColor(texture.getRed(), texture.getGreen(), texture.getBlue(), texture.getAlpha());
+			}
+			else{
+				GL13.glActiveTexture(GLTextureIDIncrementer.GL_TEXTURE_IDS.get(i));
+				GL11.glBindTexture(GL11.GL_TEXTURE_2D, texture.getTextureID());
+			}
+		}
+		GL20.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
+	}
+	
 	private void useNoTexture() {
 		GL13.glActiveTexture(GLTextureIDIncrementer.GL_TEXTURE_IDS.get(0));
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
+		GL20.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE);
 	}
 	
 	/**

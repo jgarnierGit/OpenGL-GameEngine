@@ -32,6 +32,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -66,6 +67,7 @@ public class OBJLoader {
 	 */
 	public static Container3D loadModel(FileReader sc) {
 		ArrayList<Integer> vertexIndices = new ArrayList<>();
+		ArrayList<String> mtlIndexes = new ArrayList<>();
 		ArrayList<Vector3f> vertices = new ArrayList<>();
 		ArrayList<Vector2f> textures = new ArrayList<>();
 
@@ -105,7 +107,7 @@ public class OBJLoader {
 								Float.parseFloat(lineContent[1])
 								));
 					}
-					else if(lineType.contentEquals("f")) { //Polygonal face element
+					else if(lineType.contentEquals("usemtl")) { //Polygonal face element
 						//TODO generalize to any polygone.
 						break;
 					}
@@ -116,34 +118,43 @@ public class OBJLoader {
 						System.err.println("[OBJ] Unknown Line: " + ln);
 					}
 				}
-			}
-			while (ln != null && ln.startsWith("f ")){
-				String[] split = ln.split(" ");
-				String[] lineContent = ArrayUtils.remove(split, 0);
-				for(String vertexSetup : lineContent) {
-					String vertice = vertexSetup.split("/")[0];
-					String texture = vertexSetup.split("/")[1];
-					String normal = vertexSetup.split("/")[2];
+			}//TODO complete isVertexTextured linked directly with vertexIndices
+			while (ln != null){
+				if(ln.startsWith("usemtl")) {
+					String[] split = ln.split(" ");
+					String[] lineContent = ArrayUtils.remove(split, 0);
+					mtlIndexes.add(lineContent[0]);
+				}
+				else if(ln.startsWith("f ")) {
+					String[] split = ln.split(" ");
+					String[] lineContent = ArrayUtils.remove(split, 0);
+					for(String vertexSetup : lineContent) {
+						String vertice = vertexSetup.split("/")[0];
+						String texture = vertexSetup.split("/")[1];
+						String normal = vertexSetup.split("/")[2];
 
-					if(vertice.isEmpty() || normal.isEmpty()) {
-						throw new IllegalArgumentException("Face has a missed parameter. ("+ vertexSetup +")");
-					}
-					Vertex vertex;
-					if(texture.isEmpty()) {
-						vertex = new Vertex(Integer.parseInt(vertice) -1, 0, Integer.parseInt(normal) -1);
-					}
-					else {
-						vertex = new Vertex(Integer.parseInt(vertice) -1, Integer.parseInt(texture) -1, Integer.parseInt(normal) -1);
-					}
-					Optional<Vertex> registeredVertex = findVertexAlreadyRegistered(loaderVertexFaces,vertex);
-					if(!registeredVertex.isPresent()) {
-						loaderVertexFaces.add(vertex);
-						vertexIndices.add(vertex.getIndiceIndex());
-						loaderNormalIndices.add(vertex.getNormalIndex());
-						loaderTextureIndices.add(loaderVertexFaces.indexOf(vertex));
-					}
-					else {
-						checkForDuplicatedVertex(loaderVertexFaces,registeredVertex.get(),vertex,vertexIndices,vertices);
+						if(vertice.isEmpty() || normal.isEmpty()) {
+							throw new IllegalArgumentException("Face has a missed parameter. ("+ vertexSetup +")");
+						}
+						Vertex vertex;
+						if(texture.isEmpty()) {
+							vertex = new Vertex(Integer.parseInt(vertice) -1, Integer.parseInt(normal) -1);
+							vertex.setColorIndex(mtlIndexes.size() -1);
+						}
+						else {
+							vertex = new Vertex(Integer.parseInt(vertice) -1, Integer.parseInt(normal) -1);
+							vertex.setImageIndex(Integer.parseInt(texture) -1);
+						}
+						Optional<Vertex> registeredVertex = findVertexAlreadyRegistered(loaderVertexFaces,vertex);
+						if(!registeredVertex.isPresent()) {
+							loaderVertexFaces.add(vertex);
+							vertexIndices.add(vertex.getIndiceIndex());
+							loaderNormalIndices.add(vertex.getNormalIndex());
+							loaderTextureIndices.add(loaderVertexFaces.indexOf(vertex));
+						}
+						else {
+							checkForDuplicatedVertex(loaderVertexFaces,registeredVertex.get(),vertex,vertexIndices,vertices);
+						}
 					}
 				}
 				ln = reader.readLine();
@@ -240,26 +251,31 @@ public class OBJLoader {
 				23,21,22
 
 		};
+		//TODO change texture 2f to a TextureConfig with useImage boolean and more from Vertex.
 		
-		Container3D importedModel = new GeneratedModelContainer(vertexIndices,vertices, getOrderedVectors(textures,loaderVertexFaces, Vertex::getTextureIndex), getOrderedVectors(normals,loaderVertexFaces, Vertex::getNormalIndex));
+		Container3D importedModel = new GeneratedModelContainer(vertexIndices,
+				vertices, 
+				getOrderedVectors(textures,loaderVertexFaces, Vertex::getImageIndex), 
+				getOrderedVectors(mtlIndexes,loaderVertexFaces, Vertex::getColorIndex), 
+				getOrderedVectors(normals,loaderVertexFaces, Vertex::getNormalIndex).get());
 		return importedModel;
 	}
 
-	private static void checkForDuplicatedVertex(ArrayList<Vertex> vertexFaces, Vertex currentVertex, Vertex vertexToAdd, ArrayList<Integer> indices, ArrayList<Vector3f> vertices) {
+	private static void checkForDuplicatedVertex(ArrayList<Vertex> vertexFaces, Vertex currentVertex, Vertex vertexToAdd, ArrayList<Integer> vertexIndices, ArrayList<Vector3f> vertices) {
 		if(vertexToAdd.hasSameConfig(currentVertex)) {
-			indices.add(currentVertex.getIndiceIndex());
+			vertexIndices.add(currentVertex.getIndiceIndex());
 		}
 		else {
 			Optional<Vertex> previousVertex = currentVertex.getPreviousVertex();
 			if(previousVertex.isPresent()) {
-				checkForDuplicatedVertex(vertexFaces,previousVertex.get(),vertexToAdd,indices,vertices);
+				checkForDuplicatedVertex(vertexFaces,previousVertex.get(),vertexToAdd,vertexIndices,vertices);
 			}
 			else {
 				vertexFaces.add(vertexToAdd);
 				Vector3f previousPoint = vertices.get(vertexToAdd.getIndiceIndex());
 				vertices.add(new Vector3f(previousPoint.getX(), previousPoint.getY(), previousPoint.getZ()));
 				vertexToAdd.setNewIndice(vertices.size() -1);
-				indices.add(vertices.size() -1);
+				vertexIndices.add(vertices.size() -1);
 				currentVertex.setPreviousVertex(vertexToAdd);
 			}
 		}
@@ -277,16 +293,16 @@ public class OBJLoader {
 	 * @param method {Vertex} attribute getter to process ordering
 	 * @return <T> List of {Vector} ordered
 	 */
-	private static <T> ArrayList<T> getOrderedVectors(List<T> coordinates, ArrayList<Vertex> vertexOrderedByIndices, Function<Vertex, Integer> method) {
+	private static <T> Optional<ArrayList<T>> getOrderedVectors(List<T> coordinates, ArrayList<Vertex> vertexOrderedByIndices, Function<Vertex, Integer> method) {
 		ArrayList<T> orderedVectors = new ArrayList<>();
 		if(coordinates.isEmpty()) {
-			return orderedVectors;
+			return Optional.empty();
 		}
 		
 		List<Integer> sortedIndexes = vertexOrderedByIndices.stream().sorted(Comparator.comparingInt(Vertex::getIndiceIndex)).map(vertex -> method.apply(vertex)).collect(Collectors.toList());
 		for(Integer index : sortedIndexes) {
 			orderedVectors.add(coordinates.get(index));
 		}
-		return orderedVectors;
+		return Optional.of(orderedVectors);
 	}
 }

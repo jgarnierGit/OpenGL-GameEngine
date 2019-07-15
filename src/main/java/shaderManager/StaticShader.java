@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 
 import org.lwjglx.util.vector.Matrix4f;
 import org.lwjglx.util.vector.Vector3f;
+import org.lwjglx.util.vector.Vector4f;
 
 import entities.Camera;
 import entities.Light;
@@ -26,6 +27,8 @@ public class StaticShader extends ShaderProgram {
 	private int location_reflectivity;
 	private int location_useFakeLighting;
 	private int location_skyColour;
+	private int location_useImage;
+	private int location_color;
 	
 	public StaticShader() throws FileNotFoundException {
 		super(VERTEX_FILE,FRAGMENT_FILE);
@@ -50,6 +53,8 @@ public class StaticShader extends ShaderProgram {
 		location_reflectivity = super.getUniformLocation("reflectivity");
 		location_useFakeLighting = super.getUniformLocation("useFakeLighting");
 		location_skyColour = super.getUniformLocation("skyColour");
+		location_useImage = super.getUniformLocation("useImage");
+		location_color = super.getUniformLocation("color");
 	}
 	
 	public void loadSkyColour(float r, float g, float b) {
@@ -58,6 +63,14 @@ public class StaticShader extends ShaderProgram {
 	
 	public void loadFakeLighting(boolean useFakeLighting) {
 		super.loadBoolean(location_useFakeLighting, useFakeLighting);
+	}
+	
+	public void setUseImage(boolean useImage) {
+		super.loadBoolean(location_useImage, useImage);
+	}
+	
+	public void setColor(float r, float g, float b, float a) {
+		super.loadVector(location_color, new Vector4f(r,g,b,a));
 	}
 	
 	public void loadShineVariables(float shineDamper, float reflectivity) {

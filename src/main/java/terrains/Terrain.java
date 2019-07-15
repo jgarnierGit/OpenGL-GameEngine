@@ -2,6 +2,8 @@ package terrains;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Optional;
 
 import org.lwjglx.util.vector.Vector2f;
 import org.lwjglx.util.vector.Vector3f;
@@ -72,7 +74,7 @@ public class Terrain extends Model3D {
 				vertexIndices.add(bottomRight);
 			}
 		}
-		return new GeneratedModelContainer(vertexIndices, positions, textures, normalsVector);
+		return new GeneratedModelContainer(vertexIndices, positions, Optional.of(textures), Optional.empty(), normalsVector);
 	}
 
 	public  float getX() {

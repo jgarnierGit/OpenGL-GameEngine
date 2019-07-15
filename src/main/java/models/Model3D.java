@@ -1,5 +1,6 @@
 package models;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
 import renderEngine.Loader;
@@ -13,10 +14,11 @@ public abstract class Model3D {
 		Objects.requireNonNull(loader);
 		this.container3D = container3D;
 		this.textureContainer = textureContainer;
+
 		vaoID = loader.load3DContainerToVAO(this.container3D);
 		loader.loadTextureToVAO(this.textureContainer);
 	}
-	
+
 	/**
 	 * @return The ID of the VAO which contains the data about all the geometry
 	 *         of this model.
@@ -39,8 +41,8 @@ public abstract class Model3D {
 	 * @param value
 	 */
 	public void setReflectivity(int textureID, int value) {
-		if(this.textureContainer.getTextures().isPresent()) {
-			this.textureContainer.getTextures().get().get(textureID).setReflectivity(value);
+		if(!this.textureContainer.getTextures().isEmpty()) {
+			this.textureContainer.getTextures().get(textureID).setReflectivity(value);
 		}
 	}
 	
@@ -50,8 +52,8 @@ public abstract class Model3D {
 	 * @param value
 	 */
 	public void setShineDamper(int textureID, int value) {
-		if(this.textureContainer.getTextures().isPresent()) {
-			this.textureContainer.getTextures().get().get(textureID).setShineDamper(value);
+		if(!this.textureContainer.getTextures().isEmpty()) {
+			this.textureContainer.getTextures().get(textureID).setShineDamper(value);
 		}
 	}
 	
@@ -61,8 +63,8 @@ public abstract class Model3D {
 	 * @param value
 	 */
 	public void setHasTransparency(int textureID, boolean value) {
-		if(this.textureContainer.getTextures().isPresent()) {
-			this.textureContainer.getTextures().get().get(textureID).setHasTransparency(value);
+		if(this.textureContainer.getTextures().isEmpty()) {
+			this.textureContainer.getTextures().get(textureID).setHasTransparency(value);
 		}
 	}
 	
@@ -72,8 +74,8 @@ public abstract class Model3D {
 	 * @param value
 	 */
 	public void setUseFakeLighting(int textureID, boolean value) {
-		if(this.textureContainer.getTextures().isPresent()) {
-			this.textureContainer.getTextures().get().get(textureID).setUseFakeLighting(value);
+		if(this.textureContainer.getTextures().isEmpty()) {
+			this.textureContainer.getTextures().get(textureID).setUseFakeLighting(value);
 		}
 	}
 }

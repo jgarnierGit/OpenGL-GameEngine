@@ -48,8 +48,8 @@ public class TerrainRenderer{
 		GL20.glEnableVertexAttribArray(VBOIndex.POSITION_INDEX);
 		GL20.glEnableVertexAttribArray(VBOIndex.TEXTURE_INDEX);
 		GL20.glEnableVertexAttribArray(VBOIndex.NORMAL_INDEX);
-		if(model.getTextureContainer().getTextures().isPresent()) {
-			bindTextures(model.getTextureContainer().getTextures().get());
+		if(!model.getTextureContainer().getTextures().isEmpty()) {
+			bindTextures(model.getTextureContainer().getTextures());
 		}else {
 			useNoTexture();
 		}

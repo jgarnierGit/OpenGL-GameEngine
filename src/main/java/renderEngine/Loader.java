@@ -11,9 +11,11 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
+import org.lwjglx.util.vector.Vector4f;
 
 import models.Container3D;
 import models.Model3D;
+import models.TextureConfig;
 import models.TextureContainer;
 import models.TextureData;
 
@@ -54,17 +56,18 @@ public class Loader {
 	public int load3DContainerToVAO(Container3D model) {
 		int vaoID = createVAO();
 		bindIndicesBuffer(model.getFlatIndices());
-		storeDataInAttributeList(VBOIndex.POSITION_INDEX,3, model.getFlatPositions());
-		storeDataInAttributeList(VBOIndex.TEXTURE_INDEX,2, model.getFlatTextures());
-		storeDataInAttributeList(VBOIndex.NORMAL_INDEX,3,model.getFlatNormals());
+		storeDataFloatInAttrList(VBOIndex.POSITION_INDEX,3, model.getFlatPositions());
+		TextureConfig textureConfig = model.getTextureConfig(); //TODO maybe not the best composition
+		if(textureConfig.getUsingImage()) {
+			storeDataFloatInAttrList(VBOIndex.TEXTURE_INDEX,2, model.getFlatTextures());
+		}
+		storeDataFloatInAttrList(VBOIndex.NORMAL_INDEX,3,model.getFlatNormals());
 		unbindVAO();
 		return vaoID;
 	}
-	
+
 	public void loadTextureToVAO(TextureContainer textureContainer) {
-		if(textureContainer.getTextures().isPresent()) {
-			textures.addAll(textureContainer.getTextures().get().stream().map(TextureData::getTextureID).collect(Collectors.toList()));
-		}
+		textures.addAll(textureContainer.getTextures().stream().map(TextureData::getTextureID).collect(Collectors.toList()));
 	}
 
 	/**
@@ -111,7 +114,7 @@ public class Loader {
 	 *            - The geometry data to be stored in the VAO, in this case the
 	 *            positions of the vertices.
 	 */
-	private void storeDataInAttributeList(int attributeNumber, int coordinateSize, ArrayList<Float> arrayList) {
+	private void storeDataFloatInAttrList(int attributeNumber, int coordinateSize, ArrayList<Float> arrayList) {
 		int vboID = GL15.glGenBuffers();
 		vbos.add(vboID);
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboID);
@@ -150,28 +153,6 @@ public class Loader {
 
 
 	/**
-	 * Creates an index buffer, binds the index buffer to the currently active
-	 * VAO, and then fills it with our indices.
-	 * 
-	 * The index buffer is different from other data that we might store in the
-	 * attributes of the VAO. When we stored the positions we were storing data
-	 * about each vertex. The positions were "attributes" of each vertex. Data
-	 * like that is stored in an attribute list of the VAO.
-	 * 
-	 * The index buffer however does not contain data about each vertex. Instead
-	 * it tells OpenGL how the vertices should be connected. Each VAO can only
-	 * have one index buffer associated with it. This is why we don't store the
-	 * index buffer in a certain attribute of the VAO; each VAO has one special
-	 * "slot" for an index buffer and simply binding the index buffer binds it
-	 * to the currently active VAO. When the VAO is rendered it will use the
-	 * index buffer that is bound to it.
-	 * 
-	 * This is also why we don't unbind the index buffer, as that would unbind
-	 * it from the VAO.
-	 * 
-	 * Note that we tell OpenGL that this is an index buffer by using
-	 * "GL_ELEMENT_ARRAY_BUFFER" instead of "GL_ARRAY_BUFFER". This is how
-	 * OpenGL knows to bind it as the index buffer for the current VAO.
 	 * 
 	 * @param indices
 	 */

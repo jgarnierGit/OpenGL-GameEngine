@@ -7,5 +7,5 @@ import java.util.Optional;
 
 public interface TextureContainer {
 	static final Path resourceTexturePath = Paths.get("./", "src", "main", "resources", "2D");
-	public Optional<ArrayList<TextureData>> getTextures();
+	public ArrayList<TextureData> getTextures();
 }
