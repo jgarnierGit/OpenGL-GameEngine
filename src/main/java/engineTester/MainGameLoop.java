@@ -18,6 +18,7 @@ import models.Model3D;
 import models.imports.Cube;
 import models.imports.Grass;
 import models.imports.JM;
+import models.imports.Tree;
 import renderEngine.DisplayManager;
 import renderEngine.Loader;
 import renderEngine.MasterRenderer;
@@ -60,7 +61,8 @@ public class MainGameLoop {
 		
 		// TODO fix mapping seems like it didnt work.
 		Model3D jm = new JM(loader);
-		Player player = new Player(jm, new Vector3f(0,-5,-10), 0, 0, 0, 1);
+		Model3D tree = new Tree(loader);
+		Player player = new Player(tree, new Vector3f(0,-5,-10), 0, 0, 0, 1);
 
 		// Cube semi ko
 		//plane // OK
@@ -77,6 +79,7 @@ public class MainGameLoop {
 		
 		ArrayList<Entity> grasses = new ArrayList<>();
 		ArrayList<Entity> cubes = new ArrayList<>();
+		ArrayList<Entity> trees = new ArrayList<>();
 		Random random = new Random();
 		// last optim may have been lost ?
 		for(int i=0; i < 4000; i++) {
@@ -84,6 +87,14 @@ public class MainGameLoop {
 			float y = random.nextFloat() * 100 - 50;
 			float z = random.nextFloat() *- 300;
 			cubes.add(new Entity(cube, new Vector3f(x,y,z), random.nextFloat() * 180, random.nextFloat() * 180, 0, 1f));
+		}
+		
+		for(int i=0;i<50; i++) {
+			float x = random.nextFloat() * 100 - 50;
+			float y = -4f;
+			float z = random.nextFloat() *- 300;
+			float yRot = random.nextFloat() * 180;
+			trees.add(new Entity(tree, new Vector3f(x,y,z), 0, yRot, 0, 1f));
 		}
 		
 		for(int i=0;i<200; i++) {
@@ -109,6 +120,10 @@ public class MainGameLoop {
 				entityCube.increaseRotation(0.3f, 0.3f, 0.6f);
 				masterRenderer.processEntity(entityCube);
 			}
+			for(Entity entityTree : trees) {
+				masterRenderer.processEntity(entityTree);
+			}
+			
 			masterRenderer.processEntity(player);
 			for(Entity entityGrass : grasses) {
 				masterRenderer.processEntity(entityGrass);

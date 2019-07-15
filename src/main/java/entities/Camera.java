@@ -84,6 +84,7 @@ public class Camera {
 	}
 
 	private void calculatePitch() {
+		//FIXME isPressed() not working.
 		if (UserInputHandler.isPressed() && UserInputHandler.isActive(GLFW_MOUSE_BUTTON_MIDDLE)) {
 			System.out.println("updating origin");
 			UserInputHandler.setYOrigin();
