@@ -26,5 +26,6 @@ public interface Container3D {
 	public ArrayList<Float> getFlatTextures();
 	/**public void addIsTexturedVertex(boolean simpleColor);
 	public ArrayList<Boolean> getFlatIndicesUsingTexture();**/
+	public ArrayList<String> getColorLinks();
 	
 }

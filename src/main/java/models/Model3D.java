@@ -15,8 +15,7 @@ public abstract class Model3D {
 		this.container3D = container3D;
 		this.textureContainer = textureContainer;
 
-		vaoID = loader.load3DContainerToVAO(this.container3D);
-		loader.loadTextureToVAO(this.textureContainer);
+		vaoID = loader.loadModelToVAO(this);
 	}
 
 	/**

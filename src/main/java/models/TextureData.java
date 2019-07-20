@@ -1,5 +1,6 @@
 package models;
 
+import org.lwjglx.util.vector.Vector4f;
 import org.newdawn.slick.opengl.Texture;
 
 public class TextureData{
@@ -7,10 +8,7 @@ public class TextureData{
 	//TODO if is texture then use this param
 	private int textureID;
 	//TODO if is color then use this param
-	private float red;
-	private float blue;
-	private float green;
-	private float alpha;
+	private Vector4f color;
 	private String mtl_name;
 	
 	// specular lightning
@@ -26,10 +24,7 @@ public class TextureData{
 	}
 	
 	public TextureData(float red, float green, float blue, float alpha, String mtl_name) {
-		this.red = red;
-		this.blue = blue;
-		this.green = green;
-		this.alpha = alpha;
+		this.color = new Vector4f(red,green,blue,alpha);
 		this.mtl_name = mtl_name;
 	}
 	
@@ -72,24 +67,12 @@ public class TextureData{
 	public int getTextureID() {
 		return textureID;
 	}
-	
-	public float getRed() {
-		return red;
-	}
-
-	public float getBlue() {
-		return blue;
-	}
-
-	public float getGreen() {
-		return green;
-	}
-
-	public float getAlpha() {
-		return alpha;
-	}
 
 	public void addPNGTexture(Texture texture, int GL_TEXTURE) {
 		this.textureID = texture.getTextureID();
+	}
+
+	public Vector4f getColor() {
+		return this.color;
 	}
 }

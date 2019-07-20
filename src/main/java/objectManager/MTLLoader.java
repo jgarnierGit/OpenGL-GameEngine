@@ -81,7 +81,7 @@ public class MTLLoader {
         sc.close();
     	TextureContainer textureData = SimpleTextureContainer.create()
     			.setColors(diffuseColorMTL)
-    			.addTextureIDs(textureIdsMTL) //TODO builder is not appropriate since i may instanciate TextureContainer with textures (int) or colors (Vector4f)
+    			.addTextureIDs(textureIdsMTL)
     			.build();
         return textureData;
     }

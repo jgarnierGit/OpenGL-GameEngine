@@ -48,6 +48,12 @@ public class BlendedTexturesContainer implements TextureContainer{
 	public ArrayList<TextureData> getTextures() {
 		return textures;
 	}
+
+	@Override
+	public ArrayList<Float> getFlatColors(ArrayList<String> colorLinks) {
+		//Not implemented yet
+		return new ArrayList<>();
+	}
 	
 
 

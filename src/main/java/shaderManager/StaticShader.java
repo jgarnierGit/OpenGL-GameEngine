@@ -28,7 +28,6 @@ public class StaticShader extends ShaderProgram {
 	private int location_useFakeLighting;
 	private int location_skyColour;
 	private int location_useImage;
-	private int location_color;
 	
 	public StaticShader() throws FileNotFoundException {
 		super(VERTEX_FILE,FRAGMENT_FILE);
@@ -40,6 +39,7 @@ public class StaticShader extends ShaderProgram {
 		super.bindAttribute(VBOIndex.POSITION_INDEX, "position");
 		super.bindAttribute(VBOIndex.TEXTURE_INDEX, "textureCoords");
 		super.bindAttribute(VBOIndex.NORMAL_INDEX, "normals");
+		super.bindAttribute(VBOIndex.COLOR_INDEX, "colors");
 	}
 
 	@Override
@@ -54,7 +54,6 @@ public class StaticShader extends ShaderProgram {
 		location_useFakeLighting = super.getUniformLocation("useFakeLighting");
 		location_skyColour = super.getUniformLocation("skyColour");
 		location_useImage = super.getUniformLocation("useImage");
-		location_color = super.getUniformLocation("color");
 	}
 	
 	public void loadSkyColour(float r, float g, float b) {
@@ -67,10 +66,6 @@ public class StaticShader extends ShaderProgram {
 	
 	public void setUseImage(boolean useImage) {
 		super.loadBoolean(location_useImage, useImage);
-	}
-	
-	public void setColor(float r, float g, float b, float a) {
-		super.loadVector(location_color, new Vector4f(r,g,b,a));
 	}
 	
 	public void loadShineVariables(float shineDamper, float reflectivity) {

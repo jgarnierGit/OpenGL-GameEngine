@@ -74,16 +74,23 @@ public class EntityRenderer{
 		GL20.glEnableVertexAttribArray(VBOIndex.POSITION_INDEX);
 		GL20.glEnableVertexAttribArray(VBOIndex.TEXTURE_INDEX);
 		GL20.glEnableVertexAttribArray(VBOIndex.NORMAL_INDEX);
-		if(!model.getTextureContainer().getTextures().isEmpty()) {
-			bindTextures(model.getTextureContainer().getTextures(),model.getContainer3D().getTextureConfig().getUsingImage());
+		GL20.glEnableVertexAttribArray(VBOIndex.COLOR_INDEX);
+		Boolean usingImage = model.getContainer3D().getTextureConfig().getUsingImage();
+		shader.setUseImage(usingImage);
+		if(!usingImage) {
+			//TODO use array of colors to be in flow of Element Buffer Object.
+			//GL20.glEnableVertexAttribArray(VBOIndex.COLOR_INDEX);
+		}
+		else if(!model.getTextureContainer().getTextures().isEmpty()) {
+			bindTextures(model.getTextureContainer().getTextures());
 		}
 		else {
 			 useNoTexture();
 		}
 	}
 	
-	private void bindTextures(ArrayList<TextureData> textureContainer, Boolean usingImage) {
-		shader.setUseImage(usingImage);
+	private void bindTextures(ArrayList<TextureData> textureContainer) {
+
 		for(int i =0; i< textureContainer.size() && i<33; i++) {
 			TextureData texture = textureContainer.get(i);
 			if(texture.isHasTransparency()) {
@@ -91,14 +98,9 @@ public class EntityRenderer{
 			}
 			shader.loadFakeLighting(texture.isUseFakeLighting());
 			shader.loadShineVariables(texture.getShineDamper(), texture.getReflectivity()); //TODO extract from texture to TextureConfig
-			
-			if(!usingImage) { //TODO FIXME not working, tree has no TextureData, because uses only colors. But expected TextureData
-				shader.setColor(texture.getRed(), texture.getGreen(), texture.getBlue(), texture.getAlpha());
-			}
-			else{
-				GL13.glActiveTexture(GLTextureIDIncrementer.GL_TEXTURE_IDS.get(i));
-				GL11.glBindTexture(GL11.GL_TEXTURE_2D, texture.getTextureID());
-			}
+
+			GL13.glActiveTexture(GLTextureIDIncrementer.GL_TEXTURE_IDS.get(i));
+			GL11.glBindTexture(GL11.GL_TEXTURE_2D, texture.getTextureID());
 		}
 		GL20.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
 	}
@@ -123,6 +125,7 @@ public class EntityRenderer{
 	 */
 	private void unbindTextureModel() {
 		MasterRenderer.enableCulling();
+		GL20.glDisableVertexAttribArray(VBOIndex.COLOR_INDEX);
 		GL20.glDisableVertexAttribArray(VBOIndex.NORMAL_INDEX);
 		GL20.glDisableVertexAttribArray(VBOIndex.TEXTURE_INDEX);
 		GL20.glDisableVertexAttribArray(VBOIndex.POSITION_INDEX);

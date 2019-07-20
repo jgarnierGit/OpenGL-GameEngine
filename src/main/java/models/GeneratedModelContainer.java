@@ -52,6 +52,11 @@ public class GeneratedModelContainer implements Container3D {
 		return containerData.getTextureConfig();
 	}
 
+	@Override
+	public ArrayList<String> getColorLinks() {
+		return containerData.getColorLinks();
+	}
+
 	/** @Override
 	public void addIsTexturedVertex(boolean simpleColor) {
 		containerData.addIsTexturedVertex(simpleColor);

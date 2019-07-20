@@ -33,41 +33,37 @@ public class Loader {
 		public final static int POSITION_INDEX = 0;
 		public final static int TEXTURE_INDEX = 1;
 		public final static int NORMAL_INDEX = 2;
+		public static final int COLOR_INDEX = 3;
 	}
 
 	private List<Integer> vaos = new ArrayList<Integer>();
 	private List<Integer> vbos = new ArrayList<Integer>();
-	private List<Integer> textures = new ArrayList<Integer>();
-	
-	/**
-	 * TODO FIXME this is confusing that loadModelToVAO is the same thing as load3DContainerToVAO, but loadTextureToVAO is required for rendering well....
-	 * @param model
-	 */
-	public void loadModelToVAO(Model3D model) {
-		load3DContainerToVAO(model.getContainer3D());
-	}
+	private List<Integer> texturesToClean = new ArrayList<Integer>();
 	
 	/**
 	 * Creates a VAO and stores the position data of the vertices into attribute
-	 * 0 of the VAO.
-	 * @param model 3Dmodel to load
+	 * 0 of the VAO.	
+	 * @param model
 	 * @return VAOId linked to the loaded model.
 	 */
-	public int load3DContainerToVAO(Container3D model) {
+	public int loadModelToVAO(Model3D model) {
 		int vaoID = createVAO();
-		bindIndicesBuffer(model.getFlatIndices());
-		storeDataFloatInAttrList(VBOIndex.POSITION_INDEX,3, model.getFlatPositions());
-		TextureConfig textureConfig = model.getTextureConfig(); //TODO maybe not the best composition
+		Container3D container = model.getContainer3D();
+		TextureContainer textureContainer = model.getTextureContainer();
+		bindIndicesBuffer(container.getFlatIndices());
+		storeDataFloatInAttrList(VBOIndex.POSITION_INDEX,3, container.getFlatPositions());
+		TextureConfig textureConfig = container.getTextureConfig(); //TODO maybe not the best composition
 		if(textureConfig.getUsingImage()) {
-			storeDataFloatInAttrList(VBOIndex.TEXTURE_INDEX,2, model.getFlatTextures());
+			storeDataFloatInAttrList(VBOIndex.TEXTURE_INDEX,2, container.getFlatTextures());
 		}
-		storeDataFloatInAttrList(VBOIndex.NORMAL_INDEX,3,model.getFlatNormals());
+		else {//TODO still not working. random color applied.
+			storeDataFloatInAttrList(VBOIndex.COLOR_INDEX,4, textureContainer.getFlatColors(container.getColorLinks()));
+		}
+		storeDataFloatInAttrList(VBOIndex.NORMAL_INDEX,3,container.getFlatNormals());
 		unbindVAO();
+		
+		texturesToClean.addAll(textureContainer.getTextures().stream().map(TextureData::getTextureID).collect(Collectors.toList()));
 		return vaoID;
-	}
-
-	public void loadTextureToVAO(TextureContainer textureContainer) {
-		textures.addAll(textureContainer.getTextures().stream().map(TextureData::getTextureID).collect(Collectors.toList()));
 	}
 
 	/**
@@ -81,7 +77,7 @@ public class Loader {
 		for (int vbo : vbos) {
 			GL15.glDeleteBuffers(vbo);
 		}
-		for( int texture : textures) {
+		for( int texture : texturesToClean) {
 			GL11.glDeleteTextures(texture);
 		}
 	}

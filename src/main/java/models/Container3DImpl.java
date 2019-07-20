@@ -11,11 +11,8 @@ import org.lwjglx.util.vector.Vector3f;
 
 public class Container3DImpl{
 	public ArrayList<Integer> vertexIndices;
-//	public ArrayList<Boolean> vertexIsUsingTextureIndices;
 	public ArrayList<Vector3f> positions;
 	public TextureConfig textureConfig;
-	/** public ArrayList<Vector2f> textures; //TODO deported in TextureConfig
-	public ArrayList<String> colors; **/ 
 	public ArrayList<Vector3f> normals;
 	
 	public Container3DImpl(ArrayList<Integer> vertexIndices, ArrayList<Vector3f> vertices,
@@ -23,9 +20,7 @@ public class Container3DImpl{
 		this.vertexIndices = vertexIndices;
 		this.positions = vertices;
 		this.textureConfig = new TextureConfig(textureIndices,colors);
-		/**this.textures= textureIndices;
-		this.colors = colors; // Container3D doesn't know actual state of Textures. Just have clue of texture (u,v) indices and marker to actual MTL material.
-	**/	this.normals = normalIndices;
+		this.normals = normalIndices;
 	}
 	
 	public ArrayList<Float> getFlatPositions(){
@@ -33,10 +28,6 @@ public class Container3DImpl{
 	}
 	
 	public ArrayList<Integer> getFlatIndices(){
-		/** ArrayList<Integer> flatVertexIndices = new ArrayList<>();
-		vertexIndices.entrySet().stream().map(entry -> entry.getValue()).forEach(list -> {
-			flatVertexIndices.addAll(list);
-		}); **/
 		return this.vertexIndices;
 	}
 	
@@ -70,17 +61,8 @@ public class Container3DImpl{
 	public TextureConfig getTextureConfig() {
 		return this.textureConfig;
 	}
-	
-/** @deprecated	
- * public void addIsTexturedVertex(boolean simpleColor) {
-		if(vertexIsUsingTextureIndices == null) {
-			vertexIsUsingTextureIndices = new ArrayList<>();
-		}
-		vertexIsUsingTextureIndices.add(simpleColor);
+
+	public ArrayList<String> getColorLinks() {
+		return this.textureConfig.getColorsLinks();
 	}
-
-	public ArrayList<Boolean> getFlatIndicesUsingTexture() {
-		return this.vertexIsUsingTextureIndices;
-	}**/
-
 }

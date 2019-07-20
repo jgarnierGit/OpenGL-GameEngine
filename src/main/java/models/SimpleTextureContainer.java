@@ -3,9 +3,12 @@ package models;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 import java.util.Optional;
 
+import org.lwjglx.util.vector.Vector3f;
 import org.lwjglx.util.vector.Vector4f;
 
 public class SimpleTextureContainer implements TextureContainer {
@@ -86,6 +89,36 @@ public class SimpleTextureContainer implements TextureContainer {
 	@Override
 	public ArrayList<TextureData> getTextures() {
 		return textures;
+	}
+	
+	/**
+	 * TODO regroup with {Container3DImpl.getVertexArray3f}
+	 * @param vertices
+	 * @return
+	 */
+	private ArrayList<Float> getVertexArray4f(List<Vector4f> vertices) {
+		ArrayList<Float> floatArray = new ArrayList<>();
+		for(Vector4f vector :vertices) {
+			floatArray.add(vector.getX());
+			floatArray.add(vector.getY());
+			floatArray.add(vector.getZ());
+			floatArray.add(vector.getW());
+		}
+		return floatArray;
+	}
+
+	@Override
+	public ArrayList<Float> getFlatColors(ArrayList<String> colorLinks) {
+		ArrayList<Vector4f> ColorsList = new ArrayList<>();
+		for(String colorLink : colorLinks) {
+			for(TextureData textureData : this.getTextures()) {
+				if(textureData.getMtl_name().contentEquals(colorLink)) {
+					ColorsList.add(textureData.getColor());
+					break;
+				}
+			}
+		}
+		return getVertexArray4f(ColorsList);
 	}
 
 }
