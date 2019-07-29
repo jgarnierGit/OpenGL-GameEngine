@@ -72,8 +72,6 @@ public class OBJLoader {
 		ArrayList<Vector2f> textures = new ArrayList<>();
 
 		ArrayList<Vertex> loaderVertexFaces= new ArrayList<>();
-		ArrayList<Integer> loaderNormalIndices = new ArrayList<>();
-		ArrayList<Integer> loaderTextureIndices = new ArrayList<>();
 
 		ArrayList<Vector3f> normals = new ArrayList<>();
 
@@ -146,11 +144,9 @@ public class OBJLoader {
 							vertex.setImageIndex(Integer.parseInt(texture) -1);
 						}
 						Optional<Vertex> registeredVertex = findVertexAlreadyRegistered(loaderVertexFaces,vertex);
-						if(!registeredVertex.isPresent()) {
+						if(!registeredVertex.isPresent()) {//problem might be here
 							loaderVertexFaces.add(vertex);
 							vertexIndices.add(vertex.getIndiceIndex());
-							loaderNormalIndices.add(vertex.getNormalIndex());
-							loaderTextureIndices.add(loaderVertexFaces.indexOf(vertex));
 						}
 						else {
 							checkForDuplicatedVertex(loaderVertexFaces,registeredVertex.get(),vertex,vertexIndices,vertices);
@@ -251,8 +247,7 @@ public class OBJLoader {
 				23,21,22
 
 		};
-		//TODO change texture 2f to a TextureConfig with useImage boolean and more from Vertex.
-		
+		//maybe origin blender / openGL does it wrong
 		Container3D importedModel = new GeneratedModelContainer(vertexIndices,
 				vertices, 
 				getOrderedVectors(textures,loaderVertexFaces, Vertex::getImageIndex), 
@@ -261,6 +256,14 @@ public class OBJLoader {
 		return importedModel;
 	}
 
+	/**
+	 * 
+	 * @param vertexFaces	updated by method with vertexToAdd if its configuration (normal id and texture id) is unknown.
+	 * @param currentVertex	matched vertex with same index than vertexToAdd.
+	 * @param vertexToAdd	new vertex constructed by OBJ file reading.
+	 * @param vertexIndices	updated by method.
+	 * @param vertices		updated by method.
+	 */
 	private static void checkForDuplicatedVertex(ArrayList<Vertex> vertexFaces, Vertex currentVertex, Vertex vertexToAdd, ArrayList<Integer> vertexIndices, ArrayList<Vector3f> vertices) {
 		if(vertexToAdd.hasSameConfig(currentVertex)) {
 			vertexIndices.add(currentVertex.getIndiceIndex());
@@ -271,7 +274,7 @@ public class OBJLoader {
 				checkForDuplicatedVertex(vertexFaces,previousVertex.get(),vertexToAdd,vertexIndices,vertices);
 			}
 			else {
-				vertexFaces.add(vertexToAdd);
+				vertexFaces.add(vertexToAdd); // here is added the vertex with normal and texture configuration.
 				Vector3f previousPoint = vertices.get(vertexToAdd.getIndiceIndex());
 				vertices.add(new Vector3f(previousPoint.getX(), previousPoint.getY(), previousPoint.getZ()));
 				vertexToAdd.setNewIndice(vertices.size() -1);
@@ -281,6 +284,11 @@ public class OBJLoader {
 		}
 	}
 
+	/**
+	 * @param vertexList
+	 * @param currentVertex
+	 * @return Vertex with same index.
+	 */
 	private static Optional<Vertex> findVertexAlreadyRegistered(List<Vertex> vertexList, Vertex currentVertex) {
 		Optional<Vertex> faceWithRegisteredVertex = vertexList.stream().filter(vertex -> vertex.getIndiceIndex() == currentVertex.getIndiceIndex()).findFirst();
 		return faceWithRegisteredVertex;
