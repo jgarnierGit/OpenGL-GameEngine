@@ -10,6 +10,9 @@ import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 import org.lwjglx.util.vector.Matrix4f;
 
+import com.mokiat.data.front.parser.MTLLibrary;
+import com.mokiat.data.front.parser.MTLMaterial;
+
 import entities.Entity;
 import models.Model3D;
 import models.TextureData;
@@ -75,29 +78,42 @@ public class EntityRenderer{
 		GL20.glEnableVertexAttribArray(VBOIndex.TEXTURE_INDEX);
 		GL20.glEnableVertexAttribArray(VBOIndex.NORMAL_INDEX);
 		GL20.glEnableVertexAttribArray(VBOIndex.COLOR_INDEX);
-		Boolean usingImage = model.getContainer3D().getTextureConfig().getUsingImage();
+		boolean usingImage = isUsingTexture(model.getTextureContainer());
 		shader.setUseImage(usingImage);
+		shader.loadFakeLighting(model.isUseFakeLighting());
+		//TODO do it MasterRenderer.disableCulling(); if model.isHasTransparency()
+		//TODO then see if there is any problem with bindTextures
+		shader.loadShineVariable(model.getSpecularExponent());
+		shader.loadReflectivityVariable(model.getReflectivity());
 		if(!usingImage) {
 			//TODO use array of colors to be in flow of Element Buffer Object.
 			//GL20.glEnableVertexAttribArray(VBOIndex.COLOR_INDEX);
 		}
-		else if(!model.getTextureContainer().getTextures().isEmpty()) {
-			bindTextures(model.getTextureContainer().getTextures());
+		else if(!model.getTextureContainer().getMaterials().isEmpty()) {
+			bindTextures(model.getTextureContainer().getMaterials());
 		}
 		else {
 			 useNoTexture();
 		}
 	}
 	
-	private void bindTextures(ArrayList<TextureData> textureContainer) {
+	private boolean isUsingTexture(MTLLibrary textureContainer) {
+		return textureContainer.getMaterials().stream().filter(mtlMat -> {
+			return mtlMat.getDiffuseTexture() != null || mtlMat.getDissolveTexture() != null
+					 || mtlMat.getSpecularExponentTexture() != null
+							 || mtlMat.getSpecularTexture() != null;
+		}).count() > 0;
+	}
 
-		for(int i =0; i< textureContainer.size() && i<33; i++) {
-			TextureData texture = textureContainer.get(i);
-			if(texture.isHasTransparency()) {
+	private void bindTextures(List<MTLMaterial> list) {
+
+		for(int i =0; i< list.size() && i<33; i++) {
+			
+			MTLMaterial texture = list.get(i);
+			if(texture.getDissolve() < 1.0f) {
 				MasterRenderer.disableCulling();
 			}
-			shader.loadFakeLighting(texture.isUseFakeLighting());
-			shader.loadShineVariables(texture.getShineDamper(), texture.getReflectivity()); //TODO extract from texture to TextureConfig
+			shader.loadShineVariable(texture.getSpecularExponent());
 
 			GL13.glActiveTexture(GLTextureIDIncrementer.GL_TEXTURE_IDS.get(i));
 			GL11.glBindTexture(GL11.GL_TEXTURE_2D, texture.getTextureID());

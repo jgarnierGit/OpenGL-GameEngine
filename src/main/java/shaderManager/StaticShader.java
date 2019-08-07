@@ -68,8 +68,11 @@ public class StaticShader extends ShaderProgram {
 		super.loadBoolean(location_useImage, useImage);
 	}
 	
-	public void loadShineVariables(float shineDamper, float reflectivity) {
+	public void loadShineVariable(float shineDamper) {
 		super.loadFloat(location_shineDamper, shineDamper);
+	}
+	
+	public void loadReflectivityVariable(float reflectivity) {
 		super.loadFloat(location_reflectivity, reflectivity);
 		
 	}

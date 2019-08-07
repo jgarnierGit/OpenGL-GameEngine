@@ -14,9 +14,7 @@ public class TextureData{
 	// specular lightning
 	private float shineDamper = 1;
 	private float reflectivity = 0;
-	
-	private boolean hasTransparency = false;
-	private boolean useFakeLighting = false;
+
 	
 	public TextureData(int textureID, String mtl_name) {
 		this.textureID = textureID;
@@ -32,22 +30,10 @@ public class TextureData{
 		return mtl_name;
 	}
 
-	public boolean isHasTransparency() {
-		return hasTransparency;
-	}
-
-	public void setHasTransparency(boolean hasTransparency) {
-		this.hasTransparency = hasTransparency;
-	}
-
-	public boolean isUseFakeLighting() {
-		return useFakeLighting;
-	}
-
-	public void setUseFakeLighting(boolean useFakeLighting) {
-		this.useFakeLighting = useFakeLighting;
-	}
-
+	/**
+	 * @deprecated replaced by getSpecularExponent()
+	 * @return
+	 */
 	public float getShineDamper() {
 		return shineDamper;
 	}

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
@@ -112,6 +113,7 @@ public class Loader {
 	 */
 	private void storeDataFloatInAttrList(int attributeNumber, int coordinateSize, ArrayList<Float> arrayList) {
 		int vboID = GL15.glGenBuffers();
+
 		vbos.add(vboID);
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboID);
 		FloatBuffer buffer = storeDataInFloatBuffer(arrayList);

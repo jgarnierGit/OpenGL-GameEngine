@@ -4,18 +4,16 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.logging.Logger;
 
-import models.Imported3DModelContainer;
 import models.Model3D;
 import renderEngine.Loader;
 
 public class JM extends Model3D{
-	private static final String OBJECT_DESCRIPTOR = "JM.obj";
-	private static final String TEXTURE_DESCRIPTOR = "JM.mtl";
-	private final static Logger logger = Logger.getLogger(JM.class.getName());
+	private static final String OBJECT_DESCRIPTOR = "plane_zoomed.obj";
+	private static final String TEXTURE_DESCRIPTOR = "plane_zoomed.mtl";
 	
 	public JM(Loader loader) throws FileNotFoundException, IOException {
-		super(Imported3DModelContainer.importModel(OBJECT_DESCRIPTOR),
-				Imported3DModelContainer.importTexture(TEXTURE_DESCRIPTOR, logger), loader);
+		super(OBJECT_DESCRIPTOR,
+				TEXTURE_DESCRIPTOR, loader);
 	}
 
 }
