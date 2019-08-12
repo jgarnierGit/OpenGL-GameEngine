@@ -5,7 +5,6 @@ import static org.lwjgl.glfw.GLFW.*;
 import org.lwjgl.opengl.GL;
 
 import org.lwjgl.system.MemoryUtil;
-import org.lwjglx.Sys;
 
 /**
  * This class contains all the methods needed to set-up, maintain, and close a LWJGL display.

@@ -1,6 +1,5 @@
 package renderEngine;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -10,12 +9,12 @@ import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 import org.lwjglx.util.vector.Matrix4f;
 
-import com.mokiat.data.front.parser.MTLLibrary;
 import com.mokiat.data.front.parser.MTLMaterial;
 
 import entities.Entity;
+import models.MTLUtils;
 import models.Model3D;
-import models.TextureData;
+import models.OBJUtils;
 import renderEngine.Loader.VBOIndex;
 import shaderManager.StaticShader;
 import toolbox.GLTextureIDIncrementer;
@@ -58,9 +57,10 @@ public class EntityRenderer{
 		for(Model3D model : entities.keySet()) {
 			prepareTextureModel(model);
 			List<Entity> batch = entities.get(model);
+			OBJUtils objUtil = model.getObjUtils();
 			for(Entity entity : batch) {
 				prepareInstance(entity);
-				GL11.glDrawElements(GL11.GL_TRIANGLES, MasterRenderer.storeDataInIntBuffer(model.getContainer3D().getFlatIndices()));
+				GL11.glDrawElements(GL11.GL_TRIANGLES, MasterRenderer.storeDataInIntBuffer(objUtil.getIndices()));
 			}
 			unbindTextureModel();
 		}
@@ -78,45 +78,36 @@ public class EntityRenderer{
 		GL20.glEnableVertexAttribArray(VBOIndex.TEXTURE_INDEX);
 		GL20.glEnableVertexAttribArray(VBOIndex.NORMAL_INDEX);
 		GL20.glEnableVertexAttribArray(VBOIndex.COLOR_INDEX);
-		boolean usingImage = isUsingTexture(model.getTextureContainer());
-		shader.setUseImage(usingImage);
-		shader.loadFakeLighting(model.isUseFakeLighting());
+		MTLUtils mtlUtils = model.getMtlUtils();
+		shader.setUseImage(mtlUtils.isUsingImage());
+		shader.loadFakeLighting(mtlUtils.isUseFakeLighting());
 		//TODO do it MasterRenderer.disableCulling(); if model.isHasTransparency()
-		//TODO then see if there is any problem with bindTextures
-		shader.loadShineVariable(model.getSpecularExponent());
-		shader.loadReflectivityVariable(model.getReflectivity());
-		if(!usingImage) {
+		shader.loadShineVariable(mtlUtils.getSpecularExponent());
+		shader.loadReflectivityVariable(mtlUtils.getReflectivity());
+		if(!mtlUtils.isUsingImage()) {
 			//TODO use array of colors to be in flow of Element Buffer Object.
 			//GL20.glEnableVertexAttribArray(VBOIndex.COLOR_INDEX);
 		}
-		else if(!model.getTextureContainer().getMaterials().isEmpty()) {
-			bindTextures(model.getTextureContainer().getMaterials());
+		else if(!model.getMaterials().isEmpty()) {
+			bindTextures(mtlUtils);
 		}
 		else {
 			 useNoTexture();
 		}
 	}
-	
-	private boolean isUsingTexture(MTLLibrary textureContainer) {
-		return textureContainer.getMaterials().stream().filter(mtlMat -> {
-			return mtlMat.getDiffuseTexture() != null || mtlMat.getDissolveTexture() != null
-					 || mtlMat.getSpecularExponentTexture() != null
-							 || mtlMat.getSpecularTexture() != null;
-		}).count() > 0;
-	}
 
-	private void bindTextures(List<MTLMaterial> list) {
-
-		for(int i =0; i< list.size() && i<33; i++) {
+	private void bindTextures(MTLUtils mtlUtils) {
+		List<MTLMaterial> matList = mtlUtils.getMaterials();
+		for(int i =0; i< matList.size() && i<33; i++) {
 			
-			MTLMaterial texture = list.get(i);
+			MTLMaterial texture = matList.get(i);
 			if(texture.getDissolve() < 1.0f) {
 				MasterRenderer.disableCulling();
 			}
 			shader.loadShineVariable(texture.getSpecularExponent());
 
 			GL13.glActiveTexture(GLTextureIDIncrementer.GL_TEXTURE_IDS.get(i));
-			GL11.glBindTexture(GL11.GL_TEXTURE_2D, texture.getTextureID());
+			GL11.glBindTexture(GL11.GL_TEXTURE_2D, mtlUtils.getTexturesIndexes().get(i));
 		}
 		GL20.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
 	}

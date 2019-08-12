@@ -1,47 +1,53 @@
 package terrains;
 
-import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Optional;
 
-import org.lwjglx.util.vector.Vector2f;
-import org.lwjglx.util.vector.Vector3f;
+import com.mokiat.data.front.error.WFException;
+import com.mokiat.data.front.parser.MTLLibrary;
+import com.mokiat.data.front.parser.OBJDataReference;
+import com.mokiat.data.front.parser.OBJFace;
+import com.mokiat.data.front.parser.OBJMesh;
+import com.mokiat.data.front.parser.OBJModel;
+import com.mokiat.data.front.parser.OBJNormal;
+import com.mokiat.data.front.parser.OBJObject;
+import com.mokiat.data.front.parser.OBJTexCoord;
+import com.mokiat.data.front.parser.OBJVertex;
 
-import models.Container3D;
-import models.GeneratedModelContainer;
-import models.BlendedTexturesContainer;
+import models.BlendedMaterialLibraryBuilder;
 import models.Model3D;
-import models.TextureContainer;
 import renderEngine.Loader;
 
 public class Terrain extends Model3D {
 	private static final float SIZE = 800;
 	private static final int VERTEX_COUNT = 128;
+	static final String resourceTexturePath = Paths.get("./", "src", "main", "resources", "2D").toString();
 
+	private static final String OBJ_NAME = "Terrain";
 	private float x;
 	private float z;
 
-	public Terrain (int gridX, int gridZ, Loader loader) throws FileNotFoundException {
-		super(generateTerrain(), importTextures(), loader);
+	public Terrain (int gridX, int gridZ, Loader loader) throws WFException, IOException {
+		super(generateTerrain(), importTextures(), loader,false);
 		this.x = gridX*SIZE;
 		this.z = gridZ*SIZE;
 	}
 
-	private static TextureContainer importTextures() {
-		TextureContainer mixedTextures = BlendedTexturesContainer.create()
-				.addTexture("grass.png")
-				.addTexture("mud.png")
-				.addTexture("grassFlowers.png")
-				.addTexture("path.png")
-				.addBlendTexturesAndBuild("blendMap.png");
-		return mixedTextures;
+	private static MTLLibrary importTextures() {
+		MTLLibrary mtlLibrary = BlendedMaterialLibraryBuilder.create()
+				.addTexture(resourceTexturePath, "grass1.png")
+				.addTexture(resourceTexturePath, "mud1.png")
+				.addTexture(resourceTexturePath, "grassFlowers1.png")
+				.addTexture(resourceTexturePath, "path1.png")
+				.addBlendTexturesAndBuild(resourceTexturePath, "blendMap1.png");
+		return mtlLibrary;
 	}
 
-	private static Container3D generateTerrain(){
-		ArrayList<Vector3f> positions = new ArrayList<>();
-		ArrayList<Vector3f> normalsVector = new ArrayList<>();
-		ArrayList<Vector2f> textures = new ArrayList<>();
+	private static OBJModel generateTerrain(){
+		ArrayList<OBJVertex> positions = new ArrayList<>();
+		ArrayList<OBJNormal> normalsVector = new ArrayList<>();
+		ArrayList<OBJTexCoord> textures = new ArrayList<>();
 		ArrayList<Integer> vertexIndices = new ArrayList<>();
 
 		for(int i=0;i<VERTEX_COUNT;i++){
@@ -52,29 +58,67 @@ public class Terrain extends Model3D {
 				float y = -5;
 				//z + is to the player, - is far from the screen
 				float z = -(float)i/((float)VERTEX_COUNT - 1) * SIZE;
-				positions.add(new Vector3f(x, y, z));
+				positions.add(new OBJVertex(x, y, z));
 				//TODO need to understand normals and how invert them
-				normalsVector.add(new Vector3f(0, 1,0));
+				normalsVector.add(new OBJNormal(0, 1,0));
 				float u = (float)j/((float)VERTEX_COUNT - 1);
 				float v = (float)i/((float)VERTEX_COUNT - 1);
-				textures.add(new Vector2f(u,v));
+				textures.add(new OBJTexCoord(u,v));
 			}
 		}
+		
+		OBJMesh mesh = new OBJMesh();
+		mesh.setMaterialName("TerrainMaterial");
 		for(int gz=0;gz<VERTEX_COUNT-1;gz++){
 			for(int gx=0;gx<VERTEX_COUNT-1;gx++){
-				int topLeft = (gz*VERTEX_COUNT)+gx;
-				int topRight = topLeft + 1;
-				int bottomLeft = ((gz+1)*VERTEX_COUNT)+gx;
-				int bottomRight = bottomLeft + 1;
-				vertexIndices.add(topLeft);
-				vertexIndices.add(bottomLeft);
-				vertexIndices.add(topRight);
-				vertexIndices.add(topRight);
-				vertexIndices.add(bottomLeft);
-				vertexIndices.add(bottomRight);
+				mesh.getFaces().add(makeFaceBottom(gz,gx));
+				mesh.getFaces().add(makeFaceUp(gz,gx));
 			}
 		}
-		return new GeneratedModelContainer(vertexIndices, positions, Optional.of(textures), Optional.empty(), normalsVector);
+		OBJModel objModel = new OBJModel();
+		OBJObject object = new OBJObject(OBJ_NAME);
+		object.getMeshes().add(mesh);
+		objModel.getObjects().add(object);
+		
+		objModel.getNormals().addAll(normalsVector);
+		objModel.getTexCoords().addAll(textures);
+		objModel.getVertices().addAll(positions);
+		return objModel;
+	}
+
+	private static OBJFace makeFaceBottom(int gz, int gx) {
+		OBJFace face = new OBJFace();
+		
+		int topLeft = (gz*VERTEX_COUNT)+gx;
+		int topRight = topLeft + 1;
+		int bottomLeft = ((gz+1)*VERTEX_COUNT)+gx;
+		int bottomRight = bottomLeft + 1;
+		
+		face.getReferences().add(createOBjDataRef(topRight,topRight,topRight));
+		face.getReferences().add(createOBjDataRef(bottomLeft,bottomLeft,bottomLeft));
+		face.getReferences().add(createOBjDataRef(bottomRight,bottomRight,bottomRight));
+		return face;
+	}
+
+	private static OBJDataReference createOBjDataRef(int vertexIndex, int texCoordIndex, int normalIndex) {
+		OBJDataReference dataRef = new OBJDataReference();
+		dataRef.vertexIndex = vertexIndex;
+		dataRef.texCoordIndex = texCoordIndex;
+		dataRef.normalIndex = normalIndex;
+		return dataRef;
+	}
+
+	private static OBJFace makeFaceUp(int gz, int gx) {
+		OBJFace face = new OBJFace();
+
+		int topLeft = (gz*VERTEX_COUNT)+gx;
+		int topRight = topLeft + 1;
+		int bottomLeft = ((gz+1)*VERTEX_COUNT)+gx;
+		
+		face.getReferences().add(createOBjDataRef(topLeft,topLeft,topLeft));
+		face.getReferences().add(createOBjDataRef(bottomLeft,bottomLeft,bottomLeft));
+		face.getReferences().add(createOBjDataRef(topRight,topRight,topRight));
+		return face;
 	}
 
 	public  float getX() {

@@ -4,21 +4,15 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
-import org.lwjglx.util.vector.Vector4f;
 
-import models.Container3D;
-import models.Model3D;
-import models.TextureConfig;
-import models.TextureContainer;
-import models.TextureData;
+import models.MTLUtils;
+import models.OBJUtils;
 
 /**
  * Handles the loading of geometry data into VAOs. It also keeps track of all
@@ -47,24 +41,25 @@ public class Loader {
 	 * @param model
 	 * @return VAOId linked to the loaded model.
 	 */
-	public int loadModelToVAO(Model3D model) {
+	public int loadModelToVAO(OBJUtils objUtils, MTLUtils mtlUtils) {
 		int vaoID = createVAO();
-		Container3D container = model.getContainer3D();
-		TextureContainer textureContainer = model.getTextureContainer();
-		bindIndicesBuffer(container.getFlatIndices());
-		storeDataFloatInAttrList(VBOIndex.POSITION_INDEX,3, container.getFlatPositions());
-		TextureConfig textureConfig = container.getTextureConfig(); //TODO maybe not the best composition
-		if(textureConfig.getUsingImage()) {
-			storeDataFloatInAttrList(VBOIndex.TEXTURE_INDEX,2, container.getFlatTextures());
+		bindIndicesBuffer(objUtils.getIndices());
+		storeDataFloatInAttrList(VBOIndex.POSITION_INDEX,3, objUtils.getPositions());
+		if(mtlUtils.isUsingImage()) {
+			storeDataFloatInAttrList(VBOIndex.TEXTURE_INDEX,2, objUtils.getTexturesCoords());
 		}
-		else {//TODO still not working. random color applied.
-			storeDataFloatInAttrList(VBOIndex.COLOR_INDEX,4, textureContainer.getFlatColors(container.getColorLinks()));
+		else {
+			storeDataFloatInAttrList(VBOIndex.COLOR_INDEX,4, mtlUtils.getColors());
 		}
-		storeDataFloatInAttrList(VBOIndex.NORMAL_INDEX,3,container.getFlatNormals());
+		storeDataFloatInAttrList(VBOIndex.NORMAL_INDEX,3,objUtils.getNormals());
 		unbindVAO();
-		
-		texturesToClean.addAll(textureContainer.getTextures().stream().map(TextureData::getTextureID).collect(Collectors.toList()));
+		loadTextures(mtlUtils);
+		texturesToClean.addAll(mtlUtils.getTexturesIndexes());
 		return vaoID;
+	}
+	
+	private void loadTextures(MTLUtils mtlUtils) {
+		//objUtils.get
 	}
 
 	/**

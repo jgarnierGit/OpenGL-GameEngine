@@ -1,45 +1,27 @@
 package models;
 
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.List;
 import java.util.Objects;
 
 import com.mokiat.data.front.error.WFException;
-import com.mokiat.data.front.parser.IMTLParser;
-import com.mokiat.data.front.parser.IOBJParser;
 import com.mokiat.data.front.parser.MTLLibrary;
-import com.mokiat.data.front.parser.MTLParser;
+import com.mokiat.data.front.parser.MTLMaterial;
 import com.mokiat.data.front.parser.OBJModel;
-import com.mokiat.data.front.parser.OBJParser;
 
 import renderEngine.Loader;
 
 public abstract class Model3D {
 	private int vaoID;
-	static final Path resourcePath = Paths.get("./", "src", "main", "resources", "3D");
-	private OBJModel objModel;
-	protected MTLLibrary mtlLibrary;
-	private boolean useFakeLighting = false;
-	private boolean hasTransparency = false;
-	private float reflectivity = 0;
-	/**
-	 * overide specularExponent of material if needed.
-	 */
-	private float specularExponent = 0; 
+	private OBJUtils objUtils;
+	private MTLUtils mtlUtils;
 	
-	protected Model3D(String objFile, String mtlFile, Loader loader) throws WFException, FileNotFoundException, IOException {
+	public Model3D(OBJModel model, MTLLibrary materialsLibrary, Loader loader, boolean isImported) throws WFException, FileNotFoundException, IOException {
 		Objects.requireNonNull(loader);
-		IOBJParser objParser = new OBJParser();
-		IMTLParser mtlParser = new MTLParser();
-		
-		this.objModel = objParser.parse(new FileInputStream(Paths.get(resourcePath.toString(), objFile).toFile()));
-		this.mtlLibrary =  mtlParser.parse(new FileInputStream(Paths.get(resourcePath.toString(), mtlFile).toFile()));
-		//TODO mtlParser doesn't load texture to openGL.
-		vaoID = loader.loadModelToVAO(this);
+		objUtils = new OBJUtils(model,isImported);
+		mtlUtils = new MTLUtils(materialsLibrary);
+		vaoID = loader.loadModelToVAO(objUtils,mtlUtils);
 	}
 
 	/**
@@ -50,12 +32,12 @@ public abstract class Model3D {
 		return vaoID;
 	}
 	
-	public OBJModel getContainer3D() {
-		return objModel;
+	public OBJModel getObjModel() {
+		return objUtils.getObjModel();
 	}
 
-	public MTLLibrary getTextureContainer() {
-		return mtlLibrary;
+	public List<MTLMaterial> getMaterials() {
+		return mtlUtils.getMaterials();
 	}
 
 /**
@@ -63,34 +45,26 @@ public abstract class Model3D {
  * @param value
  */
 	public void setReflectivity(float value) {
-		this.reflectivity = value;
+		mtlUtils.setReflectivity(value);
 	}
 	
 	public void setHasTransparency(boolean value) {
-		this.hasTransparency = value;
-	}
-	
-	public boolean isHasTransparency() {
-		return hasTransparency;
+		mtlUtils.setHasTransparency(value);
 	}
 	
 	public void setUseFakeLighting(boolean value) {
-		this.useFakeLighting = value;
-	}
-
-	public boolean isUseFakeLighting() {
-		return useFakeLighting;
+		mtlUtils.setUseFakeLighting(value);
 	}
 
 	public void setSpecularExponent(float value) {
-		this.specularExponent = value;
+		mtlUtils.setSpecularExponent(value);
 	}
 
-	public float getSpecularExponent() {
-		return this.specularExponent;
+	public OBJUtils getObjUtils() {
+		return objUtils;
 	}
 
-	public float getReflectivity() {
-		return this.reflectivity;
+	public MTLUtils  getMtlUtils() {
+		return mtlUtils;
 	}
 }

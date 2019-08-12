@@ -6,7 +6,6 @@ import java.nio.file.Paths;
 
 import org.lwjglx.util.vector.Matrix4f;
 import org.lwjglx.util.vector.Vector3f;
-import org.lwjglx.util.vector.Vector4f;
 
 import entities.Camera;
 import entities.Light;
