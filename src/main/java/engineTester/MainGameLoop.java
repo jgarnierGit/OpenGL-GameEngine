@@ -60,9 +60,9 @@ public class MainGameLoop {
 		Model3D grass = new Grass(loader);
 		
 		// TODO fix mapping seems like it didnt work.
-		Model3D jm = new JM(loader);
-		Model3D tree = new Tree(loader);
-		Player player = new Player(tree, new Vector3f(0,-5,-10), 0, 0, 0, 1);
+		//Model3D jm = new JM(loader);
+		//Model3D tree = new Tree(loader);
+		Player player = new Player(cube, new Vector3f(0,-5,-10), 0, 0, 0, 1);
 
 		// Cube semi ko
 		//plane // OK
@@ -89,13 +89,13 @@ public class MainGameLoop {
 			cubes.add(new Entity(cube, new Vector3f(x,y,z), random.nextFloat() * 180, random.nextFloat() * 180, 0, 1f));
 		}
 		
-		for(int i=0;i<50; i++) {
+		/**for(int i=0;i<50; i++) {
 			float x = random.nextFloat() * 100 - 50;
 			float y = -4f;
 			float z = random.nextFloat() *- 300;
 			float yRot = random.nextFloat() * 180;
 			trees.add(new Entity(tree, new Vector3f(x,y,z), 0, yRot, 0, 1f));
-		}
+		}**/
 		
 		for(int i=0;i<200; i++) {
 			float x = random.nextFloat() * 100 - 50;
