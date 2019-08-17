@@ -1,6 +1,12 @@
 package models;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.lwjglx.util.vector.Vector2f;
+import org.lwjglx.util.vector.Vector3f;
 
 import com.mokiat.data.front.parser.OBJModel;
 import com.mokiat.data.front.parser.OBJNormal;
@@ -25,41 +31,64 @@ public class OBJUtils {
 		positions = new ArrayList<>();
 		texturesCoords = new ArrayList<>();
 		normals = new ArrayList<>();
+		int vertexSizeList = objModel.getVertices().size();
+		OBJDataReferenceUtils objDataReferenceUtils = new OBJDataReferenceUtils(vertexSizeList);
+
 		objModel.getObjects().forEach(obj -> {
 			obj.getMeshes().forEach(mesh -> {
 				mesh.getFaces().forEach(face -> {
 					face.getReferences().forEach(ref -> {
 						if(ref.hasVertexIndex()) {
-							indices.add(ref.vertexIndex);
-							OBJVertex vertex = objModel.getVertices().get(ref.vertexIndex);
-							positions.add(vertex.x);
-							positions.add(vertex.y);
-							positions.add(vertex.z);
+							// ref.vertexIndex only contains original ids.
+							if(indices.contains(ref.vertexIndex)) {
+								if(objDataReferenceUtils.isConfigRegistered(ref)) {
+									indices.add(ref.vertexIndex);
+								}
+								else {
+									int newIndex = objDataReferenceUtils.addChildConfig(ref);
+									indices.add(ref.vertexIndex);
+								}
+							}
+							else {
+								indices.add(ref.vertexIndex);
+								objDataReferenceUtils.addVertex(ref);
+							}
 						}
 						else {
 							System.out.println(obj.getName() +" has no vertexIndex");
-						}
-						if(ref.hasNormalIndex()) {
-							OBJNormal normal = objModel.getNormals().get(ref.normalIndex);
-							normals.add(normal.x);
-							normals.add(normal.y);
-							normals.add(normal.z);
-						}
-						else {
-							System.out.println(obj.getName() +" has no normalIndex");
-						}
-						if(ref.hasTexCoordIndex()) {
-							OBJTexCoord textCoord = objModel.getTexCoords().get(ref.texCoordIndex);
-							texturesCoords.add(textCoord.u);
-							texturesCoords.add(textCoord.v);
-						}
-						else {
-							System.out.println(obj.getName() +" has no textureCoordsIndex for index :"+ ref.vertexIndex);
 						}
 					});
 				});
 			});
 		});
+		List<OBJVertex> vertices = objDataReferenceUtils.getPositionsIndices().stream().map(indice -> {
+			return objModel.getVertices().get(indice);
+		}).collect(Collectors.toList());
+		for(OBJVertex vertex : vertices) {
+			positions.add(vertex.x);
+			positions.add(vertex.y);
+			positions.add(vertex.z);
+		}
+		List<OBJNormal> normalsList = objDataReferenceUtils.getNormalsIndices().stream().map(indice -> {
+			return objModel.getNormals().get(indice);
+		}).collect(Collectors.toList());
+		for(OBJNormal normal : normalsList) {
+			normals.add(normal.x);
+			normals.add(normal.y);
+			normals.add(normal.z);
+		}
+		List<OBJTexCoord> textCoordList = objDataReferenceUtils.getTexturesCoordsIndices().stream().map(indice -> {
+			return objModel.getTexCoords().get(indice);
+		}).collect(Collectors.toList());
+		for(OBJTexCoord textCoord : textCoordList) {
+			texturesCoords.add(textCoord.u);
+			texturesCoords.add(textCoord.v);
+		}
+		System.out.println(objModel.getObjects().get(0).getName() +" :");
+		System.out.println(indices);
+		System.out.println(positions);
+		System.out.println(texturesCoords);
+		System.out.println(normals);
 	}
 
 	public ArrayList<Integer> getIndices() {
