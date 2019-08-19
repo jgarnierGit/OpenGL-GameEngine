@@ -7,7 +7,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
+import org.lwjgl.stb.STBImage;
 import org.lwjglx.util.vector.Vector4f;
+import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
 
 import com.mokiat.data.front.parser.MTLColor;
@@ -52,8 +54,8 @@ public class MTLUtils {
 	
 	private void loadTextureInMemory(MTLMaterial mat) {
 		if(texturesList.add(mat.getDiffuseTexture())) {
-			try {
-				int textId = TextureLoader.getTexture("png", new FileInputStream(mat.getDiffuseTexture())).getTextureID();
+			try (FileInputStream image = new FileInputStream(mat.getDiffuseTexture())){
+				int textId = TextureLoader.getTexture("png", image).getTextureID();
 				texturesIndexes.add(Integer.valueOf(textId));
 			} catch (IOException e) {
 				System.err.println("["+ mat.getName() +"] File not found "+ mat.getDiffuseTexture() +" specified in MTL file. ");
