@@ -18,7 +18,6 @@ public class MTLUtils {
 	private ArrayList<MaterialMapper> materialMappers;
 	private HashSet<String> texturesList;
 	private List<Integer> texturesIndexes;
-	private ArrayList<Vector4f> colors;
 	private boolean isUsingImage;
 	private boolean useFakeLighting = false;
 	private boolean hasTransparency = false;
@@ -30,21 +29,19 @@ public class MTLUtils {
 
 	public MTLUtils(MTLLibrary mtlLibrary) {
 		materialMappers = new ArrayList<>();
-		
-		texturesList = new HashSet<>();
+		texturesList = new HashSet<>(); //TODO may be put those 2 params in MaterialMapper.
 		texturesIndexes = new ArrayList<>();
-		colors = new ArrayList<>();
 		mtlLibrary.getMaterials().forEach(mat -> {
 			MaterialMapper materialMapper = new MaterialMapper(mat);
-			materialMappers.add(materialMapper);
 			if(materialMapper.getType() == MaterialType.IMAGE) {
 				loadTextureInMemory(mat);
 			}
 			else {
 				MTLColor color = mat.getDiffuseColor();
 				Vector4f colorVector = new Vector4f(color.r,color.g,color.b,mat.getDissolve());
-				colors.add(colorVector);
+				materialMapper.setColor(colorVector);
 			}
+			materialMappers.add(materialMapper);
 		});
 
 		//TODO is this still meaningful
@@ -79,10 +76,6 @@ public class MTLUtils {
 	 */
 	public List<Integer> getTexturesIndexes() {
 		return texturesIndexes;
-	}
-	
-	public ArrayList<Vector4f> getColors() {
-		return colors;
 	}
 
 	public boolean isUsingImage() {
@@ -128,12 +121,13 @@ public class MTLUtils {
 	public List<MaterialMapper> getMaterials() {
 		return materialMappers;
 	}
-	
-	public HashMap<String,MaterialType> getMaterialWithTypes(){
-		HashMap<String,MaterialType> materialsAssociation = new HashMap<>();
-		for (MaterialMapper mapper : materialMappers) {
-			materialsAssociation.put(mapper.getMaterial().getName(), mapper.getType());
+
+	public MaterialMapper getMaterial(String materialName) {
+		for(MaterialMapper mapper: materialMappers) {
+			if(mapper.getMaterial().getName().contentEquals(materialName)) {
+				return mapper;
+			}
 		}
-		return materialsAssociation;
+		return null;
 	}
 }

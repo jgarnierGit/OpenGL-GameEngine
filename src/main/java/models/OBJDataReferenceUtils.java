@@ -21,7 +21,7 @@ public class OBJDataReferenceUtils {
 	private List<OBJNormal> normalsList;
 	private List<OBJTexCoord> textCoordsList;
 	private List<OBJVertex> verticesList;
-	private ArrayList<Vector4f> colorsList;
+	private List<MaterialMapper> materialsList;
 
 	public ArrayList<OBJDataReferenceMapper> getVertices() {
 		return dataReferences;
@@ -33,7 +33,7 @@ public class OBJDataReferenceUtils {
 		normalsList = objModel.getNormals();
 		textCoordsList = objModel.getTexCoords();
 		verticesList = objModel.getVertices();
-		colorsList = mtlUtils.getColors();
+		materialsList = mtlUtils.getMaterials();
 	}
 
 	/**
@@ -66,7 +66,7 @@ public class OBJDataReferenceUtils {
 	 * @return ArrayList<Integer> list of colors indexes ordered by vertices indexes as sorted by obj file.
 	 */
 	public ArrayList<Integer> getColorsIndices() {
-		return getOrderedReferences(OBJDataReferenceMapper::getColorIndex);
+		return getOrderedReferences(OBJDataReferenceMapper::getMaterialIndex);
 	}
 
 
@@ -82,8 +82,8 @@ public class OBJDataReferenceUtils {
 		return verticesList;
 	}
 
-	public ArrayList<Vector4f> getColorsList() {
-		return colorsList;
+	public List<MaterialMapper> getMaterialsList() {
+		return materialsList;
 	}
 
 	private ArrayList<Integer> getOrderedReferences(Function<OBJDataReferenceMapper, Integer> method){

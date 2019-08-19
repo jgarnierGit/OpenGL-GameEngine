@@ -42,7 +42,7 @@ public class OBJDataReferenceMapper {
 		return dataRef.texCoordIndex;
 	}
 	
-	public int getColorIndex() {
+	public int getMaterialIndex() {
 		return materialIndex;
 	}
 

@@ -32,15 +32,13 @@ public class OBJUtils {
 		normals = new NormalBufferCreator();
 		
 		//TODO update to set type for each material of an object
-		HashMap<String, MaterialType> materialTypes = mtlUtils.getMaterialWithTypes();
-		material = materialTypes.values().toArray()[0] == MaterialType.IMAGE ? new ImageMaterialBufferCreator() : new ColorMaterialBufferCreator();
-		List<String> materialNamesList = materialTypes.keySet().stream().collect(Collectors.toList());
+		material = mtlUtils.getMaterials().get(0).getType() == MaterialType.IMAGE ? new ImageMaterialBufferCreator() : new ColorMaterialBufferCreator();
 		OBJDataReferenceUtils objDataReferenceUtils = new OBJDataReferenceUtils(objModel,mtlUtils);
 
 		objModel.getObjects().forEach(obj -> {
 			obj.getMeshes().forEach(mesh -> {
+				int materialIndex = mtlUtils.getMaterials().indexOf(mtlUtils.getMaterial(mesh.getMaterialName()));
 				mesh.getFaces().forEach(face -> {
-					//materialNames.add(mesh.getMaterialName()); //TODO exploit material type
 					face.getReferences().forEach(ref -> {
 						if(ref.hasVertexIndex()) {
 							// ref.vertexIndex only contains original ids.
@@ -49,13 +47,13 @@ public class OBJUtils {
 									indices.add(ref.vertexIndex);
 								}
 								else {
-									objDataReferenceUtils.addChildConfig(ref, materialNamesList.indexOf(mesh.getMaterialName()));
+									objDataReferenceUtils.addChildConfig(ref, materialIndex);
 									indices.add(ref.vertexIndex);
 								}
 							}
 							else {
 								indices.add(ref.vertexIndex);
-								objDataReferenceUtils.addVertex(ref, materialNamesList.indexOf(mesh.getMaterialName()));
+								objDataReferenceUtils.addVertex(ref, materialIndex);
 							}
 						}
 						else {
