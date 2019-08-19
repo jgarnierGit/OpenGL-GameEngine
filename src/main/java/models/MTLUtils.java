@@ -3,9 +3,11 @@ package models;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
+import org.lwjglx.util.vector.Vector4f;
 import org.newdawn.slick.opengl.TextureLoader;
 
 import com.mokiat.data.front.parser.MTLColor;
@@ -13,10 +15,10 @@ import com.mokiat.data.front.parser.MTLLibrary;
 import com.mokiat.data.front.parser.MTLMaterial;
 
 public class MTLUtils {
-	private MTLLibrary mtlLibrary;
+	private ArrayList<MaterialMapper> materialMappers;
 	private HashSet<String> texturesList;
 	private List<Integer> texturesIndexes;
-	private ArrayList<Float> colors;
+	private ArrayList<Vector4f> colors;
 	private boolean isUsingImage;
 	private boolean useFakeLighting = false;
 	private boolean hasTransparency = false;
@@ -27,36 +29,41 @@ public class MTLUtils {
 	private float specularExponent = 0; 
 
 	public MTLUtils(MTLLibrary mtlLibrary) {
-		this.mtlLibrary =  mtlLibrary;
+		materialMappers = new ArrayList<>();
+		
 		texturesList = new HashSet<>();
 		texturesIndexes = new ArrayList<>();
 		colors = new ArrayList<>();
 		mtlLibrary.getMaterials().forEach(mat -> {
-			if(mat.getDiffuseTexture() != null && texturesList.add(mat.getDiffuseTexture())) {
-				int textId;
-				try {
-					textId = TextureLoader.getTexture("png", new FileInputStream(mat.getDiffuseTexture())).getTextureID();
-					texturesIndexes.add(Integer.valueOf(textId));
-				} catch (IOException e) {
-					System.err.println("["+ mat.getName() +"] File not found "+ mat.getDiffuseTexture() +" specified in MTL file. ");
-				}
+			MaterialMapper materialMapper = new MaterialMapper(mat);
+			materialMappers.add(materialMapper);
+			if(materialMapper.getType() == MaterialType.IMAGE) {
+				loadTextureInMemory(mat);
 			}
-			if(mat.getDiffuseColor() != null) {
+			else {
 				MTLColor color = mat.getDiffuseColor();
-				colors.add(color.r);
-				colors.add(color.g);
-				colors.add(color.b);
-				colors.add(mat.getDissolve());
+				Vector4f colorVector = new Vector4f(color.r,color.g,color.b,mat.getDissolve());
+				colors.add(colorVector);
 			}
 		});
 
-		isUsingImage = mtlLibrary.getMaterials().stream().filter(mtlMat -> {
-			return mtlMat.getDiffuseTexture() != null || mtlMat.getDissolveTexture() != null
-					|| mtlMat.getSpecularExponentTexture() != null
-					|| mtlMat.getSpecularTexture() != null;
+		//TODO is this still meaningful
+		isUsingImage = materialMappers.stream().filter(matMapper -> {
+			return matMapper.getType() == MaterialType.IMAGE;
 		}).count() > 0;
 	}
 	
+	private void loadTextureInMemory(MTLMaterial mat) {
+		if(texturesList.add(mat.getDiffuseTexture())) {
+			try {
+				int textId = TextureLoader.getTexture("png", new FileInputStream(mat.getDiffuseTexture())).getTextureID();
+				texturesIndexes.add(Integer.valueOf(textId));
+			} catch (IOException e) {
+				System.err.println("["+ mat.getName() +"] File not found "+ mat.getDiffuseTexture() +" specified in MTL file. ");
+			}
+		}
+	}
+
 	/**
 	 * TODO FIXME change list of integer for a list of TextureId containing [TextureName, GL_ID], to know if a material is valid.
 	 * @param materialName
@@ -74,7 +81,7 @@ public class MTLUtils {
 		return texturesIndexes;
 	}
 	
-	public ArrayList<Float> getColors() {
+	public ArrayList<Vector4f> getColors() {
 		return colors;
 	}
 
@@ -118,7 +125,15 @@ public class MTLUtils {
 		this.specularExponent = value;
 	}
 
-	public List<MTLMaterial> getMaterials() {
-		return mtlLibrary.getMaterials();
+	public List<MaterialMapper> getMaterials() {
+		return materialMappers;
+	}
+	
+	public HashMap<String,MaterialType> getMaterialWithTypes(){
+		HashMap<String,MaterialType> materialsAssociation = new HashMap<>();
+		for (MaterialMapper mapper : materialMappers) {
+			materialsAssociation.put(mapper.getMaterial().getName(), mapper.getType());
+		}
+		return materialsAssociation;
 	}
 }

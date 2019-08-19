@@ -11,8 +11,7 @@ import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
-import models.MTLUtils;
-import models.OBJUtils;
+import models.ModelUtils;
 
 /**
  * Handles the loading of geometry data into VAOs. It also keeps track of all
@@ -41,25 +40,22 @@ public class Loader {
 	 * @param model
 	 * @return VAOId linked to the loaded model.
 	 */
-	public int loadModelToVAO(OBJUtils objUtils, MTLUtils mtlUtils) {
+	public int loadModelToVAO(ModelUtils modelUtils) {
 		int vaoID = createVAO();
-		bindIndicesBuffer(objUtils.getIndices());
-		storeDataFloatInAttrList(VBOIndex.POSITION_INDEX,3, objUtils.getPositions());
-		if(mtlUtils.isUsingImage()) {
-			storeDataFloatInAttrList(VBOIndex.TEXTURE_INDEX,2, objUtils.getTexturesCoords());
+		// OBJUtils objUtils, MTLUtils mtlUtils
+		bindIndicesBuffer(modelUtils.getOBJUtils().getIndices());
+		//TODO refactor architecture.
+		storeDataFloatInAttrList(VBOIndex.POSITION_INDEX,modelUtils.getOBJUtils().getPositions().getDimension(), modelUtils.getOBJUtils().getPositions().getContent());
+		if(modelUtils.getMtlUtils().isUsingImage()) {
+			storeDataFloatInAttrList(VBOIndex.TEXTURE_INDEX,modelUtils.getOBJUtils().getMaterial().getDimension(), modelUtils.getOBJUtils().getMaterial().getContent());
 		}
 		else {
-			storeDataFloatInAttrList(VBOIndex.COLOR_INDEX,4, mtlUtils.getColors());
+			storeDataFloatInAttrList(VBOIndex.COLOR_INDEX,modelUtils.getOBJUtils().getMaterial().getDimension(), modelUtils.getOBJUtils().getMaterial().getContent());
 		}
-		storeDataFloatInAttrList(VBOIndex.NORMAL_INDEX,3,objUtils.getNormals());
+		storeDataFloatInAttrList(VBOIndex.NORMAL_INDEX,modelUtils.getOBJUtils().getNormals().getDimension(),modelUtils.getOBJUtils().getNormals().getContent());
 		unbindVAO();
-		loadTextures(mtlUtils);
-		texturesToClean.addAll(mtlUtils.getTexturesIndexes());
+		texturesToClean.addAll(modelUtils.getMtlUtils().getTexturesIndexes());
 		return vaoID;
-	}
-	
-	private void loadTextures(MTLUtils mtlUtils) {
-		//objUtils.get
 	}
 
 	/**

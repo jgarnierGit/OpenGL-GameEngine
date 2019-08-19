@@ -12,7 +12,7 @@ public class Grass extends Model3D{
 
 	public Grass(Loader loader) throws IOException {
 		super(Model3DImporter.importOBJ(OBJECT_DESCRIPTOR),
-				Model3DImporter.importMTL(TEXTURE_DESCRIPTOR),loader,true);
+				Model3DImporter.importMTL(TEXTURE_DESCRIPTOR),loader);
 		super.setHasTransparency(true);
 		super.setUseFakeLighting(true);
 	}

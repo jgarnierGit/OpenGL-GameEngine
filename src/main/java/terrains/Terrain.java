@@ -29,18 +29,18 @@ public class Terrain extends Model3D {
 	private float z;
 
 	public Terrain (int gridX, int gridZ, Loader loader) throws WFException, IOException {
-		super(generateTerrain(), importTextures(), loader,false);
+		super(generateTerrain(), importTextures(), loader);
 		this.x = gridX*SIZE;
 		this.z = gridZ*SIZE;
 	}
 
 	private static MTLLibrary importTextures() {
 		MTLLibrary mtlLibrary = BlendedMaterialLibraryBuilder.create()
-				.addTexture(resourceTexturePath, "grass1.png")
-				.addTexture(resourceTexturePath, "mud1.png")
-				.addTexture(resourceTexturePath, "grassFlowers1.png")
-				.addTexture(resourceTexturePath, "path1.png")
-				.addBlendTexturesAndBuild(resourceTexturePath, "blendMap1.png");
+				.addTexture(resourceTexturePath, "grass.png")
+				.addTexture(resourceTexturePath, "mud.png")
+				.addTexture(resourceTexturePath, "grassFlowers.png")
+				.addTexture(resourceTexturePath, "path.png")
+				.addBlendTexturesAndBuild(resourceTexturePath, "blendMap.png");
 		return mtlLibrary;
 	}
 

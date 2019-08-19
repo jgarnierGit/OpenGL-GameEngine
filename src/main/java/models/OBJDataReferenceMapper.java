@@ -7,12 +7,14 @@ import com.mokiat.data.front.parser.OBJDataReference;
 
 public class OBJDataReferenceMapper {
 	OBJDataReference dataRef;
+	int materialIndex;
 	List<OBJDataReference> children;
 	boolean isCHild;
 	OBJDataReferenceMapper parent;
 	
-	public OBJDataReferenceMapper(OBJDataReference objDataRef) {
+	public OBJDataReferenceMapper(OBJDataReference objDataRef,int materialIndexRef) {
 		dataRef = objDataRef;
+		materialIndex = materialIndexRef;
 		children = new ArrayList<OBJDataReference>();
 	}
 	
@@ -38,6 +40,10 @@ public class OBJDataReferenceMapper {
 	
 	public int getTextureCoordIndex() {
 		return dataRef.texCoordIndex;
+	}
+	
+	public int getColorIndex() {
+		return materialIndex;
 	}
 
 	public void setParent(OBJDataReferenceMapper firstConfig) {

@@ -1,42 +1,46 @@
 package models;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.lwjglx.util.vector.Vector2f;
-import org.lwjglx.util.vector.Vector3f;
-
 import com.mokiat.data.front.parser.OBJModel;
-import com.mokiat.data.front.parser.OBJNormal;
-import com.mokiat.data.front.parser.OBJTexCoord;
-import com.mokiat.data.front.parser.OBJVertex;
+
+import models.bufferCreator.BufferCreator;
+import models.bufferCreator.ColorMaterialBufferCreator;
+import models.bufferCreator.ImageMaterialBufferCreator;
+import models.bufferCreator.NormalBufferCreator;
+import models.bufferCreator.PositionBufferCreator;
 
 public class OBJUtils {
 	private OBJModel objModel;
-	private ArrayList<Integer> indices;
-	private ArrayList<Float> positions; // getVertexArray3f
-	private ArrayList<Float> texturesCoords; // getVertexArray2f
-	private ArrayList<Float> normals; // getVertexArray3f
+	private final ArrayList<Integer> indices;
+	private final PositionBufferCreator positions;
+	private final BufferCreator material;
+	private final NormalBufferCreator normals;
 	
 	/**
-	 * FIXME, visual KO, indices starts well from 0..., maybe boolean is imported is useless.
 	 * @param objModel
-	 * @param isImported
+	 * @param materialTypes 
+	 * @param mtlUtils 
 	 */
-	public OBJUtils(OBJModel objModel, boolean isImported) {
+	public OBJUtils(OBJModel objModel, MTLUtils mtlUtils) {
 		this.objModel= objModel;
 		indices = new ArrayList<>();
-		positions = new ArrayList<>();
-		texturesCoords = new ArrayList<>();
-		normals = new ArrayList<>();
-		int vertexSizeList = objModel.getVertices().size();
-		OBJDataReferenceUtils objDataReferenceUtils = new OBJDataReferenceUtils(vertexSizeList);
+		positions = new PositionBufferCreator();
+		normals = new NormalBufferCreator();
+		
+		//TODO update to set type for each material of an object
+		HashMap<String, MaterialType> materialTypes = mtlUtils.getMaterialWithTypes();
+		material = materialTypes.values().toArray()[0] == MaterialType.IMAGE ? new ImageMaterialBufferCreator() : new ColorMaterialBufferCreator();
+		List<String> materialNamesList = materialTypes.keySet().stream().collect(Collectors.toList());
+		OBJDataReferenceUtils objDataReferenceUtils = new OBJDataReferenceUtils(objModel,mtlUtils);
 
 		objModel.getObjects().forEach(obj -> {
 			obj.getMeshes().forEach(mesh -> {
 				mesh.getFaces().forEach(face -> {
+					//materialNames.add(mesh.getMaterialName()); //TODO exploit material type
 					face.getReferences().forEach(ref -> {
 						if(ref.hasVertexIndex()) {
 							// ref.vertexIndex only contains original ids.
@@ -45,13 +49,13 @@ public class OBJUtils {
 									indices.add(ref.vertexIndex);
 								}
 								else {
-									int newIndex = objDataReferenceUtils.addChildConfig(ref);
+									objDataReferenceUtils.addChildConfig(ref, materialNamesList.indexOf(mesh.getMaterialName()));
 									indices.add(ref.vertexIndex);
 								}
 							}
 							else {
 								indices.add(ref.vertexIndex);
-								objDataReferenceUtils.addVertex(ref);
+								objDataReferenceUtils.addVertex(ref, materialNamesList.indexOf(mesh.getMaterialName()));
 							}
 						}
 						else {
@@ -61,49 +65,29 @@ public class OBJUtils {
 				});
 			});
 		});
-		List<OBJVertex> vertices = objDataReferenceUtils.getPositionsIndices().stream().map(indice -> {
-			return objModel.getVertices().get(indice);
-		}).collect(Collectors.toList());
-		for(OBJVertex vertex : vertices) {
-			positions.add(vertex.x);
-			positions.add(vertex.y);
-			positions.add(vertex.z);
-		}
-		List<OBJNormal> normalsList = objDataReferenceUtils.getNormalsIndices().stream().map(indice -> {
-			return objModel.getNormals().get(indice);
-		}).collect(Collectors.toList());
-		for(OBJNormal normal : normalsList) {
-			normals.add(normal.x);
-			normals.add(normal.y);
-			normals.add(normal.z);
-		}
-		List<OBJTexCoord> textCoordList = objDataReferenceUtils.getTexturesCoordsIndices().stream().map(indice -> {
-			return objModel.getTexCoords().get(indice);
-		}).collect(Collectors.toList());
-		for(OBJTexCoord textCoord : textCoordList) {
-			texturesCoords.add(textCoord.u);
-			texturesCoords.add(textCoord.v);
-		}
+		positions.setContent(objDataReferenceUtils);
+		normals.setContent(objDataReferenceUtils);
+		material.setContent(objDataReferenceUtils);
 		System.out.println(objModel.getObjects().get(0).getName() +" :");
 		System.out.println(indices);
-		System.out.println(positions);
-		System.out.println(texturesCoords);
-		System.out.println(normals);
+		System.out.println(positions.getContent());
+		System.out.println(material.getContent());
+		System.out.println(normals.getContent());
 	}
 
 	public ArrayList<Integer> getIndices() {
 		return this.indices;
 	}
 
-	public ArrayList<Float> getPositions() {
+	public BufferCreator getPositions() {
 		return this.positions;
 	}
 
-	public ArrayList<Float> getTexturesCoords() {
-		return this.texturesCoords;
+	public BufferCreator getMaterial() {
+		return this.material;
 	}
 
-	public ArrayList<Float> getNormals() {
+	public BufferCreator getNormals() {
 		return this.normals;
 	}
 	

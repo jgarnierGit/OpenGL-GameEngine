@@ -13,6 +13,6 @@ public class Plane extends Model3D{
 	
 	public Plane(Loader loader) throws FileNotFoundException, IOException{
 		super(Model3DImporter.importOBJ(OBJECT_DESCRIPTOR),
-				Model3DImporter.importMTL(TEXTURE_DESCRIPTOR),loader,true);
+				Model3DImporter.importMTL(TEXTURE_DESCRIPTOR),loader);
 	}
 }

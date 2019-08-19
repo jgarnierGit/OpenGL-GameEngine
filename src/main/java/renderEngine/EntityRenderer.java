@@ -13,6 +13,7 @@ import com.mokiat.data.front.parser.MTLMaterial;
 
 import entities.Entity;
 import models.MTLUtils;
+import models.MaterialMapper;
 import models.Model3D;
 import models.OBJUtils;
 import renderEngine.Loader.VBOIndex;
@@ -57,7 +58,7 @@ public class EntityRenderer{
 		for(Model3D model : entities.keySet()) {
 			prepareTextureModel(model);
 			List<Entity> batch = entities.get(model);
-			OBJUtils objUtil = model.getObjUtils();
+			OBJUtils objUtil = model.getObjUtils().getOBJUtils();
 			for(Entity entity : batch) {
 				prepareInstance(entity);
 				GL11.glDrawElements(GL11.GL_TRIANGLES, MasterRenderer.storeDataInIntBuffer(objUtil.getIndices()));
@@ -78,7 +79,7 @@ public class EntityRenderer{
 		GL20.glEnableVertexAttribArray(VBOIndex.TEXTURE_INDEX);
 		GL20.glEnableVertexAttribArray(VBOIndex.NORMAL_INDEX);
 		GL20.glEnableVertexAttribArray(VBOIndex.COLOR_INDEX);
-		MTLUtils mtlUtils = model.getMtlUtils();
+		MTLUtils mtlUtils = model.getObjUtils().getMtlUtils();
 		shader.setUseImage(mtlUtils.isUsingImage());
 		shader.loadFakeLighting(mtlUtils.isUseFakeLighting());
 		//TODO do it MasterRenderer.disableCulling(); if model.isHasTransparency()
@@ -88,7 +89,7 @@ public class EntityRenderer{
 			//TODO use array of colors to be in flow of Element Buffer Object.
 			//GL20.glEnableVertexAttribArray(VBOIndex.COLOR_INDEX);
 		}
-		else if(!model.getMaterials().isEmpty()) {
+		else if(!model.getObjUtils().getMtlUtils().getMaterials().isEmpty()) {//TODO clarify method calling.
 			bindTextures(mtlUtils);
 		}
 		else {
@@ -97,11 +98,11 @@ public class EntityRenderer{
 	}
 
 	private void bindTextures(MTLUtils mtlUtils) {
-		List<MTLMaterial> matList = mtlUtils.getMaterials();
+		List<MaterialMapper> matList = mtlUtils.getMaterials();
 		for(int i =0; i< matList.size() && i<33; i++) {
 			
-			MTLMaterial texture = matList.get(i);
-			if(texture.getDissolve() < 1.0f) {
+			MTLMaterial texture = matList.get(i).getMaterial();
+			if(texture.getDissolve() < 1.0f) { //TODO finish adapt
 				MasterRenderer.disableCulling();
 			}
 			shader.loadShineVariable(texture.getSpecularExponent());

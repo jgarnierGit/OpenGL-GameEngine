@@ -12,6 +12,7 @@ import org.lwjglx.util.vector.Vector3f;
 import com.mokiat.data.front.parser.MTLMaterial;
 
 import models.MTLUtils;
+import models.MaterialMapper;
 import models.Model3D;
 import renderEngine.Loader.VBOIndex;
 import shaderManager.TerrainShader;
@@ -40,7 +41,7 @@ public class TerrainRenderer{
 		for(Model3D terrain : terrains) {
 			prepareTerrain(terrain);
 			loadTerrain(terrain);
-			GL11.glDrawElements(GL11.GL_TRIANGLES, MasterRenderer.storeDataInIntBuffer(terrain.getObjUtils().getIndices()));
+			GL11.glDrawElements(GL11.GL_TRIANGLES, MasterRenderer.storeDataInIntBuffer(terrain.getObjUtils().getOBJUtils().getIndices()));
 			unbindTerrain();
 		}
 	}
@@ -55,8 +56,8 @@ public class TerrainRenderer{
 		GL20.glEnableVertexAttribArray(VBOIndex.POSITION_INDEX);
 		GL20.glEnableVertexAttribArray(VBOIndex.TEXTURE_INDEX);
 		GL20.glEnableVertexAttribArray(VBOIndex.NORMAL_INDEX);
-		if(!model.getMtlUtils().getMaterials().isEmpty() && model.getMtlUtils().isMaterialValid("")) { //TODO delete second check when FIXME on MTLUtils is done test with one texture ok and many not.
-			bindTextures(model.getMtlUtils());
+		if(!model.getObjUtils().getMtlUtils().getMaterials().isEmpty() && model.getObjUtils().getMtlUtils().isMaterialValid("")) { //TODO delete second check when FIXME on MTLUtils is done test with one texture ok and many not.
+			bindTextures(model.getObjUtils().getMtlUtils());
 		}else {
 			useNoTexture(0);
 		}
@@ -71,9 +72,9 @@ public class TerrainRenderer{
 	
 	// TODO code may be duplicated with entityRenderer
 	private void bindTextures(MTLUtils mtlUtils) {
-		List<MTLMaterial> materialList = mtlUtils.getMaterials();
+		List<MaterialMapper> materialList = mtlUtils.getMaterials();
 		for(int i =0; i< materialList.size() && i<33; i++) {
-			if(mtlUtils.isMaterialValid(materialList.get(i).getName())) {
+			if(mtlUtils.isMaterialValid(materialList.get(i).getMaterial().getName())) {
 				GL13.glActiveTexture(GLTextureIDIncrementer.GL_TEXTURE_IDS.get(i));
 				GL11.glBindTexture(GL11.GL_TEXTURE_2D, mtlUtils.getTexturesIndexes().get(i));
 			}
