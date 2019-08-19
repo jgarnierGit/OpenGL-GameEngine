@@ -66,11 +66,11 @@ public class OBJUtils {
 		positions.setContent(objDataReferenceUtils);
 		normals.setContent(objDataReferenceUtils);
 		material.setContent(objDataReferenceUtils);
-		System.out.println(objModel.getObjects().get(0).getName() +" :");
+		/**System.out.println(objModel.getObjects().get(0).getName() +" :");
 		System.out.println(indices);
 		System.out.println(positions.getContent());
 		System.out.println(material.getContent());
-		System.out.println(normals.getContent());
+		System.out.println(normals.getContent());**/
 	}
 
 	public ArrayList<Integer> getIndices() {
