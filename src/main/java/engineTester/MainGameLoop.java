@@ -87,7 +87,7 @@ public class MainGameLoop {
 			float y = random.nextFloat() * 100 - 50;
 			float z = random.nextFloat() *- 300;
 			cubes.add(new Entity(cube, new Vector3f(x,y,z), random.nextFloat() * 180, random.nextFloat() * 180, 0, 1f));
-		}
+		} // UPDATE
 		
 		for(int i=0;i<1; i++) {
 			float x = random.nextFloat() * 100 - 50;
