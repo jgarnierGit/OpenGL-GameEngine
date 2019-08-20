@@ -82,14 +82,14 @@ public class MainGameLoop {
 		ArrayList<Entity> trees = new ArrayList<>();
 		Random random = new Random();
 		// last optim may have been lost ?
-		for(int i=0; i < 4000; i++) {
+		for(int i=0; i < 1; i++) {
 			float x = random.nextFloat() * 100 - 50;
 			float y = random.nextFloat() * 100 - 50;
 			float z = random.nextFloat() *- 300;
 			cubes.add(new Entity(cube, new Vector3f(x,y,z), random.nextFloat() * 180, random.nextFloat() * 180, 0, 1f));
 		}
 		
-		for(int i=0;i<50; i++) {
+		for(int i=0;i<1; i++) {
 			float x = random.nextFloat() * 100 - 50;
 			float y = -4f;
 			float z = random.nextFloat() *- 300;
@@ -97,7 +97,7 @@ public class MainGameLoop {
 			trees.add(new Entity(tree, new Vector3f(x,y,z), 0, yRot, 0, 1f));
 		}
 		
-		for(int i=0;i<200; i++) {
+		for(int i=0;i<1; i++) {
 			float x = random.nextFloat() * 100 - 50;
 			float y = -4f;
 			float z = random.nextFloat() *- 300;
