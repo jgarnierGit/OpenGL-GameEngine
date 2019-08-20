@@ -107,7 +107,7 @@ public class Terrain extends Model3D {
 		float height = image.getRGB(x, z);
 		height += MAX_PIXEL_COLOR/2f;
 		height /= MAX_PIXEL_COLOR/2f;
-		height += MAX_HEIGHT;
+		height *= MAX_HEIGHT;
 		return height;
 	}
 
