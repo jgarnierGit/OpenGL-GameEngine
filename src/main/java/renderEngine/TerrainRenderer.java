@@ -1,6 +1,5 @@
 package renderEngine;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.lwjgl.opengl.GL11;
@@ -10,14 +9,23 @@ import org.lwjgl.opengl.GL30;
 import org.lwjglx.util.vector.Matrix4f;
 import org.lwjglx.util.vector.Vector3f;
 
+import com.mokiat.data.front.parser.MTLMaterial;
+
+import models.MTLUtils;
+import models.MaterialMapper;
 import models.Model3D;
-import models.TextureData;
 import renderEngine.Loader.VBOIndex;
 import shaderManager.TerrainShader;
 import terrains.Terrain;
 import toolbox.GLTextureIDIncrementer;
 import toolbox.Maths;
 
+/**
+ * TODO can refactor terrainRenderer and EntityRenderer using Visitor, as there is only MTLLibrary parsing changing.
+ * if there are other things changing do visitor for those points too.
+ * @author chezmoi
+ *
+ */
 public class TerrainRenderer{
 	private TerrainShader shader;
 	
@@ -33,7 +41,7 @@ public class TerrainRenderer{
 		for(Model3D terrain : terrains) {
 			prepareTerrain(terrain);
 			loadTerrain(terrain);
-			GL11.glDrawElements(GL11.GL_TRIANGLES, MasterRenderer.storeDataInIntBuffer(terrain.getContainer3D().getFlatIndices()));
+			GL11.glDrawElements(GL11.GL_TRIANGLES, MasterRenderer.storeDataInIntBuffer(terrain.getObjUtils().getOBJUtils().getIndices()));
 			unbindTerrain();
 		}
 	}
@@ -48,25 +56,31 @@ public class TerrainRenderer{
 		GL20.glEnableVertexAttribArray(VBOIndex.POSITION_INDEX);
 		GL20.glEnableVertexAttribArray(VBOIndex.TEXTURE_INDEX);
 		GL20.glEnableVertexAttribArray(VBOIndex.NORMAL_INDEX);
-		if(!model.getTextureContainer().getTextures().isEmpty()) {
-			bindTextures(model.getTextureContainer().getTextures());
+		if(!model.getObjUtils().getMtlUtils().getMaterials().isEmpty() && model.getObjUtils().getMtlUtils().isMaterialValid("")) { //TODO delete second check when FIXME on MTLUtils is done test with one texture ok and many not.
+			bindTextures(model.getObjUtils().getMtlUtils());
 		}else {
-			useNoTexture();
+			useNoTexture(0);
 		}
 
 		shader.loadShineVariables(1, 0);
 	}
 	
-	private void useNoTexture() {
-		GL13.glActiveTexture(GLTextureIDIncrementer.GL_TEXTURE_IDS.get(0));
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
+	private void useNoTexture(int id) {
+		GL13.glActiveTexture(GLTextureIDIncrementer.GL_TEXTURE_IDS.get(id));
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, id);
 	}
 	
 	// TODO code may be duplicated with entityRenderer
-	private void bindTextures(ArrayList<TextureData> textureContainer) {
-		for(int i =0; i< textureContainer.size() && i<33; i++) {
-			GL13.glActiveTexture(GLTextureIDIncrementer.GL_TEXTURE_IDS.get(i));
-			GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureContainer.get(i).getTextureID());
+	private void bindTextures(MTLUtils mtlUtils) {
+		List<MaterialMapper> materialList = mtlUtils.getMaterials();
+		for(int i =0; i< materialList.size() && i<33; i++) {
+			if(mtlUtils.isMaterialValid(materialList.get(i).getMaterial().getName())) {
+				GL13.glActiveTexture(GLTextureIDIncrementer.GL_TEXTURE_IDS.get(i));
+				GL11.glBindTexture(GL11.GL_TEXTURE_2D, mtlUtils.getTexturesIndexes().get(i));
+			}
+			else {
+				useNoTexture(i);
+			}
 		}
 	}
 

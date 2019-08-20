@@ -4,20 +4,14 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
-import org.lwjglx.util.vector.Vector4f;
 
-import models.Container3D;
-import models.Model3D;
-import models.TextureConfig;
-import models.TextureContainer;
-import models.TextureData;
+import models.ModelUtils;
 
 /**
  * Handles the loading of geometry data into VAOs. It also keeps track of all
@@ -46,23 +40,21 @@ public class Loader {
 	 * @param model
 	 * @return VAOId linked to the loaded model.
 	 */
-	public int loadModelToVAO(Model3D model) {
+	public int loadModelToVAO(ModelUtils modelUtils) {
 		int vaoID = createVAO();
-		Container3D container = model.getContainer3D();
-		TextureContainer textureContainer = model.getTextureContainer();
-		bindIndicesBuffer(container.getFlatIndices());
-		storeDataFloatInAttrList(VBOIndex.POSITION_INDEX,3, container.getFlatPositions());
-		TextureConfig textureConfig = container.getTextureConfig(); //TODO maybe not the best composition
-		if(textureConfig.getUsingImage()) {
-			storeDataFloatInAttrList(VBOIndex.TEXTURE_INDEX,2, container.getFlatTextures());
+		// OBJUtils objUtils, MTLUtils mtlUtils
+		bindIndicesBuffer(modelUtils.getOBJUtils().getIndices());
+		//TODO refactor architecture.
+		storeDataFloatInAttrList(VBOIndex.POSITION_INDEX,modelUtils.getOBJUtils().getPositions().getDimension(), modelUtils.getOBJUtils().getPositions().getContent());
+		if(modelUtils.getMtlUtils().isUsingImage()) {
+			storeDataFloatInAttrList(VBOIndex.TEXTURE_INDEX,modelUtils.getOBJUtils().getMaterial().getDimension(), modelUtils.getOBJUtils().getMaterial().getContent());
 		}
-		else {//TODO still not working. random color applied.
-			storeDataFloatInAttrList(VBOIndex.COLOR_INDEX,4, textureContainer.getFlatColors(container.getColorLinks()));
+		else {
+			storeDataFloatInAttrList(VBOIndex.COLOR_INDEX,modelUtils.getOBJUtils().getMaterial().getDimension(), modelUtils.getOBJUtils().getMaterial().getContent());
 		}
-		storeDataFloatInAttrList(VBOIndex.NORMAL_INDEX,3,container.getFlatNormals());
+		storeDataFloatInAttrList(VBOIndex.NORMAL_INDEX,modelUtils.getOBJUtils().getNormals().getDimension(),modelUtils.getOBJUtils().getNormals().getContent());
 		unbindVAO();
-		
-		texturesToClean.addAll(textureContainer.getTextures().stream().map(TextureData::getTextureID).collect(Collectors.toList()));
+		texturesToClean.addAll(modelUtils.getMtlUtils().getTexturesIndexes());
 		return vaoID;
 	}
 
@@ -112,6 +104,7 @@ public class Loader {
 	 */
 	private void storeDataFloatInAttrList(int attributeNumber, int coordinateSize, ArrayList<Float> arrayList) {
 		int vboID = GL15.glGenBuffers();
+
 		vbos.add(vboID);
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboID);
 		FloatBuffer buffer = storeDataInFloatBuffer(arrayList);

@@ -3,7 +3,12 @@
   <groupId>OpenGL-Game</groupId>
   <artifactId>OpenGL-Game</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-
+<repositories>
+	<repository>
+		<id>jitpack.io</id>
+		<url>https://jitpack.io</url>
+	</repository>
+</repositories>
   <build>
     <sourceDirectory>OpenGL-Game/src</sourceDirectory>
     <resources>
@@ -26,6 +31,11 @@
     </plugins>
   </build>
   <dependencies>
+  <dependency>
+		<groupId>com.github.mokiat</groupId>
+		<artifactId>java-data-front</artifactId>
+		<version>v2.0.0</version>
+	</dependency>
   	<dependency>
   		<groupId>org.mockito</groupId>
   		<artifactId>mockito-core</artifactId>

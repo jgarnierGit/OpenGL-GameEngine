@@ -6,7 +6,6 @@ import java.nio.file.Paths;
 
 import org.lwjglx.util.vector.Matrix4f;
 import org.lwjglx.util.vector.Vector3f;
-import org.lwjglx.util.vector.Vector4f;
 
 import entities.Camera;
 import entities.Light;
@@ -68,8 +67,11 @@ public class StaticShader extends ShaderProgram {
 		super.loadBoolean(location_useImage, useImage);
 	}
 	
-	public void loadShineVariables(float shineDamper, float reflectivity) {
+	public void loadShineVariable(float shineDamper) {
 		super.loadFloat(location_shineDamper, shineDamper);
+	}
+	
+	public void loadReflectivityVariable(float reflectivity) {
 		super.loadFloat(location_reflectivity, reflectivity);
 		
 	}
