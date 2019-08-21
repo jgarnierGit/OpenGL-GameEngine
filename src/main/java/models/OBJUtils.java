@@ -2,6 +2,7 @@ package models;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.lwjglx.util.vector.Vector2f;
 import org.lwjglx.util.vector.Vector3f;
@@ -74,15 +75,19 @@ public class OBJUtils {
 		ArrayList<Float> coords = new ArrayList<>();
 		if(materials.get(0).getType() == MaterialType.IMAGE) {
 			dimension = 2;
-			for(Integer i : objDataReferenceUtils.getTexturesCoordsIndices()) {
-				OBJTexCoord textCoord = objDataReferenceUtils.getTextCoordsList().get(i);
+			List<OBJTexCoord> textCoordList = objDataReferenceUtils.getTexturesCoordsIndices().stream().map(indice -> {
+						return objDataReferenceUtils.getTextCoordsList().get(indice);
+					}).collect(Collectors.toList());
+			for(OBJTexCoord textCoord : textCoordList) {
 				coords.add(textCoord.u);
 				coords.add(textCoord.v);
 			}
 		}else {
 			dimension = 4;
-			for(Integer i : objDataReferenceUtils.getColorsIndices()) {
-				MaterialMapper color = objDataReferenceUtils.getMaterialsList().get(i);
+			List<MaterialMapper> colorsList = objDataReferenceUtils.getColorsIndices().stream().map(indice -> {
+						return objDataReferenceUtils.getMaterialsList().get(indice);
+					}).collect(Collectors.toList());
+			for(MaterialMapper color : colorsList) {
 				coords.add(color.getColor().x);
 				coords.add(color.getColor().y);
 				coords.add(color.getColor().z);
@@ -93,9 +98,11 @@ public class OBJUtils {
 	}
 
 	private VBOContent setPositionContent(OBJDataReferenceUtils objDataReferenceUtils) {
+		List<OBJVertex> vertices = objDataReferenceUtils.getPositionsIndices().stream().map(indice -> {
+					return objDataReferenceUtils.getVerticesList().get(indice);
+				}).collect(Collectors.toList());
 		ArrayList<Float> positions = new ArrayList<>();
-		for(Integer i : objDataReferenceUtils.getPositionsIndices()) {
-			OBJVertex vertex = objDataReferenceUtils.getVerticesList().get(i);
+		for(OBJVertex vertex : vertices) {
 			positions.add(vertex.x);
 			positions.add(vertex.y);
 			positions.add(vertex.z);
@@ -104,9 +111,11 @@ public class OBJUtils {
 	}
 	
 	private VBOContent setNormalContent(OBJDataReferenceUtils objDataReferenceUtils) {
+		List<OBJNormal> normalsList = objDataReferenceUtils.getNormalsIndices().stream().map(indice -> {
+					return objDataReferenceUtils.getNormalsList().get(indice);
+				}).collect(Collectors.toList());
 		ArrayList<Float> normals = new ArrayList<>();
-		for(Integer i : objDataReferenceUtils.getNormalsIndices()) {
-			OBJNormal normal = objDataReferenceUtils.getNormalsList().get(i);
+		for(OBJNormal normal : normalsList) {
 			normals.add(normal.x);
 			normals.add(normal.y);
 			normals.add(normal.z);
