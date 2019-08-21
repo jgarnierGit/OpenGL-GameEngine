@@ -1,24 +1,24 @@
 package models;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
+
+import org.lwjglx.util.vector.Vector2f;
+import org.lwjglx.util.vector.Vector3f;
+import org.lwjglx.util.vector.Vector4f;
 
 import com.mokiat.data.front.parser.OBJModel;
+import com.mokiat.data.front.parser.OBJNormal;
+import com.mokiat.data.front.parser.OBJTexCoord;
+import com.mokiat.data.front.parser.OBJVertex;
 
-import models.bufferCreator.BufferCreator;
-import models.bufferCreator.ColorMaterialBufferCreator;
-import models.bufferCreator.ImageMaterialBufferCreator;
-import models.bufferCreator.NormalBufferCreator;
-import models.bufferCreator.PositionBufferCreator;
+import models.bufferCreator.VBOContent;
 
 public class OBJUtils {
-	private OBJModel objModel;
 	private final ArrayList<Integer> indices;
-	private final PositionBufferCreator positions;
-	private final BufferCreator material;
-	private final NormalBufferCreator normals;
+	private final VBOContent positions; // dimension 3.
+	private final VBOContent material;
+	private final VBOContent normals; // dimension 3.
 	
 	/**
 	 * @param objModel
@@ -26,13 +26,8 @@ public class OBJUtils {
 	 * @param mtlUtils 
 	 */
 	public OBJUtils(OBJModel objModel, MTLUtils mtlUtils) {
-		this.objModel= objModel;
 		indices = new ArrayList<>();
-		positions = new PositionBufferCreator();
-		normals = new NormalBufferCreator();
 		
-		//TODO update to set type for each material of an object
-		material = mtlUtils.getMaterials().get(0).getType() == MaterialType.IMAGE ? new ImageMaterialBufferCreator() : new ColorMaterialBufferCreator();
 		OBJDataReferenceUtils objDataReferenceUtils = new OBJDataReferenceUtils(objModel,mtlUtils);
 
 		objModel.getObjects().forEach(obj -> {
@@ -63,33 +58,125 @@ public class OBJUtils {
 				});
 			});
 		});
-		positions.setContent(objDataReferenceUtils);
-		normals.setContent(objDataReferenceUtils);
-		material.setContent(objDataReferenceUtils);
+		positions = setPositionContent(objDataReferenceUtils);
+		normals = setNormalContent(objDataReferenceUtils);
+		//TODO update to set type for each material of an object
+		material = setMaterialContent(objDataReferenceUtils,mtlUtils.getMaterials());
 		/**System.out.println(objModel.getObjects().get(0).getName() +" :");
 		System.out.println(indices);
 		System.out.println(positions.getContent());
 		System.out.println(material.getContent());
 		System.out.println(normals.getContent());**/
 	}
+	
+	private VBOContent setMaterialContent(OBJDataReferenceUtils objDataReferenceUtils, List<MaterialMapper> materials) {
+		int dimension = 0;
+		ArrayList<Float> coords = new ArrayList<>();
+		if(materials.get(0).getType() == MaterialType.IMAGE) {
+			dimension = 2;
+			for(Integer i : objDataReferenceUtils.getTexturesCoordsIndices()) {
+				OBJTexCoord textCoord = objDataReferenceUtils.getTextCoordsList().get(i);
+				coords.add(textCoord.u);
+				coords.add(textCoord.v);
+			}
+		}else {
+			dimension = 4;
+			for(Integer i : objDataReferenceUtils.getColorsIndices()) {
+				MaterialMapper color = objDataReferenceUtils.getMaterialsList().get(i);
+				coords.add(color.getColor().x);
+				coords.add(color.getColor().y);
+				coords.add(color.getColor().z);
+				coords.add(color.getColor().w);
+			}
+		}
+		return new VBOContent(dimension, coords);
+	}
+
+	private VBOContent setPositionContent(OBJDataReferenceUtils objDataReferenceUtils) {
+		ArrayList<Float> positions = new ArrayList<>();
+		for(Integer i : objDataReferenceUtils.getPositionsIndices()) {
+			OBJVertex vertex = objDataReferenceUtils.getVerticesList().get(i);
+			positions.add(vertex.x);
+			positions.add(vertex.y);
+			positions.add(vertex.z);
+		}
+		return new VBOContent(3, positions);
+	}
+	
+	private VBOContent setNormalContent(OBJDataReferenceUtils objDataReferenceUtils) {
+		ArrayList<Float> normals = new ArrayList<>();
+		for(Integer i : objDataReferenceUtils.getNormalsIndices()) {
+			OBJNormal normal = objDataReferenceUtils.getNormalsList().get(i);
+			normals.add(normal.x);
+			normals.add(normal.y);
+			normals.add(normal.z);
+		}
+		return new VBOContent(3, normals);
+	}
+	
 
 	public ArrayList<Integer> getIndices() {
 		return this.indices;
 	}
 
-	public BufferCreator getPositions() {
-		return this.positions;
+	public VBOContent getPositions() {
+		return positions;
 	}
 
-	public BufferCreator getMaterial() {
+	public VBOContent getMaterial() {
 		return this.material;
 	}
 
-	public BufferCreator getNormals() {
+	public VBOContent getNormals() {
 		return this.normals;
 	}
+
+	public static <T> OBJUtils create(ArrayList<Integer> vertexIndices, ArrayList<Vector3f> positions2,
+			ArrayList<Vector3f> normalsVector, ArrayList<T> materials) {
+		
+		int materialDimension = 0;
+		ArrayList<Float> matList = new ArrayList<>();
+		if(materials.get(0) instanceof Vector4f) {
+			materialDimension = 4;
+			for(T mat : materials) {
+				Vector4f matV4f = (Vector4f) mat;
+				matList.add(matV4f.x);
+				matList.add(matV4f.y);
+				matList.add(matV4f.z);
+				matList.add(matV4f.w);
+			}
+		}else if(materials.get(0) instanceof Vector2f) {
+			materialDimension = 2;
+			for(T mat : materials) {
+				Vector2f matV2f = (Vector2f) mat;
+				matList.add(matV2f.x);
+				matList.add(matV2f.y);
+			}
+		}
+		else {
+			System.err.println("unsupported type for materials.");
+		}
+		ArrayList<Float> normalList = new ArrayList<>();
+		for(Vector3f normal: normalsVector ) {
+			normalList.add(normal.x);
+			normalList.add(normal.y);
+			normalList.add(normal.z);
+		}
+		
+		ArrayList<Float> positionsList = new ArrayList<>();
+		for(Vector3f position: positions2) {
+			positionsList.add(position.x);
+			positionsList.add(position.y);
+			positionsList.add(position.z);
+		}
+		return new OBJUtils(vertexIndices, new VBOContent(3, positionsList), new VBOContent(3, normalList), new VBOContent(materialDimension, matList));
+	}
 	
-	public OBJModel getObjModel() {
-		return objModel;
+	private OBJUtils(ArrayList<Integer> vertexIndices, VBOContent positions2,
+			VBOContent normalsVector, VBOContent materials) {
+		this.indices = vertexIndices;
+		this.positions = positions2;
+		this.normals = normalsVector;
+		this.material = materials;
 	}
 }

@@ -14,9 +14,9 @@ public abstract class Model3D {
 	private int vaoID;
 	private ModelUtils modelUtils;
 	
-	public Model3D(OBJModel model, MTLLibrary materialsLibrary, Loader loader) throws WFException, FileNotFoundException, IOException {
+	public Model3D(ModelUtils model, Loader loader) throws WFException, FileNotFoundException, IOException {
 		Objects.requireNonNull(loader);
-		modelUtils = new ModelUtils(model,materialsLibrary);
+		modelUtils = model;
 		vaoID = loader.loadModelToVAO(modelUtils);
 	}
 
