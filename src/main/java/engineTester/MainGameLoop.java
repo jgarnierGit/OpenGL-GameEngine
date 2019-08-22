@@ -68,10 +68,9 @@ public class MainGameLoop {
 		//plane // OK
 
 		//Entity entity = new Entity(model, new Vector3f(0,0,-2),0,0,0,1);
-		Light sun = new Light(new Vector3f(0,0,1), new Vector3f(1,1,1));
+		Light sun = new Light(new Vector3f(0,0,50), new Vector3f(1,1,1));
 		
-		Model3D terrain = new Terrain(0,0,loader);
-		Model3D terrain2 = new Terrain(1,0,loader);
+		Terrain terrain = new Terrain(0,0,loader);
 		
 		Camera camera = new Camera(player);
 		// Run the rendering loop until the user has attempted to close
@@ -83,24 +82,24 @@ public class MainGameLoop {
 		Random random = new Random();
 		// last optim may have been lost ?
 		for(int i=0; i < 4000; i++) {
-			float x = random.nextFloat() * 100 - 50;
-			float y = random.nextFloat() * 100 - 50;
-			float z = random.nextFloat() *- 300;
+			float x = random.nextFloat() * 100;
+			float z = random.nextFloat() * 300;
+			float y = random.nextFloat() * 100 + terrain.getHeight(x, z);
 			cubes.add(new Entity(cube, new Vector3f(x,y,z), random.nextFloat() * 180, random.nextFloat() * 180, 0, 1f));
-		} // UPDATE
+		}
 		
 		for(int i=0;i<50; i++) {
-			float x = random.nextFloat() * 100 - 50;
-			float y = -4f;
-			float z = random.nextFloat() *- 300;
+			float x = random.nextFloat() * 100;
+			float z = random.nextFloat() * 300;
+			float y = terrain.getHeight(x, z);
 			float yRot = random.nextFloat() * 180;
 			trees.add(new Entity(tree, new Vector3f(x,y,z), 0, yRot, 0, 1f));
 		}
 		
 		for(int i=0;i<500; i++) {
-			float x = random.nextFloat() * 100 - 50;
-			float y = -4f;
-			float z = random.nextFloat() *- 300;
+			float x = random.nextFloat() * 100;
+			float z = random.nextFloat() * 300;
+			float y = terrain.getHeight(x, z) +1;
 			float zRot = random.nextFloat() * 180;
 			grasses.add(new Entity(grass, new Vector3f(x,y,z), -90, 0, zRot, 1f));
 			grasses.add(new Entity(grass, new Vector3f(x,y,z), -90, 0,zRot + 90, 1f));
@@ -112,7 +111,7 @@ public class MainGameLoop {
 			// game logic
 			//entity.increasePosition(0, 0, -0.01f);
 			
-			player.move();
+			player.move(terrain);
 			camera.move();
 			for(Entity entityCube : cubes) {
 				entityCube.increaseRotation(0.3f, 0.3f, 0.6f);
@@ -127,7 +126,6 @@ public class MainGameLoop {
 				masterRenderer.processEntity(entityGrass);
 			}
 			masterRenderer.processTerrain(terrain);
-			masterRenderer.processTerrain(terrain2);
 			masterRenderer.render(sun, camera);
 			DisplayManager.updateDisplay();
 		}

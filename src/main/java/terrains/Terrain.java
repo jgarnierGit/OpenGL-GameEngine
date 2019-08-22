@@ -13,14 +13,6 @@ import org.lwjglx.util.vector.Vector3f;
 
 import com.mokiat.data.front.error.WFException;
 import com.mokiat.data.front.parser.MTLLibrary;
-import com.mokiat.data.front.parser.OBJDataReference;
-import com.mokiat.data.front.parser.OBJFace;
-import com.mokiat.data.front.parser.OBJMesh;
-import com.mokiat.data.front.parser.OBJModel;
-import com.mokiat.data.front.parser.OBJNormal;
-import com.mokiat.data.front.parser.OBJObject;
-import com.mokiat.data.front.parser.OBJTexCoord;
-import com.mokiat.data.front.parser.OBJVertex;
 
 import models.BlendedMaterialLibraryBuilder;
 import models.MTLUtils;
@@ -28,12 +20,14 @@ import models.Model3D;
 import models.ModelUtils;
 import models.OBJUtils;
 import renderEngine.Loader;
+import toolbox.Maths;
 
 public class Terrain extends Model3D {
 	private static final float SIZE = 800;
 	private static final float MAX_HEIGHT = 40;
 	private static final float MAX_PIXEL_COLOR = 256* 256 *256;
-	private static int vertexCount = 0;
+	private int vertexCount = 0; //TODO refactor to move those in TerrainData class or similar.
+	private float[][] heights;
 	
 	static final String resourceTexturePath = Paths.get("./", "src", "main", "resources", "2D").toString();
 
@@ -42,16 +36,46 @@ public class Terrain extends Model3D {
 	private float z;
 
 	public Terrain (int gridX, int gridZ, Loader loader) throws WFException, IOException {
-		super(generateModel(), loader);
+		super(); //TODO find a way to avoid empty constructor.
+		createModel(generateModel(), loader);
 		this.x = gridX*SIZE;
 		this.z = gridZ*SIZE;
 	}
+	
+	public float getHeight(float worldX, float worldZ) {
+		float terrainX = worldX - this.x;
+		float terrainZ = worldZ - this.z;
+		float gridSquareSize = SIZE / ((float)heights.length-1);
+		int gridX = (int) Math.floor(terrainX / gridSquareSize);
+		int gridZ = (int) Math.floor(terrainZ / gridSquareSize);
+		//TODO buggy for terrain in negative coordinates?
+		if(gridX >= heights.length -1 || gridZ >= heights.length -1 || gridX < 0 || gridZ < 0) {
+			return 0;
+		}
+		// once we found the current grid, have to get inside coord.
+		float xCoord = (terrainX % gridSquareSize) / gridSquareSize;
+		float zCoord = (terrainZ % gridSquareSize) / gridSquareSize;
+		float answer;
+		// find out what triangle of current grid 
+		if (xCoord <= (1-zCoord)) {
+			answer = Maths
+					.barryCentric(new Vector3f(0, heights[gridX][gridZ], 0), new Vector3f(1,
+							heights[gridX + 1][gridZ], 0), new Vector3f(0,
+							heights[gridX][gridZ + 1], 1), new Vector2f(xCoord, zCoord));
+		} else {
+			answer = Maths
+					.barryCentric(new Vector3f(1, heights[gridX + 1][gridZ], 0), new Vector3f(1,
+							heights[gridX + 1][gridZ + 1], 1), new Vector3f(0,
+							heights[gridX][gridZ + 1], 1), new Vector2f(xCoord, zCoord));
+		}
+		return answer;
+	}
 
-	private static ModelUtils generateModel() {
+	private ModelUtils generateModel() {
 		return new ModelUtils(generateTerrain(), importTextures());
 	}
 
-	private static MTLUtils importTextures() {
+	private MTLUtils importTextures() {
 		MTLLibrary mtlLibrary = BlendedMaterialLibraryBuilder.create()
 				.addTexture(resourceTexturePath, "grass.png")
 				.addTexture(resourceTexturePath, "mud.png")
@@ -62,7 +86,7 @@ public class Terrain extends Model3D {
 		return new MTLUtils(mtlLibrary);
 	}
 
-	private static OBJUtils generateTerrain(){
+	private OBJUtils generateTerrain(){
 		ArrayList<Vector3f> positions = new ArrayList<>();
 		ArrayList<Vector3f> normalsVector = new ArrayList<>();
 		ArrayList<Vector2f> textures = new ArrayList<>();
@@ -70,17 +94,18 @@ public class Terrain extends Model3D {
 		try {
 			BufferedImage image = ImageIO.read(new File(Paths.get(resourceTexturePath, "heightmap.png").toString()));
 			vertexCount = image.getHeight();
+			heights = new float[vertexCount][vertexCount];
 		for(int i=0;i<vertexCount;i++){
 			for(int j=0;j<vertexCount;j++){
 				//x+ is right, x- is left
-				float x = -(float)j/((float)vertexCount - 1) * SIZE;
+				float x = (float)j/((float)vertexCount - 1) * SIZE;
 				// y+ is up, - is down
-				float y = getHeight(j, i, image) -50;
+				float y = getHeight(j, i, image);
+				heights[j][i] = y;
 				//z + is to the player, - is far from the screen
-				float z = -(float)i/((float)vertexCount - 1) * SIZE;
+				float z = (float)i/((float)vertexCount - 1) * SIZE;
 				positions.add(new Vector3f(x, y, z));
-				//TODO need to understand normals and how invert them
-				normalsVector.add(new Vector3f(0, 1,0));
+				normalsVector.add(calculateNormal(j,i,image));
 				float u = (float)j/((float)vertexCount - 1);
 				float v = (float)i/((float)vertexCount - 1);
 				textures.add(new Vector2f(u,v));
@@ -104,6 +129,16 @@ public class Terrain extends Model3D {
 			}
 		}
 		return OBJUtils.create(vertexIndices,positions,normalsVector,textures);
+	}
+	
+	private static Vector3f calculateNormal(int x, int z, BufferedImage image) {
+		float heightL = getHeight(x-1,z,image);
+		float heightR = getHeight(x+1,z,image);
+		float heightD = getHeight(x,z-1,image);
+		float heightU = getHeight(x,z+1,image);
+		Vector3f normal = new Vector3f(heightL-heightR, 2f, heightD-heightU);
+		normal.normalise();
+		return normal;
 	}
 	
 	private static float getHeight(int x, int z, BufferedImage image) {

@@ -3,9 +3,6 @@ package models;
 import com.mokiat.data.front.parser.MTLLibrary;
 import com.mokiat.data.front.parser.OBJModel;
 
-/**
- * @deprecated
- * useless class**/
 public class ModelUtils {
 	private OBJUtils objUtils;
 	private MTLUtils mtlUtils;

@@ -13,7 +13,8 @@ public class Plane extends Model3D{
 	private static final String TEXTURE_DESCRIPTOR = "plane.mtl";
 	
 	public Plane(Loader loader) throws FileNotFoundException, IOException{
-		super(ModelUtils.importModel(Model3DImporter.importOBJ(OBJECT_DESCRIPTOR),
+		super();
+		createModel(ModelUtils.importModel(Model3DImporter.importOBJ(OBJECT_DESCRIPTOR),
 				Model3DImporter.importMTL(TEXTURE_DESCRIPTOR)),loader);
 	}
 }

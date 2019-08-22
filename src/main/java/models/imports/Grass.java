@@ -12,7 +12,8 @@ public class Grass extends Model3D{
 	private static final String TEXTURE_DESCRIPTOR = "grass.mtl";
 
 	public Grass(Loader loader) throws IOException {
-		super(ModelUtils.importModel(Model3DImporter.importOBJ(OBJECT_DESCRIPTOR),
+		super();
+		createModel(ModelUtils.importModel(Model3DImporter.importOBJ(OBJECT_DESCRIPTOR),
 				Model3DImporter.importMTL(TEXTURE_DESCRIPTOR)),loader);
 		super.setHasTransparency(true);
 		super.setUseFakeLighting(true);

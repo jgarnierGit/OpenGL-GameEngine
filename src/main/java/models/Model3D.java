@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.util.Objects;
 
 import com.mokiat.data.front.error.WFException;
-import com.mokiat.data.front.parser.MTLLibrary;
-import com.mokiat.data.front.parser.OBJModel;
 
 import renderEngine.Loader;
 
@@ -14,7 +12,7 @@ public abstract class Model3D {
 	private int vaoID;
 	private ModelUtils modelUtils;
 	
-	public Model3D(ModelUtils model, Loader loader) throws WFException, FileNotFoundException, IOException {
+	public void createModel(ModelUtils model, Loader loader) throws WFException, FileNotFoundException, IOException {
 		Objects.requireNonNull(loader);
 		modelUtils = model;
 		vaoID = loader.loadModelToVAO(modelUtils);
@@ -49,6 +47,9 @@ public abstract class Model3D {
 	}
 
 	public ModelUtils getObjUtils() {
+		if(modelUtils == null) {
+			throw new NullPointerException("OBJ must be created before used.");
+		}
 		return modelUtils;
 	}
 }

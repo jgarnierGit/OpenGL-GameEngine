@@ -5,13 +5,13 @@ import org.lwjglx.util.vector.Vector3f;
 
 import models.Model3D;
 import renderEngine.DisplayManager;
+import terrains.Terrain;
 
 public class Player extends Entity {
 	private static final float RUN_SPEED = 20;
 	private static final float TURN_FLOAT = 160;
 	private static final float GRAVITY = 50;
 	private static final float JUMP_POWER = 30;
-	private static final float TERRAIN_HEIGHT = -5;
 	
 	private float currentSpeed = 0;
 	private float currentTurnSpeed = 0;
@@ -23,7 +23,7 @@ public class Player extends Entity {
 		// TODO Auto-generated constructor stub
 	}
 	
-	public void move() {
+	public void move(Model3D terrain) {
 		checkInputs();
 		super.increaseRotation(0, currentTurnSpeed * DisplayManager.getFrameTimeSeconds(), 0);
 		float distance = currentSpeed * DisplayManager.getFrameTimeSeconds();
@@ -32,9 +32,13 @@ public class Player extends Entity {
 		super.increasePosition(dx, 0, dz);
 		upwardSpeed -= GRAVITY * DisplayManager.getFrameTimeSeconds();
 		super.increasePosition(0, upwardSpeed * DisplayManager.getFrameTimeSeconds(), 0);
-		if(super.getPositions().y < TERRAIN_HEIGHT) {
+		if(!(terrain instanceof Terrain)) { // TODO ugly.
+			throw new IllegalArgumentException("must be a terrain");
+		}
+		float terrainHeight = ((Terrain) terrain).getHeight(super.getPositions().x, super.getPositions().z);
+		if(super.getPositions().y < terrainHeight) {
 			upwardSpeed = 0;
-			super.getPositions().y = TERRAIN_HEIGHT;
+			super.getPositions().y = terrainHeight;
 			isInAir = false;
 		}
 	}
