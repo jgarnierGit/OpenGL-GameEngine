@@ -23,7 +23,7 @@ public class Player extends Entity {
 		// TODO Auto-generated constructor stub
 	}
 	
-	public void move(Model3D terrain) {
+	public void move(Terrain terrain) {
 		checkInputs();
 		super.increaseRotation(0, currentTurnSpeed * DisplayManager.getFrameTimeSeconds(), 0);
 		float distance = currentSpeed * DisplayManager.getFrameTimeSeconds();
@@ -32,9 +32,6 @@ public class Player extends Entity {
 		super.increasePosition(dx, 0, dz);
 		upwardSpeed -= GRAVITY * DisplayManager.getFrameTimeSeconds();
 		super.increasePosition(0, upwardSpeed * DisplayManager.getFrameTimeSeconds(), 0);
-		if(!(terrain instanceof Terrain)) { // TODO ugly.
-			throw new IllegalArgumentException("must be a terrain");
-		}
 		float terrainHeight = ((Terrain) terrain).getHeight(super.getPositions().x, super.getPositions().z);
 		if(super.getPositions().y < terrainHeight) {
 			upwardSpeed = 0;
