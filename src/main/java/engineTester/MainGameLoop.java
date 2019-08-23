@@ -62,7 +62,7 @@ public class MainGameLoop {
 		// TODO fix mapping seems like it didnt work.
 		Model3D jm = new JM(loader);
 		Model3D tree = new Tree(loader);
-		Player player = new Player(jm, new Vector3f(0,-5,-10), 0, 0, 0, 1);
+		Player player = new Player(grass, new Vector3f(0,-5,-10), 0, 0, 0, 1);
 
 		// Cube semi ko
 		//plane // OK

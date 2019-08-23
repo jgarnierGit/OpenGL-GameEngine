@@ -30,7 +30,7 @@ public class MTLUtils {
 	/**
 	 * overide specularExponent of material if needed.
 	 */
-	private float specularExponent = 0; 
+	private float specularExponent = 0;
 
 	public MTLUtils(MTLLibrary mtlLibrary) {
 		materialMappers = new ArrayList<>();

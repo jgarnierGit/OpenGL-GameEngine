@@ -85,6 +85,7 @@ public class EntityRenderer{
 		//TODO do it MasterRenderer.disableCulling(); if model.isHasTransparency()
 		shader.loadShineVariable(mtlUtils.getSpecularExponent());
 		shader.loadReflectivityVariable(mtlUtils.getReflectivity());
+			
 		if(!mtlUtils.isUsingImage()) {
 			//TODO use array of colors to be in flow of Element Buffer Object.
 			//GL20.glEnableVertexAttribArray(VBOIndex.COLOR_INDEX);
@@ -102,7 +103,7 @@ public class EntityRenderer{
 		for(int i =0; i< matList.size() && i<33; i++) {
 			
 			MTLMaterial texture = matList.get(i).getMaterial();
-			if(texture.getDissolve() < 1.0f) { //TODO finish adapt
+			if(texture.getDissolve() < 1.0f || mtlUtils.isHasTransparency()) {
 				MasterRenderer.disableCulling();
 			}
 			shader.loadShineVariable(texture.getSpecularExponent());
@@ -116,7 +117,7 @@ public class EntityRenderer{
 	private void useNoTexture() {
 		GL13.glActiveTexture(GLTextureIDIncrementer.GL_TEXTURE_IDS.get(0));
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
-		GL20.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE);
+		GL20.glPolygonMode(GL11.GL_FRONT, GL11.GL_LINE);
 	}
 	
 	/**
