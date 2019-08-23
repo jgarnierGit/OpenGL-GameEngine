@@ -129,13 +129,9 @@ public class MasterRenderer {
 	 * @param data
 	 * @return
 	 */
-	public static IntBuffer storeDataInIntBuffer(ArrayList<Integer> data) {
-		int[] rawTypeList = new int[data.size()];
-		for(int i=0; i< data.size(); i++) {
-			rawTypeList[i] = data.get(i);
-		}
-		IntBuffer buffer = BufferUtils.createIntBuffer(rawTypeList.length);
-		buffer.put(rawTypeList);
+	public static IntBuffer storeDataInIntBuffer(int[] data) {
+		IntBuffer buffer = BufferUtils.createIntBuffer(data.length);
+		buffer.put(data);
 		buffer.flip();
 		return buffer;
 	}

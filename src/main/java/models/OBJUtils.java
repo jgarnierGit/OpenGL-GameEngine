@@ -16,10 +16,10 @@ import com.mokiat.data.front.parser.OBJVertex;
 import models.bufferCreator.VBOContent;
 
 public class OBJUtils {
-	private final ArrayList<Integer> indices;
-	private final VBOContent positions; // dimension 3.
+	private final int[] indices;
+	private final VBOContent positions;
 	private final VBOContent material;
-	private final VBOContent normals; // dimension 3.
+	private final VBOContent normals;
 	
 	/**
 	 * @param objModel
@@ -27,7 +27,7 @@ public class OBJUtils {
 	 * @param mtlUtils 
 	 */
 	public OBJUtils(OBJModel objModel, MTLUtils mtlUtils) {
-		indices = new ArrayList<>();
+		ArrayList<Integer> indicesList = new ArrayList<>();
 		
 		OBJDataReferenceUtils objDataReferenceUtils = new OBJDataReferenceUtils(objModel,mtlUtils);
 
@@ -38,17 +38,17 @@ public class OBJUtils {
 					face.getReferences().forEach(ref -> {
 						if(ref.hasVertexIndex()) {
 							// ref.vertexIndex only contains original ids.
-							if(indices.contains(ref.vertexIndex)) {
+							if(indicesList.contains(ref.vertexIndex)) {
 								if(objDataReferenceUtils.isConfigRegistered(ref)) {
-									indices.add(ref.vertexIndex);
+									indicesList.add(ref.vertexIndex);
 								}
 								else {
 									objDataReferenceUtils.addChildConfig(ref, materialIndex);
-									indices.add(ref.vertexIndex);
+									indicesList.add(ref.vertexIndex);
 								}
 							}
 							else {
-								indices.add(ref.vertexIndex);
+								indicesList.add(ref.vertexIndex);
 								objDataReferenceUtils.addVertex(ref, materialIndex);
 							}
 						}
@@ -63,6 +63,11 @@ public class OBJUtils {
 		normals = setNormalContent(objDataReferenceUtils);
 		//TODO update to set type for each material of an object
 		material = setMaterialContent(objDataReferenceUtils,mtlUtils.getMaterials());
+		
+		indices = new int[indicesList.size()];
+		for(int i=0;i<indicesList.size();i++){
+			indices[i] = indicesList.get(i);
+		}
 		/**System.out.println(objModel.getObjects().get(0).getName() +" :");
 		System.out.println(indices);
 		System.out.println(positions.getContent());
@@ -72,26 +77,29 @@ public class OBJUtils {
 	
 	private VBOContent setMaterialContent(OBJDataReferenceUtils objDataReferenceUtils, List<MaterialMapper> materials) {
 		int dimension = 0;
-		ArrayList<Float> coords = new ArrayList<>();
+		int indexCoords = 0;
+		float[] coords;
 		if(materials.get(0).getType() == MaterialType.IMAGE) {
 			dimension = 2;
 			List<OBJTexCoord> textCoordList = objDataReferenceUtils.getTexturesCoordsIndices().stream().map(indice -> {
 						return objDataReferenceUtils.getTextCoordsList().get(indice);
 					}).collect(Collectors.toList());
+			coords = new float[textCoordList.size() * 2];
 			for(OBJTexCoord textCoord : textCoordList) {
-				coords.add(textCoord.u);
-				coords.add(textCoord.v);
+				coords[indexCoords++] = textCoord.u;
+				coords[indexCoords++] = textCoord.v;
 			}
 		}else {
 			dimension = 4;
 			List<MaterialMapper> colorsList = objDataReferenceUtils.getColorsIndices().stream().map(indice -> {
 						return objDataReferenceUtils.getMaterialsList().get(indice);
 					}).collect(Collectors.toList());
+			coords = new float[colorsList.size() * 4];
 			for(MaterialMapper color : colorsList) {
-				coords.add(color.getColor().x);
-				coords.add(color.getColor().y);
-				coords.add(color.getColor().z);
-				coords.add(color.getColor().w);
+				coords[indexCoords++] = color.getColor().x;
+				coords[indexCoords++] = color.getColor().y;
+				coords[indexCoords++] = color.getColor().z;
+				coords[indexCoords++] = color.getColor().w;
 			}
 		}
 		return new VBOContent(dimension, coords);
@@ -101,11 +109,12 @@ public class OBJUtils {
 		List<OBJVertex> vertices = objDataReferenceUtils.getPositionsIndices().stream().map(indice -> {
 					return objDataReferenceUtils.getVerticesList().get(indice);
 				}).collect(Collectors.toList());
-		ArrayList<Float> positions = new ArrayList<>();
+		int indexCoords = 0;
+		float[] positions = new float[vertices.size() *3];
 		for(OBJVertex vertex : vertices) {
-			positions.add(vertex.x);
-			positions.add(vertex.y);
-			positions.add(vertex.z);
+			positions[indexCoords++] = vertex.x;
+			positions[indexCoords++] = vertex.y;
+			positions[indexCoords++] = vertex.z;
 		}
 		return new VBOContent(3, positions);
 	}
@@ -114,17 +123,18 @@ public class OBJUtils {
 		List<OBJNormal> normalsList = objDataReferenceUtils.getNormalsIndices().stream().map(indice -> {
 					return objDataReferenceUtils.getNormalsList().get(indice);
 				}).collect(Collectors.toList());
-		ArrayList<Float> normals = new ArrayList<>();
+		int indexCoords = 0;
+		float[] normals = new float[normalsList.size() *3];
 		for(OBJNormal normal : normalsList) {
-			normals.add(normal.x);
-			normals.add(normal.y);
-			normals.add(normal.z);
+			normals[indexCoords++] = normal.x;
+			normals[indexCoords++] = normal.y;
+			normals[indexCoords++] = normal.z;
 		}
 		return new VBOContent(3, normals);
 	}
 	
 
-	public ArrayList<Integer> getIndices() {
+	public int[] getIndices() {
 		return this.indices;
 	}
 
@@ -143,45 +153,57 @@ public class OBJUtils {
 	public static <T> OBJUtils create(ArrayList<Integer> vertexIndices, ArrayList<Vector3f> positions2,
 			ArrayList<Vector3f> normalsVector, ArrayList<T> materials) {
 		
+		int[] indicesList = new int[vertexIndices.size()];
+		int indexIndice = 0;
+		for(Integer i : vertexIndices) {
+			indicesList[indexIndice++] = i;
+		}
+		
 		int materialDimension = 0;
-		ArrayList<Float> matList = new ArrayList<>();
+		int indexMat = 0;
+		float[] matList;
 		if(materials.get(0) instanceof Vector4f) {
 			materialDimension = 4;
+			matList = new float[materials.size() * 4];
 			for(T mat : materials) {
 				Vector4f matV4f = (Vector4f) mat;
-				matList.add(matV4f.x);
-				matList.add(matV4f.y);
-				matList.add(matV4f.z);
-				matList.add(matV4f.w);
+				matList[indexMat++] = matV4f.x;
+				matList[indexMat++] = matV4f.y;
+				matList[indexMat++] = matV4f.z;
+				matList[indexMat++] = matV4f.w;
 			}
 		}else if(materials.get(0) instanceof Vector2f) {
 			materialDimension = 2;
+			matList = new float[materials.size() * 2];
 			for(T mat : materials) {
 				Vector2f matV2f = (Vector2f) mat;
-				matList.add(matV2f.x);
-				matList.add(matV2f.y);
+				matList[indexMat++] = matV2f.x;
+				matList[indexMat++] = matV2f.y;
 			}
 		}
 		else {
+			matList = null;
 			System.err.println("unsupported type for materials.");
 		}
-		ArrayList<Float> normalList = new ArrayList<>();
+		int indexCoords = 0;
+		float[] normals = new float[normalsVector.size() * 3];
 		for(Vector3f normal: normalsVector ) {
-			normalList.add(normal.x);
-			normalList.add(normal.y);
-			normalList.add(normal.z);
+			normals[indexCoords++] = normal.x;
+			normals[indexCoords++] = normal.y;
+			normals[indexCoords++] = normal.z;
 		}
 		
-		ArrayList<Float> positionsList = new ArrayList<>();
+		int indexPositions = 0;
+		float[] positionsList = new float[positions2.size() * 3];
 		for(Vector3f position: positions2) {
-			positionsList.add(position.x);
-			positionsList.add(position.y);
-			positionsList.add(position.z);
+			positionsList[indexPositions++] = position.x;
+			positionsList[indexPositions++] = position.y;
+			positionsList[indexPositions++] = position.z;
 		}
-		return new OBJUtils(vertexIndices, new VBOContent(3, positionsList), new VBOContent(3, normalList), new VBOContent(materialDimension, matList));
+		return new OBJUtils(indicesList, new VBOContent(3, positionsList), new VBOContent(3, normals), new VBOContent(materialDimension, matList));
 	}
 	
-	private OBJUtils(ArrayList<Integer> vertexIndices, VBOContent positions2,
+	private OBJUtils(int[] vertexIndices, VBOContent positions2,
 			VBOContent normalsVector, VBOContent materials) {
 		this.indices = vertexIndices;
 		this.positions = positions2;

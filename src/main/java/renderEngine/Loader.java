@@ -102,7 +102,7 @@ public class Loader {
 	 *            - The geometry data to be stored in the VAO, in this case the
 	 *            positions of the vertices.
 	 */
-	private void storeDataFloatInAttrList(int attributeNumber, int coordinateSize, ArrayList<Float> arrayList) {
+	private void storeDataFloatInAttrList(int attributeNumber, int coordinateSize, float[] arrayList) {
 		int vboID = GL15.glGenBuffers();
 
 		vbos.add(vboID);
@@ -128,14 +128,10 @@ public class Loader {
 	 *            - The float data that is going to be stored in the buffer.
 	 * @return The FloatBuffer containing the data ready to be loaded into a VBO.
 	 */
-	private FloatBuffer storeDataInFloatBuffer(ArrayList<Float> arrayList) {
+	private FloatBuffer storeDataInFloatBuffer(float[] arrayList) {
 		// create direct ByteBuffer then cast it as float buffer.
-		float[] rawTypeList = new float[arrayList.size()];
-		for(int i=0; i< arrayList.size(); i++) {
-			rawTypeList[i] = arrayList.get(i);
-		}
-		FloatBuffer buffer = BufferUtils.createFloatBuffer(rawTypeList.length);
-		buffer.put(rawTypeList);
+		FloatBuffer buffer = BufferUtils.createFloatBuffer(arrayList.length);
+		buffer.put(arrayList);
 		buffer.flip();
 		return buffer;
 	}
@@ -145,7 +141,7 @@ public class Loader {
 	 * 
 	 * @param indices
 	 */
-	private void bindIndicesBuffer(ArrayList<Integer> indices) {
+	private void bindIndicesBuffer(int[] indices) {
 		int vboId = GL15.glGenBuffers();
 		vbos.add(vboId);
 		GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, vboId);
@@ -164,13 +160,9 @@ public class Loader {
 	 *           - The indices in an int[].
 	 * @return The indices in a buffer.
 	 */
-	private IntBuffer storeDataInIntBuffer(ArrayList<Integer> data) {
-		int[] rawTypeList = new int[data.size()];
-		for(int i=0; i< data.size(); i++) {
-			rawTypeList[i] = data.get(i);
-		}
-		IntBuffer buffer = BufferUtils.createIntBuffer(rawTypeList.length);
-		buffer.put(rawTypeList);
+	private IntBuffer storeDataInIntBuffer(int[] data) {
+		IntBuffer buffer = BufferUtils.createIntBuffer(data.length);
+		buffer.put(data);
 		buffer.flip();
 		return buffer;
 	}
