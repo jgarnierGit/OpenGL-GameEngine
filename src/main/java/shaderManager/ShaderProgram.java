@@ -1,6 +1,10 @@
 package shaderManager;
 
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.FloatBuffer;
 import java.nio.file.Path;
 import java.util.Scanner;
@@ -20,7 +24,7 @@ public abstract class ShaderProgram {
 	    
 	    private static FloatBuffer matrixBuffer = BufferUtils.createFloatBuffer(16);
 	     
-	    public ShaderProgram(Path vertexFile,Path fragmentFile) throws FileNotFoundException{
+	    public ShaderProgram(String vertexFile,String fragmentFile) throws IOException{
 	        vertexShaderID = loadShader(vertexFile,GL20.GL_VERTEX_SHADER);
 	        fragmentShaderID = loadShader(fragmentFile,GL20.GL_FRAGMENT_SHADER);
 	        programID = GL20.glCreateProgram();
@@ -91,20 +95,28 @@ public abstract class ShaderProgram {
 	        GL20.glBindAttribLocation(programID, attribute, variableName);
 	    }
 	     
-	    private static int loadShader(Path pathFile, int type) throws FileNotFoundException{
+	    private static int loadShader(String pathFile, int type) throws IOException{
 	        StringBuilder shaderSource = new StringBuilder();
-	        	Scanner file = new Scanner(pathFile.toFile());
-	        	while(file.hasNextLine()) {
-	        		String line = file.nextLine();
+	        try(InputStream fileStream = ShaderProgram.class.getResourceAsStream(pathFile)){
+	        	InputStreamReader fileReader = new InputStreamReader(fileStream);
+	        	BufferedReader bufferedFileReader = new BufferedReader(fileReader);
+	        	String line = bufferedFileReader.readLine();
+	        	while(line != null) {
 	        		shaderSource.append(line).append("\n");
+	        		line = bufferedFileReader.readLine();
 	        	}
-	        	file.close();
+	        	bufferedFileReader.close();
+	        	fileReader.close();
+	        }catch(NullPointerException e) {
+	        	System.err.println("File not found:"+ pathFile.toString());
+	        }
+	        	
 	        int shaderID = GL20.glCreateShader(type);
 	        GL20.glShaderSource(shaderID, shaderSource);
 	        GL20.glCompileShader(shaderID);
 	        if(GL20.glGetShaderi(shaderID, GL20.GL_COMPILE_STATUS )== GL11.GL_FALSE){
 	            System.out.println(GL20.glGetShaderInfoLog(shaderID, 500));
-	            System.err.println("Could not compile shader "+ pathFile.getFileName());
+	            System.err.println("Could not compile shader "+ pathFile);
 	            System.exit(-1);
 	        }
 	        return shaderID;

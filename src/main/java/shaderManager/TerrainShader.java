@@ -1,6 +1,7 @@
 package shaderManager;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -13,8 +14,8 @@ import renderEngine.Loader.VBOIndex;
 import toolbox.Maths;
 
 public class TerrainShader extends ShaderProgram{
-	private static final Path VERTEX_FILE= Paths.get("src", "main", "java", "shaderManager", "terrainVertexShader.txt");
-	private static final Path FRAGMENT_FILE= Paths.get("src", "main", "java", "shaderManager", "terrainFragmentShader.txt");
+	private static final String VERTEX_FILE= "terrainVertexShader.txt";
+	private static final String FRAGMENT_FILE= "terrainFragmentShader.txt";
 	private int location_transformationMatrix;
 	private int projectionMatrix;
 	private int location_viewMatrix;
@@ -29,7 +30,7 @@ public class TerrainShader extends ShaderProgram{
 	private int location_bTexture;
 	private int location_blendMap;
 	
-	public TerrainShader() throws FileNotFoundException {
+	public TerrainShader() throws IOException {
 		super(VERTEX_FILE,FRAGMENT_FILE);
 	}
 
