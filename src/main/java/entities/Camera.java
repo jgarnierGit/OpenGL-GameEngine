@@ -74,13 +74,8 @@ public class Camera {
 	}
 
 	private void calculateZoom() {
-		glfwSetScrollCallback(DisplayManager.WINDOW_ID, new GLFWScrollCallback() {
-			@Override
-			public void invoke(long window, double xoffset, double yoffset) {
-				float zoomLevel = (float) yoffset * 0.5f;
-				distanceFromPlayer -= zoomLevel;
-			}
-		});
+			float zoomLevel = (float) UserInputHandler.getScrollValue() * 0.5f;
+			distanceFromPlayer -= zoomLevel;
 	}
 
 	private void calculatePitch() {
