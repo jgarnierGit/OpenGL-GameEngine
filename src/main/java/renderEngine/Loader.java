@@ -1,5 +1,7 @@
 package renderEngine;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
@@ -7,9 +9,11 @@ import java.util.List;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
+import org.newdawn.slick.opengl.TextureLoader;
 
 import models.ModelUtils;
 
@@ -56,6 +60,27 @@ public class Loader {
 		unbindVAO();
 		texturesToClean.addAll(modelUtils.getMtlUtils().getTexturesIndexes());
 		return vaoID;
+	}
+	
+	public int loadGUIToVAO(float[] positions) {
+		int vaoId = createVAO();
+		this.storeDataFloatInAttrList(VBOIndex.POSITION_INDEX, 2, positions);
+		unbindVAO();
+		return vaoId;
+	}
+	
+	public int loadTexture(String name) {
+		try (FileInputStream image = new FileInputStream(name)){
+			int id = TextureLoader.getTexture("png", image).getTextureID();
+			GL30.glGenerateMipmap(GL11.GL_TEXTURE_2D);
+			GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
+			GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL14.GL_TEXTURE_LOD_BIAS, -0.4f);
+			texturesToClean.add(id);
+			return id;
+		} catch (IOException e) {
+			System.err.println("["+ name +"] not found ");
+		}
+		return 0;
 	}
 
 	/**
