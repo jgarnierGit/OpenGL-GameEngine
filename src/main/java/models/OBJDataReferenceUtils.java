@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.lwjglx.util.vector.Vector4f;
 
 import com.mokiat.data.front.parser.OBJDataReference;
 import com.mokiat.data.front.parser.OBJModel;

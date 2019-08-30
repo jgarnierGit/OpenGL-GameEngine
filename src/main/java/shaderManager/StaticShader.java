@@ -1,7 +1,6 @@
 package shaderManager;
 
 import java.io.IOException;
-import java.io.IOException;
 
 import org.lwjglx.util.vector.Matrix4f;
 import org.lwjglx.util.vector.Vector3f;

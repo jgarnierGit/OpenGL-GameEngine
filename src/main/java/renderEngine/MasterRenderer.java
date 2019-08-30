@@ -1,6 +1,5 @@
 package renderEngine;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.IntBuffer;
 import java.util.ArrayList;

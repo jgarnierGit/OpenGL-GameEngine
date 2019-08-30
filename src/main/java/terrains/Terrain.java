@@ -1,7 +1,6 @@
 package terrains;
 
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Paths;
@@ -33,7 +32,6 @@ public class Terrain extends Model3D {
 	
 	static final String resourceTexturePath = Paths.get("2D").toString();
 
-	private static final String OBJ_NAME = "Terrain";
 	private float x;
 	private float z;
 

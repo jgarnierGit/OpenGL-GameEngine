@@ -2,11 +2,8 @@ package entities;
 
 import static org.lwjgl.glfw.GLFW.*;
 
-import org.lwjgl.glfw.GLFWCursorPosCallback;
-import org.lwjgl.glfw.GLFWScrollCallback;
 import org.lwjglx.util.vector.Vector3f;
 
-import renderEngine.DisplayManager;
 
 public class Camera {
 

@@ -9,8 +9,6 @@ import org.lwjgl.opengl.GL30;
 import org.lwjglx.util.vector.Matrix4f;
 import org.lwjglx.util.vector.Vector3f;
 
-import com.mokiat.data.front.parser.MTLMaterial;
-
 import models.MTLUtils;
 import models.MaterialMapper;
 import models.Model3D;

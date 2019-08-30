@@ -1,6 +1,5 @@
 package renderEngine;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.FloatBuffer;
@@ -16,7 +15,6 @@ import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 import org.newdawn.slick.opengl.TextureLoader;
 
-import models.MTLUtils;
 import models.ModelUtils;
 
 /**
