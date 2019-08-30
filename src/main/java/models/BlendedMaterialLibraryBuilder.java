@@ -12,16 +12,16 @@ public class BlendedMaterialLibraryBuilder {
 	public static class MixedTexturesBuilder {
 		public List<MTLMaterial> materials = new ArrayList<MTLMaterial>();
 		
-		public MixedTexturesBuilder addTexture(String path, String textureName) {
+		public MixedTexturesBuilder addTexture(String textureName) {
 			MTLMaterial material = new MTLMaterial(textureName);
-			material.setDiffuseTexture(Paths.get(path, textureName).toString());
+			material.setDiffuseTexture(textureName);
 			materials.add(material);
 			return this;
 		}
 		
-		public MTLLibrary addBlendTexturesAndBuild(String path, String textureName) {
+		public MTLLibrary addBlendTexturesAndBuild(String textureName) {
 			MTLMaterial material = new MTLMaterial(textureName);
-			material.setDiffuseTexture(Paths.get(path, textureName).toString());
+			material.setDiffuseTexture(textureName);
 			materials.add(material);
 			MTLLibrary library = new MTLLibrary();
 			library.getMaterials().addAll(materials);

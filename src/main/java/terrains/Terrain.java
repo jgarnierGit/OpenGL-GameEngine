@@ -3,6 +3,7 @@ package terrains;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
@@ -17,6 +18,7 @@ import com.mokiat.data.front.parser.MTLLibrary;
 import models.BlendedMaterialLibraryBuilder;
 import models.MTLUtils;
 import models.Model3D;
+import models.Model3DImporter;
 import models.ModelUtils;
 import models.OBJUtils;
 import renderEngine.Loader;
@@ -29,7 +31,7 @@ public class Terrain extends Model3D {
 	private int vertexCount = 0; //TODO refactor to move those in TerrainData class or similar.
 	private float[][] heights;
 	
-	static final String resourceTexturePath = Paths.get("./", "src", "main", "resources", "2D").toString();
+	static final String resourceTexturePath = Paths.get("2D").toString();
 
 	private static final String OBJ_NAME = "Terrain";
 	private float x;
@@ -77,11 +79,11 @@ public class Terrain extends Model3D {
 
 	private MTLUtils importTextures() {
 		MTLLibrary mtlLibrary = BlendedMaterialLibraryBuilder.create()
-				.addTexture(resourceTexturePath, "grass.png")
-				.addTexture(resourceTexturePath, "mud.png")
-				.addTexture(resourceTexturePath, "grassFlowers.png")
-				.addTexture(resourceTexturePath, "path.png")
-				.addBlendTexturesAndBuild(resourceTexturePath, "blendMap.png");
+				.addTexture("grass.png")
+				.addTexture("mud.png")
+				.addTexture("grassFlowers.png")
+				.addTexture("path.png")
+				.addBlendTexturesAndBuild("blendMap.png");
 		
 		return new MTLUtils(mtlLibrary);
 	}
@@ -91,8 +93,8 @@ public class Terrain extends Model3D {
 		ArrayList<Vector3f> normalsVector = new ArrayList<>();
 		ArrayList<Vector2f> textures = new ArrayList<>();
 		ArrayList<Integer> vertexIndices = new ArrayList<>();
-		try {
-			BufferedImage image = ImageIO.read(new File(Paths.get(resourceTexturePath, "heightmap.png").toString()));
+		try(InputStream fileStream = Model3DImporter.class.getClassLoader().getResourceAsStream("2D/heightmap.png")){
+			BufferedImage image = ImageIO.read(fileStream);
 			vertexCount = image.getHeight();
 			heights = new float[vertexCount][vertexCount];
 		for(int i=0;i<vertexCount;i++){
