@@ -17,31 +17,33 @@ import com.mokiat.data.front.parser.OBJVertex;
 
 public class OBJDataReferenceUtils {
 	private ArrayList<OBJDataReferenceMapper> dataReferences;
-	private int verticesListSize;
 	private List<OBJNormal> normalsList;
 	private List<OBJTexCoord> textCoordsList;
 	private List<OBJVertex> verticesList;
 	private List<MaterialMapper> materialsList;
+	private int initialReferencesSize;
 
-	public ArrayList<OBJDataReferenceMapper> getVertices() {
+	public ArrayList<OBJDataReferenceMapper> getDataReferences() {
 		return dataReferences;
 	}
 
 	public OBJDataReferenceUtils(OBJModel objModel, MTLUtils mtlUtils) {
-		verticesListSize = objModel.getVertices().size();
 		dataReferences = new ArrayList<>();
 		normalsList = objModel.getNormals();
 		textCoordsList = objModel.getTexCoords();
 		verticesList = objModel.getVertices();
 		materialsList = mtlUtils.getMaterials();
+		initialReferencesSize = objModel.getVertices().size();
 	}
 
 	/**
 	 * @param OBJDataReference
 	 * @param int Mesh Index, link with MTL file.
 	 */
-	public void addVertex(OBJDataReference objDataRef,int materialIndex) {
-		dataReferences.add(new OBJDataReferenceMapper(objDataRef,materialIndex));
+	public OBJDataReferenceMapper addVertex(OBJDataReference objDataRef,int materialIndex) {
+		OBJDataReferenceMapper newMapper = new OBJDataReferenceMapper(objDataRef,materialIndex,dataReferences.size());
+		dataReferences.add(newMapper);
+		return newMapper;
 	}
 
 	public ArrayList<Integer> getPositionsIndices() {
@@ -104,42 +106,44 @@ public class OBJDataReferenceUtils {
 		return indices;
 	}
 
-	public boolean isConfigRegistered(OBJDataReference ref) {
-		for(OBJDataReferenceMapper currentDataRef : dataReferences) {
-			if(currentDataRef.dataRef.vertexIndex == ref.vertexIndex) {
-				if(ref.equals(currentDataRef.dataRef)) {
-					return true;
-				}
-				for(OBJDataReference child: currentDataRef.children) {
-					if(ref.equals(child)) {
-						return true;
-					}
-				}
-			}
+	/**
+	 * compare dataReference configuration for specified index. dataReferences is constructed in met order.
+	 * @param dataReferencesIndex
+	 * @param ref 
+	 * @return code{true} if configuration is already known.
+	 */
+	public boolean isConfigRegistered(int dataReferencesIndex, OBJDataReference ref) {
+		OBJDataReferenceMapper currentDataRef = dataReferences.get(dataReferencesIndex);
+		if(ref.equals(currentDataRef.dataRef)) {
+			return true;
+		}
+		if(currentDataRef.children.contains(ref)) {
+			return true;
 		}
 		return false;
 	}
 
 	/**
-	 * 
+	 * @param registeredIndex 
 	 * @param ref
 	 * @param materialIndex
 	 */
-	public void addChildConfig(OBJDataReference ref,int materialIndex) {
-		OBJDataReferenceMapper firstConfig = null;
-		for(OBJDataReferenceMapper currentDataRef : dataReferences) {
-			if(currentDataRef.dataRef.vertexIndex == ref.vertexIndex) {
-				firstConfig = currentDataRef;
-			}
-		}
-		ref.vertexIndex = verticesListSize;
-		verticesListSize++;
-		addVertex(ref,materialIndex);
-		firstConfig.children.add(ref);
-		for(OBJDataReferenceMapper currentDataRef : dataReferences) {
-			if(currentDataRef.dataRef.vertexIndex == ref.vertexIndex) {
-				currentDataRef.setParent(firstConfig);
-			}
-		}
+	public void addChildConfig(int registeredIndex, OBJDataReferenceMapper refMapper,int materialIndex) {
+		OBJDataReferenceMapper registeredConfig = dataReferences.get(registeredIndex);
+		OBJDataReferenceMapper firstConfig = registeredConfig.getParentIfPresent();
+		firstConfig.children.add(refMapper.dataRef);
+		OBJDataReferenceMapper currentDataRef = dataReferences.get(refMapper.mapperIndex);
+		currentDataRef.setParent(firstConfig);
+	}
+	 /** 
+	  * Alter ref.vertexIndex to duplicate it in the end list.
+	  * @param ref
+	  * @param materialIndex
+	 * @return OBJDataReferenceMapper new mapper
+	  */
+	public OBJDataReferenceMapper duplicateVertex(OBJDataReference ref, int materialIndex) {
+		ref.vertexIndex = initialReferencesSize;
+		initialReferencesSize++;
+		return addVertex(ref,materialIndex);
 	}
 }

@@ -1,6 +1,7 @@
 package models;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -8,8 +9,12 @@ import org.lwjglx.util.vector.Vector2f;
 import org.lwjglx.util.vector.Vector3f;
 import org.lwjglx.util.vector.Vector4f;
 
+import com.mokiat.data.front.parser.OBJDataReference;
+import com.mokiat.data.front.parser.OBJFace;
+import com.mokiat.data.front.parser.OBJMesh;
 import com.mokiat.data.front.parser.OBJModel;
 import com.mokiat.data.front.parser.OBJNormal;
+import com.mokiat.data.front.parser.OBJObject;
 import com.mokiat.data.front.parser.OBJTexCoord;
 import com.mokiat.data.front.parser.OBJVertex;
 
@@ -28,26 +33,40 @@ public class OBJUtils {
 	 */
 	public OBJUtils(OBJModel objModel, MTLUtils mtlUtils) {
 		ArrayList<Integer> indicesList = new ArrayList<>();
+		int indicesListSize = 0;
+		for(OBJObject obj : objModel.getObjects()) {
+			for(OBJMesh mesh : obj.getMeshes()) {
+				for(OBJFace face: mesh.getFaces()) {
+					indicesListSize += face.getReferences().size();
+				}
+			}
+		}
+		
+		int[] registeredIndice = new int[indicesListSize];
+		Arrays.fill(registeredIndice, -1);
 		
 		OBJDataReferenceUtils objDataReferenceUtils = new OBJDataReferenceUtils(objModel,mtlUtils);
-
-		objModel.getObjects().forEach(obj -> {
-			obj.getMeshes().forEach(mesh -> {
+		for(OBJObject obj : objModel.getObjects()) {
+			for(OBJMesh mesh : obj.getMeshes()) {
 				int materialIndex = mtlUtils.getMaterials().indexOf(mtlUtils.getMaterial(mesh.getMaterialName()));
-				mesh.getFaces().forEach(face -> {
-					face.getReferences().forEach(ref -> {
+				for(OBJFace face: mesh.getFaces()) {
+					for(OBJDataReference ref : face.getReferences()) {
 						if(ref.hasVertexIndex()) {
 							// ref.vertexIndex only contains original ids.
-							if(indicesList.contains(ref.vertexIndex)) {
-								if(objDataReferenceUtils.isConfigRegistered(ref)) {
+							int registeredIndex = registeredIndice[ref.vertexIndex];
+							if(registeredIndex != -1) {
+								if(objDataReferenceUtils.isConfigRegistered(registeredIndex, ref)) {
 									indicesList.add(ref.vertexIndex);
 								}
 								else {
-									objDataReferenceUtils.addChildConfig(ref, materialIndex);
+									OBJDataReferenceMapper mapper = objDataReferenceUtils.duplicateVertex(ref,materialIndex);
+									registeredIndice[ref.vertexIndex] = objDataReferenceUtils.getDataReferences().size();
+									objDataReferenceUtils.addChildConfig(registeredIndex, mapper, materialIndex);
 									indicesList.add(ref.vertexIndex);
 								}
 							}
 							else {
+								registeredIndice[ref.vertexIndex] = objDataReferenceUtils.getDataReferences().size();
 								indicesList.add(ref.vertexIndex);
 								objDataReferenceUtils.addVertex(ref, materialIndex);
 							}
@@ -55,10 +74,11 @@ public class OBJUtils {
 						else {
 							System.out.println(obj.getName() +" has no vertexIndex");
 						}
-					});
-				});
-			});
-		});
+					}
+				}
+			}
+		}
+			
 		positions = setPositionContent(objDataReferenceUtils);
 		normals = setNormalContent(objDataReferenceUtils);
 		//TODO update to set type for each material of an object

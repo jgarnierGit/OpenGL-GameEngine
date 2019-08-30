@@ -39,7 +39,7 @@ public class MTLUtils {
 		materialMappers = new ArrayList<>();
 		texturesList = new HashSet<>(); //TODO may be put those 2 params in MaterialMapper.
 		texturesIndexes = new ArrayList<>();
-		mtlLibrary.getMaterials().forEach(mat -> {
+		for(MTLMaterial mat : mtlLibrary.getMaterials()) {
 			MaterialMapper materialMapper = new MaterialMapper(mat);
 			if(materialMapper.getType() == MaterialType.IMAGE) {
 				loadTextureInMemory(mat);
@@ -50,7 +50,7 @@ public class MTLUtils {
 				materialMapper.setColor(colorVector);
 			}
 			materialMappers.add(materialMapper);
-		});
+		}
 
 		//TODO is this still meaningful
 		isUsingImage = materialMappers.stream().filter(matMapper -> {

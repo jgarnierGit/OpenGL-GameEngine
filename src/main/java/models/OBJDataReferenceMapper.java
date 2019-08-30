@@ -1,21 +1,22 @@
 package models;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 
 import com.mokiat.data.front.parser.OBJDataReference;
 
 public class OBJDataReferenceMapper {
-	OBJDataReference dataRef;
-	int materialIndex;
-	List<OBJDataReference> children;
+	final OBJDataReference dataRef;
+	final int materialIndex;
+	HashSet<OBJDataReference> children;
 	boolean isCHild;
+	final int mapperIndex;
 	OBJDataReferenceMapper parent;
 	
-	public OBJDataReferenceMapper(OBJDataReference objDataRef,int materialIndexRef) {
+	public OBJDataReferenceMapper(OBJDataReference objDataRef,int materialIndexRef, int i) {
 		dataRef = objDataRef;
 		materialIndex = materialIndexRef;
-		children = new ArrayList<OBJDataReference>();
+		children = new HashSet<OBJDataReference>();
+		mapperIndex = i;
 	}
 	
 	public boolean hasChild() {
@@ -32,6 +33,17 @@ public class OBJDataReferenceMapper {
 			index = parent.getIndex();
 		}
 		return index;
+	}
+	
+	/**
+	 * 
+	 * @return parent if set, else itself
+	 */
+	public OBJDataReferenceMapper getParentIfPresent() {
+		if(isCHild) {
+			return parent;
+		}
+		return this;
 	}
 	
 	public int getNormalIndex() {
