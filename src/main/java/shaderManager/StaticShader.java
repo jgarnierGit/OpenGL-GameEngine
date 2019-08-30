@@ -1,6 +1,7 @@
 package shaderManager;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -15,8 +16,8 @@ import toolbox.Maths;
 
 public class StaticShader extends ShaderProgram {
 	
-	private static final Path VERTEX_FILE= Paths.get("src", "main", "java", "shaderManager", "vertexShader.txt");
-	private static final Path FRAGMENT_FILE= Paths.get("src", "main", "java", "shaderManager", "fragmentShader.txt");
+	private static final String VERTEX_FILE= "vertexShader.txt";
+	private static final String FRAGMENT_FILE= "fragmentShader.txt";
 	private int location_transformationMatrix;
 	private int projectionMatrix;
 	private int location_viewMatrix;
@@ -28,7 +29,7 @@ public class StaticShader extends ShaderProgram {
 	private int location_skyColour;
 	private int location_useImage;
 	
-	public StaticShader() throws FileNotFoundException {
+	public StaticShader() throws IOException {
 		super(VERTEX_FILE,FRAGMENT_FILE);
 	}
 

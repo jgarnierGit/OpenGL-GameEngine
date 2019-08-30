@@ -2,6 +2,9 @@ package models;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -57,7 +60,9 @@ public class MTLUtils {
 	
 	private void loadTextureInMemory(MTLMaterial mat) {
 		if(texturesList.add(mat.getDiffuseTexture())) {
-			try (FileInputStream image = new FileInputStream(mat.getDiffuseTexture())){
+			Path path = Paths.get(mat.getDiffuseTexture());
+			
+			try(InputStream image = MTLUtils.class.getClassLoader().getResourceAsStream("2D/"+ path.getFileName())){
 				int textId = TextureLoader.getTexture("png", image).getTextureID();
 				GL30.glGenerateMipmap(GL11.GL_TEXTURE_2D);
 				GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);

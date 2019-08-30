@@ -1,6 +1,7 @@
 package renderEngine;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,7 +39,7 @@ public class MasterRenderer {
 	
 	private HashMap<Model3D, List<Entity>> entities = new HashMap<>();
 	
-	public MasterRenderer() throws FileNotFoundException {
+	public MasterRenderer() throws IOException {
 		shader = new StaticShader();
 		enableCulling();
 		createProjectionMatrix();
