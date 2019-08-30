@@ -2,6 +2,7 @@ package renderEngine;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 import org.newdawn.slick.opengl.TextureLoader;
 
+import models.MTLUtils;
 import models.ModelUtils;
 
 /**
@@ -70,7 +72,7 @@ public class Loader {
 	}
 	
 	public int loadTexture(String name) {
-		try (FileInputStream image = new FileInputStream(name)){
+		try (InputStream image = Loader.class.getClassLoader().getResourceAsStream("2D/"+ name)){
 			int id = TextureLoader.getTexture("png", image).getTextureID();
 			GL30.glGenerateMipmap(GL11.GL_TEXTURE_2D);
 			GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
