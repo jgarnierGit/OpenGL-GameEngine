@@ -87,8 +87,7 @@ public class EntityRenderer{
 		shader.loadReflectivityVariable(mtlUtils.getReflectivity());
 			
 		if(!mtlUtils.isUsingImage()) {
-			//TODO use array of colors to be in flow of Element Buffer Object.
-			//GL20.glEnableVertexAttribArray(VBOIndex.COLOR_INDEX);
+			useNoTexture();
 		}
 		else if(!model.getObjUtils().getMtlUtils().getMaterials().isEmpty()) {//TODO clarify method calling.
 			bindTextures(mtlUtils);
@@ -107,7 +106,7 @@ public class EntityRenderer{
 				MasterRenderer.disableCulling();
 			}
 			shader.loadShineVariable(texture.getSpecularExponent());
-
+			// below link to sampler2D textureSampler in fragmentShader
 			GL13.glActiveTexture(GLTextureIDIncrementer.GL_TEXTURE_IDS.get(i));
 			GL11.glBindTexture(GL11.GL_TEXTURE_2D, mtlUtils.getTexturesIndexes().get(i));
 		}

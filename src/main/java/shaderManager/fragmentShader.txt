@@ -36,9 +36,9 @@ void main(void)
 	float dampedFactor = pow(specularFactor,shineDamper);
 	vec3 finalSpecular = dampedFactor * reflectivity * lightColor;
 	
-	vec4 finalColour = texture(textureSampler,pass_textureCoords);
-	if(pass_useImage == 0.0){
-		finalColour = pass_color;
+	vec4 finalColour = pass_color;
+	if(pass_useImage == 1.0){
+		finalColour = texture(textureSampler,pass_textureCoords);
 	}
 	
 	if(finalColour.a<0.5){

@@ -54,8 +54,12 @@ public class Loader {
 		storeDataFloatInAttrList(VBOIndex.POSITION_INDEX,modelUtils.getOBJUtils().getPositions().getDimension(), modelUtils.getOBJUtils().getPositions().getContent());
 		if(modelUtils.getMtlUtils().isUsingImage()) {
 			storeDataFloatInAttrList(VBOIndex.TEXTURE_INDEX,modelUtils.getOBJUtils().getMaterial().getDimension(), modelUtils.getOBJUtils().getMaterial().getContent());
+			float[] emptyColor  = {0.0f,0.0f,0.0f,0.0f};
+			storeDataFloatInAttrList(VBOIndex.COLOR_INDEX,4, emptyColor);
 		}
 		else {
+			float[] emptyTexture  = {0.0f,0.0f};
+			storeDataFloatInAttrList(VBOIndex.TEXTURE_INDEX,2, emptyTexture);
 			storeDataFloatInAttrList(VBOIndex.COLOR_INDEX,modelUtils.getOBJUtils().getMaterial().getDimension(), modelUtils.getOBJUtils().getMaterial().getContent());
 		}
 		storeDataFloatInAttrList(VBOIndex.NORMAL_INDEX,modelUtils.getOBJUtils().getNormals().getDimension(),modelUtils.getOBJUtils().getNormals().getContent());
