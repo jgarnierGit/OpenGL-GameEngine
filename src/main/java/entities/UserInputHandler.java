@@ -17,7 +17,7 @@ public class UserInputHandler {
 	private static float originXPos = 0;
 	private static float originYPos = 0;
 	private static float scrollValue = 0;
-	private static boolean isScrolling = false;
+	private static boolean isScrollingUp = false;
 
 	public static void updateInputHandler() {
 		updateKeyboardInputHandler();
@@ -27,8 +27,13 @@ public class UserInputHandler {
 	
 	private static void updateScrollInputHandler() {
 		glfwSetScrollCallback(DisplayManager.WINDOW_ID, (long window, double xoffset, double yoffset) -> {
-			scrollValue =  0 - (float) yoffset;
-			isScrolling = yoffset != 0;
+			isScrollingUp = yoffset > 0;
+			if(scrollValue != 0 && isScrollingUp != (scrollValue > 0)) {
+				scrollValue = 0;
+			}
+			else {
+				scrollValue +=  (float) yoffset;
+			}
 		});
 	}
 	
@@ -53,10 +58,6 @@ public class UserInputHandler {
 	
 	public static boolean isPressed() {
 		return isButtonPressedNow;
-	}
-	
-	public static boolean isScrolling() {
-		return isScrolling;
 	}
 	
 	public static boolean isActive(int button) {
