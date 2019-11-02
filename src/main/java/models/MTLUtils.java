@@ -64,7 +64,7 @@ public class MTLUtils {
 				GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
 				GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL14.GL_TEXTURE_LOD_BIAS, -0.4f);
 				texturesIndexes.add(Integer.valueOf(textId));
-			} catch (IOException e) {
+			} catch (IOException | NullPointerException e) {
 				System.err.println("["+ mat.getName() +"] File not found "+ mat.getDiffuseTexture() +" specified in MTL file. ");
 			}
 		}

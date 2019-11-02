@@ -116,10 +116,18 @@ public class OBJUtils {
 					}).collect(Collectors.toList());
 			coords = new float[colorsList.size() * 4];
 			for(MaterialMapper color : colorsList) {
-				coords[indexCoords++] = color.getColor().x;
-				coords[indexCoords++] = color.getColor().y;
-				coords[indexCoords++] = color.getColor().z;
-				coords[indexCoords++] = color.getColor().w;
+				if(color.getColor() != null) {
+					coords[indexCoords++] = color.getColor().x;
+					coords[indexCoords++] = color.getColor().y;
+					coords[indexCoords++] = color.getColor().z;
+					coords[indexCoords++] = color.getColor().w;
+				}
+				else {
+					coords[indexCoords++] = 0;
+					coords[indexCoords++] = 0;
+					coords[indexCoords++] = 0;
+					coords[indexCoords++] = 0;
+				}
 			}
 		}
 		return new VBOContent(dimension, coords);
