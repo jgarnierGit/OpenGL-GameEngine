@@ -49,25 +49,25 @@ public class Player extends Entity {
 	}
 	
 	private void checkInputs() {
-			if (UserInputHandler.isActive(GLFW_KEY_W)) {
+			if (UserInputHandler.activateOnPress(GLFW_KEY_W)) {
 				currentSpeed = RUN_SPEED;
 			}
-			if(UserInputHandler.isActive(GLFW_KEY_S)) {
+			if(UserInputHandler.activateOnPress(GLFW_KEY_S)) {
 				currentSpeed = -RUN_SPEED;
 			}
-			if(!UserInputHandler.isActive(GLFW_KEY_W) && !UserInputHandler.isActive(GLFW_KEY_S)){
+			if(!UserInputHandler.activateOnPress(GLFW_KEY_W) && !UserInputHandler.activateOnPress(GLFW_KEY_S)){
 				currentSpeed = 0;
 			}
-			if(UserInputHandler.isActive(GLFW_KEY_A)) {
+			if(UserInputHandler.activateOnPress(GLFW_KEY_A)) {
 				currentTurnSpeed = - TURN_FLOAT;
 			}
-			if(UserInputHandler.isActive(GLFW_KEY_D)) {
+			if(UserInputHandler.activateOnPress(GLFW_KEY_D)) {
 				currentTurnSpeed = TURN_FLOAT;
 			}
-			if(!UserInputHandler.isActive(GLFW_KEY_A) && !UserInputHandler.isActive(GLFW_KEY_D)){
+			if(!UserInputHandler.activateOnPress(GLFW_KEY_A) && !UserInputHandler.activateOnPress(GLFW_KEY_D)){
 				currentTurnSpeed = 0;
 			}
-			if(UserInputHandler.isActive(GLFW_KEY_SPACE)) {
+			if(UserInputHandler.activateOnPress(GLFW_KEY_SPACE)) {
 				jump();
 			}
 	}

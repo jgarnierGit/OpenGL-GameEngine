@@ -76,14 +76,14 @@ public class Camera {
 	}
 
 	private void calculatePitch() {
-		if(UserInputHandler.isActive(GLFW_MOUSE_BUTTON_MIDDLE)){
+		if(UserInputHandler.activateOnPress(GLFW_MOUSE_BUTTON_MIDDLE)){
 			float ypos =  UserInputHandler.getMouseDeltaY();
 			pitch -= -ypos* 0.5f;
 		}
 	}
 
 	private void calculateAngleAroundPlayer() {
-		if (UserInputHandler.isActive(GLFW_MOUSE_BUTTON_MIDDLE)) {
+		if (UserInputHandler.activateOnPress(GLFW_MOUSE_BUTTON_MIDDLE)) {
 			float xpos = UserInputHandler.getMouseDeltaX();
 			angleAroundPlayer -= xpos *0.5f;
 		}

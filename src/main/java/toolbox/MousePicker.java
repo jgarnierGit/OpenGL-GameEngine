@@ -1,7 +1,9 @@
 package toolbox;
 
-import org.lwjglx.input.Mouse;
-import org.lwjglx.opengl.Display;
+import static org.lwjgl.glfw.GLFW.*;
+
+import java.util.logging.Logger;
+
 import org.lwjglx.util.vector.Matrix4f;
 import org.lwjglx.util.vector.Vector2f;
 import org.lwjglx.util.vector.Vector3f;
@@ -16,11 +18,13 @@ private Vector3f currentRay;
 private Matrix4f projectionMatrix;
 private Matrix4f viewMatrix;
 private Camera camera;
+private Logger logger;
 
 public MousePicker(Camera cam, Matrix4f projection) {
 	this.camera = cam;
 	this.projectionMatrix = projection;
 	this.viewMatrix = Maths.createViewMatrix(cam);
+	this.logger = Logger.getLogger("MousePicker");
 }
 
 public Vector3f getCurrentRay() {
@@ -31,6 +35,24 @@ public Vector3f getCurrentRay() {
 public void update() {
 	viewMatrix = Maths.createViewMatrix(camera);
 	currentRay = calculateMouseRay();
+	log();
+}
+
+private void log() {
+	if(UserInputHandler.activateOnPressOneTime(GLFW_MOUSE_BUTTON_RIGHT)) {
+			float mouseX = UserInputHandler.getMouseXpos();
+			float mouseY = UserInputHandler.getMouseYpos();
+			System.out.println("ViewPort Space ["+mouseX +", "+ mouseY +"]");
+			Vector2f normalizedCoords = getNormalizedDeviceCoords(mouseX, mouseY);
+			System.out.println("Normalized device Space ["+normalizedCoords.x +", "+ normalizedCoords.y +"]");
+			Vector4f clipCoords = new Vector4f(normalizedCoords.x, normalizedCoords.y, -1f, 1f);
+			System.out.println("Homogeneous clip Space ["+clipCoords.x +", "+ clipCoords.y +", "+ clipCoords.z +", "+ clipCoords.w +"]");
+			Vector4f eyeCoords = toEyeCoords(clipCoords);
+			System.out.println("Eye Space ["+eyeCoords.x +", "+ eyeCoords.y +", "+ eyeCoords.z +", "+ eyeCoords.w +"]");
+			Vector3f worldCoords = toWorldCoords(eyeCoords);
+			System.out.println("World Space ["+worldCoords.x +", "+ worldCoords.y +", "+ worldCoords.z +"]");
+			System.out.println("-----");
+	}
 }
 
 private Vector3f calculateMouseRay() {
