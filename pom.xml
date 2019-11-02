@@ -5,7 +5,6 @@
 	<groupId>OpenGL-Game</groupId>
 	<artifactId>OpenGL-Game</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>openGL-GAME</name>
 
 	<properties>
 		<lwjgl.version>3.2.2</lwjgl.version>
@@ -185,6 +184,11 @@
 			<artifactId>mockito-junit-jupiter</artifactId>
 			<version>2.23.0</version>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.6</version>
 		</dependency>
 		<dependency>
 			<groupId>slickutil</groupId>

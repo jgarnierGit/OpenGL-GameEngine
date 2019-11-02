@@ -2,6 +2,7 @@ package renderEngine;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
@@ -14,6 +15,7 @@ import com.mokiat.data.front.parser.MTLMaterial;
 import entities.Entity;
 import models.MTLUtils;
 import models.MaterialMapper;
+import models.MaterialType;
 import models.Model3D;
 import models.OBJUtils;
 import renderEngine.Loader.VBOIndex;
@@ -98,17 +100,17 @@ public class EntityRenderer{
 	}
 
 	private void bindTextures(MTLUtils mtlUtils) {
-		List<MaterialMapper> matList = mtlUtils.getMaterials();
+		List<MaterialMapper> matList = mtlUtils.getMaterials().stream().filter(materialMapper -> materialMapper.getType().equals(MaterialType.IMAGE)).collect(Collectors.toList());
 		for(int i =0; i< matList.size() && i<33; i++) {
 			
 			MTLMaterial texture = matList.get(i).getMaterial();
-			if(texture.getDissolve() < 1.0f || mtlUtils.isHasTransparency()) {
-				MasterRenderer.disableCulling();
-			}
-			shader.loadShineVariable(texture.getSpecularExponent());
-			// below link to sampler2D textureSampler in fragmentShader
-			GL13.glActiveTexture(GLTextureIDIncrementer.GL_TEXTURE_IDS.get(i));
-			GL11.glBindTexture(GL11.GL_TEXTURE_2D, mtlUtils.getTexturesIndexes().get(i));
+				if(texture.getDissolve() < 1.0f || mtlUtils.isHasTransparency()) {
+					MasterRenderer.disableCulling();
+				}
+				shader.loadShineVariable(texture.getSpecularExponent());
+				// below link to sampler2D textureSampler in fragmentShader
+				GL13.glActiveTexture(GLTextureIDIncrementer.GL_TEXTURE_IDS.get(i));
+				GL11.glBindTexture(GL11.GL_TEXTURE_2D, mtlUtils.getTexturesIndexes().get(i));
 		}
 		GL20.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
 	}

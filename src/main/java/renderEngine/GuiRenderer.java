@@ -20,7 +20,7 @@ public class GuiRenderer {
 	private GuiShader shader;
 
 	public GuiRenderer(Loader loader) throws IOException {
-		vaoId = loader.loadGUIToVAO(positions);
+		vaoId = loader.loadToVAO(positions,2);
 		shader = new GuiShader();
 		
 	}

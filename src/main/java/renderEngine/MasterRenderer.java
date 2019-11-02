@@ -34,19 +34,27 @@ public class MasterRenderer {
 	private TerrainShader terrainShader = new TerrainShader();
 	private List<Model3D> terrains = new ArrayList<>();
 	
+	private SkyboxRenderer skyboxRender;
+	
 	private Matrix4f projectionMatrix;
 	
 	private HashMap<Model3D, List<Entity>> entities = new HashMap<>();
 	
-	public MasterRenderer() throws IOException {
+	public MasterRenderer(Loader loader) throws IOException {
 		shader = new StaticShader();
 		enableCulling();
 		createProjectionMatrix();
 		renderer = new EntityRenderer(shader, projectionMatrix);
 		terrainRenderer = new TerrainRenderer(terrainShader, projectionMatrix);
+		skyboxRender = new SkyboxRenderer(loader, projectionMatrix);
 	}
 	
 	
+	public Matrix4f getProjectionMatrix() {
+		return projectionMatrix;
+	}
+
+
 	public static void enableCulling() {
 		GL11.glEnable(GL11.GL_CULL_FACE);
 		GL11.glCullFace(GL11.GL_BACK); // do not render hidden vertices.
@@ -56,20 +64,21 @@ public class MasterRenderer {
 		GL11.glDisable(GL11.GL_CULL_FACE);
 	}
 	
-	public void render(Light sun, Camera camera) {
+	public void render(List<Light> lights, Camera camera) {
 		prepare();
 		shader.start();
 		shader.loadSkyColour(RED, GREEN, BLUE);
 		shader.loadViewMatrix(camera);
-		shader.loadLightColor(sun);
+		shader.loadLightsColor(lights);
 		renderer.render(entities);
 		shader.stop();
 		terrainShader.start();
 		terrainShader.loadSkyColour(RED, GREEN, BLUE);
 		terrainShader.loadViewMatrix(camera);
-		terrainShader.loadLightColor(sun);
+		terrainShader.loadLightsColor(lights);
 		terrainRenderer.render(terrains);
 		terrainShader.stop();
+		skyboxRender.render(camera,RED, GREEN, BLUE);
 		terrains.clear();
 		entities.clear();
 		
