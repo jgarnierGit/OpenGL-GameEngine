@@ -10,8 +10,8 @@ public class UserInputHandler {
 	private static boolean isButtonPressedNow = false;
 	private static float mouseXposition = 0;
 	private static float mouseYposition = 0;
-	private static float originXPos = 0;
-	private static float originYPos = 0;
+	private static float lastMouseXPos = 0;
+	private static float lastMouseYPos = 0;
 	private static float scrollValue = 0;
 	private static boolean isScrollingUp = false;
 
@@ -34,7 +34,7 @@ public class UserInputHandler {
 	}
 	
 	private static void updateMouseInputHandler() {
-		updateMousePosition(false);
+		updateMousePosition();
 		glfwSetMouseButtonCallback(DisplayManager.WINDOW_ID, (long window, int button, int action, int mods) -> {
 			inputs[button] = action != GLFW_RELEASE;
 		});
@@ -68,19 +68,31 @@ public class UserInputHandler {
 		return mouseYposition;
 	}
 	
+	public static float getMouseDeltaX() {
+		return mouseXposition - lastMouseXPos;
+	}
+	
+	public static float getMouseDeltaY() {
+		return mouseYposition - lastMouseYPos;
+	}
+	
 	public static float getScrollValue() {
 		return scrollValue;
 	}
 
-	public static void updateMousePosition(boolean setOrigins) {
+	public static void updateMousePosition() {
 		glfwSetCursorPosCallback(DisplayManager.WINDOW_ID, (long window, double xpos, double ypos) -> {
 			/**	if(setOrigins) {
 					originXPos = (float) xpos;
 					originYPos =(float) ypos;
 					System.out.println("set origin mouse");
 				}**/
-				mouseXposition = (float) (DisplayManager.WIDTH / 2 + originXPos - xpos);
-				mouseYposition = (float) (DisplayManager.HEIGHT / 2 + originYPos - ypos);		
+				// mouseXposition = (float) (DisplayManager.WIDTH / 2 + originXPos - xpos);
+				// mouseYposition = (float) (DisplayManager.HEIGHT / 2 + originYPos - ypos);
+			lastMouseXPos = mouseXposition;
+			lastMouseYPos = mouseYposition;
+			mouseXposition = (float) xpos;
+			mouseYposition = (float) ypos;
 		});
 	}
 
@@ -101,12 +113,4 @@ public class UserInputHandler {
 			}
 		});
 	}**/
-
-	public static void setYOrigin() {
-		updateMousePosition(true);
-	}
-
-	public static void setXOrigin() {
-		updateMousePosition(true);
-	}
 }

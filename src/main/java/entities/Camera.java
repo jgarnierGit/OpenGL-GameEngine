@@ -4,7 +4,7 @@ import static org.lwjgl.glfw.GLFW.*;
 
 import org.lwjglx.util.vector.Vector3f;
 
-
+//poute 
 public class Camera {
 
 	private float distanceFromPlayer = 10;
@@ -76,32 +76,16 @@ public class Camera {
 	}
 
 	private void calculatePitch() {
-		//FIXME isPressed() not working.
-		if (UserInputHandler.isPressed() && UserInputHandler.isActive(GLFW_MOUSE_BUTTON_MIDDLE)) {
-			System.out.println("updating origin");
-			UserInputHandler.setYOrigin();
-		}
 		if(UserInputHandler.isActive(GLFW_MOUSE_BUTTON_MIDDLE)){
-			float ypos =  UserInputHandler.getMouseYpos();
-			//float pitchChange += yposMouse;
-			pitch -= ypos *0.01f;
-		}
-		else {
-
+			float ypos =  UserInputHandler.getMouseDeltaY();
+			pitch -= -ypos* 0.5f;
 		}
 	}
 
 	private void calculateAngleAroundPlayer() {
 		if (UserInputHandler.isActive(GLFW_MOUSE_BUTTON_MIDDLE)) {
-			if(UserInputHandler.isPressed()) {
-				System.out.println("updating origin");
-				UserInputHandler.setXOrigin();
-			}
-			float xpos = UserInputHandler.getMouseXpos();
-			float angleChange = xpos * 0.1f;
-			angleAroundPlayer -= angleChange;
-		}else {
-
+			float xpos = UserInputHandler.getMouseDeltaX();
+			angleAroundPlayer -= xpos *0.5f;
 		}
 	}
 
