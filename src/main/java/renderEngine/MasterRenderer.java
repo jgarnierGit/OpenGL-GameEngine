@@ -14,7 +14,9 @@ import org.lwjglx.util.vector.Matrix4f;
 import entities.Camera;
 import entities.Entity;
 import entities.Light;
-import models.Model3D;
+import modelsLibrary.Ray;
+import modelsManager.Model3D;
+import shaderManager.RayShader;
 import shaderManager.StaticShader;
 import shaderManager.TerrainShader;
 
@@ -22,11 +24,19 @@ public class MasterRenderer {
 	private static final float FOV = 70;
 	private static final float NEAR_PLANE = 0.1f;
 	private static final float FAR_PLANE = 1000;
-	private static final float RED = 0.49f;
-	private static final float BLUE = 0.89f;
-	private static final float GREEN = 0.98f;
+	private static final float RED = 0.55f;
+	private static final float BLUE = 0.64f;
+	private static final float GREEN = 0.75f;
 	
 	
+	public static float getNearPlane() {
+		return NEAR_PLANE;
+	}
+
+	public static float getFarPlane() {
+		return FAR_PLANE;
+	}
+
 	private StaticShader shader;
 	private EntityRenderer renderer;
 	private TerrainRenderer terrainRenderer;
@@ -92,7 +102,7 @@ public class MasterRenderer {
 	 * TODO adapt logic to process list based on same texture but different models?
 	 * @param entity
 	 */
-	public void processEntity(Entity entity) { //TODO review this method, weird logic
+	public void processEntity(Entity entity) {
 		Model3D entityModel = entity.getModel();
 		List<Entity> batch = entities.getOrDefault(entityModel, new ArrayList<>());
 		if(batch.isEmpty()) {

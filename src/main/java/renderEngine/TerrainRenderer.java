@@ -9,12 +9,12 @@ import org.lwjgl.opengl.GL30;
 import org.lwjglx.util.vector.Matrix4f;
 import org.lwjglx.util.vector.Vector3f;
 
-import models.MTLUtils;
-import models.MaterialMapper;
-import models.Model3D;
+import modelsLibrary.Terrain;
+import modelsManager.MTLUtils;
+import modelsManager.MaterialMapper;
+import modelsManager.Model3D;
 import renderEngine.Loader.VBOIndex;
 import shaderManager.TerrainShader;
-import terrains.Terrain;
 import toolbox.GLTextureIDIncrementer;
 import toolbox.Maths;
 

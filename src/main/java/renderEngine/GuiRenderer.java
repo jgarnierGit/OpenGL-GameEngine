@@ -1,6 +1,7 @@
 package renderEngine;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.lwjgl.opengl.GL11;
@@ -16,16 +17,21 @@ import toolbox.Maths;
 
 public class GuiRenderer {
 	private final int vaoId;
-	private final float[] positions = {-1,1,-1,-1,1,1,1,-1};
+	private final float[] positions = {-1,1,-1,-1,1,1,1,-1}; //construction of quad assuming triangle_strip
 	private GuiShader shader;
+	private List<GuiTexture> guis;
 
 	public GuiRenderer(Loader loader) throws IOException {
 		vaoId = loader.loadToVAO(positions,2);
 		shader = new GuiShader();
-		
+		guis = new ArrayList<>();
 	}
 	
-	public void render(List<GuiTexture> gui) {
+	public void addGui(GuiTexture gui) {
+		this.guis.add(gui);
+	}
+	
+	public void render() {
 		shader.start();
 		GL30.glBindVertexArray(vaoId);
 		GL20.glEnableVertexAttribArray(VBOIndex.POSITION_INDEX);
@@ -33,7 +39,7 @@ public class GuiRenderer {
 		GL11.glEnable(GL11.GL_BLEND);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		GL11.glDisable(GL11.GL_DEPTH);
-		for(GuiTexture texture : gui) {
+		for(GuiTexture texture : guis) {
 			GL13.glActiveTexture(GL13.GL_TEXTURE0);
 			GL11.glBindTexture(GL11.GL_TEXTURE_2D, texture.getTexture());
 			Matrix4f matrix = Maths.createTransformationMatrix(texture.getPosition(), texture.getScale());

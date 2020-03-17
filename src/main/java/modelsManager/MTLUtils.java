@@ -1,4 +1,4 @@
-package models;
+package modelsManager;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -138,5 +138,10 @@ public class MTLUtils {
 			}
 		}
 		return null;
+	}
+
+	public static MTLUtils createEmpty() {
+		MTLLibrary mtlLibrary = new MTLLibrary();
+		return  new MTLUtils(mtlLibrary);
 	}
 }

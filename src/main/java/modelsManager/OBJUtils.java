@@ -1,4 +1,4 @@
-package models;
+package modelsManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,7 +18,7 @@ import com.mokiat.data.front.parser.OBJObject;
 import com.mokiat.data.front.parser.OBJTexCoord;
 import com.mokiat.data.front.parser.OBJVertex;
 
-import models.bufferCreator.VBOContent;
+import modelsManager.bufferCreator.VBOContent;
 
 public class OBJUtils {
 	private final int[] indices;
@@ -190,6 +190,7 @@ public class OBJUtils {
 		int materialDimension = 0;
 		int indexMat = 0;
 		float[] matList;
+		//TODO absolutly unclear use of parametrized types... change to builder (materials : 2f / 4f/ none], normals : none if no surfacic )
 		if(materials.get(0) instanceof Vector4f) {
 			materialDimension = 4;
 			matList = new float[materials.size() * 4];

@@ -2,13 +2,14 @@ package entities;
 
 import org.lwjglx.util.vector.Vector3f;
 
-import models.Model3D;
+import modelsManager.Model3D;
 
 public class Entity {
 	private Model3D model;
 	private Vector3f position;
 	private float rotX, rotY, rotZ;
 	private float scale;
+	private boolean selected;
 	public Entity(Model3D model, Vector3f positions, float rotX, float rotY, float rotZ, float scale) {
 		this.model = model;
 		this.position = positions;
@@ -16,6 +17,7 @@ public class Entity {
 		this.rotY = rotY;
 		this.rotZ = rotZ;
 		this.scale = scale;
+		this.selected = false;
 	}
 	
 	public void increasePosition(float dx, float dy, float dz) {
@@ -65,6 +67,18 @@ public class Entity {
 	}
 	public void setScale(float scale) {
 		this.scale = scale;
+	}
+
+	public void select() {
+		selected = true;
+	}
+
+	public boolean isSelected() {
+		return selected;
+	}
+
+	public void unselect() {
+		selected = false;
 	}
 	
 	

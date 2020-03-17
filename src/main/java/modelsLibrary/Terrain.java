@@ -1,4 +1,4 @@
-package terrains;
+package modelsLibrary;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -14,12 +14,12 @@ import org.lwjglx.util.vector.Vector3f;
 import com.mokiat.data.front.error.WFException;
 import com.mokiat.data.front.parser.MTLLibrary;
 
-import models.BlendedMaterialLibraryBuilder;
-import models.MTLUtils;
-import models.Model3D;
-import models.Model3DImporter;
-import models.ModelUtils;
-import models.OBJUtils;
+import modelsManager.BlendedMaterialLibraryBuilder;
+import modelsManager.MTLUtils;
+import modelsManager.Model3D;
+import modelsManager.Model3DImporter;
+import modelsManager.ModelUtils;
+import modelsManager.OBJUtils;
 import renderEngine.Loader;
 import toolbox.Maths;
 

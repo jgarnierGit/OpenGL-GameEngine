@@ -1,4 +1,4 @@
-package models;
+package modelsManager;
 
 import org.lwjglx.util.vector.Vector4f;
 

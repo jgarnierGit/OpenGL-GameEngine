@@ -1,4 +1,4 @@
-package models;
+package modelsManager;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -10,7 +10,7 @@ import renderEngine.Loader;
 
 public abstract class Model3D {
 	private int vaoID;
-	private ModelUtils modelUtils;
+	private ModelUtils modelUtils; //TODO do not use implementation directly.
 	
 	public void createModel(ModelUtils model, Loader loader) throws WFException, FileNotFoundException, IOException {
 		Objects.requireNonNull(loader);

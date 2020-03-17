@@ -1,4 +1,4 @@
-package models;
+package modelsManager;
 
 public enum MaterialType {
 	IMAGE,

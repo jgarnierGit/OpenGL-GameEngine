@@ -1,4 +1,4 @@
-package models;
+package modelsManager;
 
 import com.mokiat.data.front.parser.MTLLibrary;
 import com.mokiat.data.front.parser.OBJModel;
@@ -10,6 +10,11 @@ public class ModelUtils {
 	public ModelUtils(OBJUtils generateTerrain, MTLUtils importTextures) {
 		objUtils = generateTerrain;
 		mtlUtils = importTextures;
+	}
+	
+	public ModelUtils(OBJUtils generateTerrain) {
+		objUtils = generateTerrain;
+		mtlUtils = MTLUtils.createEmpty();
 	}
 	public OBJUtils getOBJUtils() {
 		return objUtils;

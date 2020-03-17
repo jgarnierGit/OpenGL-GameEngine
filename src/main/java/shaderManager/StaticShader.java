@@ -28,6 +28,7 @@ public class StaticShader extends ShaderProgram {
 	private int location_useFakeLighting;
 	private int location_skyColour;
 	private int location_useImage;
+	private int location_isSelected;
 	
 	public StaticShader() throws IOException {
 		super(VERTEX_FILE,FRAGMENT_FILE);
@@ -61,6 +62,7 @@ public class StaticShader extends ShaderProgram {
 			location_lightColor[i] = super.getUniformLocation("lightColor["+ i+"]");
 			location_attenuation[i] = super.getUniformLocation("atenuation["+ i+"]");
 		}
+		location_isSelected = super.getUniformLocation("isSelected");
 	}
 	
 	public void loadSkyColour(float r, float g, float b) {
@@ -110,5 +112,9 @@ public class StaticShader extends ShaderProgram {
 				super.loadVector(location_attenuation[i], new Vector3f(1,0,0));
 			}
 		}
+	}
+
+	public void loadSelected(boolean selected) {
+		super.loadBoolean(location_isSelected, selected);
 	}
 }

@@ -19,10 +19,11 @@ import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 import org.newdawn.slick.opengl.PNGDecoder;
 import org.newdawn.slick.opengl.PNGDecoder.Format;
+
+import modelsManager.ModelUtils;
+
 import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
-
-import models.ModelUtils;
 
 /**
  * Handles the loading of geometry data into VAOs. It also keeps track of all

@@ -1,4 +1,4 @@
-package models.bufferCreator;
+package modelsManager.bufferCreator;
 
 public class VBOContent {
 	private int dimension;

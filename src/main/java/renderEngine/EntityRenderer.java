@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.lwjgl.opengl.ARBClipControl;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL20;
@@ -13,11 +14,11 @@ import org.lwjglx.util.vector.Matrix4f;
 import com.mokiat.data.front.parser.MTLMaterial;
 
 import entities.Entity;
-import models.MTLUtils;
-import models.MaterialMapper;
-import models.MaterialType;
-import models.Model3D;
-import models.OBJUtils;
+import modelsManager.MTLUtils;
+import modelsManager.MaterialMapper;
+import modelsManager.MaterialType;
+import modelsManager.Model3D;
+import modelsManager.OBJUtils;
 import renderEngine.Loader.VBOIndex;
 import shaderManager.StaticShader;
 import toolbox.GLTextureIDIncrementer;
@@ -64,6 +65,7 @@ public class EntityRenderer{
 			for(Entity entity : batch) {
 				prepareInstance(entity);
 				GL11.glDrawElements(GL11.GL_TRIANGLES, MasterRenderer.storeDataInIntBuffer(objUtil.getIndices()));
+				//GL11.glDrawArrays(GL11.GL_POINTS, 0, objUtil.getPositions().getContent().length);
 			}
 			unbindTextureModel();
 		}
@@ -128,6 +130,7 @@ public class EntityRenderer{
 	private void prepareInstance(Entity entity) {
 		Matrix4f transformationMatrix = Maths.createTransformationMatrix(entity.getPositions(), entity.getRotX(), entity.getRotY(), entity.getRotZ(), entity.getScale());
 		shader.loadTransformationMatrix(transformationMatrix);
+		shader.loadSelected(entity.isSelected());
 	}
 	
 	/** 

@@ -13,6 +13,7 @@ out vec3 surfaceNormal;
 out vec3 tolightVector[4];
 out vec3 toCameraVector;
 out float visibility;
+out float pass_isSelected;
 
 uniform mat4 transformationMatrix;
 uniform mat4 projectionMatrix;
@@ -21,6 +22,7 @@ uniform vec3 lightPosition[4];
 
 uniform float useFakeLighting;
 uniform float useImage;
+uniform float isSelected;
 
 const float density = 0.003;
 const float gradient = 6;
@@ -33,6 +35,7 @@ void main(void){
 	pass_textureCoords = textureCoords;
 	pass_color = colors;
 	pass_useImage = useImage;
+	pass_isSelected = isSelected;
 	vec3 actualNormals = normals;
 	if(useFakeLighting > 0.5){
 		actualNormals = vec3(0.0,1.0,0.0);
@@ -40,7 +43,7 @@ void main(void){
 	
 	surfaceNormal = (transformationMatrix * vec4(actualNormals,0.0)).xyz;
 	for(int i=0; i<4; i++){
-		tolightVector[i] = lightPosition[i] - worldPosition.xyz;
+		tolightVector[i] = lightPosition[i] - worldPosition.xyz; //calculate light vector to active point to render
 	}
 	
 	toCameraVector = (inverse(viewMatrix) * vec4(0.0,0.0,0.0,1.0)).xyz - worldPosition.xyz;

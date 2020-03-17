@@ -4,13 +4,15 @@ import static org.lwjgl.glfw.GLFW.*;
 
 import org.lwjglx.util.vector.Vector3f;
 
+import modelsLibrary.Terrain;
+
 //poute 
 public class Camera {
 
 	private float distanceFromPlayer = 10;
 	private float angleAroundPlayer;
 
-	private Vector3f position = new Vector3f(0,0,-20);
+	private Vector3f position = new Vector3f(0,40,-20);
 	private float pitch = 20;
 	private float yaw = 50;
 	private float roll = 0;
@@ -53,13 +55,16 @@ public class Camera {
 		return roll;
 	}
 
-	private void calculateCameraPosition(float horizontalDist, float verticalDist) {
+	private void calculateCameraPosition(Terrain terrain, float horizontalDist, float verticalDist) {
 		float theta = player.getRotY() + angleAroundPlayer;
 		float offsetX = (float) (horizontalDist * Math.sin(Math.toRadians(theta)));
 		float offsetZ = (float) (horizontalDist * Math.cos(Math.toRadians(theta)));
 		position.x = player.getPositions().x - offsetX;
 		position.z = player.getPositions().z - offsetZ;
-		position.y = player.getPositions().y + verticalDist;
+		//System.out.println("camera x: "+ position.x);
+		//System.out.println("camera y: "+ position.y);
+		float y = player.getPositions().y + verticalDist;
+		position.y = terrain.getHeight(position.x, position.z) +1 > y ? terrain.getHeight(position.x, position.z) + 1 : y;
 	}
 
 	private float calculateHorizontalDistance() {
@@ -92,8 +97,9 @@ public class Camera {
 	/**
 	 * Do not use Keyboard library, (lwjgl 2 compatible). use GLFW instead
 	 * Tip : english keyboard.
+	 * @param terrain 
 	 */
-	public void move() {
+	public void move(Terrain terrain) {
 		calculateAngleAroundPlayer();
 		calculatePitch();
 
@@ -101,7 +107,7 @@ public class Camera {
 		calculateZoom();
 		float horizontalDist = calculateHorizontalDistance();
 		float verticalDist = calculateVerticalDistance();
-		calculateCameraPosition(horizontalDist,verticalDist);
+		calculateCameraPosition(terrain,horizontalDist,verticalDist);
 		this.yaw = 180 - (player.getRotY() + angleAroundPlayer);
 	}
 }
