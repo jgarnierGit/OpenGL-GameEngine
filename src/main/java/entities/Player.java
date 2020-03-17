@@ -3,9 +3,9 @@ package entities;
 import static org.lwjgl.glfw.GLFW.*;
 import org.lwjglx.util.vector.Vector3f;
 
-import models.Model3D;
+import modelsLibrary.Terrain;
+import modelsManager.Model3D;
 import renderEngine.DisplayManager;
-import terrains.Terrain;
 
 public class Player extends Entity {
 	private static final float RUN_SPEED = 20;
@@ -32,7 +32,7 @@ public class Player extends Entity {
 		super.increasePosition(dx, 0, dz);
 		upwardSpeed -= GRAVITY * DisplayManager.getFrameTimeSeconds();
 		super.increasePosition(0, upwardSpeed * DisplayManager.getFrameTimeSeconds(), 0);
-		float terrainHeight = ((Terrain) terrain).getHeight(super.getPositions().x, super.getPositions().z);
+		float terrainHeight = terrain.getHeight(super.getPositions().x, super.getPositions().z);
 		if(super.getPositions().y < terrainHeight) {
 			upwardSpeed = 0;
 			super.getPositions().y = terrainHeight;
