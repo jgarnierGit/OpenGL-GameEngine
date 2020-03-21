@@ -135,8 +135,7 @@ public class MousePicker {
 	private void showRayToScreen(Vector3f start, Vector3f end) {
 		//ray = new Ray(orig, rayCasting, this.loader);
 		//fakeRay.setOriginePositions(new Vector3f(terrainPoint.x,terrainPoint.y +7, terrainPoint.z));
-		rayRenderer.setWorldPosition(new Vector3f(start.x, start.y, start.z));
-		rayRenderer.setRayEndPosition(new Vector3f(1f,1f,1f));
+		rayRenderer.setRayEndPosition(new Vector3f(this.camera.getPosition().x,this.camera.getPosition().y,this.camera.getPosition().z));
 	}
 
 	/**

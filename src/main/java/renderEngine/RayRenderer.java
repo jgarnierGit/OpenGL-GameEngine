@@ -16,7 +16,6 @@ import org.lwjglx.util.vector.Vector3f;
 
 import entities.Camera;
 import entities.Entity;
-import modelsLibrary.LineGeom;
 import modelsLibrary.PointGeom;
 import modelsLibrary.Ray;
 import renderEngine.Loader.VBOIndex;
@@ -26,7 +25,6 @@ import toolbox.Maths;
 
 public class RayRenderer {
 	private PointGeom point;
-	private LineGeom geom;
 	private Ray ray;
 	private RayShader rayShader;
 	//private List<Ray> rays = new ArrayList<>();
@@ -39,9 +37,9 @@ public class RayRenderer {
 		
 		//rays.add(ray);
 		//point = new PointGeom(loader);
-		geom = new LineGeom(new Vector3f(0,0,0), loader);
+
 		rayShader.start();
-		ray = new Ray(new Vector3f(0,0,0), new Vector3f(0,0,0), loader);
+		ray = new Ray(loader);
 		rayShader.loadProjectionMatrix(projectionMatrix);
 		rayShader.stop();
 	}
@@ -58,16 +56,20 @@ public class RayRenderer {
 			// Disable distance filtering.
 			GL11.glDisable(GL11.GL_DEPTH);
 			//GL11.glEnable(GL11.GL_POINT_SMOOTH);
-			GL11.glPointSize(20);
+			GL11.glLineWidth(5); //GL_LINES
+			//GL11.glPointSize(20); GL_POINTS
 			//useNoTexture(0);
 			//GL11.glDrawArrays(GL11.GL_POINTS, 0,1);//drawArrays needed to draw points with GL_POINTS, not GL_POINT
-			updateViewModelMatrix(ray.getWorldPositionVector3f(),0f,1f,viewMatrix);
-			GL11.glDrawArrays(GL11.GL_POINTS, 0, geom.getPoints().length); //ray.getVertexOrderList().length
+			//updateViewModelMatrix(ray.getWorldPositionVector3f(),0f,1f,viewMatrix);
+			rayShader.loadModelViewMatrix(viewMatrix);
+			//System.out.println(ray.getPoints().toString());
+			GL11.glDrawArrays(GL11.GL_LINES, 0, ray.getPoints().length/2); //ray.getVertexOrderList().length
 			//rayShader.loadRay(ray);
 			unbindTerrain();
 			//GL30.glDeleteVertexArrays(ray.getVaoID());
 			//GL11.glDisable(GL11.GL_POINT_SMOOTH);
-			GL11.glPointSize(1);
+			//GL11.glPointSize(1);
+			GL11.glLineWidth(1);
 			GL11.glEnable(GL11.GL_DEPTH);
 		rayShader.stop();
 	}
@@ -87,8 +89,7 @@ private void useNoTexture(int id) {
 		 */
 		private void prepare() {
 			rayShader.start();
-			System.out.println(geom.getVaoId());
-			GL30.glBindVertexArray(geom.getVaoId());
+			GL30.glBindVertexArray(ray.getVaoId());
 			GL20.glEnableVertexAttribArray(VBOIndex.POSITION_INDEX);
 		}
 		
@@ -97,9 +98,9 @@ private void useNoTexture(int id) {
 		 * So we alter viewMatrix in java instead of in shader because simplier.
 		 * @param model
 		 */
-		private void updateViewModelMatrix(Vector3f position, float rotation, float scale, Matrix4f viewMatrix) {
+	/**	private void updateViewModelMatrix(Vector3f position, float rotation, float scale, Matrix4f viewMatrix) {
 		/**	Matrix4f transformationMatrix = Maths.createTransformationMatrix(model.getPositionVector3f(), 0, 0, 0, 1);
-			rayShader.loadTransformationMatrix(transformationMatrix);**/
+			rayShader.loadTransformationMatrix(transformationMatrix);** /
 			Matrix4f modelMatrix = new Matrix4f();
 			Matrix4f.translate(position, modelMatrix, modelMatrix);
 			modelMatrix.m00 = viewMatrix.m00;
@@ -115,7 +116,7 @@ private void useNoTexture(int id) {
 			Matrix4f.scale(new Vector3f(scale, scale, scale), modelMatrix, modelMatrix);
 			Matrix4f modelViewMatrix = Matrix4f.mul(viewMatrix, modelMatrix, null);
 			rayShader.loadModelViewMatrix(modelViewMatrix);
-		}
+		} **/
 		
 		/** 
 		 * TODO refactor to facilitate renderer file creation.
@@ -131,11 +132,7 @@ private void useNoTexture(int id) {
 			rayShader.cleanUp();
 		}
 
-		public void setWorldPosition(Vector3f vector3f) {
-			this.ray.setWorldPosition(vector3f);
-		}
-
 		public void setRayEndPosition(Vector3f vector3f) {
-			this.geom.setEndPosition(vector3f);
+			this.ray.setEndPosition(vector3f);
 		}
 }

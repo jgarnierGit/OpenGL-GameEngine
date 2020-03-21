@@ -84,6 +84,12 @@ public class Loader {
 		unbindVAO();
 		return vaoId;
 	}
+	
+	public void reloadVAOPosition(int vaoId, float[] positions, int dimensions) {
+		GL30.glBindVertexArray(vaoId);
+		this.storeDataFloatInAttrList(VBOIndex.POSITION_INDEX, dimensions, positions);
+		unbindVAO();
+	}
 
 	public int loadTexture(String name) {
 		try (InputStream image = Loader.class.getClassLoader().getResourceAsStream("2D/" + name)) {
@@ -151,6 +157,7 @@ public class Loader {
 	private int createVAO() {
 		int vaoID = GL30.glGenVertexArrays();
 		vaos.add(vaoID);
+		System.out.println(vaos);
 		GL30.glBindVertexArray(vaoID);
 		return vaoID;
 	}
