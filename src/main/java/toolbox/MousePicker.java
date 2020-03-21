@@ -98,15 +98,14 @@ public class MousePicker {
 			Vector3f worldCoords = toWorldCoords(eyeCoords);
 			System.out.println("World Space [" + worldCoords.x + ", " + worldCoords.y + ", " + worldCoords.z + "]");
 			System.out.println("-----");
-			//showRayToScreen(normalizedCoords);
 			rayCasting(worldCoords);
 		}
 	}
 
 	private void rayCasting(Vector3f worldCoords) {
 		Vector3f rayCasting = new Vector3f(worldCoords.x * 5, worldCoords.y * 5, worldCoords.z * 5);
-		Vector3f orig = new Vector3f(0, 0, MasterRenderer.getNearPlane());
-
+		Vector3f orig = new Vector3f(this.camera.getPosition().x, this.camera.getPosition().y, this.camera.getPosition().z);
+		rayRenderer.reloadPositions(orig,rayCasting);
 		/**
 		 * List<Entity> filteredEntities = this.entities.stream().filter(entity -> {
 		 * return (entity.getPositions().x - 0.01 < worldCoords.x &&
@@ -123,19 +122,6 @@ public class MousePicker {
 		} else {
 			System.out.println("nothing selected");
 		}
-	}
-
-	/**
-	 * TODO debug ray adding to screen with a simplier example.
-	 * 
-	 * @param orig
-	 * @param rayCasting
-	 * @param worldCoords 
-	 */
-	private void showRayToScreen(Vector3f start, Vector3f end) {
-		//ray = new Ray(orig, rayCasting, this.loader);
-		//fakeRay.setOriginePositions(new Vector3f(terrainPoint.x,terrainPoint.y +7, terrainPoint.z));
-		rayRenderer.setRayEndPosition(new Vector3f(this.camera.getPosition().x,this.camera.getPosition().y,this.camera.getPosition().z));
 	}
 
 	/**
@@ -242,7 +228,7 @@ public class MousePicker {
 			System.out.println(start);
 			System.out.println("end");
 			System.out.println(endPoint);
-			showRayToScreen(start,endPoint);
+			rayRenderer.reloadPositions(start,endPoint);
 			}
 		}
 
@@ -250,7 +236,7 @@ public class MousePicker {
 			float half = start + ((finish - start) / 2f);
 			if (count >= RECURSION_COUNT) {
 				Vector3f endPoint = getPointOnRay(ray, half);
-				logPointOnRay(camera.getPosition(),endPoint);
+				//logPointOnRay(camera.getPosition(),endPoint);
 				Terrain terrain = getTerrain(endPoint.getX(), endPoint.getZ());
 				if (terrain != null) {
 					return endPoint;

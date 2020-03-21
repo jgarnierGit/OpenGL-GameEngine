@@ -31,6 +31,26 @@ public class Ray{
 		points[5] = end.z;
 		loader.reloadVAOPosition(vaoId, points,3);
 	}
+
+
+	public void setStartPosition(Vector3f start) {
+		points[0] = start.x;
+		points[1] = start.y;
+		points[2] = start.z;
+		loader.reloadVAOPosition(vaoId, points,3);
+	}
+	
+	public void reloadPositions(Vector3f start, Vector3f end) {
+		points[0] = start.x;
+		points[1] = start.y;
+		points[2] = start.z;
+		points[3] = end.x;
+		points[4] = end.y;
+		points[5] = end.z;
+		loader.reloadVAOPosition(vaoId, points,3);
+	}
+	
+	
 	
 /**	public void setRayEndPosition(Vector3f end) {
 		//Vector3f length = Vector3f.sub(worldPosition, end, null);

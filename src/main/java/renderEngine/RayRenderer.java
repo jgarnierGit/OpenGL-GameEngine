@@ -135,4 +135,12 @@ private void useNoTexture(int id) {
 		public void setRayEndPosition(Vector3f vector3f) {
 			this.ray.setEndPosition(vector3f);
 		}
+
+		public void setRayBeginPosition(Vector3f start) {
+			this.ray.setStartPosition(start);
+		}
+
+		public void reloadPositions(Vector3f start, Vector3f endPoint) {
+			this.ray.reloadPositions(start, endPoint);
+		}
 }
