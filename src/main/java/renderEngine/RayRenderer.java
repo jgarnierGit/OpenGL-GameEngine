@@ -56,7 +56,7 @@ public class RayRenderer {
 			// Disable distance filtering.
 			GL11.glDisable(GL11.GL_DEPTH);
 			//GL11.glEnable(GL11.GL_POINT_SMOOTH);
-			GL11.glLineWidth(5); //GL_LINES
+			GL11.glLineWidth(2); //seems to have a max cap unlike PointSize. for GL_LINES
 			//GL11.glPointSize(20); GL_POINTS
 			//useNoTexture(0);
 			//GL11.glDrawArrays(GL11.GL_POINTS, 0,1);//drawArrays needed to draw points with GL_POINTS, not GL_POINT

@@ -33,7 +33,7 @@ public class MouseLogger implements IMouseBehaviour {
 
 	@Override
 	public void process(Vector3f ray) {
-		// FIXME need many click to be interpreted
+		// FIXME why need many click to be interpreted
 		if (UserInputHandler.activateOnPressOneTime(GLFW_MOUSE_BUTTON_LEFT)) {
 			rayCasting(ray);
 			//log();

@@ -6,7 +6,10 @@ import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.io.IOUtils;
 import org.lwjgl.BufferUtils;
@@ -36,15 +39,24 @@ import org.newdawn.slick.opengl.TextureLoader;
 public class Loader {
 
 	public class VBOIndex {
-		public final static int POSITION_INDEX = 0;
-		public final static int TEXTURE_INDEX = 1;
-		public final static int NORMAL_INDEX = 2;
+		public static final int POSITION_INDEX = 0;
+		public static final int TEXTURE_INDEX = 1;
+		public static final int NORMAL_INDEX = 2;
 		public static final int COLOR_INDEX = 3;
+		private VBOIndex() {}
 	}
 
-	private List<Integer> vaos = new ArrayList<Integer>();
-	private List<Integer> vbos = new ArrayList<Integer>();
-	private List<Integer> texturesToClean = new ArrayList<Integer>();
+	/**
+	 * improve that part by linking : vao  1.n -> 1.n vbo;
+	 * vao may contains one or more vbo,
+	 * vbo may be shared by many vao.
+	 * reloading / deleting shared vbos affects each concerned vao.
+	 * 
+	 * vbos are loaded once vao is binded.
+	 * Doing so, this might optimized reload of position which at this state froze render for <0.5sec
+	 */
+	private Map<Integer, VboManager> vaos = new HashMap<>();
+	private List<Integer> texturesToClean = new ArrayList<>();
 
 	/**
 	 * Creates a VAO and stores the position data of the vertices into attribute 0
@@ -54,24 +66,24 @@ public class Loader {
 	 * @return VAOId linked to the loaded model.
 	 */
 	public int loadModelToVAO(ModelUtils modelUtils) {
-		int vaoID = createVAO();
+		int vaoID = createAndBindVAO();
 		// OBJUtils objUtils, MTLUtils mtlUtils
-		bindIndicesBuffer(modelUtils.getOBJUtils().getIndices());
+		bindIndicesBuffer(vaoID, modelUtils.getOBJUtils().getIndices());
 		// TODO refactor architecture.
-		storeDataFloatInAttrList(VBOIndex.POSITION_INDEX, modelUtils.getOBJUtils().getPositions().getDimension(),
+		storeDataFloatInAttrList(vaoID, VBOIndex.POSITION_INDEX, modelUtils.getOBJUtils().getPositions().getDimension(),
 				modelUtils.getOBJUtils().getPositions().getContent());
 		if (modelUtils.getMtlUtils().isUsingImage()) {
-			storeDataFloatInAttrList(VBOIndex.TEXTURE_INDEX, modelUtils.getOBJUtils().getMaterial().getDimension(),
+			storeDataFloatInAttrList(vaoID, VBOIndex.TEXTURE_INDEX, modelUtils.getOBJUtils().getMaterial().getDimension(),
 					modelUtils.getOBJUtils().getMaterial().getContent());
 			float[] emptyColor = { 0.0f, 0.0f, 0.0f, 0.0f };
-			storeDataFloatInAttrList(VBOIndex.COLOR_INDEX, 4, emptyColor);
+			storeDataFloatInAttrList(vaoID, VBOIndex.COLOR_INDEX, 4, emptyColor);
 		} else {
 			float[] emptyTexture = { 0.0f, 0.0f };
-			storeDataFloatInAttrList(VBOIndex.TEXTURE_INDEX, 2, emptyTexture);
-			storeDataFloatInAttrList(VBOIndex.COLOR_INDEX, modelUtils.getOBJUtils().getMaterial().getDimension(),
+			storeDataFloatInAttrList(vaoID, VBOIndex.TEXTURE_INDEX, 2, emptyTexture);
+			storeDataFloatInAttrList(vaoID, VBOIndex.COLOR_INDEX, modelUtils.getOBJUtils().getMaterial().getDimension(),
 					modelUtils.getOBJUtils().getMaterial().getContent());
 		}
-		storeDataFloatInAttrList(VBOIndex.NORMAL_INDEX, modelUtils.getOBJUtils().getNormals().getDimension(),
+		storeDataFloatInAttrList(vaoID, VBOIndex.NORMAL_INDEX, modelUtils.getOBJUtils().getNormals().getDimension(),
 				modelUtils.getOBJUtils().getNormals().getContent());
 		unbindVAO();
 		texturesToClean.addAll(modelUtils.getMtlUtils().getTexturesIndexes());
@@ -79,15 +91,15 @@ public class Loader {
 	}
 
 	public int loadToVAO(float[] positions, int dimensions) {
-		int vaoId = createVAO();
-		this.storeDataFloatInAttrList(VBOIndex.POSITION_INDEX, dimensions, positions);
+		int vaoId = createAndBindVAO();
+		this.storeDataFloatInAttrList(vaoId, VBOIndex.POSITION_INDEX, dimensions, positions);
 		unbindVAO();
 		return vaoId;
 	}
 	
 	public void reloadVAOPosition(int vaoId, float[] positions, int dimensions) {
 		GL30.glBindVertexArray(vaoId);
-		this.storeDataFloatInAttrList(VBOIndex.POSITION_INDEX, dimensions, positions);
+		this.storeDataFloatInAttrList(vaoId, VBOIndex.POSITION_INDEX, dimensions, positions);
 		unbindVAO();
 	}
 
@@ -136,17 +148,14 @@ public class Loader {
 	 * located in video memory.
 	 */
 	public void cleanUp() {
-		for (int vao : vaos) {
-			GL30.glDeleteVertexArrays(vao);
+		for (Entry<Integer, VboManager> vboManager : vaos.entrySet()) {
+			GL30.glDeleteVertexArrays(vboManager.getKey());
+			vboManager.getValue().clean();
 		}
-		for (int vbo : vbos) {
-			GL15.glDeleteBuffers(vbo);
-		}
-		for (int texture : texturesToClean) {
+		for (int texture : texturesToClean) {//TODO delete.
 			GL11.glDeleteTextures(texture);
 		}
 	}
-
 	/**
 	 * Creates a new VAO, makes it active by binding it, and returns its ID. A VAO
 	 * holds geometry data that we can render and is physically stored in memory on
@@ -154,10 +163,10 @@ public class Loader {
 	 * 
 	 * @return The ID of the newly created VAO.
 	 */
-	private int createVAO() {
+	private int createAndBindVAO() {
 		int vaoID = GL30.glGenVertexArrays();
-		vaos.add(vaoID);
-		System.out.println(vaos);
+		VboManager vaoManager = new VboManager();
+		vaos.put(vaoID,vaoManager);
 		GL30.glBindVertexArray(vaoID);
 		return vaoID;
 	}
@@ -172,15 +181,28 @@ public class Loader {
 	 * @param arrayList       - The geometry data to be stored in the VAO, in this
 	 *                        case the positions of the vertices.
 	 */
-	private void storeDataFloatInAttrList(int attributeNumber, int coordinateSize, float[] arrayList) {
-		int vboID = GL15.glGenBuffers();
-
-		vbos.add(vboID);
+	private void storeDataFloatInAttrList(int vaoID, int attributeNumber, int coordinateSize, float[] arrayList) {
+		int vboID = 0;
+		if(!this.vaos.get(vaoID).getVbos().containsKey(attributeNumber)) {
+			vboID = GL15.glGenBuffers();
+		}
+		else {
+			vboID = this.vaos.get(vaoID).getVbos().get(attributeNumber);
+		}
+		
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboID);
 		FloatBuffer buffer = storeDataInFloatBuffer(arrayList);
+		//Use STATIC_DRAW when the data store contents will be modified once and used many times.
+		//Use DYNAMIC_DRAW when the data store contents will be modified repeatedly and used many times.
+		//Use STREAM_DRAW when the data store contents will be modified once and used at most a few times.
+		// does not really affect perfs. those are hints not constraints.
 		GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, GL15.GL_STATIC_DRAW);
+		//TODO might be useless to rebind vbo to vao if vbo already exists and is already binded to vao.
 		GL20.glVertexAttribPointer(attributeNumber, coordinateSize, GL11.GL_FLOAT, false, 0, 0);
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+		this.vaos.get(vaoID).addVbo(attributeNumber, vboID);
+		System.out.println("vbos");
+		System.out.println(vaos);
 	}
 
 	/**
@@ -207,11 +229,12 @@ public class Loader {
 
 	/**
 	 * 
+	 * @param vaoID 
 	 * @param indices
 	 */
-	private void bindIndicesBuffer(int[] indices) {
+	private void bindIndicesBuffer(int vaoID, int[] indices) {
 		int vboId = GL15.glGenBuffers();
-		vbos.add(vboId);
+		vaos.get(vaoID).addUnmutableVbo(vboId);
 		GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, vboId);
 		IntBuffer buffer = storeDataInIntBuffer(indices);
 		GL15.glBufferData(GL15.GL_ELEMENT_ARRAY_BUFFER, buffer, GL15.GL_STATIC_DRAW);
