@@ -37,7 +37,6 @@ public class MouseLogger implements IMouseBehaviour {
 		if (UserInputHandler.activateOnPressOneTime(GLFW_MOUSE_BUTTON_LEFT)) {
 			rayCasting(ray);
 			//log();
-			entities.clear();
 		}
 	}
 
@@ -147,6 +146,11 @@ public class MouseLogger implements IMouseBehaviour {
 			Vector3f rayCastingShorter = new Vector3f(maxX, maxY, maxZ);
 			return filterInDistance(filteredEntities, minRayCast, rayCastingShorter, ++iteration, true);
 		}
+	}
+	
+	
+	public void clear() {
+		entities.clear();
 	}
 
 }
