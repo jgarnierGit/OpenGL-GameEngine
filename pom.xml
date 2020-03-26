@@ -13,6 +13,7 @@
 		<version.non-maven>1.0.0</version.non-maven>
 		<version.maven-install-plugin>2.5.2</version.maven-install-plugin>
 		<version.java-data-front.non-maven>v2.0.0</version.java-data-front.non-maven>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
 	<build>
