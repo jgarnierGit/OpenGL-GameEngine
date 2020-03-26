@@ -40,7 +40,6 @@ public class MasterRenderer {
 	private StaticShader shader;
 	private EntityRenderer renderer;
 	private TerrainRenderer terrainRenderer;
-	//TODO FIXME instanciation + composition  is this a good idea?
 	private TerrainShader terrainShader = new TerrainShader();
 	private List<Model3D> terrains = new ArrayList<>();
 	

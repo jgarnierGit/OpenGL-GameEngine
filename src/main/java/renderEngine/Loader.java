@@ -99,6 +99,7 @@ public class Loader {
 	
 	public void reloadVAOPosition(int vaoId, float[] positions, int dimensions) {
 		GL30.glBindVertexArray(vaoId);
+		vaos.get(vaoId).clean(); //TODO not working to clean previous geom... find way for debugging GL_LINES render.
 		this.storeDataFloatInAttrList(vaoId, VBOIndex.POSITION_INDEX, dimensions, positions);
 		unbindVAO();
 	}
@@ -156,6 +157,15 @@ public class Loader {
 			GL11.glDeleteTextures(texture);
 		}
 	}
+	
+	/**
+	 * only delete in memory, not cleaning 3D world.
+	 * @param vaoId
+	 */
+	public void clean(int vaoId) {
+		GL30.glDeleteVertexArrays(vaoId);
+		vaos.get(vaoId).clean();
+	}
 	/**
 	 * Creates a new VAO, makes it active by binding it, and returns its ID. A VAO
 	 * holds geometry data that we can render and is physically stored in memory on
@@ -201,8 +211,6 @@ public class Loader {
 		GL20.glVertexAttribPointer(attributeNumber, coordinateSize, GL11.GL_FLOAT, false, 0, 0);
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 		this.vaos.get(vaoID).addVbo(attributeNumber, vboID);
-		System.out.println("vbos");
-		System.out.println(vaos);
 	}
 
 	/**
@@ -256,5 +264,4 @@ public class Loader {
 		buffer.flip();
 		return buffer;
 	}
-
 }

@@ -3,9 +3,17 @@ package toolbox.mousePicker.MouseBehaviour;
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.TreeMap;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.lwjgl.opengl.GL11;
 import org.lwjglx.util.vector.Matrix4f;
 import org.lwjglx.util.vector.Vector2f;
 import org.lwjglx.util.vector.Vector3f;
@@ -14,6 +22,8 @@ import org.lwjglx.util.vector.Vector4f;
 import entities.Camera;
 import entities.Entity;
 import entities.UserInputHandler;
+import modelsLibrary.Ray;
+import renderEngine.Loader;
 import renderEngine.MasterRenderer;
 import renderEngine.RayRenderer;
 import toolbox.Maths;
@@ -22,21 +32,29 @@ public class MouseLogger implements IMouseBehaviour {
 	private List<Entity> entities;
 	private Camera camera;
 	private RayRenderer rayRenderer;
+	private Ray ray;
 	private Matrix4f viewMatrix;
+	private Vector3f camPos;
+	private Loader loader;
+	private static final int BOUNDING_BOX = 4;
 
-	public MouseLogger(Camera camera, RayRenderer rayRenderer) {
+	public MouseLogger(Camera camera, RayRenderer rayRenderer, Loader loader) {
 		this.entities = new ArrayList<>();
 		this.camera = camera;
-		this.rayRenderer = rayRenderer;
+		this.rayRenderer = rayRenderer; //TODO I want to render via a DrawGeomRenderer using logic as simple as RayRenderer, but I want to specify what I render (GL_POINTS, TRIANGLES, LINES) dynamically. same logic will fit with others Renderer. 
 		this.viewMatrix = Maths.createViewMatrix(camera);
+		this.loader = loader;
+		this.ray = new Ray(this.loader);
 	}
 
 	@Override
 	public void process(Vector3f ray) {
 		// FIXME why need many click to be interpreted
 		if (UserInputHandler.activateOnPressOneTime(GLFW_MOUSE_BUTTON_LEFT)) {
+			cleanSelected();
+			this.camPos = camera.getPosition();
+			// ray is with world origin.
 			rayCasting(ray);
-			//log();
 		}
 	}
 
@@ -45,54 +63,105 @@ public class MouseLogger implements IMouseBehaviour {
 			entity.unselect();
 		}
 	}
+	
+	/**
+	 * Apply distance given by distance and orientation from cursorRay to camera position
+	 * @param cursorRay always starts from mouse coordinates.
+	 * @param distance
+	 * @return Vector3f 3D position of cursor click + distance transformation.
+	 */
+	private Vector3f getPointOnRay(Vector3f cursorRay, float distance) {
+		Vector3f start = new Vector3f(camPos.x, camPos.y, camPos.z);
+		Vector3f scaledRay = new Vector3f(cursorRay.x * distance, cursorRay.y * distance, cursorRay.z * distance);
+		return Vector3f.add(start, scaledRay, null);
+	}
 
-	/**private void log() {
-		cleanSelected();
-		float mouseX = UserInputHandler.getMouseXpos();
-		float mouseY = UserInputHandler.getMouseYpos();
-		System.out.println("ViewPort Space [" + mouseX + ", " + mouseY + "]");
-		Vector2f normalizedCoords = getNormalizedDeviceCoords(mouseX, mouseY);
-		System.out.println("Normalized device Space [" + normalizedCoords.x + ", " + normalizedCoords.y + "]");
-		Vector4f clipCoords = new Vector4f(normalizedCoords.x, normalizedCoords.y, -1f, 1f);
-		System.out.println("Homogeneous clip Space [" + clipCoords.x + ", " + clipCoords.y + ", " + clipCoords.z + ", "
-				+ clipCoords.w + "]");
-		Vector4f eyeCoords = toEyeCoords(clipCoords);
-		System.out.println(
-				"Eye Space [" + eyeCoords.x + ", " + eyeCoords.y + ", " + eyeCoords.z + ", " + eyeCoords.w + "]");
-		Vector3f worldCoords = toWorldCoords(eyeCoords);
-		System.out.println("World Space [" + worldCoords.x + ", " + worldCoords.y + ", " + worldCoords.z + "]");
-		System.out.println("-----");
-		rayCasting(worldCoords);
-	} **/
-
-	private void rayCasting(Vector3f worldCoords) {
-		Vector3f rayCasting = new Vector3f(worldCoords.x * 5, worldCoords.y * 5, worldCoords.z * 5);
-		Vector3f orig = new Vector3f(this.camera.getPosition().x, this.camera.getPosition().y,
-				this.camera.getPosition().z);
-		rayRenderer.reloadPositions(orig, rayCasting);
-		/**
-		 * List<Entity> filteredEntities = this.entities.stream().filter(entity -> {
-		 * return (entity.getPositions().x - 0.01 < worldCoords.x &&
-		 * entity.getPositions().x + 0.01 > worldCoords.x) && (entity.getPositions().y -
-		 * 0.01 < worldCoords.y && entity.getPositions().y + 0.01 > worldCoords.y);
-		 * }).collect(Collectors.toList()); TODO decomment filtering when debug is done.
-		 **/
-		Entity selectedEntity = filterInDistance(this.entities, orig, rayCasting, 0, false);
-		if (selectedEntity != null) {
-			System.out.println(selectedEntity.getModel().getClass() + " is selected");
-			selectedEntity.select();
-			Vector3f objectWorld = objectToWorldCoord(selectedEntity.getPositions());
-			System.out.println(objectWorld);
+	private void rayCasting(Vector3f mouseCoord) {
+		System.out.println("mouseCoord");
+		System.out.println(mouseCoord);
+		Float distance = 5f;
+		Vector3f origRay = getPointOnRay(mouseCoord, 0);
+		Vector3f endRay = getPointOnRay(mouseCoord, distance);
+		/**System.out.println("origRay");
+		System.out.println(origRay);
+		System.out.println("endRay");
+		System.out.println(endRay);**/
+		this.ray.addPoint(origRay); 
+		
+		/**System.out.println(this.entities);
+		this.entities.forEach(entity -> {
+			System.out.println("entity");
+			System.out.println(entity.getPositions());
+		});**/
+		Optional<Entity> selectedEntity = rayMarching(mouseCoord, 0f, distance);
+		if (selectedEntity.isPresent()) {
+			Entity entity = selectedEntity.get();
+			System.out.println(entity.getModel().getClass() + " is selected");
+			entity.select();
+			//Vector3f objectWorld = objectToWorldCoord(selectedEntity.getPositions());
+			System.out.println(entity.getPositions());
 		} else {
 			System.out.println("nothing selected");
 		}
+		System.out.println(ray);
+		this.ray.reloadPositions();
+		this.rayRenderer.process(this.ray, GL11.GL_POINTS);
 	}
 	
-	private Vector3f objectToWorldCoord(Vector3f objectPosition) {
+	private Optional<Entity> rayMarching(Vector3f mouseCoord, Float startPointDistance, Float distance) {
+		Vector3f beginRay = getPointOnRay(mouseCoord, startPointDistance);
+		if(distance > MasterRenderer.getFarPlane()) {
+			distance =  MasterRenderer.getFarPlane();
+			Vector3f endRay = getPointOnRay(mouseCoord, distance);
+			return getMatchingEntities(beginRay, endRay);
+		}
+		Vector3f endRay = getPointOnRay(mouseCoord, distance);
+		this.ray.addPoint(endRay);
+		Optional<Entity> matchedEntity = getMatchingEntities(beginRay, endRay);
+		if(matchedEntity.isPresent()) {
+			return matchedEntity;
+		}
+		return rayMarching(mouseCoord, distance, distance * 2);
+	}
+
+	/**
+	 * TODO transform entity position using viewMatrix so we can easily order by distance using z coordinate.
+	 * find each Entity between beginRay and endRay
+	 * @param endRay
+	 * @return nearest Entity if any
+	 */
+	private Optional<Entity> getMatchingEntities(Vector3f beginRay, Vector3f endRay) {
+		Map<Entity, Vector3f> entitiesViewPosition = this.entities.stream().collect(Collectors.toMap(Function.identity(), Entity::getPositions)); 
+		TreeMap<Float, Entity> result = entitiesViewPosition.entrySet().stream().filter(entry -> {
+			Entity entity = entry.getKey();
+			Vector3f worldPositionEntity = entity.getPositions(); //TODO print entity position point.
+			if((worldPositionEntity.x + BOUNDING_BOX <= endRay.x && worldPositionEntity.x + BOUNDING_BOX  >= beginRay.x) ||
+					(worldPositionEntity.x - BOUNDING_BOX <= endRay.x && worldPositionEntity.x - BOUNDING_BOX  >= beginRay.x) ||
+					(worldPositionEntity.y + BOUNDING_BOX <= endRay.y && worldPositionEntity.y + BOUNDING_BOX  >= beginRay.y) ||
+					(worldPositionEntity.y - BOUNDING_BOX <= endRay.y && worldPositionEntity.y - BOUNDING_BOX  >= beginRay.y) ||
+					(worldPositionEntity.z + BOUNDING_BOX <= endRay.z && worldPositionEntity.z + BOUNDING_BOX  >= beginRay.z) ||
+					(worldPositionEntity.z - BOUNDING_BOX <= endRay.z && worldPositionEntity.z - BOUNDING_BOX  >= beginRay.z)) {
+				return true;
+			}
+			return false;
+		}).collect(Collectors.toMap(entity -> objectToWorldCoord(entity.getKey()).z, Entry::getKey, (o1,o2) -> o1, TreeMap::new));
+		if(result.isEmpty()) {
+			return Optional.empty();
+		}
+		return Optional.of(result.firstEntry().getValue());
+	}
+
+	private Vector3f objectToWorldCoord(Entity entity) {
+		System.out.println(entity.getModel());
+		Vector3f objectPosition = entity.getPositions();
+		System.out.println("worldCoord");
+		System.out.println(objectPosition);
 		Vector4f objectPos4f = new Vector4f(objectPosition.x, objectPosition.y, objectPosition.z, 1f);
 		Vector4f objectWorld = Matrix4f.transform(viewMatrix, objectPos4f, null);
 		Vector3f objectToWorld = new Vector3f(objectWorld.x, objectWorld.y, objectWorld.z);
 		objectToWorld.normalise();
+		System.out.println("viewWorld");
+		System.out.println(objectToWorld);
 		return objectToWorld;
 	}
 
@@ -112,7 +181,8 @@ public class MouseLogger implements IMouseBehaviour {
 			int iteration, boolean gotResult) {
 		// TODO update filtering.
 		List<Entity> filteredInZ = filteredEntities.stream().filter(entity -> {
-			Vector3f objectWorld = objectToWorldCoord(entity.getPositions());
+			Vector3f objectWorld = entity.getPositions(); //objectToWorldCoord(
+			//System.out.println(entity.getPositions());
 			return objectWorld.z < maxRayCast.z && objectWorld.z > minRayCast.z;
 		}).collect(Collectors.toList());
 
@@ -132,7 +202,7 @@ public class MouseLogger implements IMouseBehaviour {
 				maxY = maxRayCast.y + (maxRayCast.y - minRayCast.y);
 			}
 			// cap to max rendered distance.
-			if (maxZ > MasterRenderer.getFarPlane()) {
+			if (maxZ > MasterRenderer.getFarPlane()) { //TODO cannot be just a coordinate. as to be a distance calculated by vector.
 				maxZ = MasterRenderer.getFarPlane();
 				maxX = (maxRayCast.x * (MasterRenderer.getFarPlane() / maxRayCast.z));
 				maxY = (maxRayCast.y * (MasterRenderer.getFarPlane() / maxRayCast.z));

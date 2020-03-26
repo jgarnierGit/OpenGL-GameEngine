@@ -4,11 +4,18 @@ import org.lwjglx.util.vector.Vector3f;
 
 import entities.Camera;
 import modelsLibrary.Terrain;
+import renderEngine.MasterRenderer;
 
+/**
+ * Ray casting start from max distance : if not subterrain positionned, return, else divide by 2 and affine position until RECURSION_COUNT is reached.
+ * @author chezmoi
+ *
+ */
 public class MouseOnTerrainMover implements IMouseBehaviour  {
 	private Terrain terrain;
 	private Camera camera;
 	private Vector3f currentTerrainPoint;
+	private Vector3f camPos;
 	
 	public MouseOnTerrainMover(Terrain terrain, Camera camera) {
 		this.terrain = terrain;
@@ -24,8 +31,9 @@ public class MouseOnTerrainMover implements IMouseBehaviour  {
 
 	@Override
 	public void process(Vector3f ray) {
-		if (intersectionInRange(0, RAY_RANGE, ray)) {
-			currentTerrainPoint = binarySearch(0, 0, RAY_RANGE, ray);
+		this.camPos = camera.getPosition();
+		if (intersectionInRange(0, MasterRenderer.getFarPlane(), ray)) {
+			currentTerrainPoint = binarySearch(0, 0, MasterRenderer.getFarPlane(), ray);
 		} else {
 			currentTerrainPoint = null;
 		}
@@ -35,7 +43,6 @@ public class MouseOnTerrainMover implements IMouseBehaviour  {
 		float half = start + ((finish - start) / 2f);
 		if (count >= RECURSION_COUNT) {
 			Vector3f endPoint = getPointOnRay(ray, half);
-			//logPointOnRay(camera.getPosition(),endPoint);
 			Terrain terrain = getTerrain(endPoint.getX(), endPoint.getZ());
 			if (terrain != null) {
 				return endPoint;
@@ -51,7 +58,6 @@ public class MouseOnTerrainMover implements IMouseBehaviour  {
 	}
 	
 	private Vector3f getPointOnRay(Vector3f ray, float distance) {
-		Vector3f camPos = camera.getPosition();
 		Vector3f start = new Vector3f(camPos.x, camPos.y, camPos.z);
 		Vector3f scaledRay = new Vector3f(ray.x * distance, ray.y * distance, ray.z * distance);
 		return Vector3f.add(start, scaledRay, null);
@@ -68,10 +74,10 @@ public class MouseOnTerrainMover implements IMouseBehaviour  {
 	}
 
 	private boolean isUnderGround(Vector3f testPoint) {
-		Terrain terrain = getTerrain(testPoint.getX(), testPoint.getZ());
+		Terrain activeTerrain = getTerrain(testPoint.getX(), testPoint.getZ());
 		float height = 0;
-		if (terrain != null) {
-			height = terrain.getHeight(testPoint.getX(), testPoint.getZ());
+		if (activeTerrain != null) {
+			height = activeTerrain.getHeight(testPoint.getX(), testPoint.getZ());
 		}
 		if (testPoint.y < height) {
 			return true;

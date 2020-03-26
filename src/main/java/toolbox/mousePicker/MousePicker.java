@@ -1,5 +1,7 @@
 package toolbox.mousePicker;
 
+import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -32,12 +34,34 @@ public class MousePicker {
 
 	public void update() {
 		viewMatrix = Maths.createViewMatrix(camera);
+		// currentRay has coordinate near world(0,0,0) : has to be used as a delta to
+		// apply to camera position.
 		Vector3f currentRay = calculateMouseRay();
-		for(IMouseBehaviour behaviour: mouseBehaviours) {
+		//log();
+		for (IMouseBehaviour behaviour : mouseBehaviours) {
 			behaviour.process(currentRay);
 		}
 	}
-	
+
+	private void log() {
+		if (UserInputHandler.activateOnPressOneTime(GLFW_MOUSE_BUTTON_LEFT)) {
+			float mouseX = UserInputHandler.getMouseXpos();
+			float mouseY = UserInputHandler.getMouseYpos();
+			System.out.println("ViewPort Space [" + mouseX + ", " + mouseY + "]");
+			Vector2f normalizedCoords = getNormalizedDeviceCoords(mouseX, mouseY);
+			System.out.println("Normalized device Space [" + normalizedCoords.x + ", " + normalizedCoords.y + "]");
+			Vector4f clipCoords = new Vector4f(normalizedCoords.x, normalizedCoords.y, -1f, 1f);
+			System.out.println("Homogeneous clip Space [" + clipCoords.x + ", " + clipCoords.y + ", " + clipCoords.z
+					+ ", " + clipCoords.w + "]");
+			Vector4f eyeCoords = toEyeCoords(clipCoords);
+			System.out.println(
+					"Eye Space [" + eyeCoords.x + ", " + eyeCoords.y + ", " + eyeCoords.z + ", " + eyeCoords.w + "]");
+			Vector3f worldCoords = toWorldCoords(eyeCoords);
+			System.out.println("World Space [" + worldCoords.x + ", " + worldCoords.y + ", " + worldCoords.z + "]");
+			System.out.println("-----");
+		}
+	}
+
 	public void addMouseBehaviour(IMouseBehaviour mouseBehaviour) {
 		this.mouseBehaviours.add(mouseBehaviour);
 	}
@@ -46,16 +70,21 @@ public class MousePicker {
 		float mouseX = UserInputHandler.getMouseXpos();
 		float mouseY = UserInputHandler.getMouseYpos();
 		Vector2f normalizedCoords = getNormalizedDeviceCoords(mouseX, mouseY);
-		Vector4f clipCoords = new Vector4f(normalizedCoords.x, normalizedCoords.y, -1f, 1f); //pointing into the screen
+		Vector4f clipCoords = new Vector4f(normalizedCoords.x, normalizedCoords.y, -1f, 1f); // pointing into the screen
 		Vector4f eyeCoords = toEyeCoords(clipCoords);
 		return toWorldCoords(eyeCoords);
 	}
 
+	/**
+	 * Origin of cursor Point becomes the world(0,0,0) 
+	 * @param eyeCoords
+	 * @return
+	 */
 	private Vector3f toWorldCoords(Vector4f eyeCoords) {
 		Matrix4f invertedView = Matrix4f.invert(viewMatrix, null);
 		Vector4f rayWorld = Matrix4f.transform(invertedView, eyeCoords, null);
 		Vector3f mouseRay = new Vector3f(rayWorld.x, rayWorld.y, rayWorld.z);
-		mouseRay.normalise();//just want to be a direction
+		mouseRay.normalise();// just want to be a direction
 		return mouseRay;
 	}
 

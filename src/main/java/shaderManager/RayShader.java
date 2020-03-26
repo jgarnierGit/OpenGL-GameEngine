@@ -14,7 +14,7 @@ public class RayShader extends ShaderProgram {
 	private static final String FRAGMENT_FILE= "rayFragmentShader.txt";
 	private int location_transformationMatrix;
 	private int projectionMatrix;
-	private int location_modelViewMatrix;
+	private int location_viewMatrix;
 	
 	public RayShader() throws IOException {
 		super(VERTEX_FILE,FRAGMENT_FILE);
@@ -24,7 +24,7 @@ public class RayShader extends ShaderProgram {
 	protected void getAllUniformLocation() {
 		//location_transformationMatrix = super.getUniformLocation("transformationMatrix");
 		projectionMatrix = super.getUniformLocation("projectionMatrix");
-		location_modelViewMatrix = super.getUniformLocation("modelViewMatrix");
+		location_viewMatrix = super.getUniformLocation("viewMatrix");
 	}
 
 	@Override
@@ -45,7 +45,7 @@ public class RayShader extends ShaderProgram {
 		super.loadMatrix(projectionMatrix,projection);
 	}
 
-	public void loadModelViewMatrix(Matrix4f modelViewMatrix) {
-		super.loadMatrix(location_modelViewMatrix, modelViewMatrix);
+	public void loadViewMatrix(Matrix4f viewMatrix) {
+		super.loadMatrix(location_viewMatrix, viewMatrix);
 	}
 }
