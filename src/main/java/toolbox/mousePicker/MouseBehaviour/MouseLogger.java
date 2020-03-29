@@ -42,7 +42,6 @@ public class MouseLogger implements IMouseBehaviour {
 		this.entities = new ArrayList<>();
 		this.camera = camera;
 		this.rayRenderer = rayRenderer; //TODO I want to render via a DrawGeomRenderer using logic as simple as RayRenderer, but I want to specify what I render (GL_POINTS, TRIANGLES, LINES) dynamically. same logic will fit with others Renderer. 
-		this.viewMatrix = Maths.createViewMatrix(camera);
 		this.loader = loader;
 		this.ray = new Ray(this.loader);
 	}
@@ -54,6 +53,7 @@ public class MouseLogger implements IMouseBehaviour {
 			cleanSelected();
 			this.ray.resetRay();
 			this.camPos = camera.getPosition();
+			this.viewMatrix = Maths.createViewMatrix(camera);
 			// ray is with world origin.
 			rayCasting(ray);
 		}
@@ -90,7 +90,6 @@ public class MouseLogger implements IMouseBehaviour {
 		} else {
 			System.out.println("nothing selected");
 		}
-		System.out.println(ray);
 		this.ray.reloadPositions();
 		this.rayRenderer.process(this.ray, GL11.GL_POINTS);
 		this.rayRenderer.process(this.ray, GL11.GL_LINE_STRIP);

@@ -38,7 +38,6 @@ public class Ray {
 		List<Float> temp = rayPoints.stream().map(ray -> Arrays.asList(ray.x, ray.y, ray.z)).flatMap(Collection::stream)
 				.collect(Collectors.toList());
 		points = ArrayUtils.toPrimitive(temp.toArray(new Float[rayPoints.size() * 3]));**/
-		System.out.println(Arrays.toString(points));
 		loader.reloadVAOPosition(vaoId, points, 3);
 	}
 

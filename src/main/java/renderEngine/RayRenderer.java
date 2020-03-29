@@ -58,7 +58,6 @@ public class RayRenderer {
 	private void renderByMode(Ray ray) {
 		int dataLength = 0;
 		// cf https://www.khronos.org/opengl/wiki/Primitive => internal gl logic, hidden for DrawArrays usage;
-		// TODO why print always a point at origin...
 		int verticesCount = ray.getPoints().length / 3;
 		for(int glRenderMode : ray.getRenderModes()) {
 			// GL11.glEnable(GL11.GL_POINT_SMOOTH);
