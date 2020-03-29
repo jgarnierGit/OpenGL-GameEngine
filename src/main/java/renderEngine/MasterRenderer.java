@@ -69,6 +69,10 @@ public class MasterRenderer {
 		GL11.glCullFace(GL11.GL_BACK); // do not render hidden vertices.
 	}
 	
+	/**
+	 * Allow to render geometries defined in anticlockwise turn.
+	 * Clockwise detection is useful to not render faces oriented backward to camera.
+	 */
 	public static void disableCulling() {
 		GL11.glDisable(GL11.GL_CULL_FACE);
 	}

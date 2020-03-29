@@ -52,6 +52,7 @@ public class MouseLogger implements IMouseBehaviour {
 		// FIXME why need many click to be interpreted
 		if (UserInputHandler.activateOnPressOneTime(GLFW_MOUSE_BUTTON_LEFT)) {
 			cleanSelected();
+			this.ray.resetRay();
 			this.camPos = camera.getPosition();
 			// ray is with world origin.
 			rayCasting(ray);
@@ -86,7 +87,7 @@ public class MouseLogger implements IMouseBehaviour {
 		System.out.println(origRay);
 		System.out.println("endRay");
 		System.out.println(endRay);**/
-		this.ray.addPoint(origRay); 
+	//	this.ray.addPoint(origRay); 
 		
 		/**System.out.println(this.entities);
 		this.entities.forEach(entity -> {
@@ -106,6 +107,7 @@ public class MouseLogger implements IMouseBehaviour {
 		System.out.println(ray);
 		this.ray.reloadPositions();
 		this.rayRenderer.process(this.ray, GL11.GL_POINTS);
+		this.rayRenderer.process(this.ray, GL11.GL_LINE_STRIP);
 	}
 	
 	private Optional<Entity> rayMarching(Vector3f mouseCoord, Float startPointDistance, Float distance) {

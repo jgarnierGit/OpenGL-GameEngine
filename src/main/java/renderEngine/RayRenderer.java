@@ -3,7 +3,9 @@ package renderEngine;
 import java.io.IOException;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
@@ -24,8 +26,7 @@ import toolbox.GLTextureIDIncrementer;
 import toolbox.Maths;
 
 public class RayRenderer {
-	private Ray ray;
-	private int glRenderMode;
+	private List<Ray> rays;
 	private RayShader rayShader;
 	private Camera camera;
 
@@ -33,45 +34,60 @@ public class RayRenderer {
 		this.rayShader = new RayShader();
 		this.camera = camera;
 		rayShader.start();
-
+		this.rays = new ArrayList<>();
 		rayShader.loadProjectionMatrix(projectionMatrix);
 		rayShader.stop();
 	}
 
 	public void render() {
-		if(ray == null) {
-			return;
+		for(Ray ray : rays) {
+			prepare(ray);
+			Matrix4f viewMatrix = Maths.createViewMatrix(camera);
+			rayShader.loadViewMatrix(viewMatrix);
+			
+			// Disable distance filtering.
+			GL11.glDisable(GL11.GL_DEPTH);
+			renderByMode(ray);	
+			unbindRay();
+			// GL11.glLineWidth(1);
+			GL11.glEnable(GL11.GL_DEPTH);
+			rayShader.stop();
 		}
+	}
+
+	private void renderByMode(Ray ray) {
 		int dataLength = 0;
-		switch(glRenderMode) {
-		case GL11.GL_POINTS:
-			dataLength = ray.getPoints().length;
-			break;
-		case GL11.GL_LINES:
-			dataLength = ray.getPoints().length /2;
-			break;
-		default :
-			System.err.println("unsupported render mode: "+ glRenderMode);
-			return;
+		// cf https://www.khronos.org/opengl/wiki/Primitive
+		// TODO why print always a point at origin...
+		int verticesCount = ray.getPoints().length / 3;
+		for(int glRenderMode : ray.getRenderModes()) {
+			switch (glRenderMode) {
+			case GL11.GL_LINE_STRIP:
+			case GL11.GL_TRIANGLE_STRIP:
+			case GL11.GL_LINE_LOOP:
+			case GL11.GL_POINTS:
+				dataLength = verticesCount; 
+				break;
+			case GL11.GL_LINES:
+				dataLength = verticesCount / 2;
+				break;
+			case GL11.GL_TRIANGLES:
+				dataLength = verticesCount / 3;
+				break;
+			case GL11.GL_TRIANGLE_FAN:
+				dataLength = verticesCount - 2;
+				break;
+			default:
+				System.err.println("unsupported render mode: " + glRenderMode);
+				return;
+			}
+			// GL11.glEnable(GL11.GL_POINT_SMOOTH);
+			// GL11.glLineWidth(2); //seems to have a max cap unlike PointSize. for GL_LINES
+			GL11.glPointSize(5); // GL_POINTS
+			// GL11.drawArrays can draw points with GL_POINTS, not GL_POINT
+			GL11.glDrawArrays(glRenderMode, 0, dataLength); //
+			GL11.glPointSize(1);
 		}
-		
-		prepare();
-		Matrix4f viewMatrix = Maths.createViewMatrix(camera);
-
-		// Disable distance filtering.
-		GL11.glDisable(GL11.GL_DEPTH);
-		// GL11.glEnable(GL11.GL_POINT_SMOOTH);
-		// GL11.glLineWidth(2); //seems to have a max cap unlike PointSize. for GL_LINES
-		GL11.glPointSize(5); // GL_POINTS
-		//GL11.drawArrays can draw points with GL_POINTS, not GL_POINT
-		rayShader.loadViewMatrix(viewMatrix);
-
-		GL11.glDrawArrays(glRenderMode, 0,dataLength);
-		unbindTerrain();
-		GL11.glPointSize(1);
-		// GL11.glLineWidth(1);
-		GL11.glEnable(GL11.GL_DEPTH);
-		rayShader.stop();
 	}
 
 	/**
@@ -79,9 +95,10 @@ public class RayRenderer {
 	 * VAO it needs to be made active, and we can do this by binding it. We also
 	 * need to enable the relevant attributes of the VAO, which in this case is just
 	 * attribute 0 where we stored the position data.
-	 * @param ray2 
+	 * 
+	 * @param ray2
 	 */
-	private void prepare() {
+	private void prepare(Ray ray) {
 		rayShader.start();
 		GL30.glBindVertexArray(ray.getVaoId());
 		GL20.glEnableVertexAttribArray(VBOIndex.POSITION_INDEX);
@@ -115,7 +132,7 @@ public class RayRenderer {
 	 * TODO refactor to facilitate renderer file creation. After rendering we unbind
 	 * the VAO and disable the attribute.
 	 */
-	private void unbindTerrain() {
+	private void unbindRay() {
 		GL20.glDisableVertexAttribArray(VBOIndex.POSITION_INDEX);
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 		GL30.glBindVertexArray(0);
@@ -126,7 +143,7 @@ public class RayRenderer {
 	}
 
 	public void process(Ray ray2, int glRenderMode) {
-		this.ray = ray2;
-		this.glRenderMode = glRenderMode;
+		ray2.addRenderMode(glRenderMode);
+		this.rays.add(ray2);
 	}
 }

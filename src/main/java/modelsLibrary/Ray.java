@@ -16,13 +16,13 @@ import renderEngine.Loader;
 public class Ray {
 	private int vaoId;
 	private Loader loader;
-	List<Vector3f> rayPoints;
-	private float[] points = new float[] { -0f, 0f, -0f, 1f, 1f, 1f };
+	private List<Integer> glRenderModes;
+	private float[] points = new float[] {};
 
 	public Ray(Loader loader) {
 		this.loader = loader;
 		vaoId = loader.loadToVAO(points, 3);
-		rayPoints = new ArrayList<>();
+		this.glRenderModes = new ArrayList<>();
 	}
 
 	public int getVaoId() {
@@ -32,31 +32,19 @@ public class Ray {
 	public float[] getPoints() {
 		return points;
 	}
-/**
-	public void setEndPosition(Vector3f end) {
-		points[3] = end.x;
-		points[4] = end.y;
-		points[5] = end.z;
-		loader.reloadVAOPosition(vaoId, points, 3);
-	}
-
-	public void setStartPosition(Vector3f start) {
-		points[0] = start.x;
-		points[1] = start.y;
-		points[2] = start.z;
-		loader.reloadVAOPosition(vaoId, points, 3);
-	}*/
 
 	public void reloadPositions() {
-		Arrays.asList(rayPoints.get(0).x, rayPoints.get(0).y, rayPoints.get(0).z);
+		/**Arrays.asList(rayPoints.get(0).x, rayPoints.get(0).y, rayPoints.get(0).z);
 		List<Float> temp = rayPoints.stream().map(ray -> Arrays.asList(ray.x, ray.y, ray.z)).flatMap(Collection::stream)
 				.collect(Collectors.toList());
-		points = ArrayUtils.toPrimitive(temp.toArray(new Float[rayPoints.size() * 3]));
+		points = ArrayUtils.toPrimitive(temp.toArray(new Float[rayPoints.size() * 3]));**/
+		System.out.println(Arrays.toString(points));
 		loader.reloadVAOPosition(vaoId, points, 3);
 	}
 
 	public void addPoint(Vector3f endRay) {
-		rayPoints.add(endRay);
+		float[] newPoints = ArrayUtils.addAll(points, endRay.x,endRay.y,endRay.z);//points
+		points = newPoints;
 	}
 
 	@Override
@@ -64,9 +52,21 @@ public class Ray {
 		return "Ray " + vaoId + " [points=" + Arrays.toString(points) + "]";
 	}
 
-	/**
-	 * public void setRayEndPosition(Vector3f end) { //Vector3f length =
-	 * Vector3f.sub(worldPosition, end, null); geom.setEndPosition(end); //= new
-	 * LineGeom(end, this.loader); }
-	 **/
+	public void resetRay() {
+		points = new float[] {};
+	}
+
+	public static Ray copy(Ray ray2) {
+		Ray ray = new Ray(ray2.loader);
+		ray.points = ray.getPoints();
+		return ray;
+	}
+
+	public List<Integer> getRenderModes() {
+		return this.glRenderModes;
+	}
+
+	public void addRenderMode(int glRenderMode2) {
+		this.glRenderModes.add(glRenderMode2);
+	}
 }
