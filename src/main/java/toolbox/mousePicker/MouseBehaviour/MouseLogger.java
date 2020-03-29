@@ -78,22 +78,8 @@ public class MouseLogger implements IMouseBehaviour {
 	}
 
 	private void rayCasting(Vector3f mouseCoord) {
-		System.out.println("mouseCoord");
-		System.out.println(mouseCoord);
 		Float distance = 5f;
-		Vector3f origRay = getPointOnRay(mouseCoord, 0);
-		Vector3f endRay = getPointOnRay(mouseCoord, distance);
-		/**System.out.println("origRay");
-		System.out.println(origRay);
-		System.out.println("endRay");
-		System.out.println(endRay);**/
-	//	this.ray.addPoint(origRay); 
-		
-		/**System.out.println(this.entities);
-		this.entities.forEach(entity -> {
-			System.out.println("entity");
-			System.out.println(entity.getPositions());
-		});**/
+		printBoundingBoxes();
 		Optional<Entity> selectedEntity = rayMarching(mouseCoord, 0f, distance);
 		if (selectedEntity.isPresent()) {
 			Entity entity = selectedEntity.get();
@@ -110,11 +96,62 @@ public class MouseLogger implements IMouseBehaviour {
 		this.rayRenderer.process(this.ray, GL11.GL_LINE_STRIP);
 	}
 	
+	private void printBoundingBoxes() {
+		List<Ray> boundingBoxes = new ArrayList<>();
+		this.entities.forEach(entity -> {
+			Ray boundingBox = new Ray(this.loader);
+			Vector3f worldPositionEntity = entity.getPositions();
+			boundingBox.addPoint(new Vector3f(worldPositionEntity.x - BOUNDING_BOX, worldPositionEntity.y - BOUNDING_BOX, worldPositionEntity.z + BOUNDING_BOX));
+			boundingBox.addPoint(new Vector3f(worldPositionEntity.x - BOUNDING_BOX, worldPositionEntity.y + BOUNDING_BOX, worldPositionEntity.z + BOUNDING_BOX));
+		
+			boundingBox.addPoint(new Vector3f(worldPositionEntity.x - BOUNDING_BOX, worldPositionEntity.y + BOUNDING_BOX, worldPositionEntity.z + BOUNDING_BOX));
+			boundingBox.addPoint(new Vector3f(worldPositionEntity.x + BOUNDING_BOX, worldPositionEntity.y + BOUNDING_BOX, worldPositionEntity.z + BOUNDING_BOX));
+			
+			boundingBox.addPoint(new Vector3f(worldPositionEntity.x + BOUNDING_BOX, worldPositionEntity.y + BOUNDING_BOX, worldPositionEntity.z + BOUNDING_BOX));
+			boundingBox.addPoint(new Vector3f(worldPositionEntity.x + BOUNDING_BOX, worldPositionEntity.y - BOUNDING_BOX, worldPositionEntity.z + BOUNDING_BOX));
+			
+			boundingBox.addPoint(new Vector3f(worldPositionEntity.x + BOUNDING_BOX, worldPositionEntity.y - BOUNDING_BOX, worldPositionEntity.z + BOUNDING_BOX));
+			boundingBox.addPoint(new Vector3f(worldPositionEntity.x - BOUNDING_BOX, worldPositionEntity.y - BOUNDING_BOX, worldPositionEntity.z + BOUNDING_BOX));
+			
+			boundingBox.addPoint(new Vector3f(worldPositionEntity.x - BOUNDING_BOX, worldPositionEntity.y - BOUNDING_BOX, worldPositionEntity.z + BOUNDING_BOX));
+			boundingBox.addPoint(new Vector3f(worldPositionEntity.x - BOUNDING_BOX, worldPositionEntity.y - BOUNDING_BOX, worldPositionEntity.z - BOUNDING_BOX));
+			
+			boundingBox.addPoint(new Vector3f(worldPositionEntity.x - BOUNDING_BOX, worldPositionEntity.y - BOUNDING_BOX, worldPositionEntity.z - BOUNDING_BOX));
+			boundingBox.addPoint(new Vector3f(worldPositionEntity.x + BOUNDING_BOX, worldPositionEntity.y - BOUNDING_BOX, worldPositionEntity.z - BOUNDING_BOX));
+		
+			boundingBox.addPoint(new Vector3f(worldPositionEntity.x + BOUNDING_BOX, worldPositionEntity.y - BOUNDING_BOX, worldPositionEntity.z - BOUNDING_BOX));
+			boundingBox.addPoint(new Vector3f(worldPositionEntity.x + BOUNDING_BOX, worldPositionEntity.y - BOUNDING_BOX, worldPositionEntity.z + BOUNDING_BOX));
+			
+			
+			boundingBox.addPoint(new Vector3f(worldPositionEntity.x + BOUNDING_BOX, worldPositionEntity.y - BOUNDING_BOX, worldPositionEntity.z - BOUNDING_BOX));
+			boundingBox.addPoint(new Vector3f(worldPositionEntity.x + BOUNDING_BOX, worldPositionEntity.y + BOUNDING_BOX, worldPositionEntity.z - BOUNDING_BOX));
+			
+			boundingBox.addPoint(new Vector3f(worldPositionEntity.x + BOUNDING_BOX, worldPositionEntity.y + BOUNDING_BOX, worldPositionEntity.z - BOUNDING_BOX));
+			boundingBox.addPoint(new Vector3f(worldPositionEntity.x + BOUNDING_BOX, worldPositionEntity.y + BOUNDING_BOX, worldPositionEntity.z + BOUNDING_BOX));
+		
+			boundingBox.addPoint(new Vector3f(worldPositionEntity.x + BOUNDING_BOX, worldPositionEntity.y + BOUNDING_BOX, worldPositionEntity.z - BOUNDING_BOX));
+			boundingBox.addPoint(new Vector3f(worldPositionEntity.x - BOUNDING_BOX, worldPositionEntity.y + BOUNDING_BOX, worldPositionEntity.z - BOUNDING_BOX));
+		
+			boundingBox.addPoint(new Vector3f(worldPositionEntity.x - BOUNDING_BOX, worldPositionEntity.y + BOUNDING_BOX, worldPositionEntity.z - BOUNDING_BOX));
+			boundingBox.addPoint(new Vector3f(worldPositionEntity.x - BOUNDING_BOX, worldPositionEntity.y + BOUNDING_BOX, worldPositionEntity.z + BOUNDING_BOX));
+			
+			boundingBox.addPoint(new Vector3f(worldPositionEntity.x - BOUNDING_BOX, worldPositionEntity.y + BOUNDING_BOX, worldPositionEntity.z - BOUNDING_BOX));
+			boundingBox.addPoint(new Vector3f(worldPositionEntity.x - BOUNDING_BOX, worldPositionEntity.y - BOUNDING_BOX, worldPositionEntity.z - BOUNDING_BOX));
+			boundingBoxes.add(boundingBox);
+
+		});
+		for(Ray bbox : boundingBoxes) {
+			bbox.reloadPositions();
+			this.rayRenderer.process(bbox, GL11.GL_LINES);
+		}
+	}
+
 	private Optional<Entity> rayMarching(Vector3f mouseCoord, Float startPointDistance, Float distance) {
 		Vector3f beginRay = getPointOnRay(mouseCoord, startPointDistance);
 		if(distance > MasterRenderer.getFarPlane()) {
 			distance =  MasterRenderer.getFarPlane();
 			Vector3f endRay = getPointOnRay(mouseCoord, distance);
+			this.ray.addPoint(endRay);
 			return getMatchingEntities(beginRay, endRay);
 		}
 		Vector3f endRay = getPointOnRay(mouseCoord, distance);

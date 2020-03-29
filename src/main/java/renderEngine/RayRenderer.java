@@ -57,36 +57,17 @@ public class RayRenderer {
 
 	private void renderByMode(Ray ray) {
 		int dataLength = 0;
-		// cf https://www.khronos.org/opengl/wiki/Primitive
+		// cf https://www.khronos.org/opengl/wiki/Primitive => internal gl logic, hidden for DrawArrays usage;
 		// TODO why print always a point at origin...
 		int verticesCount = ray.getPoints().length / 3;
 		for(int glRenderMode : ray.getRenderModes()) {
-			switch (glRenderMode) {
-			case GL11.GL_LINE_STRIP:
-			case GL11.GL_TRIANGLE_STRIP:
-			case GL11.GL_LINE_LOOP:
-			case GL11.GL_POINTS:
-				dataLength = verticesCount; 
-				break;
-			case GL11.GL_LINES:
-				dataLength = verticesCount / 2;
-				break;
-			case GL11.GL_TRIANGLES:
-				dataLength = verticesCount / 3;
-				break;
-			case GL11.GL_TRIANGLE_FAN:
-				dataLength = verticesCount - 2;
-				break;
-			default:
-				System.err.println("unsupported render mode: " + glRenderMode);
-				return;
-			}
 			// GL11.glEnable(GL11.GL_POINT_SMOOTH);
-			// GL11.glLineWidth(2); //seems to have a max cap unlike PointSize. for GL_LINES
+			GL11.glLineWidth(2); //seems to have a max cap unlike PointSize. for GL_LINES
 			GL11.glPointSize(5); // GL_POINTS
 			// GL11.drawArrays can draw points with GL_POINTS, not GL_POINT
-			GL11.glDrawArrays(glRenderMode, 0, dataLength); //
+			GL11.glDrawArrays(glRenderMode, 0, verticesCount);
 			GL11.glPointSize(1);
+			GL11.glLineWidth(1);
 		}
 	}
 

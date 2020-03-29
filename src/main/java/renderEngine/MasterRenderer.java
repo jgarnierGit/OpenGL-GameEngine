@@ -72,6 +72,7 @@ public class MasterRenderer {
 	/**
 	 * Allow to render geometries defined in anticlockwise turn.
 	 * Clockwise detection is useful to not render faces oriented backward to camera.
+	 * This way plane can be rendered front and back
 	 */
 	public static void disableCulling() {
 		GL11.glDisable(GL11.GL_CULL_FACE);
