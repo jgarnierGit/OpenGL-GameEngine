@@ -27,18 +27,19 @@ import renderEngine.Loader;
  * @author chezmoi
  *
  */
-public class SimpleGeom implements ISimpleGeom{
-	private int vaoId;
-	private Loader loader;
-	private final int dimension;
-	private List<Integer> glRenderModes;
-	private float[] points = new float[] {};
+public abstract class SimpleGeom implements ISimpleGeom{
+	private int dimension;
+	protected int vaoId;
+	protected Loader loader;
+	protected List<Integer> glRenderModes;
+	protected float[] points;
 
-	public SimpleGeom(Loader loader, int dimension) {
-		this.loader = loader;
-		vaoId = loader.loadToVAO(points, dimension);
-		this.glRenderModes = new ArrayList<>();
+	public SimpleGeom(Loader loader2, int dimension) {
+		this.loader = loader2;
 		this.dimension = dimension;
+		this.glRenderModes = new ArrayList<>();
+		this.points = new float[] {};
+		this.vaoId = loader.loadToVAO(points, this.dimension);
 	}
 	@Override
 	public int getVaoId() {
@@ -48,25 +49,15 @@ public class SimpleGeom implements ISimpleGeom{
 	public float[] getPoints() {
 		return points;
 	}
+	
 	@Override
 	public int getDimension() {
 		return this.dimension;
 	}
+	
 	@Override
 	public void reloadPositions() {
 		loader.reloadVAOPosition(vaoId, points, this.dimension);
-	}
-	@Override
-	public void addPoint3f(Vector vector) {
-		Vector3f v3f = (Vector3f) vector;
-		float[] newPoints = ArrayUtils.addAll(points, v3f.x, v3f.y, v3f.z);
-		points = newPoints;
-	}
-	@Override
-	public void addPoint2f(Vector vector) {
-		Vector2f v2f = (Vector2f) vector;
-		float[] newPoints = ArrayUtils.addAll(points, v2f.x, v2f.y);
-		points = newPoints;
 	}
 
 	@Override

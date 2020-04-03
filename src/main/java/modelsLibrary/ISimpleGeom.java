@@ -3,6 +3,7 @@ package modelsLibrary;
 import java.util.List;
 
 import org.lwjglx.util.vector.Vector;
+import org.lwjglx.util.vector.Vector3f;
 
 public interface ISimpleGeom {
 	/**
@@ -11,6 +12,10 @@ public interface ISimpleGeom {
 	 */
 	public int getVaoId();
 	
+	/**
+	 * 
+	 * @return dimension count to apply for each vertice.
+	 */
 	public int getDimension();
 
 	/**
@@ -19,9 +24,9 @@ public interface ISimpleGeom {
 	 */
 	public float[] getPoints();
 	
-	public void addPoint2f(Vector endRay);
+	public List<? extends Vector> getVertices();
 	
-	public void addPoint3f(Vector endRay);
+	public void addPoint(Vector endRay);
 
 	/**
 	 * Reload points coordinates to binded Vertex Buffer Object attached to VAO
