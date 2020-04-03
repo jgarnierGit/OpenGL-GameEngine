@@ -3,9 +3,6 @@ package toolbox.mousePicker.MouseBehaviour;
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -14,7 +11,6 @@ import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjglx.util.vector.Matrix4f;
 import org.lwjglx.util.vector.Vector2f;
@@ -24,8 +20,8 @@ import org.lwjglx.util.vector.Vector4f;
 import entities.Camera;
 import entities.Entity;
 import entities.UserInputHandler;
-import modelsLibrary.PointGeom;
-import modelsLibrary.Ray;
+import modelsLibrary.ISimpleGeom;
+import modelsLibrary.SimpleGeom;
 import renderEngine.DisplayManager;
 import renderEngine.Draw2DRenderer;
 import renderEngine.Loader;
@@ -37,22 +33,22 @@ public class MouseLogger implements IMouseBehaviour {
 	private List<Entity> entities;
 	private Camera camera;
 	private RayRenderer rayRenderer;
-	private Ray ray;
-	private List<Ray> boundingBoxes;
-	private List<PointGeom> debugPoints;
+	private ISimpleGeom ray3D;
+	private List<ISimpleGeom> boundingBoxes;
+	private List<ISimpleGeom> debugPoints;
 	private Draw2DRenderer draw2DRenderer;
 	private Matrix4f viewMatrix;
 	private Vector3f camPos;
 	private Loader loader;
 	private Matrix4f projectionMatrix;
-	private static final int BOUNDING_BOX = 4;
+	private static final float BOUNDING_BOX = 4f;
 
 	public MouseLogger(Camera camera, RayRenderer rayRenderer, Draw2DRenderer draw2DRenderer, Matrix4f projection, Loader loader) {
 		this.entities = new ArrayList<>();
 		this.camera = camera;
 		this.rayRenderer = rayRenderer; //TODO I want to render via a DrawGeomRenderer using logic as simple as RayRenderer, but I want to specify what I render (GL_POINTS, TRIANGLES, LINES) dynamically. same logic will fit with others Renderer. 
 		this.loader = loader;
-		this.ray = new Ray(this.loader);
+		this.ray3D = new SimpleGeom(this.loader, 3);
 		this.boundingBoxes = new ArrayList<>();
 		this.debugPoints = new ArrayList<>();
 		this.draw2DRenderer = draw2DRenderer;
@@ -65,68 +61,78 @@ public class MouseLogger implements IMouseBehaviour {
 		if (UserInputHandler.activateOnPressOneTime(GLFW_MOUSE_BUTTON_LEFT)) {
 			cleanSelected();
 
-			this.ray.resetRay();
-			for(Ray boundingBox : boundingBoxes) {
-				boundingBox.resetRay();
-			}
-			for(PointGeom point : debugPoints) { //TODO debug list might be not a good idea, so how render properly on 2d.
+			this.ray3D.resetGeom();
+			for(ISimpleGeom point : debugPoints) {
 				point.resetGeom();
 			}
 			debugPoints = new ArrayList<>();
 			this.camPos = camera.getPosition();
 			this.viewMatrix = Maths.createViewMatrix(camera);
 			filterEntitiesBackwardToCamera();
-			printBoundingBoxes();
+			generateBoundingBoxes();
 			filterByRayPromixity(ray);
 			// ray is with world origin.
 			rayCasting(ray);
 		}
 	}
 
+	/**
+	 * Filtering by viewCoord is okay but request a different bounding box;
+	 * may pist to analyse. bounding box with relative rotation to camera is simply to obtain. 
+	 * Mask intersection :
+	 *    * can calculate a mask that generate a 2D texture and test where ray intersect on mask. what are the perfs and implem?
+	 *    * firstly try to generate a plan with proportions linked to global shape of object. => can be extracted automatically from obj coordinates (min & max x & y & z) + setters for internal construction
+	 *    * with thoses params no need of a virtual bounding box, just transform coordinates to projectionMatrix using camera rotation.
+	 * @param ray2
+	 */
 	private void filterByRayPromixity(Vector3f ray2) {
 		Vector3f rayFromMouse = getPointOnRay(ray2, MasterRenderer.getNearPlane());
 		Vector3f rayFromMouseToViewCoord = objectToProjectionMatrix(rayFromMouse);
-		PointGeom rayFromMousePoint = new PointGeom(this.loader);
-		rayFromMousePoint.addPoint(new Vector2f(rayFromMouseToViewCoord.x,rayFromMouseToViewCoord.y));
+		SimpleGeom rayFromMousePoint = new SimpleGeom(this.loader,2);
+		rayFromMousePoint.addPoint2f(new Vector2f(rayFromMouseToViewCoord.x,rayFromMouseToViewCoord.y));
 		debugPoints.add(rayFromMousePoint);
 		rayFromMousePoint.reloadPositions();
 		List<Entity> filteredList = this.entities.stream().filter(entity -> {
+			entity.getBoundingBox();
 			Vector3f entityPosition = entity.getPositions();
-			Vector3f boundingBox_mXmY = new Vector3f(entityPosition.x - BOUNDING_BOX, entityPosition.y - BOUNDING_BOX, entityPosition.z);
-			Vector3f boundingBox_MXmY = new Vector3f(entityPosition.x + BOUNDING_BOX, entityPosition.y - BOUNDING_BOX, entityPosition.z);
-			Vector3f boundingBox_mXMY = new Vector3f(entityPosition.x - BOUNDING_BOX, entityPosition.y + BOUNDING_BOX, entityPosition.z);
-			Vector3f boundingBox_MXMY = new Vector3f(entityPosition.x + BOUNDING_BOX, entityPosition.y + BOUNDING_BOX, entityPosition.z);
+			Vector3f entityToviewCoord = objectToProjectionMatrix(entityPosition);
+			float bboxViewCoord = BOUNDING_BOX / 100;
+			Vector3f boundingBox_mXmY = new Vector3f(entityToviewCoord.x - bboxViewCoord, entityToviewCoord.y - bboxViewCoord, entityToviewCoord.z);
+			Vector3f boundingBox_MXmY = new Vector3f(entityToviewCoord.x + bboxViewCoord, entityToviewCoord.y - bboxViewCoord, entityToviewCoord.z);
+			Vector3f boundingBox_mXMY = new Vector3f(entityToviewCoord.x - bboxViewCoord, entityToviewCoord.y + bboxViewCoord, entityToviewCoord.z);
+			Vector3f boundingBox_MXMY = new Vector3f(entityToviewCoord.x + bboxViewCoord, entityToviewCoord.y + bboxViewCoord, entityToviewCoord.z);
+		/**	
 			Vector3f mXmY_ViewCoord = objectToProjectionMatrix(boundingBox_mXmY);
 			Vector3f MXmY_ViewCoord = objectToProjectionMatrix(boundingBox_MXmY);
 			Vector3f mXMY_ViewCoord = objectToProjectionMatrix(boundingBox_mXMY); 
-			Vector3f MXMY_ViewCoord = objectToProjectionMatrix(boundingBox_MXMY); 
+			Vector3f MXMY_ViewCoord = objectToProjectionMatrix(boundingBox_MXMY); **/
 			// TODO FIXME : problem is that y coord is influenced by x position.
 			// have to do the test at least in world coords, better way would be to test in in view coords. so find a way to calculate a min/max x and y...
 			
-			PointGeom ViewCoordPoint = new PointGeom(this.loader);
+			SimpleGeom ViewCoordPoint = new SimpleGeom(this.loader, 2);
 
-			System.out.println("mXmY_ViewCoord");
-			System.out.println(mXmY_ViewCoord);
-			System.out.println("MXmY_ViewCoord");
-			System.out.println(MXmY_ViewCoord);
-			System.out.println("mXMY_ViewCoord");
-			System.out.println(mXMY_ViewCoord);
-			System.out.println("MXMY_ViewCoord");
-			System.out.println(MXMY_ViewCoord);
+			System.out.println("boundingBox_mXmY");
+			System.out.println(boundingBox_mXmY);
+			System.out.println("boundingBox_MXmY");
+			System.out.println(boundingBox_MXmY);
+			System.out.println("boundingBox_mXMY");
+			System.out.println(boundingBox_mXMY);
+			System.out.println("boundingBox_MXMY");
+			System.out.println(boundingBox_MXMY);
 			System.out.println("rayFromMouseToViewCoord");
 			System.out.println(rayFromMouseToViewCoord);
-			ViewCoordPoint.addPoint(new Vector2f(mXmY_ViewCoord.x,mXmY_ViewCoord.y));
-			ViewCoordPoint.addPoint(new Vector2f(MXmY_ViewCoord.x,MXmY_ViewCoord.y));
-			ViewCoordPoint.addPoint(new Vector2f(MXMY_ViewCoord.x,MXMY_ViewCoord.y));
-			ViewCoordPoint.addPoint(new Vector2f(mXMY_ViewCoord.x,mXMY_ViewCoord.y));
+			ViewCoordPoint.addPoint2f(new Vector2f(boundingBox_mXmY.x,boundingBox_mXmY.y));
+			ViewCoordPoint.addPoint2f(new Vector2f(boundingBox_MXmY.x,boundingBox_MXmY.y));
+			ViewCoordPoint.addPoint2f(new Vector2f(boundingBox_mXMY.x,boundingBox_mXMY.y));
+			ViewCoordPoint.addPoint2f(new Vector2f(boundingBox_MXMY.x,boundingBox_MXMY.y));
 			debugPoints.add(ViewCoordPoint);
 			ViewCoordPoint.reloadPositions();
 
-			return (mXmY_ViewCoord.x <= rayFromMouseToViewCoord.x && MXmY_ViewCoord.x >= rayFromMouseToViewCoord.x )
-					&& (MXmY_ViewCoord.y <= rayFromMouseToViewCoord.y && mXMY_ViewCoord.y >= rayFromMouseToViewCoord.y);
+			return (boundingBox_mXmY.x <= rayFromMouseToViewCoord.x && boundingBox_MXmY.x >= rayFromMouseToViewCoord.x )
+					&& (boundingBox_MXmY.y <= rayFromMouseToViewCoord.y && boundingBox_mXMY.y >= rayFromMouseToViewCoord.y);
 		}).collect(Collectors.toList());
 		this.entities = filteredList;
-		for(PointGeom point : debugPoints) {
+		for(ISimpleGeom point : debugPoints) {
 			this.draw2DRenderer.process(point, GL11.GL_LINE_LOOP);
 		}
 		this.draw2DRenderer.process(rayFromMousePoint, GL11.GL_POINTS);
@@ -188,56 +194,72 @@ public class MouseLogger implements IMouseBehaviour {
 		} else {
 			System.out.println("nothing selected");
 		}
-		this.ray.reloadPositions();
-		this.rayRenderer.process(this.ray, GL11.GL_POINTS);
-		this.rayRenderer.process(this.ray, GL11.GL_LINE_STRIP);
+		this.ray3D.reloadPositions();
+		this.rayRenderer.process(this.ray3D, GL11.GL_POINTS);
+		this.rayRenderer.process(this.ray3D, GL11.GL_LINE_STRIP);
+	}
+	
+	private void generateBoundingBoxes() {
+		this.entities.forEach(entity -> {
+			SimpleGeom boundingBox = new SimpleGeom(this.loader, 3);
+			Vector3f worldPositionEntity = entity.getPositions();
+			boundingBox.addPoint3f(new Vector3f(worldPositionEntity.x - BOUNDING_BOX, worldPositionEntity.y - BOUNDING_BOX, worldPositionEntity.z));
+			boundingBox.addPoint3f(new Vector3f(worldPositionEntity.x - BOUNDING_BOX, worldPositionEntity.y + BOUNDING_BOX, worldPositionEntity.z));
+			boundingBox.addPoint3f(new Vector3f(worldPositionEntity.x + BOUNDING_BOX, worldPositionEntity.y + BOUNDING_BOX, worldPositionEntity.z));
+			boundingBox.addPoint3f(new Vector3f(worldPositionEntity.x + BOUNDING_BOX, worldPositionEntity.y - BOUNDING_BOX, worldPositionEntity.z));
+			entity.setBoundingBox(boundingBox);
+		});
+		printBoundingBoxes();
 	}
 	
 	private void printBoundingBoxes() {
-		this.boundingBoxes = new ArrayList<>();
+		for(ISimpleGeom boundingBox : boundingBoxes) {
+			boundingBox.resetGeom();
+		}
+		this.boundingBoxes.clear();
 		this.entities.forEach(entity -> {
-			Ray boundingBox = new Ray(this.loader);
+			SimpleGeom boundingBox = new SimpleGeom(this.loader,3);
 			Vector3f worldPositionEntity = entity.getPositions();
-			boundingBox.addPoint(new Vector3f(worldPositionEntity.x - BOUNDING_BOX, worldPositionEntity.y - BOUNDING_BOX, worldPositionEntity.z + BOUNDING_BOX));
-			boundingBox.addPoint(new Vector3f(worldPositionEntity.x - BOUNDING_BOX, worldPositionEntity.y + BOUNDING_BOX, worldPositionEntity.z + BOUNDING_BOX));
+			boundingBox.addPoint3f(new Vector3f(worldPositionEntity.x - BOUNDING_BOX, worldPositionEntity.y - BOUNDING_BOX, worldPositionEntity.z + BOUNDING_BOX));
+			boundingBox.addPoint3f(new Vector3f(worldPositionEntity.x - BOUNDING_BOX, worldPositionEntity.y + BOUNDING_BOX, worldPositionEntity.z + BOUNDING_BOX));
 		
-			boundingBox.addPoint(new Vector3f(worldPositionEntity.x - BOUNDING_BOX, worldPositionEntity.y + BOUNDING_BOX, worldPositionEntity.z + BOUNDING_BOX));
-			boundingBox.addPoint(new Vector3f(worldPositionEntity.x + BOUNDING_BOX, worldPositionEntity.y + BOUNDING_BOX, worldPositionEntity.z + BOUNDING_BOX));
+			boundingBox.addPoint3f(new Vector3f(worldPositionEntity.x - BOUNDING_BOX, worldPositionEntity.y + BOUNDING_BOX, worldPositionEntity.z + BOUNDING_BOX));
+			boundingBox.addPoint3f(new Vector3f(worldPositionEntity.x + BOUNDING_BOX, worldPositionEntity.y + BOUNDING_BOX, worldPositionEntity.z + BOUNDING_BOX));
 			
-			boundingBox.addPoint(new Vector3f(worldPositionEntity.x + BOUNDING_BOX, worldPositionEntity.y + BOUNDING_BOX, worldPositionEntity.z + BOUNDING_BOX));
-			boundingBox.addPoint(new Vector3f(worldPositionEntity.x + BOUNDING_BOX, worldPositionEntity.y - BOUNDING_BOX, worldPositionEntity.z + BOUNDING_BOX));
+			boundingBox.addPoint3f(new Vector3f(worldPositionEntity.x + BOUNDING_BOX, worldPositionEntity.y + BOUNDING_BOX, worldPositionEntity.z + BOUNDING_BOX));
+			boundingBox.addPoint3f(new Vector3f(worldPositionEntity.x + BOUNDING_BOX, worldPositionEntity.y - BOUNDING_BOX, worldPositionEntity.z + BOUNDING_BOX));
 			
-			boundingBox.addPoint(new Vector3f(worldPositionEntity.x + BOUNDING_BOX, worldPositionEntity.y - BOUNDING_BOX, worldPositionEntity.z + BOUNDING_BOX));
-			boundingBox.addPoint(new Vector3f(worldPositionEntity.x - BOUNDING_BOX, worldPositionEntity.y - BOUNDING_BOX, worldPositionEntity.z + BOUNDING_BOX));
+			boundingBox.addPoint3f(new Vector3f(worldPositionEntity.x + BOUNDING_BOX, worldPositionEntity.y - BOUNDING_BOX, worldPositionEntity.z + BOUNDING_BOX));
+			boundingBox.addPoint3f(new Vector3f(worldPositionEntity.x - BOUNDING_BOX, worldPositionEntity.y - BOUNDING_BOX, worldPositionEntity.z + BOUNDING_BOX));
 			
-			boundingBox.addPoint(new Vector3f(worldPositionEntity.x - BOUNDING_BOX, worldPositionEntity.y - BOUNDING_BOX, worldPositionEntity.z + BOUNDING_BOX));
-			boundingBox.addPoint(new Vector3f(worldPositionEntity.x - BOUNDING_BOX, worldPositionEntity.y - BOUNDING_BOX, worldPositionEntity.z - BOUNDING_BOX));
+			boundingBox.addPoint3f(new Vector3f(worldPositionEntity.x - BOUNDING_BOX, worldPositionEntity.y - BOUNDING_BOX, worldPositionEntity.z + BOUNDING_BOX));
+			boundingBox.addPoint3f(new Vector3f(worldPositionEntity.x - BOUNDING_BOX, worldPositionEntity.y - BOUNDING_BOX, worldPositionEntity.z - BOUNDING_BOX));
 			
-			boundingBox.addPoint(new Vector3f(worldPositionEntity.x - BOUNDING_BOX, worldPositionEntity.y - BOUNDING_BOX, worldPositionEntity.z - BOUNDING_BOX));
-			boundingBox.addPoint(new Vector3f(worldPositionEntity.x + BOUNDING_BOX, worldPositionEntity.y - BOUNDING_BOX, worldPositionEntity.z - BOUNDING_BOX));
+			boundingBox.addPoint3f(new Vector3f(worldPositionEntity.x - BOUNDING_BOX, worldPositionEntity.y - BOUNDING_BOX, worldPositionEntity.z - BOUNDING_BOX));
+			boundingBox.addPoint3f(new Vector3f(worldPositionEntity.x + BOUNDING_BOX, worldPositionEntity.y - BOUNDING_BOX, worldPositionEntity.z - BOUNDING_BOX));
 		
-			boundingBox.addPoint(new Vector3f(worldPositionEntity.x + BOUNDING_BOX, worldPositionEntity.y - BOUNDING_BOX, worldPositionEntity.z - BOUNDING_BOX));
-			boundingBox.addPoint(new Vector3f(worldPositionEntity.x + BOUNDING_BOX, worldPositionEntity.y - BOUNDING_BOX, worldPositionEntity.z + BOUNDING_BOX));
+			boundingBox.addPoint3f(new Vector3f(worldPositionEntity.x + BOUNDING_BOX, worldPositionEntity.y - BOUNDING_BOX, worldPositionEntity.z - BOUNDING_BOX));
+			boundingBox.addPoint3f(new Vector3f(worldPositionEntity.x + BOUNDING_BOX, worldPositionEntity.y - BOUNDING_BOX, worldPositionEntity.z + BOUNDING_BOX));
 			
 			
-			boundingBox.addPoint(new Vector3f(worldPositionEntity.x + BOUNDING_BOX, worldPositionEntity.y - BOUNDING_BOX, worldPositionEntity.z - BOUNDING_BOX));
-			boundingBox.addPoint(new Vector3f(worldPositionEntity.x + BOUNDING_BOX, worldPositionEntity.y + BOUNDING_BOX, worldPositionEntity.z - BOUNDING_BOX));
+			boundingBox.addPoint3f(new Vector3f(worldPositionEntity.x + BOUNDING_BOX, worldPositionEntity.y - BOUNDING_BOX, worldPositionEntity.z - BOUNDING_BOX));
+			boundingBox.addPoint3f(new Vector3f(worldPositionEntity.x + BOUNDING_BOX, worldPositionEntity.y + BOUNDING_BOX, worldPositionEntity.z - BOUNDING_BOX));
 			
-			boundingBox.addPoint(new Vector3f(worldPositionEntity.x + BOUNDING_BOX, worldPositionEntity.y + BOUNDING_BOX, worldPositionEntity.z - BOUNDING_BOX));
-			boundingBox.addPoint(new Vector3f(worldPositionEntity.x + BOUNDING_BOX, worldPositionEntity.y + BOUNDING_BOX, worldPositionEntity.z + BOUNDING_BOX));
+			boundingBox.addPoint3f(new Vector3f(worldPositionEntity.x + BOUNDING_BOX, worldPositionEntity.y + BOUNDING_BOX, worldPositionEntity.z - BOUNDING_BOX));
+			boundingBox.addPoint3f(new Vector3f(worldPositionEntity.x + BOUNDING_BOX, worldPositionEntity.y + BOUNDING_BOX, worldPositionEntity.z + BOUNDING_BOX));
 		
-			boundingBox.addPoint(new Vector3f(worldPositionEntity.x + BOUNDING_BOX, worldPositionEntity.y + BOUNDING_BOX, worldPositionEntity.z - BOUNDING_BOX));
-			boundingBox.addPoint(new Vector3f(worldPositionEntity.x - BOUNDING_BOX, worldPositionEntity.y + BOUNDING_BOX, worldPositionEntity.z - BOUNDING_BOX));
+			boundingBox.addPoint3f(new Vector3f(worldPositionEntity.x + BOUNDING_BOX, worldPositionEntity.y + BOUNDING_BOX, worldPositionEntity.z - BOUNDING_BOX));
+			boundingBox.addPoint3f(new Vector3f(worldPositionEntity.x - BOUNDING_BOX, worldPositionEntity.y + BOUNDING_BOX, worldPositionEntity.z - BOUNDING_BOX));
 		
-			boundingBox.addPoint(new Vector3f(worldPositionEntity.x - BOUNDING_BOX, worldPositionEntity.y + BOUNDING_BOX, worldPositionEntity.z - BOUNDING_BOX));
-			boundingBox.addPoint(new Vector3f(worldPositionEntity.x - BOUNDING_BOX, worldPositionEntity.y + BOUNDING_BOX, worldPositionEntity.z + BOUNDING_BOX));
+			boundingBox.addPoint3f(new Vector3f(worldPositionEntity.x - BOUNDING_BOX, worldPositionEntity.y + BOUNDING_BOX, worldPositionEntity.z - BOUNDING_BOX));
+			boundingBox.addPoint3f(new Vector3f(worldPositionEntity.x - BOUNDING_BOX, worldPositionEntity.y + BOUNDING_BOX, worldPositionEntity.z + BOUNDING_BOX));
 			
-			boundingBox.addPoint(new Vector3f(worldPositionEntity.x - BOUNDING_BOX, worldPositionEntity.y + BOUNDING_BOX, worldPositionEntity.z - BOUNDING_BOX));
-			boundingBox.addPoint(new Vector3f(worldPositionEntity.x - BOUNDING_BOX, worldPositionEntity.y - BOUNDING_BOX, worldPositionEntity.z - BOUNDING_BOX));
+			boundingBox.addPoint3f(new Vector3f(worldPositionEntity.x - BOUNDING_BOX, worldPositionEntity.y + BOUNDING_BOX, worldPositionEntity.z - BOUNDING_BOX));
+			boundingBox.addPoint3f(new Vector3f(worldPositionEntity.x - BOUNDING_BOX, worldPositionEntity.y - BOUNDING_BOX, worldPositionEntity.z - BOUNDING_BOX));
 			boundingBoxes.add(boundingBox);
 
 		});
-		for(Ray bbox : boundingBoxes) {
+		for(ISimpleGeom bbox : boundingBoxes) {
 			bbox.reloadPositions();
 			this.rayRenderer.process(bbox, GL11.GL_LINES);
 		}
@@ -248,11 +270,11 @@ public class MouseLogger implements IMouseBehaviour {
 		if(distance > MasterRenderer.getFarPlane()) {
 			distance =  MasterRenderer.getFarPlane();
 			Vector3f endRay = getPointOnRay(mouseCoord, distance);
-			this.ray.addPoint(endRay);
+			this.ray3D.addPoint3f(endRay);
 			return getMatchingEntities(beginRay, endRay);
 		}
 		Vector3f endRay = getPointOnRay(mouseCoord, distance);
-		this.ray.addPoint(endRay);
+		this.ray3D.addPoint3f(endRay);
 		if(startPointDistance > 0) {
 			System.out.println("beginRay - ViewCoord");
 			System.out.println(objectToViewCoord(beginRay));

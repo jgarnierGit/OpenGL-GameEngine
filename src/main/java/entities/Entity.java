@@ -1,7 +1,12 @@
 package entities;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 import org.lwjglx.util.vector.Vector3f;
 
+import modelsLibrary.SimpleGeom;
 import modelsManager.Model3D;
 
 public class Entity {
@@ -10,6 +15,7 @@ public class Entity {
 	private float rotX, rotY, rotZ;
 	private float scale;
 	private boolean selected;
+	private Optional<SimpleGeom> boundingBox;
 	public Entity(Model3D model, Vector3f positions, float rotX, float rotY, float rotZ, float scale) {
 		this.model = model;
 		this.position = positions;
@@ -18,6 +24,7 @@ public class Entity {
 		this.rotZ = rotZ;
 		this.scale = scale;
 		this.selected = false;
+		this.boundingBox = Optional.empty();
 	}
 	
 	public void increasePosition(float dx, float dy, float dz) {
@@ -79,6 +86,14 @@ public class Entity {
 
 	public void unselect() {
 		selected = false;
+	}
+
+	public void setBoundingBox(SimpleGeom boundingBox) {
+		this.boundingBox = Optional.of(boundingBox);
+	}
+	
+	public Optional<SimpleGeom> getBoundingBox(){
+		return this.boundingBox;
 	}
 	
 	

@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.lwjglx.util.vector.Matrix4f;
 
 import entities.Camera;
-import modelsLibrary.Ray;
+import modelsLibrary.SimpleGeom;
 import renderEngine.Loader.VBOIndex;
 import toolbox.Maths;
 

@@ -1,33 +1,20 @@
 package renderEngine;
 
 import java.io.IOException;
-import java.nio.IntBuffer;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
-import org.lwjglx.util.vector.Matrix4f;
-import org.lwjglx.util.vector.Vector2f;
-import org.lwjglx.util.vector.Vector3f;
 
-import entities.Camera;
-import entities.Entity;
-import modelsLibrary.PointGeom;
-import modelsLibrary.Ray;
+import modelsLibrary.ISimpleGeom;
 import renderEngine.Loader.VBOIndex;
 import shaderManager.Draw2DShader;
-import shaderManager.RayShader;
-import toolbox.GLTextureIDIncrementer;
-import toolbox.Maths;
 
 public class Draw2DRenderer {
-	private List<PointGeom> geoms;
+	private List<ISimpleGeom> geoms;
 	private Draw2DShader draw2DShader;
 
 	public Draw2DRenderer() throws IOException {
@@ -36,7 +23,7 @@ public class Draw2DRenderer {
 	}
 
 	public void render() {
-		for(PointGeom geom : geoms) {
+		for(ISimpleGeom geom : geoms) {
 			prepare(geom);
 			
 			// Disable distance filtering.
@@ -49,10 +36,10 @@ public class Draw2DRenderer {
 		}
 	}
 
-	private void renderByMode(PointGeom geom) {
+	private void renderByMode(ISimpleGeom geom) {
 		int dataLength = 0;
 		// cf https://www.khronos.org/opengl/wiki/Primitive => internal gl logic, hidden for DrawArrays usage;
-		int verticesCount = geom.getPoints().length / 2;
+		int verticesCount = geom.getPoints().length / geom.getDimension();
 		for(int glRenderMode : geom.getRenderModes()) {
 			// GL11.glEnable(GL11.GL_POINT_SMOOTH);
 			GL11.glLineWidth(2); //seems to have a max cap unlike PointSize. for GL_LINES
@@ -72,7 +59,7 @@ public class Draw2DRenderer {
 	 * 
 	 * @param geom
 	 */
-	private void prepare(PointGeom geom) {
+	private void prepare(ISimpleGeom geom) {
 		draw2DShader.start();
 		GL30.glBindVertexArray(geom.getVaoId());
 		GL20.glEnableVertexAttribArray(VBOIndex.POSITION_INDEX);
@@ -92,7 +79,7 @@ public class Draw2DRenderer {
 		draw2DShader.cleanUp();
 	}
 
-	public void process(PointGeom geom, int glRenderMode) {
+	public void process(ISimpleGeom geom, int glRenderMode) {
 		geom.addRenderMode(glRenderMode);
 		this.geoms.add(geom);
 	}
