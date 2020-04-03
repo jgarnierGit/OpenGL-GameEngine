@@ -14,9 +14,7 @@ import org.lwjglx.util.vector.Matrix4f;
 import entities.Camera;
 import entities.Entity;
 import entities.Light;
-import modelsLibrary.Ray;
 import modelsManager.Model3D;
-import shaderManager.RayShader;
 import shaderManager.StaticShader;
 import shaderManager.TerrainShader;
 
@@ -95,7 +93,6 @@ public class MasterRenderer {
 		skyboxRender.render(camera,RED, GREEN, BLUE);
 		terrains.clear();
 		entities.clear();
-		
 	}
 	
 	public void processTerrain(Model3D terrain) {

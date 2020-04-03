@@ -55,12 +55,6 @@ public class Ray {
 		points = new float[] {};
 	}
 
-	public static Ray copy(Ray ray2) {
-		Ray ray = new Ray(ray2.loader);
-		ray.points = ray.getPoints();
-		return ray;
-	}
-
 	public List<Integer> getRenderModes() {
 		return this.glRenderModes;
 	}

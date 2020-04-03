@@ -30,7 +30,7 @@ public class RayRenderer {
 	private RayShader rayShader;
 	private Camera camera;
 
-	public RayRenderer(Camera camera, Matrix4f projectionMatrix, Loader loader) throws IOException {
+	public RayRenderer(Camera camera, Matrix4f projectionMatrix) throws IOException {
 		this.rayShader = new RayShader();
 		this.camera = camera;
 		rayShader.start();
