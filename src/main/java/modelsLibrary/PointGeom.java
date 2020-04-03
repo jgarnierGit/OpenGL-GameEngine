@@ -1,5 +1,12 @@
 package modelsLibrary;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.lang3.ArrayUtils;
+import org.lwjglx.util.vector.Vector2f;
+import org.lwjglx.util.vector.Vector3f;
+
 import renderEngine.Loader;
 
 
@@ -18,11 +25,15 @@ import renderEngine.Loader;
  */
 public class PointGeom {
 	private final int vaoId;
-	private float[] points = new float[] {-0.5f, 0.5f, -0.5f, -0.5f, 0.5f, 0.5f, 0.5f, -0.5f};
+	private Loader loader;
+	private List<Integer> glRenderModes;
+	private float[] points = new float[] {};
 	
 	public PointGeom(Loader loader) {
 		//faking point into quads as point sprite seems to be the longest way to go.
-		vaoId = loader.loadToVAO(points,2); 
+		this.loader = loader;
+		vaoId = this.loader.loadToVAO(points,2); 
+		this.glRenderModes = new ArrayList<>();
 	}
 	
 	public int getVaoId() {
@@ -33,4 +44,24 @@ public class PointGeom {
 		return points;
 	}
 	
+	public void reloadPositions() {
+		loader.reloadVAOPosition(vaoId, points, 2);
+	}
+
+	public void addPoint(Vector2f endRay) {
+		float[] newPoints = ArrayUtils.addAll(points, endRay.x,endRay.y);//points
+		points = newPoints;
+	}
+	
+	public void resetGeom() {
+		points = new float[] {};
+	}
+
+	public List<Integer> getRenderModes() {
+		return this.glRenderModes;
+	}
+
+	public void addRenderMode(int glRenderMode2) {
+		this.glRenderModes.add(glRenderMode2);
+	}
 }
