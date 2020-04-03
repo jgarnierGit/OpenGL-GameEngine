@@ -99,7 +99,6 @@ public class Loader {
 	
 	public void reloadVAOPosition(int vaoId, float[] positions, int dimensions) {
 		GL30.glBindVertexArray(vaoId);
-		vaos.get(vaoId).clean(); //TODO not working to clean previous geom... find way for debugging GL_LINES render.
 		this.storeDataFloatInAttrList(vaoId, VBOIndex.POSITION_INDEX, dimensions, positions);
 		unbindVAO();
 	}
