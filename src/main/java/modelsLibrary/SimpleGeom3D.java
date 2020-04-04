@@ -28,7 +28,7 @@ public class SimpleGeom3D extends SimpleGeom {
 	@Override
 	public List<Vector3f> getVertices() {
 		List<Vector3f> vectors = new ArrayList<>();
-		for (int i = 0; i < points.length / 3; i += 3) {
+		for (int i = 0; i < points.length; i += 3) {
 			vectors.add(new Vector3f(points[i], points[i + 1], points[i + 2]));
 		}
 		return vectors;

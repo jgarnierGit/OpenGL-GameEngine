@@ -27,7 +27,7 @@ public class SimpleGeom2D extends SimpleGeom {
 	@Override
 	public List<Vector2f> getVertices() {
 		List<Vector2f> vectors = new ArrayList<>();
-		for (int i = 0; i < points.length / 2; i += 2) {
+		for (int i = 0; i < points.length; i += 2) {
 			vectors.add(new Vector2f(points[i], points[i + 1]));
 		}
 		return vectors;

@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.lwjglx.util.vector.Vector3f;
 
 import modelsLibrary.SimpleGeom;
+import modelsLibrary.SimpleGeom3D;
 import modelsManager.Model3D;
 
 public class Entity {
@@ -15,7 +16,7 @@ public class Entity {
 	private float rotX, rotY, rotZ;
 	private float scale;
 	private boolean selected;
-	private Optional<SimpleGeom> boundingBox;
+	private Optional<SimpleGeom3D> boundingBox;
 	public Entity(Model3D model, Vector3f positions, float rotX, float rotY, float rotZ, float scale) {
 		this.model = model;
 		this.position = positions;
@@ -88,11 +89,11 @@ public class Entity {
 		selected = false;
 	}
 
-	public void setBoundingBox(SimpleGeom boundingBox) {
+	public void setBoundingBox(SimpleGeom3D boundingBox) {
 		this.boundingBox = Optional.of(boundingBox);
 	}
 	
-	public Optional<SimpleGeom> getBoundingBox(){
+	public Optional<SimpleGeom3D> getBoundingBox(){
 		return this.boundingBox;
 	}
 	
