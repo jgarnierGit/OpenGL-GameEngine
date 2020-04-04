@@ -3,11 +3,13 @@ package toolbox.mousePicker.MouseBehaviour;
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.TreeMap;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -30,6 +32,7 @@ import renderEngine.Loader;
 import renderEngine.MasterRenderer;
 import renderEngine.RayRenderer;
 import toolbox.Maths;
+import toolbox.mousePicker.MouseInputListener;
 
 public class MouseLogger implements IMouseBehaviour {
 	private List<Entity> entities;
@@ -43,9 +46,11 @@ public class MouseLogger implements IMouseBehaviour {
 	private Vector3f camPos;
 	private Loader loader;
 	private Matrix4f projectionMatrix;
+	private MouseInputListener mouseInputListener;
+	private Vector3f ray;
 	private static final float BOUNDING_BOX = 4f;
 
-	public MouseLogger(Camera camera, RayRenderer rayRenderer, Draw2DRenderer draw2DRenderer, Matrix4f projection, Loader loader) {
+	public MouseLogger(Camera camera, RayRenderer rayRenderer, Draw2DRenderer draw2DRenderer, Matrix4f projection, Loader loader, MouseInputListener mouseInputListener) {
 		this.entities = new ArrayList<>();
 		this.camera = camera;
 		this.rayRenderer = rayRenderer; //TODO I want to render via a DrawGeomRenderer using logic as simple as RayRenderer, but I want to specify what I render (GL_POINTS, TRIANGLES, LINES) dynamically. same logic will fit with others Renderer. 
@@ -55,27 +60,38 @@ public class MouseLogger implements IMouseBehaviour {
 		this.debugPoints = new ArrayList<>();
 		this.draw2DRenderer = draw2DRenderer;
 		this.projectionMatrix = projection;
+		this.mouseInputListener = mouseInputListener;
 	}
 
 	@Override
 	public void process(Vector3f ray) {
-		// FIXME why need many click to be interpreted
-		if (UserInputHandler.activateOnPressOneTime(GLFW_MOUSE_BUTTON_LEFT)) {
-			cleanSelected();
-
-			this.ray3D.resetGeom();
-			for(ISimpleGeom point : debugPoints) {
-				point.resetGeom();
-			}
-			debugPoints = new ArrayList<>();
-			this.camPos = camera.getPosition();
-			this.viewMatrix = Maths.createViewMatrix(camera);
-			filterEntitiesBackwardToCamera();
-			generateBoundingBoxes();
-			filterByRayPromixity(ray);
-			// ray is with world origin.
-			rayCasting(ray);
+		this.ray = ray;
+		this.mouseInputListener.addRunner(() -> processPicking());
+	}
+	
+	private void processPicking() {
+		cleanSelected();
+		this.ray3D.resetGeom();
+		for(ISimpleGeom point : debugPoints) {
+			point.resetGeom();
 		}
+		debugPoints.clear();
+
+		this.camPos = camera.getPosition();
+		this.viewMatrix = Maths.createViewMatrix(camera);
+		filterEntitiesBackwardToCamera();
+		generateBoundingBoxes();
+		filterByRayPromixity(ray);
+		// ray is with world origin.
+		rayCasting(ray);
+	}
+
+	private void temp() {
+		SimpleGeom ViewCoordPoint = new SimpleGeom2D(this.loader);
+		Vector3f bboxmXmY =  objectToProjectionMatrix(new Vector3f(-0.9f, -0.9f, 0));
+		ViewCoordPoint.addPoint(new Vector2f(bboxmXmY.x,bboxmXmY.y));
+		ViewCoordPoint.reloadPositions();
+		this.draw2DRenderer.process(ViewCoordPoint, GL11.GL_POINTS);
 	}
 
 	/**
@@ -96,45 +112,52 @@ public class MouseLogger implements IMouseBehaviour {
 		rayFromMousePoint.reloadPositions();
 		List<Entity> filteredList = this.entities.stream().filter(entity -> {
 			if(entity.getBoundingBox().isPresent()) {
-				SimpleGeom bboxEntity = entity.getBoundingBox().get();
-				bboxEntity.getVertices();
+				SimpleGeom3D bboxEntity = entity.getBoundingBox().get();
+				float entityZ = entity.getPositions().getZ();
+				List<Vector3f> bboxVertices = bboxEntity.getVertices();
+				Optional<Vector3f> minXVec = bboxVertices.stream().sorted((vec1, vec2) -> vec1.getX() > vec2.getX() ? 1 : vec1.getX() < vec2.getX()? -1 : 0).findFirst();
+				Optional<Vector3f> maxXVec = bboxVertices.stream().sorted((vec1, vec2) -> vec1.getX() < vec2.getX() ? 1 : vec1.getX() > vec2.getX()? -1 : 0).findFirst();
+				Optional<Vector3f> minYVec = bboxVertices.stream().sorted((vec1, vec2) -> vec1.getY() > vec2.getY() ? 1 : vec1.getY() < vec2.getY()? -1 : 0).findFirst();
+				Optional<Vector3f> maxYVec = bboxVertices.stream().sorted((vec1, vec2) -> vec1.getY() < vec2.getY() ? 1 : vec1.getY() > vec2.getY()? -1 : 0).findFirst();
+				if(minXVec.isPresent() && maxXVec.isPresent()  && minYVec.isPresent()  && maxYVec.isPresent()) {
+					float minX = minXVec.get().x;
+					float maxX = maxXVec.get().x;
+					float minY = minYVec.get().y;
+					float maxY = maxYVec.get().y;
+					Vector3f bboxmXmY =  objectToProjectionMatrix(new Vector3f(minX, minY, entityZ)); //
+					Vector3f bboxMXmY =  objectToProjectionMatrix(new Vector3f(maxX, minY, entityZ));
+					Vector3f bboxmXMY =  objectToProjectionMatrix(new Vector3f(minX, maxY, entityZ));
+					Vector3f bboxMXMY =  objectToProjectionMatrix(new Vector3f(maxX, maxY, entityZ));
+					// TODO FIXME : problem is that y coord is influenced by x position.
+					// have to do the test at least in world coords, better way would be to test in in view coords. 
+					//so find a way to calculate a min/max x and y...
+					// once projected x seems correct but y from mouse never match...
+					//broke what was available with local bbox
+					
+					SimpleGeom ViewCoordPoint = new SimpleGeom2D(this.loader);
+System.out.println(minX +" "+ maxX +" "+ minY +" "+ maxY);
+					System.out.println("boundingBox_mXmY");
+					System.out.println(bboxmXmY);
+					System.out.println("boundingBox_MXmY");
+					System.out.println(bboxMXmY);
+					System.out.println("boundingBox_mXMY");
+					System.out.println(bboxmXMY);
+					System.out.println("boundingBox_MXMY");
+					System.out.println(bboxMXMY);
+					System.out.println("rayFromMouseToViewCoord");
+					System.out.println(rayFromMouseToViewCoord);
+					ViewCoordPoint.addPoint(new Vector2f(bboxmXmY.x,bboxmXmY.y));
+					ViewCoordPoint.addPoint(new Vector2f(bboxMXmY.x,bboxMXmY.y));
+					ViewCoordPoint.addPoint(new Vector2f(bboxmXMY.x,bboxmXMY.y));
+					ViewCoordPoint.addPoint(new Vector2f(bboxMXMY.x,bboxMXMY.y));
+					debugPoints.add(ViewCoordPoint);
+					ViewCoordPoint.reloadPositions();
+
+					return (bboxmXmY.x <= rayFromMouseToViewCoord.x && bboxMXmY.x >= rayFromMouseToViewCoord.x )
+							&& (bboxMXmY.y <= rayFromMouseToViewCoord.y && bboxmXMY.y >= rayFromMouseToViewCoord.y);
+				}
 			}
-			Vector3f entityPosition = entity.getPositions();
-			Vector3f entityToviewCoord = objectToProjectionMatrix(entityPosition);
-			float bboxViewCoord = BOUNDING_BOX / 100;
-			Vector3f boundingBox_mXmY = new Vector3f(entityToviewCoord.x - bboxViewCoord, entityToviewCoord.y - bboxViewCoord, entityToviewCoord.z);
-			Vector3f boundingBox_MXmY = new Vector3f(entityToviewCoord.x + bboxViewCoord, entityToviewCoord.y - bboxViewCoord, entityToviewCoord.z);
-			Vector3f boundingBox_mXMY = new Vector3f(entityToviewCoord.x - bboxViewCoord, entityToviewCoord.y + bboxViewCoord, entityToviewCoord.z);
-			Vector3f boundingBox_MXMY = new Vector3f(entityToviewCoord.x + bboxViewCoord, entityToviewCoord.y + bboxViewCoord, entityToviewCoord.z);
-		/**	
-			Vector3f mXmY_ViewCoord = objectToProjectionMatrix(boundingBox_mXmY);
-			Vector3f MXmY_ViewCoord = objectToProjectionMatrix(boundingBox_MXmY);
-			Vector3f mXMY_ViewCoord = objectToProjectionMatrix(boundingBox_mXMY); 
-			Vector3f MXMY_ViewCoord = objectToProjectionMatrix(boundingBox_MXMY); **/
-			// TODO FIXME : problem is that y coord is influenced by x position.
-			// have to do the test at least in world coords, better way would be to test in in view coords. so find a way to calculate a min/max x and y...
-			
-			SimpleGeom ViewCoordPoint = new SimpleGeom2D(this.loader);
-
-			System.out.println("boundingBox_mXmY");
-			System.out.println(boundingBox_mXmY);
-			System.out.println("boundingBox_MXmY");
-			System.out.println(boundingBox_MXmY);
-			System.out.println("boundingBox_mXMY");
-			System.out.println(boundingBox_mXMY);
-			System.out.println("boundingBox_MXMY");
-			System.out.println(boundingBox_MXMY);
-			System.out.println("rayFromMouseToViewCoord");
-			System.out.println(rayFromMouseToViewCoord);
-			ViewCoordPoint.addPoint(new Vector2f(boundingBox_mXmY.x,boundingBox_mXmY.y));
-			ViewCoordPoint.addPoint(new Vector2f(boundingBox_MXmY.x,boundingBox_MXmY.y));
-			ViewCoordPoint.addPoint(new Vector2f(boundingBox_mXMY.x,boundingBox_mXMY.y));
-			ViewCoordPoint.addPoint(new Vector2f(boundingBox_MXMY.x,boundingBox_MXMY.y));
-			debugPoints.add(ViewCoordPoint);
-			ViewCoordPoint.reloadPositions();
-
-			return (boundingBox_mXmY.x <= rayFromMouseToViewCoord.x && boundingBox_MXmY.x >= rayFromMouseToViewCoord.x )
-					&& (boundingBox_MXmY.y <= rayFromMouseToViewCoord.y && boundingBox_mXMY.y >= rayFromMouseToViewCoord.y);
+			return false;
 		}).collect(Collectors.toList());
 		this.entities = filteredList;
 		for(ISimpleGeom point : debugPoints) {
@@ -145,7 +168,7 @@ public class MouseLogger implements IMouseBehaviour {
 
 	private Vector3f objectToProjectionMatrix(Vector3f vector) {
 		Vector3f vectorToViewCoord = objectToViewCoord(vector);
-		Vector4f eyeCoords = Matrix4f.transform(this.projectionMatrix, new Vector4f(vectorToViewCoord.x, vectorToViewCoord.y,vectorToViewCoord.z, 1), null);
+		Vector4f eyeCoords = Matrix4f.transform(this.projectionMatrix, new Vector4f(vectorToViewCoord.x, vectorToViewCoord.y,vectorToViewCoord.z, -1), null);
 		return new Vector3f(eyeCoords.x,eyeCoords.y,eyeCoords.z);
 	}
 	
@@ -206,7 +229,7 @@ public class MouseLogger implements IMouseBehaviour {
 	
 	private void generateBoundingBoxes() {
 		this.entities.forEach(entity -> {
-			SimpleGeom boundingBox = new SimpleGeom3D(this.loader);
+			SimpleGeom3D boundingBox = new SimpleGeom3D(this.loader);
 			Vector3f worldPositionEntity = entity.getPositions();
 			boundingBox.addPoint(new Vector3f(worldPositionEntity.x - BOUNDING_BOX, worldPositionEntity.y - BOUNDING_BOX, worldPositionEntity.z));
 			boundingBox.addPoint(new Vector3f(worldPositionEntity.x - BOUNDING_BOX, worldPositionEntity.y + BOUNDING_BOX, worldPositionEntity.z));

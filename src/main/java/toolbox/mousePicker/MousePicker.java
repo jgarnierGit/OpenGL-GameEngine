@@ -23,13 +23,15 @@ public class MousePicker {
 	private Camera camera;
 	private Logger logger;
 	private List<IMouseBehaviour> mouseBehaviours;
+	private MouseInputListener mouseInputListener;
 
-	public MousePicker(Camera cam, Matrix4f projection) {
+	public MousePicker(Camera cam, Matrix4f projection, MouseInputListener mouseInputListener) {
 		this.camera = cam;
 		this.projectionMatrix = projection;
 		this.viewMatrix = Maths.createViewMatrix(cam);
 		this.logger = Logger.getLogger("MousePicker");
 		this.mouseBehaviours = new ArrayList<>();
+		this.mouseInputListener = mouseInputListener;
 	}
 
 	public void update() {
@@ -37,14 +39,14 @@ public class MousePicker {
 		// currentRay has coordinate near world(0,0,0) : has to be used as a delta to
 		// apply to camera position.
 		Vector3f currentRay = calculateMouseRay();
-		//log();
+		this.mouseInputListener.addRunner(() -> log());
+		
 		for (IMouseBehaviour behaviour : mouseBehaviours) {
 			behaviour.process(currentRay);
 		}
 	}
 
 	private void log() {
-		if (UserInputHandler.activateOnPressOneTime(GLFW_MOUSE_BUTTON_LEFT)) {
 			float mouseX = UserInputHandler.getMouseXpos();
 			float mouseY = UserInputHandler.getMouseYpos();
 			System.out.println("ViewPort Space [" + mouseX + ", " + mouseY + "]");
@@ -59,7 +61,6 @@ public class MousePicker {
 			Vector3f worldCoords = toWorldCoords(eyeCoords);
 			System.out.println("World Space [" + worldCoords.x + ", " + worldCoords.y + ", " + worldCoords.z + "]");
 			System.out.println("-----");
-		}
 	}
 
 	public void addMouseBehaviour(IMouseBehaviour mouseBehaviour) {
