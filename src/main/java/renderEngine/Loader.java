@@ -38,6 +38,11 @@ import org.newdawn.slick.opengl.TextureLoader;
  */
 public class Loader {
 
+	/**
+	 * FIXME not so good. Some renderer wants to specify position and color without 2 extras inbetween
+	 * @author chezmoi
+	 *
+	 */
 	public class VBOIndex {
 		public static final int POSITION_INDEX = 0;
 		public static final int TEXTURE_INDEX = 1;
@@ -47,7 +52,6 @@ public class Loader {
 	}
 
 	/**
-	 * improve that part by linking : vao  1.n -> 1.n vbo;
 	 * vao may contains one or more vbo,
 	 * vbo may be shared by many vao.
 	 * reloading / deleting shared vbos affects each concerned vao.
@@ -97,9 +101,18 @@ public class Loader {
 		return vaoId;
 	}
 	
-	public void reloadVAOPosition(int vaoId, float[] positions, int dimensions) {
+	/**
+	 * 
+	 * @param vaoId
+	 * @param positions
+	 * @param colors
+	 * @param colorIndexBinded index registered in glEnableVertexAttribArray to pass content to VertexShader
+	 * @param dimensions
+	 */
+	public void reloadVAOPosition(int vaoId, float[] positions, float[] colors, int colorIndexBinded, int dimensions) {
 		GL30.glBindVertexArray(vaoId);
 		this.storeDataFloatInAttrList(vaoId, VBOIndex.POSITION_INDEX, dimensions, positions);
+		storeDataFloatInAttrList(vaoId, colorIndexBinded, 4, colors);
 		unbindVAO();
 	}
 

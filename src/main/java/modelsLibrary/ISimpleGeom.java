@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.lwjglx.util.vector.Vector;
 import org.lwjglx.util.vector.Vector3f;
+import org.lwjglx.util.vector.Vector4f;
 
 public interface ISimpleGeom {
 	/**
@@ -24,14 +25,39 @@ public interface ISimpleGeom {
 	 */
 	public float[] getPoints();
 	
+	/**
+	 * return array of colors for each points.
+	 * @return array of colors for each points.
+	 */
+	public float[] getColors();
+	
 	public List<? extends Vector> getVertices();
 	
-	public void addPoint(Vector endRay);
+	/**
+	 * add a point with last active color to apply
+	 * @param point
+	 */
+	public void addPoint(Vector point);
+	
+	/**
+	 * add Point coordinates with a color to apply
+	 * @param vector
+	 * @param color
+	 */
+	public void addPoint(Vector point, Vector4f color);
+	
+	/**
+	 * update color for active point.
+	 * @param point
+	 * @param color
+	 */
+	public void updateColor(Vector point, Vector4f color);
 
 	/**
 	 * Reload points coordinates to binded Vertex Buffer Object attached to VAO
+	 * @param colorIndex index binded by glEnableVertexAttribArray
 	 */
-	public void reloadPositions();
+	public void reloadPositions(int colorIndex);
 
 	/**
 	 * clear points arrays coordinates.

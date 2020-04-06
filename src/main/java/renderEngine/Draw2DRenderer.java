@@ -63,6 +63,7 @@ public class Draw2DRenderer {
 		draw2DShader.start();
 		GL30.glBindVertexArray(geom.getVaoId());
 		GL20.glEnableVertexAttribArray(VBOIndex.POSITION_INDEX);
+		GL20.glEnableVertexAttribArray(Draw2DShader.COLOR_INDEX);
 	}
 
 	/**
@@ -70,6 +71,7 @@ public class Draw2DRenderer {
 	 * the VAO and disable the attribute.
 	 */
 	private void unbindGeom() {
+		GL20.glDisableVertexAttribArray(Draw2DShader.COLOR_INDEX);
 		GL20.glDisableVertexAttribArray(VBOIndex.POSITION_INDEX);
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 		GL30.glBindVertexArray(0);
@@ -82,5 +84,10 @@ public class Draw2DRenderer {
 	public void process(ISimpleGeom geom, int glRenderMode) {
 		geom.addRenderMode(glRenderMode);
 		this.geoms.add(geom);
+	}
+	
+	public void reloadAndprocess(ISimpleGeom ray, int glRenderMode) {
+		ray.reloadPositions(Draw2DShader.COLOR_INDEX);
+		process(ray, glRenderMode);
 	}
 }

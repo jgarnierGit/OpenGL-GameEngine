@@ -10,6 +10,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.lwjglx.util.vector.Vector;
 import org.lwjglx.util.vector.Vector2f;
 import org.lwjglx.util.vector.Vector3f;
+import org.lwjglx.util.vector.Vector4f;
 
 import modelsManager.Model3D;
 import renderEngine.Loader;
@@ -33,14 +34,32 @@ public abstract class SimpleGeom implements ISimpleGeom{
 	protected Loader loader;
 	protected List<Integer> glRenderModes;
 	protected float[] points;
+	protected float[] colors;
+	protected static final float[] DEFAULT_COLOR = new float[] {1.0f,0.0f,1.0f,1.0f};
 
 	public SimpleGeom(Loader loader2, int dimension) {
 		this.loader = loader2;
 		this.dimension = dimension;
 		this.glRenderModes = new ArrayList<>();
 		this.points = new float[] {};
+		this.colors = new float[] {};
 		this.vaoId = loader.loadToVAO(points, this.dimension);
 	}
+	
+	public void duplicateLastColor() {
+		if(this.colors.length == 0) {
+			 this.colors = SimpleGeom.DEFAULT_COLOR.clone();
+		}
+		else {
+			int lastIndex = this.colors.length;
+			this.colors = ArrayUtils.addAll(this.colors, this.colors[lastIndex -4], this.colors[lastIndex -3], this.colors[lastIndex -2], this.colors[lastIndex -1]);
+		}
+	}
+	
+	public void addColor(Vector4f color) {
+		this.colors = ArrayUtils.addAll(this.colors, color.x, color.y, color.z, color.w);
+	}
+	
 	@Override
 	public int getVaoId() {
 		return vaoId;
@@ -49,6 +68,10 @@ public abstract class SimpleGeom implements ISimpleGeom{
 	public float[] getPoints() {
 		return points;
 	}
+	@Override
+	public float[] getColors() {
+		return colors;
+	}
 	
 	@Override
 	public int getDimension() {
@@ -56,8 +79,8 @@ public abstract class SimpleGeom implements ISimpleGeom{
 	}
 	
 	@Override
-	public void reloadPositions() {
-		loader.reloadVAOPosition(vaoId, points, this.dimension);
+	public void reloadPositions(int colorIndex) {
+		loader.reloadVAOPosition(vaoId, points, colors, colorIndex, this.dimension);
 	}
 
 	@Override

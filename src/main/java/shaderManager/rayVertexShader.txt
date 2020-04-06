@@ -1,10 +1,14 @@
 #version 400
 
 in vec3 position;
+in vec4 color;
+
+out vec4 pass_color;
 
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 
 void main(void){
 	gl_Position = projectionMatrix * viewMatrix * vec4(position,1.0);
+	pass_color = color;
 }

@@ -12,6 +12,7 @@ import toolbox.Maths;
 public class RayShader extends ShaderProgram {
 	private static final String VERTEX_FILE= "rayVertexShader.txt";
 	private static final String FRAGMENT_FILE= "rayFragmentShader.txt";
+	public static final int COLOR_INDEX = 1;
 	private int location_transformationMatrix;
 	private int projectionMatrix;
 	private int location_viewMatrix;
@@ -30,6 +31,7 @@ public class RayShader extends ShaderProgram {
 	@Override
 	protected void bindAttributes() {
 		super.bindAttribute(VBOIndex.POSITION_INDEX, "position");
+		super.bindAttribute(COLOR_INDEX, "color");
 	}
 
 /**	public void loadTransformationMatrix(Matrix4f transformationMatrix) {

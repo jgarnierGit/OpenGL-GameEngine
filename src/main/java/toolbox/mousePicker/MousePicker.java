@@ -89,6 +89,12 @@ public class MousePicker {
 		return mouseRay;
 	}
 
+	/**
+	 * 
+	 * @param clipCoords
+	 * @return vec4 with x and y set by mouse coordinate conversion, -1 as z stands for "forward" and 0 as w stands for 
+	 * "not a point a.k.a no depth".
+	 */
 	private Vector4f toEyeCoords(Vector4f clipCoords) {
 		Matrix4f invertedProjection = Matrix4f.invert(projectionMatrix, null);
 		Vector4f eyeCoords = Matrix4f.transform(invertedProjection, clipCoords, null);

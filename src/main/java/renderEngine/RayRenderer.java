@@ -21,6 +21,7 @@ public class RayRenderer {
 	private RayShader rayShader;
 	private Camera camera;
 
+
 	public RayRenderer(Camera camera, Matrix4f projectionMatrix) throws IOException {
 		this.rayShader = new RayShader();
 		this.camera = camera;
@@ -74,6 +75,7 @@ public class RayRenderer {
 		rayShader.start();
 		GL30.glBindVertexArray(ray.getVaoId());
 		GL20.glEnableVertexAttribArray(VBOIndex.POSITION_INDEX);
+		GL20.glEnableVertexAttribArray(RayShader.COLOR_INDEX);
 	}
 
 	/**
@@ -109,6 +111,7 @@ public class RayRenderer {
 	 * the VAO and disable the attribute.
 	 */
 	private void unbindRay() {
+		GL20.glDisableVertexAttribArray(RayShader.COLOR_INDEX);
 		GL20.glDisableVertexAttribArray(VBOIndex.POSITION_INDEX);
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 		GL30.glBindVertexArray(0);
@@ -121,5 +124,10 @@ public class RayRenderer {
 	public void process(ISimpleGeom ray2, int glRenderMode) {
 		ray2.addRenderMode(glRenderMode);
 		this.rays.add(ray2);
+	}
+
+	public void reloadAndprocess(ISimpleGeom ray, int glRenderMode) {
+		ray.reloadPositions(RayShader.COLOR_INDEX);
+		process(ray, glRenderMode);
 	}
 }
