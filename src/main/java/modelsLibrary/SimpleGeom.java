@@ -90,6 +90,7 @@ public abstract class SimpleGeom implements ISimpleGeom{
 	@Override
 	public void resetGeom() {
 		points = new float[] {};
+		colors = new float[] {};
 	}
 	@Override
 	public List<Integer> getRenderModes() {
