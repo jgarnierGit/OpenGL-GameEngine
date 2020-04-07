@@ -89,7 +89,7 @@ public class MouseLogger implements IMouseBehaviour {
 
 		this.camPos = camera.getPosition();
 		this.viewMatrix = Maths.createViewMatrix(camera);
-		filterEntitiesBackwardToCamera();
+		filterEntitiesByCameraClip();
 		generateBoundingBoxes();
 		filterByRayPromixity(ray);
 		//rayCasting(ray);
@@ -146,13 +146,6 @@ public class MouseLogger implements IMouseBehaviour {
 		rayPositionOriginCam.normalise();
 		return Vector3f.add(origin, rayPositionOriginCam, null);
 	}
-	
-	private Vector3f objectToTransformationMatrix(Entity entity) {
-		Matrix4f transformationMatrix = Maths.createTransformationMatrix(entity.getPositions(), entity.getRotX(), entity.getRotY(), entity.getRotZ(), entity.getScale());
-		Vector4f entityPos4f = new Vector4f(entity.getPositions().x,entity.getPositions().y,entity.getPositions().z,0);
-		Vector4f coordToTransformationM = Matrix4f.transform(transformationMatrix, entityPos4f, null);
-		return new Vector3f(coordToTransformationM.x,coordToTransformationM.y,coordToTransformationM.z);
-	}
 
 	/**
 	 * Don't need perspective division by w (in vec4) because ray have no intrinsic depth
@@ -160,13 +153,17 @@ public class MouseLogger implements IMouseBehaviour {
 	 * @param vector
 	 * @return
 	 */
-	private Vector3f objectToProjectionMatrix(Vector3f vector) {
-		System.out.println("input vector3f "+ vector);
-		Vector4f eyeCoords = Matrix4f.transform(this.projectionMatrix,
-				new Vector4f(vector.x, vector.y, -vector.z,0), null);
-		return new Vector3f(eyeCoords.x, eyeCoords.y, eyeCoords.z);
+	private Vector4f objectToProjectionMatrix(Vector3f vector) {
+
+		Vector4f projectionCoords = Matrix4f.transform(this.projectionMatrix,
+				new Vector4f(vector.x, vector.y, vector.z,1), null);
+		System.out.println("ProjectionCoords "+ projectionCoords);
+		return projectionCoords;
 	}
 	
+	private Vector3f objectToClipSpace(Vector4f projectionCoords) {
+		return new Vector3f(projectionCoords.x/projectionCoords.w,projectionCoords.y/projectionCoords.w,projectionCoords.z/projectionCoords.w);
+	}
 	/**
 	 * w = 1 to detect entity that are backward of camera
 	 * @param worldPosition
@@ -191,27 +188,20 @@ public class MouseLogger implements IMouseBehaviour {
 	}
 
 	/**
-	 * just to test direct 2d print. not usefull to debug ray ratring
-	 * 
-	 * @param mouseX
-	 * @param mouseY
-	 * @return
+	 * TODO fix far distance filtering.
 	 */
-	private Vector2f getNormalizedDeviceCoords(Vector3f vector) {
-		Vector3f projectedCoord = objectToProjectionMatrix(vector);
-		float xcoord = projectedCoord.x / 2f * DisplayManager.WIDTH + 1;
-		float ycoord = -1 + projectedCoord.y / 2f * DisplayManager.HEIGHT;
-		return new Vector2f(xcoord, ycoord);
-	}
-
-	/**
-	 * TODO add clipping detection.
-	 */
-	private void filterEntitiesBackwardToCamera() {
+	private void filterEntitiesByCameraClip() {
 		List<Entity> filteredList = this.entities.stream().filter(entity -> {
+			System.out.println(entity.getModel());
 			Vector3f viewCoordEntityPos = objectToViewCoord(entity.getPositions());
-			viewCoordEntityPos.normalise();
-			return viewCoordEntityPos.z <= 0;
+			Vector4f projectedCoordEntity = objectToProjectionMatrix(viewCoordEntityPos);
+			Vector3f clippedVector = objectToClipSpace(projectedCoordEntity);
+			System.out.println("clippedVector "+ clippedVector);
+			Vector3f normalized = new Vector3f();
+			//viewCoordEntityPos.normalise(normalized);
+			
+			return clippedVector.x >= -1 && clippedVector.x <= 1 && clippedVector.y >= -1 && clippedVector.y <= 1 && clippedVector.z >= -1 && clippedVector.z <= 1 
+					&& projectedCoordEntity.z <= MasterRenderer.getFarPlane(); // Not enough to filter by farPLane
 		}).collect(Collectors.toList());
 		this.entities = filteredList;
 	}
@@ -478,12 +468,4 @@ public class MouseLogger implements IMouseBehaviour {
 			this.rayRenderer.reloadAndprocess(bbox, GL11.GL_LINES);
 		}
 	}
-	
-	private void temp() {
-		SimpleGeom ViewCoordPoint = new SimpleGeom2D(this.loader);
-		Vector3f bboxmXmY = objectToProjectionMatrix(new Vector3f(-0.9f, -0.9f, 0));
-		ViewCoordPoint.addPoint(new Vector2f(bboxmXmY.x, bboxmXmY.y));
-		this.draw2DRenderer.reloadAndprocess(ViewCoordPoint, GL11.GL_POINTS);
-	}
-
 }

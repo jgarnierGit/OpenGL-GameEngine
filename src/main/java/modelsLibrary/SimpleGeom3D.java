@@ -10,6 +10,12 @@ import org.lwjglx.util.vector.Vector4f;
 
 import renderEngine.Loader;
 
+/**
+ * SimpleGeom3D can also render 2D as the z component is only used when transformed by projectionMatrix.
+ * This is the vertexShader attach which make the difference.
+ * @author chezmoi
+ *
+ */
 public class SimpleGeom3D extends SimpleGeom {
 
 	public SimpleGeom3D(Loader loader) {

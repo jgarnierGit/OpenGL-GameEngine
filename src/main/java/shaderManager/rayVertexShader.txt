@@ -9,6 +9,7 @@ uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 
 void main(void){
+	// order of matrices multiplication matters!
 	gl_Position = projectionMatrix * viewMatrix * vec4(position,1.0);
 	pass_color = color;
 }
