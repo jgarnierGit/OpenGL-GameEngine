@@ -188,20 +188,18 @@ public class MouseLogger implements IMouseBehaviour {
 	}
 
 	/**
-	 * TODO fix far distance filtering.
+	 * Filter entities by testing worldPosition vector relative to clipping environnement.
+	 * FIXME some entities whose have worldPosition outside clipping but due to their scaling and shape are rendered will be filtered.
+	 * A way to avoid overtesting bounding boxes is to define in Entity a forceBoundingBoxTest param designed for this method.
+	 * If not specified, worldOrigin wil be kept.
 	 */
 	private void filterEntitiesByCameraClip() {
 		List<Entity> filteredList = this.entities.stream().filter(entity -> {
-			System.out.println(entity.getModel());
 			Vector3f viewCoordEntityPos = objectToViewCoord(entity.getPositions());
 			Vector4f projectedCoordEntity = objectToProjectionMatrix(viewCoordEntityPos);
 			Vector3f clippedVector = objectToClipSpace(projectedCoordEntity);
-			System.out.println("clippedVector "+ clippedVector);
-			Vector3f normalized = new Vector3f();
-			//viewCoordEntityPos.normalise(normalized);
-			
-			return clippedVector.x >= -1 && clippedVector.x <= 1 && clippedVector.y >= -1 && clippedVector.y <= 1 && clippedVector.z >= -1 && clippedVector.z <= 1 
-					&& projectedCoordEntity.z <= MasterRenderer.getFarPlane(); // Not enough to filter by farPLane
+			return clippedVector.x >= -1 && clippedVector.x <= 1 && clippedVector.y >= -1 && clippedVector.y <= 1 && 
+				 projectedCoordEntity.length() <= MasterRenderer.getFarPlane(); 
 		}).collect(Collectors.toList());
 		this.entities = filteredList;
 	}
