@@ -61,8 +61,6 @@ public class Camera {
 		float offsetZ = (float) (horizontalDist * Math.cos(Math.toRadians(theta)));
 		position.x = player.getPositions().x - offsetX;
 		position.z = player.getPositions().z - offsetZ;
-		//System.out.println("camera x: "+ position.x);
-		//System.out.println("camera y: "+ position.y);
 		float y = player.getPositions().y + verticalDist;
 		position.y = terrain.getHeight(position.x, position.z) +1 > y ? terrain.getHeight(position.x, position.z) + 1 : y;
 	}

@@ -8,6 +8,12 @@ import entities.Camera;
 
 public class Maths {
 	
+	/**
+	 * in a 4*4 matrix last column is for translation x,y,z.
+	 * @param translation
+	 * @param scale
+	 * @return
+	 */
 	public static Matrix4f createTransformationMatrix(Vector2f translation, Vector2f scale) {
 		Matrix4f matrix = new Matrix4f();
 		matrix.setIdentity();

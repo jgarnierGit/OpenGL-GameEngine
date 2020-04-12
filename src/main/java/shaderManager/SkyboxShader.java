@@ -33,6 +33,13 @@ public class SkyboxShader  extends ShaderProgram {
 	        super.loadMatrix(location_projectionMatrix, matrix);
 	    }
 	 
+	    /**
+		 * in a 4*4 matrix last column is for translation x,y,z. So we set to 0 to be always fixed in a view coordinates system. Rotation is unaffected
+		 * to follow "camera" rotation 
+		 * @param translation
+		 * @param scale
+		 * @return
+		 */
 	    public void loadViewMatrix(Camera camera){
 	        Matrix4f matrix = Maths.createViewMatrix(camera);
 	        matrix.m30 = 0;
