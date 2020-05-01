@@ -9,7 +9,7 @@ import modelsLibrary.SimpleGeom;
 import renderEngine.Loader.VBOIndex;
 import toolbox.Maths;
 
-public class RayShader extends ShaderProgram {
+public class Draw3DShader extends ShaderProgram {
 	private static final String VERTEX_FILE= "rayVertexShader.txt";
 	private static final String FRAGMENT_FILE= "rayFragmentShader.txt";
 	public static final int COLOR_INDEX = 1;
@@ -17,7 +17,7 @@ public class RayShader extends ShaderProgram {
 	private int projectionMatrix;
 	private int location_viewMatrix;
 	
-	public RayShader() throws IOException {
+	public Draw3DShader() throws IOException {
 		super(VERTEX_FILE,FRAGMENT_FILE);
 	}
 

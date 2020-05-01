@@ -13,46 +13,51 @@ import org.lwjglx.util.vector.Matrix4f;
 import entities.Camera;
 import modelsLibrary.ISimpleGeom;
 import renderEngine.Loader.VBOIndex;
-import shaderManager.RayShader;
+import shaderManager.Draw3DShader;
 import toolbox.Maths;
 
-public class RayRenderer {
-	private List<ISimpleGeom> rays;
-	private RayShader rayShader;
+/**
+ * Render using ViewMatrix transformation
+ * @author chezmoi
+ *
+ */
+public class Draw3DRenderer {
+	private List<ISimpleGeom> geoms;
+	private Draw3DShader draw3DShader;
 	private Camera camera;
 
 
-	public RayRenderer(Camera camera, Matrix4f projectionMatrix) throws IOException {
-		this.rayShader = new RayShader();
+	public Draw3DRenderer(Camera camera, Matrix4f projectionMatrix) throws IOException {
+		this.draw3DShader = new Draw3DShader();
 		this.camera = camera;
-		rayShader.start();
-		this.rays = new ArrayList<>();
-		rayShader.loadProjectionMatrix(projectionMatrix);
-		rayShader.stop();
+		draw3DShader.start();
+		this.geoms = new ArrayList<>();
+		draw3DShader.loadProjectionMatrix(projectionMatrix);
+		draw3DShader.stop();
 	}
 
 	public void render() {
-		for (ISimpleGeom ray : rays) {
-			prepare(ray);
+		for (ISimpleGeom geom : geoms) {
+			prepare(geom);
 			Matrix4f viewMatrix = Maths.createViewMatrix(camera);
-			rayShader.loadViewMatrix(viewMatrix);
+			draw3DShader.loadViewMatrix(viewMatrix);
 
 			// Disable distance filtering.
 			GL11.glDisable(GL11.GL_DEPTH);
-			renderByMode(ray);
-			unbindRay();
+			renderByMode(geom);
+			unbindGeom();
 			// GL11.glLineWidth(1);
 			GL11.glEnable(GL11.GL_DEPTH);
-			rayShader.stop();
+			draw3DShader.stop();
 		}
 	}
 
-	private void renderByMode(ISimpleGeom ray) {
+	private void renderByMode(ISimpleGeom geom) {
 		int dataLength = 0;
 		// cf https://www.khronos.org/opengl/wiki/Primitive => internal gl logic, hidden
 		// for DrawArrays usage;
-		int verticesCount = ray.getPoints().length / ray.getDimension();
-		for (int glRenderMode : ray.getRenderModes()) {
+		int verticesCount = geom.getPoints().length / geom.getDimension();
+		for (int glRenderMode : geom.getRenderModes()) {
 			// GL11.glEnable(GL11.GL_POINT_SMOOTH);
 			GL11.glLineWidth(2); // seems to have a max cap unlike PointSize. for GL_LINES
 			GL11.glPointSize(5); // GL_POINTS
@@ -71,11 +76,11 @@ public class RayRenderer {
 	 * 
 	 * @param ray2
 	 */
-	private void prepare(ISimpleGeom ray) {
-		rayShader.start();
-		GL30.glBindVertexArray(ray.getVaoId());
+	private void prepare(ISimpleGeom geom) {
+		draw3DShader.start();
+		GL30.glBindVertexArray(geom.getVaoId());
 		GL20.glEnableVertexAttribArray(VBOIndex.POSITION_INDEX);
-		GL20.glEnableVertexAttribArray(RayShader.COLOR_INDEX);
+		GL20.glEnableVertexAttribArray(Draw3DShader.COLOR_INDEX);
 	}
 
 	/**
@@ -110,24 +115,24 @@ public class RayRenderer {
 	 * TODO refactor to facilitate renderer file creation. After rendering we unbind
 	 * the VAO and disable the attribute.
 	 */
-	private void unbindRay() {
-		GL20.glDisableVertexAttribArray(RayShader.COLOR_INDEX);
+	private void unbindGeom() {
+		GL20.glDisableVertexAttribArray(Draw3DShader.COLOR_INDEX);
 		GL20.glDisableVertexAttribArray(VBOIndex.POSITION_INDEX);
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 		GL30.glBindVertexArray(0);
 	}
 
 	public void cleanUp() {
-		rayShader.cleanUp();
+		draw3DShader.cleanUp();
 	}
 
-	public void process(ISimpleGeom ray2, int glRenderMode) {
-		ray2.addRenderMode(glRenderMode);
-		this.rays.add(ray2);
+	public void process(ISimpleGeom geom, int glRenderMode) {
+		geom.addRenderMode(glRenderMode);
+		this.geoms.add(geom);
 	}
 
-	public void reloadAndprocess(ISimpleGeom ray, int glRenderMode) {
-		ray.reloadPositions(RayShader.COLOR_INDEX);
-		process(ray, glRenderMode);
+	public void reloadAndprocess(ISimpleGeom geom, int glRenderMode) {
+		geom.reloadPositions(Draw3DShader.COLOR_INDEX);
+		process(geom, glRenderMode);
 	}
 }

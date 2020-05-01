@@ -25,14 +25,14 @@ import renderEngine.DisplayManager;
 import renderEngine.Draw2DRenderer;
 import renderEngine.Loader;
 import renderEngine.MasterRenderer;
-import renderEngine.RayRenderer;
+import renderEngine.Draw3DRenderer;
 import toolbox.Maths;
 import toolbox.mousePicker.MouseInputListener;
 
 public class MouseLogger implements IMouseBehaviour {
 	private List<Entity> entities;
 	private Camera camera;
-	private RayRenderer rayRenderer;
+	private Draw3DRenderer rayRenderer;
 	private ISimpleGeom ray3D;
 	private List<ISimpleGeom> boundingBoxes;
 	private List<ISimpleGeom> debugPoints;
@@ -47,7 +47,7 @@ public class MouseLogger implements IMouseBehaviour {
 	private static final float BOUNDING_BOX = 4f;
 	private static final Vector4f BOUNDING_BOX_COLOR = new Vector4f(0.5f,1.0f,0.5f,1.0f);
 
-	public MouseLogger(Camera camera, RayRenderer rayRenderer, Draw2DRenderer draw2DRenderer, Matrix4f projection,
+	public MouseLogger(Camera camera, Draw3DRenderer rayRenderer, Draw2DRenderer draw2DRenderer, Matrix4f projection,
 			Loader loader, MouseInputListener mouseInputListener) {
 		this.entities = new ArrayList<>();
 		this.camera = camera;
