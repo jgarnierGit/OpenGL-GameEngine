@@ -19,12 +19,14 @@ import shaderManager.StaticShader;
 import shaderManager.TerrainShader;
 
 public class MasterRenderer {
-	private static final float FOV = 70;
+	private static final float FOV = 70f;
 	private static final float NEAR_PLANE = 0.1f;
 	private static final float FAR_PLANE = 1000;
 	private static final float RED = 0.55f;
 	private static final float BLUE = 0.64f;
 	private static final float GREEN = 0.75f;
+	
+	private float time = 0;
 	
 	
 	public static float getNearPlane() {
@@ -76,7 +78,29 @@ public class MasterRenderer {
 		GL11.glDisable(GL11.GL_CULL_FACE);
 	}
 	
+	private void updateProjectionInTime() {
+		time += DisplayManager.getFrameTimeSeconds() * 50;
+		time %= 180;
+		float aspectRatio = (float) DisplayManager.WIDTH / (float) DisplayManager.HEIGHT;
+		float y_scale = (float)  ((1f / Math.tan(Math.toRadians(time/ 2f))) * aspectRatio);
+		float x_scale = y_scale / aspectRatio;
+
+		projectionMatrix.m00 = x_scale;
+		projectionMatrix.m11 = y_scale;
+		renderer.setProjectionMatrix(projectionMatrix);
+		
+		//float y_scale2 = (float)  ((1f / Math.tan(Math.toRadians(-time/ 2f))) * aspectRatio);
+		//float x_scale2 = y_scale / aspectRatio;
+		//projectionMatrix.m00 = y_scale2;
+		//projectionMatrix.m11 = x_scale2;
+		terrainShader.start();
+		terrainShader.loadProjectionMatrix(projectionMatrix);
+		terrainShader.stop();
+		
+	}
+	
 	public void render(List<Light> lights, Camera camera) {
+		//updateProjectionInTime();
 		prepare();
 		shader.start();
 		shader.loadSkyColour(RED, GREEN, BLUE);
@@ -128,7 +152,7 @@ public class MasterRenderer {
 	
 	private void createProjectionMatrix() {
 		float aspectRatio = (float) DisplayManager.WIDTH / (float) DisplayManager.HEIGHT;
-		float y_scale = (float)  ((1f / Math.tan(Math.toRadians(FOV / 2f))) * aspectRatio);
+		float y_scale = (float)  ((1f / Math.tan(Math.toRadians(FOV/ 2f))) * aspectRatio);
 		float x_scale = y_scale / aspectRatio;
 		float frustum_length = FAR_PLANE - NEAR_PLANE;
 		

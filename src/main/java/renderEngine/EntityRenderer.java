@@ -145,4 +145,10 @@ public class EntityRenderer{
 		GL30.glBindVertexArray(0);
 	}
 
+	public void setProjectionMatrix(Matrix4f projectionMatrix) {
+		this.shader.start();
+		this.shader.loadProjectionMatrix(projectionMatrix);
+		this.shader.stop();
+	}
+
 }
