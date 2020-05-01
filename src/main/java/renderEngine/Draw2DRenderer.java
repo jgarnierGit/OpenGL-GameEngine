@@ -13,6 +13,11 @@ import modelsLibrary.ISimpleGeom;
 import renderEngine.Loader.VBOIndex;
 import shaderManager.Draw2DShader;
 
+/**
+ * Render as is geom
+ * @author chezmoi
+ *
+ */
 public class Draw2DRenderer {
 	private List<ISimpleGeom> geoms;
 	private Draw2DShader draw2DShader;

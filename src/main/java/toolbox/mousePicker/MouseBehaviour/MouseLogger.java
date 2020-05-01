@@ -126,6 +126,7 @@ public class MouseLogger implements IMouseBehaviour {
 		}).collect(Collectors.toList());
 		if(!orderedList.isEmpty()) {
 			orderedList.get(0).select();
+			printSelectedBboxIn2D(orderedList.get(0));
 		}
 		logFilterByRayProximity(orderedList, rayPosNormalizedToCam, rayFromCamera);
 
@@ -133,6 +134,40 @@ public class MouseLogger implements IMouseBehaviour {
 			return false;
 		}).collect(Collectors.toList());
 		this.entities = filteredList;
+	}
+
+	/**
+	 * Project bbox worldCoordinates points to the rendering plane. 
+	 * Last step (converting to clipSpace) is equals to the cartesian conversion as w is equal to -z.
+	 * Doing again cartesian division aka [ (NearPlane * x)/z (NearPlane *y)/z] gives a minimap. (NearPlane can be replaced by any constant.)
+	 * @param entity
+	 */
+	private void printSelectedBboxIn2D(Entity entity) {
+		entity.getBoundingBox().ifPresent(bbox -> {
+			SimpleGeom2D pointToScreenSpace = new SimpleGeom2D(loader);
+			SimpleGeom2D pointToCartesianSpace = new SimpleGeom2D(loader);
+			SimpleGeom2D nearPlane = new SimpleGeom2D(loader);
+			nearPlane.addPoint(new Vector2f(-MasterRenderer.getNearPlane(),-MasterRenderer.getNearPlane()), new Vector4f(0.56f,0.91f,0.84f,1));
+			nearPlane.addPoint(new Vector2f(MasterRenderer.getNearPlane(),-MasterRenderer.getNearPlane()));
+			nearPlane.addPoint(new Vector2f(MasterRenderer.getNearPlane(),MasterRenderer.getNearPlane()));
+			nearPlane.addPoint(new Vector2f(-MasterRenderer.getNearPlane(),MasterRenderer.getNearPlane()));
+			bbox.getVertices().forEach(verticeWorldCoord -> {
+				Vector3f vtxViewCoord = objectToViewCoord(verticeWorldCoord);
+				Vector4f vtxProjCoord = objectToProjectionMatrix(vtxViewCoord);
+				Vector3f vtxScreenSpace = objectToClipSpace(vtxProjCoord); 
+				pointToScreenSpace.addPoint(new Vector2f(vtxScreenSpace.x,vtxScreenSpace.y), new Vector4f(0.84f,0.56f,0.91f,1));
+				
+				pointToCartesianSpace.addPoint(new Vector2f((MasterRenderer.getNearPlane() * vtxScreenSpace.x) / vtxScreenSpace.z, (MasterRenderer.getNearPlane() * vtxScreenSpace.y) / vtxScreenSpace.z),
+						 new Vector4f(0.56f,0.91f,0.84f,1));
+			});
+			debugPoints.add(pointToScreenSpace);
+			debugPoints.add(pointToCartesianSpace);
+			debugPoints.add(nearPlane);
+			// retry to render on 2D rendered. may compute this by taking care nearLenght while dividing by distance.
+				this.draw2DRenderer.reloadAndprocess(pointToScreenSpace, GL11.GL_LINE_LOOP);
+				this.draw2DRenderer.reloadAndprocess(pointToCartesianSpace, GL11.GL_LINE_LOOP);
+				this.draw2DRenderer.reloadAndprocess(nearPlane, GL11.GL_LINE_LOOP);
+		});
 	}
 
 	/**
@@ -148,38 +183,45 @@ public class MouseLogger implements IMouseBehaviour {
 	}
 
 	/**
-	 * Don't need perspective division by w (in vec4) because ray have no intrinsic depth
-	 * is 0 ok?
-	 * @param vector
-	 * @return
+	 * V'.x = V.x * XScale;
+	 * V'.y = V.y * YScale;
+	 * V'.z = V.z * -;
+	 * V'.w = -V.z;
+	 * @param vector3f Homogeneous vector point (V[w]=1)
+	 * @return [vector] * [projectionMatrix] (Row major column) 
 	 */
 	private Vector4f objectToProjectionMatrix(Vector3f vector) {
 
 		Vector4f projectionCoords = Matrix4f.transform(this.projectionMatrix,
-				new Vector4f(vector.x, vector.y, vector.z,1), null);
+				new Vector4f(vector.x,vector.y,vector.z,1), null);
 		System.out.println("ProjectionCoords "+ projectionCoords);
 		return projectionCoords;
 	}
 	
+	/**
+	 * @param projectionCoords
+	 * @return new Vector3f(x/w,y/w,z/w)
+	 */
 	private Vector3f objectToClipSpace(Vector4f projectionCoords) {
 		return new Vector3f(projectionCoords.x/projectionCoords.w,projectionCoords.y/projectionCoords.w,projectionCoords.z/projectionCoords.w);
 	}
 	/**
-	 * w = 1 to detect entity that are backward of camera
+	 * ViewMatrix as w[33] set as constant 1.
+	 * Need a 1*4 Vector to apply translation of ViewMatrix.
+	 * V[w] = 1 to detect entity that are backward of camera
 	 * @param worldPosition
-	 * @return
+	 * @return [x,y,z] rotated * translated homogeneous vector point
 	 */
 	private Vector3f objectToViewCoord(Vector3f worldPosition) {
 		System.out.println("worldCoord "+ worldPosition);
 		Vector4f objectPos4f = new Vector4f(worldPosition.x, worldPosition.y, worldPosition.z, 1f);
 		Vector4f objectWorld = Matrix4f.transform(viewMatrix, objectPos4f, null);
-		Vector3f objectToWorld = new Vector3f(objectWorld.x, objectWorld.y, objectWorld.z);
-		System.out.println("Eye space viewWorld "+ objectToWorld);
-		return objectToWorld;
+		return new Vector3f(objectWorld.x,objectWorld.y,objectWorld.z);
 	}
 	
 	private Vector3f objectToViewCoordNormalized(Entity entity) {
 		Vector3f objectPosition = entity.getPositions();
+		// makes position as homogeneous vector to allows applying translation transformation given by viewMatrix.
 		Vector4f objectPos4f = new Vector4f(objectPosition.x, objectPosition.y, objectPosition.z, 1f);
 		Vector4f objectWorld = Matrix4f.transform(viewMatrix, objectPos4f, null);
 		Vector3f objectToWorld = new Vector3f(objectWorld.x, objectWorld.y, objectWorld.z);
@@ -196,10 +238,12 @@ public class MouseLogger implements IMouseBehaviour {
 	private void filterEntitiesByCameraClip() {
 		List<Entity> filteredList = this.entities.stream().filter(entity -> {
 			Vector3f viewCoordEntityPos = objectToViewCoord(entity.getPositions());
+			// somes said that projection Matrix is not useful for the purpose of a ray tracer
 			Vector4f projectedCoordEntity = objectToProjectionMatrix(viewCoordEntityPos);
 			Vector3f clippedVector = objectToClipSpace(projectedCoordEntity);
 			return clippedVector.x >= -1 && clippedVector.x <= 1 && clippedVector.y >= -1 && clippedVector.y <= 1 && 
-				 projectedCoordEntity.length() <= MasterRenderer.getFarPlane(); 
+					clippedVector.z >= -1 && clippedVector.z <= 1; // z clipped seems to be twice as it should be.
+				// projectedCoordEntity.length() <= MasterRenderer.getFarPlane(); //if i want to use getFarPlane i may want to multiply it by cos(fov)
 		}).collect(Collectors.toList());
 		this.entities = filteredList;
 	}
@@ -242,7 +286,7 @@ public class MouseLogger implements IMouseBehaviour {
 	}
 
 	private void generateBoundingBoxes() {
-		this.entities.forEach(entity -> {
+	/**	this.entities.forEach(entity -> {
 			SimpleGeom3D boundingBox = new SimpleGeom3D(this.loader);
 			Vector3f worldPositionEntity = entity.getPositions();
 			boundingBox.addPoint(new Vector3f(worldPositionEntity.x - BOUNDING_BOX,
@@ -253,8 +297,8 @@ public class MouseLogger implements IMouseBehaviour {
 					worldPositionEntity.y + BOUNDING_BOX, worldPositionEntity.z));
 			boundingBox.addPoint(new Vector3f(worldPositionEntity.x + BOUNDING_BOX,
 					worldPositionEntity.y - BOUNDING_BOX, worldPositionEntity.z));
-			entity.setBoundingBox(boundingBox);
-		});
+			//entity.setBoundingBox(boundingBox);
+		});**/
 		printBoundingBoxes();
 	}
 
@@ -386,10 +430,6 @@ public class MouseLogger implements IMouseBehaviour {
 		raysWorldOrigin.addPoint(rayFromCamera, new Vector4f(1,0.6f,0.5f,1));
 		
 		this.rayRenderer.reloadAndprocess(raysWorldOrigin, GL11.GL_LINES);
-		
-		for (ISimpleGeom point : debugPoints) {
-			this.draw2DRenderer.reloadAndprocess(point, GL11.GL_LINE_LOOP);
-		}
 	}
 	
 	private void printBoundingBoxes() {
@@ -460,6 +500,7 @@ public class MouseLogger implements IMouseBehaviour {
 			boundingBox.addPoint(new Vector3f(worldPositionEntity.x - BOUNDING_BOX,
 					worldPositionEntity.y - BOUNDING_BOX, worldPositionEntity.z - BOUNDING_BOX),BOUNDING_BOX_COLOR);
 			boundingBoxes.add(boundingBox);
+			entity.setBoundingBox((SimpleGeom3D)boundingBox);
 
 		});
 		for (ISimpleGeom bbox : boundingBoxes) {

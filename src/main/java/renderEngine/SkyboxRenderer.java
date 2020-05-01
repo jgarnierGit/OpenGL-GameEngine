@@ -93,7 +93,7 @@ private static final float SIZE = 500f;
 	
 	private void bindTextures(){
 		time += DisplayManager.getFrameTimeSeconds() * 1000;
-		time %= 24000;
+		time %= 24000; // affecte le reste de la division.
 		int texture1;
 		int texture2;
 		float blendFactor;		

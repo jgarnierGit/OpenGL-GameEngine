@@ -9,7 +9,7 @@ import entities.Camera;
 public class Maths {
 	
 	/**
-	 * in a 4*4 matrix last column is for translation x,y,z.
+	 * 4*4 Matrix in Row Column Order: last line is for translation x,y,z.
 	 * @param translation
 	 * @param scale
 	 * @return
@@ -33,6 +33,13 @@ public class Maths {
 		return matrix;
 	}
 	
+	/**
+	 * Rotate and then translate an identity matrix in order to create View Matrix.
+	 * w row = [TranslM.x, TranslM.y, TranslM.z, 1]
+	 * w col = [0, 0, 0, 1]
+	 * @param camera
+	 * @return [IdMatrix] * [RotMatrix] * [TranslMatrix]
+	 */
 	public static Matrix4f createViewMatrix(Camera camera) {
 		Matrix4f viewMatrix = new Matrix4f();
 		viewMatrix.setIdentity();

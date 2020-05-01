@@ -28,7 +28,7 @@ const float density = 0.003; // higher value makes 0.0 value to be reached quick
 const float gradient = 6; // higher value makes transition beetwen 1.0 to 0.0 visibility smaller
 
 void main(void){
-
+	// OpenGL convention applied: column major order (readen right to left to apply vec4 * transformationMatrix * viewMatrix * projectionMatrix)
 	vec4 worldPosition = transformationMatrix * vec4(position,1.0);
 	vec4 positionRelativeToCam = viewMatrix * worldPosition;
 	gl_Position = projectionMatrix * positionRelativeToCam;
@@ -50,5 +50,5 @@ void main(void){
 	
 	float distance = length(positionRelativeToCam.xyz);
 	visibility = exp(-pow((distance*density),gradient));
-	visibility = clamp(visibility,0.0,1.0);// 1.0;
+	visibility =  1.0; //clamp(visibility,0.0,1.0);//
 }
