@@ -29,7 +29,7 @@ public class SimpleGeom2D extends SimpleGeom {
 	
 	private void addPoint2f(Vector point) {
 		if (!(point instanceof Vector2f)) {
-			throw new IllegalArgumentException("Vector3f excepted, got " + point.getClass());
+			throw new IllegalArgumentException("Vector2f excepted, got " + point.getClass());
 		}
 		Vector2f v2f = (Vector2f) point;
 		float[] newPoints = ArrayUtils.addAll(points, v2f.x, v2f.y);
