@@ -16,10 +16,11 @@ import shaderManager.Draw3DShader;
 
 /**
  * Render as is geom
+ * 
  * @author chezmoi
  *
  */
-public class Draw2DRenderer extends DrawRenderer{
+public class Draw2DRenderer extends DrawRenderer {
 	private Draw2DShader draw2DShader;
 
 	public Draw2DRenderer() throws IOException {
@@ -29,28 +30,28 @@ public class Draw2DRenderer extends DrawRenderer{
 
 	@Override
 	public void render() {
-		for(ISimpleGeom geom : geoms) {
+		for (RenderingParameters params : renderingParams) {
 			draw2DShader.start();
-			prepare(geom, Draw2DShader.COLOR_INDEX, VBOIndex.POSITION_INDEX);
-			
+			prepare(params.getGeom(), Draw2DShader.COLOR_INDEX, VBOIndex.POSITION_INDEX);
+
 			// Disable distance filtering.
 			GL11.glDisable(GL11.GL_DEPTH);
-			renderByMode(geom);	
-			unbindGeom(Draw2DShader.COLOR_INDEX,VBOIndex.POSITION_INDEX);
+			genericDrawRender(params);
+			unbindGeom(Draw2DShader.COLOR_INDEX, VBOIndex.POSITION_INDEX);
 			// GL11.glLineWidth(1);
 			GL11.glEnable(GL11.GL_DEPTH);
 			draw2DShader.stop();
 		}
 	}
-	
+
 	@Override
 	public void cleanUp() {
 		draw2DShader.cleanUp();
 	}
-	
+
 	@Override
-	public void reloadAndprocess(ISimpleGeom geom, int renderingIndex) {
+	public void reloadAndprocess(ISimpleGeom geom) {
 		geom.reloadPositions(Draw2DShader.COLOR_INDEX);
-		process(geom, renderingIndex);
+		this.geoms.add(geom);
 	}
 }

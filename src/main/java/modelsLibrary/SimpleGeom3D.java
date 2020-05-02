@@ -12,8 +12,10 @@ import org.lwjglx.util.vector.Vector4f;
 import renderEngine.Loader;
 
 /**
- * SimpleGeom3D can also render 2D as the z component is only used when transformed by projectionMatrix.
- * This is the vertexShader attach which make the difference.
+ * SimpleGeom3D can also render 2D as the z component is only used when
+ * transformed by projectionMatrix. This is the vertexShader attach which make
+ * the difference.
+ * 
  * @author chezmoi
  *
  */
@@ -28,13 +30,13 @@ public class SimpleGeom3D extends SimpleGeom {
 		duplicateLastColor();
 		addPoint3f(point);
 	}
-	
+
 	@Override
 	public void addPoint(Vector point, Vector4f color) {
 		addColor(color);
 		addPoint3f(point);
 	}
-	
+
 	private void addPoint3f(Vector point) {
 		Vector3f v3f = getVector3f(point);
 		float[] newPoints = ArrayUtils.addAll(points, v3f.x, v3f.y, v3f.z);
@@ -49,12 +51,11 @@ public class SimpleGeom3D extends SimpleGeom {
 		}
 		return vectors;
 	}
-	
+
 	private Vector3f getVector3f(Vector point) {
 		if (!(point instanceof Vector3f)) {
 			throw new IllegalArgumentException("Vector3f excepted, got " + point.getClass());
 		}
 		return (Vector3f) point;
 	}
-
 }
