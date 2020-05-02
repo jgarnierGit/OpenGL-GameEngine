@@ -35,7 +35,8 @@ public class Maths {
 	
 	/**
 	 * Rotate and then translate an identity matrix in order to create View Matrix.
-	 * w row = [TranslM.x, TranslM.y, TranslM.z, 1]
+	 * apply inverse camera translation to each object.
+	 * w row = [-TranslM.x, -TranslM.y, -TranslM.z, 1]
 	 * w col = [0, 0, 0, 1]
 	 * @param camera
 	 * @return [IdMatrix] * [RotMatrix] * [TranslMatrix]

@@ -48,10 +48,10 @@ public interface ISimpleGeom {
 	
 	/**
 	 * update color for active point.
-	 * @param point
+	 * @param index of point in list
 	 * @param color
 	 */
-	public void updateColor(Vector point, Vector4f color);
+	public void updateColor(int index, Vector4f color);
 
 	/**
 	 * Reload points coordinates to binded Vertex Buffer Object attached to VAO
@@ -75,4 +75,23 @@ public interface ISimpleGeom {
 	 * @param glRenderMode (GL11.GL_POINTS / GL_LINES / GL_TRIANGLES and subtypes)
 	 */
 	public void addRenderMode(int glRenderMode);
+
+	public boolean hasTransparency();
+
+	/**
+	 * Set each Gl_State to apply for active Geom.
+	 */
+	public void enableRenderOptions();
+
+	/**
+	 * Unset each Gl_State when rendering is done.
+	 */
+	public void disableRenderOptions();
+	
+	/**
+	 * add Gl_State rule for rendering
+	 * @param glBlend
+	 * @param b true to enable before rendering, false to disable before rendering
+	 */
+	public void addGlState(int glBlend, boolean b);
 }

@@ -44,9 +44,4 @@ public class SimpleGeom2D extends SimpleGeom {
 		}
 		return vectors;
 	}
-
-	@Override
-	public void updateColor(Vector point, Vector4f color) {
-		throw new UnsupportedOperationException("need to keep an internal List<Vector> to retreive point index in float index and update color.");
-	}
 }

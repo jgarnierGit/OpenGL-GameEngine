@@ -25,7 +25,7 @@ public class MasterRenderer {
 	private static final float RED = 0.55f;
 	private static final float BLUE = 0.64f;
 	private static final float GREEN = 0.75f;
-	
+	private static final float ASPECT_RATIO = (float) DisplayManager.WIDTH / (float) DisplayManager.HEIGHT;
 	private float time = 0;
 	
 	
@@ -35,6 +35,14 @@ public class MasterRenderer {
 
 	public static float getFarPlane() {
 		return FAR_PLANE;
+	}
+	
+	public static float getFOV() {
+		return FOV;
+	}
+	
+	public static float getAspectRatio() {
+		return ASPECT_RATIO;
 	}
 
 	private StaticShader shader;
@@ -151,9 +159,8 @@ public class MasterRenderer {
 	}
 	
 	private void createProjectionMatrix() {
-		float aspectRatio = (float) DisplayManager.WIDTH / (float) DisplayManager.HEIGHT;
-		float y_scale = (float)  ((1f / Math.tan(Math.toRadians(FOV/ 2f))) * aspectRatio);
-		float x_scale = y_scale / aspectRatio;
+		float y_scale = (float)  ((1f / Math.tan(Math.toRadians(FOV/ 2f))) * ASPECT_RATIO);
+		float x_scale = y_scale / ASPECT_RATIO;
 		float frustum_length = FAR_PLANE - NEAR_PLANE;
 		
 		projectionMatrix = new Matrix4f();

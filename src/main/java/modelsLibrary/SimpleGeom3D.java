@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.lwjgl.opengl.GL11;
 import org.lwjglx.util.vector.Vector;
 import org.lwjglx.util.vector.Vector3f;
 import org.lwjglx.util.vector.Vector4f;
@@ -35,10 +36,7 @@ public class SimpleGeom3D extends SimpleGeom {
 	}
 	
 	private void addPoint3f(Vector point) {
-		if (!(point instanceof Vector3f)) {
-			throw new IllegalArgumentException("Vector3f excepted, got " + point.getClass());
-		}
-		Vector3f v3f = (Vector3f) point;
+		Vector3f v3f = getVector3f(point);
 		float[] newPoints = ArrayUtils.addAll(points, v3f.x, v3f.y, v3f.z);
 		points = newPoints;
 	}
@@ -51,10 +49,12 @@ public class SimpleGeom3D extends SimpleGeom {
 		}
 		return vectors;
 	}
-
-	@Override
-	public void updateColor(Vector point, Vector4f color) {
-		throw new UnsupportedOperationException("need to keep an internal List<Vector> to retreive point index in float index and update color.");
+	
+	private Vector3f getVector3f(Vector point) {
+		if (!(point instanceof Vector3f)) {
+			throw new IllegalArgumentException("Vector3f excepted, got " + point.getClass());
+		}
+		return (Vector3f) point;
 	}
 
 }

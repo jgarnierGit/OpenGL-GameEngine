@@ -2,6 +2,7 @@ package renderEngine;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.lwjgl.opengl.GL11;
@@ -21,68 +22,52 @@ import toolbox.Maths;
  * @author chezmoi
  *
  */
-public class Draw3DRenderer {
-	private List<ISimpleGeom> geoms;
+public class Draw3DRenderer  extends DrawRenderer{
+	
 	private Draw3DShader draw3DShader;
 	private Camera camera;
 
 
 	public Draw3DRenderer(Camera camera, Matrix4f projectionMatrix) throws IOException {
+		super();
 		this.draw3DShader = new Draw3DShader();
 		this.camera = camera;
 		draw3DShader.start();
-		this.geoms = new ArrayList<>();
 		draw3DShader.loadProjectionMatrix(projectionMatrix);
 		draw3DShader.stop();
 	}
 
+	@Override
 	public void render() {
 		for (ISimpleGeom geom : geoms) {
-			prepare(geom);
+			draw3DShader.start();
+			prepare(geom,VBOIndex.POSITION_INDEX, Draw3DShader.COLOR_INDEX);
 			Matrix4f viewMatrix = Maths.createViewMatrix(camera);
 			draw3DShader.loadViewMatrix(viewMatrix);
 
 			// Disable distance filtering.
 			GL11.glDisable(GL11.GL_DEPTH);
+			geom.enableRenderOptions();
 			renderByMode(geom);
-			unbindGeom();
+			unbindGeom(VBOIndex.POSITION_INDEX, Draw3DShader.COLOR_INDEX);
 			// GL11.glLineWidth(1);
+			geom.disableRenderOptions();
 			GL11.glEnable(GL11.GL_DEPTH);
 			draw3DShader.stop();
 		}
 	}
 
-	private void renderByMode(ISimpleGeom geom) {
-		int dataLength = 0;
-		// cf https://www.khronos.org/opengl/wiki/Primitive => internal gl logic, hidden
-		// for DrawArrays usage;
-		int verticesCount = geom.getPoints().length / geom.getDimension();
-		for (int glRenderMode : geom.getRenderModes()) {
-			// GL11.glEnable(GL11.GL_POINT_SMOOTH);
-			GL11.glLineWidth(2); // seems to have a max cap unlike PointSize. for GL_LINES
-			GL11.glPointSize(5); // GL_POINTS
-			// GL11.drawArrays can draw points with GL_POINTS, not GL_POINT
-			GL11.glDrawArrays(glRenderMode, 0, verticesCount);
-			GL11.glPointSize(1);
-			GL11.glLineWidth(1);
-		}
+	@Override
+	public void cleanUp() {
+		draw3DShader.cleanUp();
 	}
-
-	/**
-	 * TODO refactor to facilitate renderer file creation. Before we can render a
-	 * VAO it needs to be made active, and we can do this by binding it. We also
-	 * need to enable the relevant attributes of the VAO, which in this case is just
-	 * attribute 0 where we stored the position data.
-	 * 
-	 * @param ray2
-	 */
-	private void prepare(ISimpleGeom geom) {
-		draw3DShader.start();
-		GL30.glBindVertexArray(geom.getVaoId());
-		GL20.glEnableVertexAttribArray(VBOIndex.POSITION_INDEX);
-		GL20.glEnableVertexAttribArray(Draw3DShader.COLOR_INDEX);
+	
+	@Override
+	public void reloadAndprocess(ISimpleGeom geom, int renderingIndex) {
+		geom.reloadPositions(Draw3DShader.COLOR_INDEX);
+		process(geom, renderingIndex);
 	}
-
+	
 	/**
 	 * No need to update transformModel Matrix because coordinates are in world
 	 * coordinate already. So we alter viewMatrix in java instead of in shader
@@ -110,29 +95,4 @@ public class Draw3DRenderer {
 		Matrix4f modelViewMatrix = Matrix4f.mul(viewMatrix, modelMatrix, null);
 		rayShader.loadModelViewMatrix(modelViewMatrix);
 	}**/
-
-	/**
-	 * TODO refactor to facilitate renderer file creation. After rendering we unbind
-	 * the VAO and disable the attribute.
-	 */
-	private void unbindGeom() {
-		GL20.glDisableVertexAttribArray(Draw3DShader.COLOR_INDEX);
-		GL20.glDisableVertexAttribArray(VBOIndex.POSITION_INDEX);
-		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
-		GL30.glBindVertexArray(0);
-	}
-
-	public void cleanUp() {
-		draw3DShader.cleanUp();
-	}
-
-	public void process(ISimpleGeom geom, int glRenderMode) {
-		geom.addRenderMode(glRenderMode);
-		this.geoms.add(geom);
-	}
-
-	public void reloadAndprocess(ISimpleGeom geom, int glRenderMode) {
-		geom.reloadPositions(Draw3DShader.COLOR_INDEX);
-		process(geom, glRenderMode);
-	}
 }

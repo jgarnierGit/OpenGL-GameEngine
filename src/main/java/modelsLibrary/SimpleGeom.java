@@ -3,10 +3,12 @@ package modelsLibrary;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.lwjgl.opengl.GL11;
 import org.lwjglx.util.vector.Vector;
 import org.lwjglx.util.vector.Vector2f;
 import org.lwjglx.util.vector.Vector3f;
@@ -36,6 +38,7 @@ public abstract class SimpleGeom implements ISimpleGeom{
 	protected float[] points;
 	protected float[] colors;
 	protected static final float[] DEFAULT_COLOR = new float[] {1.0f,0.0f,1.0f,1.0f};
+	protected HashMap<Integer, Boolean> glStatesRendering;
 
 	public SimpleGeom(Loader loader2, int dimension) {
 		this.loader = loader2;
@@ -44,6 +47,11 @@ public abstract class SimpleGeom implements ISimpleGeom{
 		this.points = new float[] {};
 		this.colors = new float[] {};
 		this.vaoId = loader.loadToVAO(points, this.dimension);
+		this.glStatesRendering = new HashMap<>();
+	}
+	
+	public Vector4f getDefaultColor() {
+		return new Vector4f(DEFAULT_COLOR[0], DEFAULT_COLOR[1], DEFAULT_COLOR[2], DEFAULT_COLOR[3]);
 	}
 	
 	public void duplicateLastColor() {
@@ -74,6 +82,16 @@ public abstract class SimpleGeom implements ISimpleGeom{
 	}
 	
 	@Override
+	public boolean hasTransparency() {
+		for(int i=3;i<=this.colors.length; i+=4) {
+			if(this.colors[i] < 1f) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	@Override
 	public int getDimension() {
 		return this.dimension;
 	}
@@ -100,4 +118,42 @@ public abstract class SimpleGeom implements ISimpleGeom{
 	public void addRenderMode(int glRenderMode) {
 		this.glRenderModes.add(glRenderMode);
 	}
+	
+	@Override
+	public void updateColor(int index, Vector4f color) {
+		this.colors[index] = color.x;
+		this.colors[index+1] = color.y;
+		this.colors[index+2] = color.z;
+		this.colors[index+3] = color.w;
+	}
+	
+	@Override
+	public void enableRenderOptions() {
+		glStatesRendering.forEach((glState, doActivate) -> {
+			if(Boolean.TRUE.equals(doActivate)) {
+				GL11.glEnable(glState);
+			}
+			else {
+				GL11.glDisable(glState);
+			}
+		});
+	}
+	
+	@Override
+	public void disableRenderOptions() {
+		glStatesRendering.forEach((glState, doActivate) -> {
+			if(Boolean.TRUE.equals(doActivate)) {
+				GL11.glDisable(glState);
+			}
+			else {
+				GL11.glEnable(glState);
+			}
+		});
+	}
+	
+	@Override
+	public void addGlState(int glBlend, boolean b) {
+		glStatesRendering.put(glBlend, b);
+	}
+
 }
