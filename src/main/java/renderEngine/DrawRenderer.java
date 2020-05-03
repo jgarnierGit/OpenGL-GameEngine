@@ -29,6 +29,11 @@ public abstract class DrawRenderer implements IDrawRenderer {
 	public void sendForRendering() {
 		renderingParams = getOrderedRenderingParameters();
 	}
+	
+	@Override
+	public void clearGeom() {
+		this.geoms.clear();
+	}
 
 	/**
 	 * Before we can render a VAO it needs to be made active, and we can do this by

@@ -61,5 +61,18 @@ public class Maths {
 		float l3 = 1.0f - l1 - l2;
 		return l1 * p1.y + l2 * p2.y + l3 * p3.y;
 	}
+	
+	/**
+	 * Normalize vector from specified origin.
+	 * 
+	 * @param vector vector to normalize
+	 * @param origin translate vector to origin to override default world origin
+	 * @return normalized vector
+	 */
+	public static Vector3f normalizeFromOrigin(Vector3f vector, Vector3f origin) {
+		Vector3f rayPositionOriginCam = Vector3f.sub(vector, origin, null);
+		rayPositionOriginCam.normalise();
+		return Vector3f.add(origin, rayPositionOriginCam, null);
+	}
 
 }

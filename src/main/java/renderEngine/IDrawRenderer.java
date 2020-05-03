@@ -9,6 +9,7 @@ public interface IDrawRenderer {
 	public void reloadAndprocess(ISimpleGeom geom);
 
 	public void cleanUp();
+	public void clearGeom();
 
 	public void render();
 

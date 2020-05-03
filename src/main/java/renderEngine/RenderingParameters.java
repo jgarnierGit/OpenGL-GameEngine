@@ -13,6 +13,7 @@ public class RenderingParameters implements Comparable<RenderingParameters> {
 	private HashMap<Integer, Boolean> glStatesRendering;
 	private Optional<Integer> renderingIndex;
 	private ISimpleGeom simpleGeom;
+	private String alias;
 
 	public RenderingParameters(ISimpleGeom simpleGeom) {
 		this.simpleGeom = simpleGeom;
@@ -104,5 +105,13 @@ public class RenderingParameters implements Comparable<RenderingParameters> {
 	@Override
 	public int compareTo(RenderingParameters params) {
 		return this.getRenderingIndex().orElse(0).compareTo(params.getRenderingIndex().orElse(0));
+	}
+
+	public void setAlias(String alias) {
+		this.alias = alias;
+	}
+	
+	public String getAlias() {
+		return this.alias;
 	}
 }

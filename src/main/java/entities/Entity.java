@@ -16,7 +16,7 @@ public class Entity {
 	private float rotX, rotY, rotZ;
 	private float scale;
 	private boolean selected;
-	private Optional<SimpleGeom3D> boundingBox;
+	private List<Vector3f> boundingBox;
 	public Entity(Model3D model, Vector3f positions, float rotX, float rotY, float rotZ, float scale) {
 		this.model = model;
 		this.position = positions;
@@ -25,7 +25,7 @@ public class Entity {
 		this.rotZ = rotZ;
 		this.scale = scale;
 		this.selected = false;
-		this.boundingBox = Optional.empty();
+		this.boundingBox = new ArrayList<>();
 	}
 	
 	public void increasePosition(float dx, float dy, float dz) {
@@ -89,11 +89,11 @@ public class Entity {
 		selected = false;
 	}
 
-	public void setBoundingBox(SimpleGeom3D boundingBox) {
-		this.boundingBox = Optional.of(boundingBox);
+	public void setBoundingBox(List<Vector3f> boundingBox) {
+		this.boundingBox = boundingBox;
 	}
 	
-	public Optional<SimpleGeom3D> getBoundingBox(){
+	public List<Vector3f> getBoundingBox(){
 		return this.boundingBox;
 	}
 	
