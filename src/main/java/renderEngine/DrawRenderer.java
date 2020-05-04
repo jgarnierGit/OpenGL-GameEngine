@@ -2,6 +2,8 @@ package renderEngine;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.lwjgl.opengl.GL11;
@@ -34,6 +36,7 @@ public abstract class DrawRenderer implements IDrawRenderer {
 	public void clearGeom() {
 		this.geoms.clear();
 	}
+
 
 	/**
 	 * Before we can render a VAO it needs to be made active, and we can do this by
@@ -78,11 +81,40 @@ public abstract class DrawRenderer implements IDrawRenderer {
 	}
 
 	protected List<RenderingParameters> getOrderedRenderingParameters() {
-		List<RenderingParameters> sortedParams = new ArrayList<>();
+		LinkedList<RenderingParameters> sortedParams = new LinkedList<>();
 		for (ISimpleGeom simpleGeom : this.geoms) {
-			sortedParams.addAll(simpleGeom.getRenderingParameters());
+			List<RenderingParameters> params = simpleGeom.getRenderingParameters();
+			if(params.isEmpty()) {
+				RenderingParameters naturalOrderParameter = new RenderingParameters(simpleGeom);
+				params.add(naturalOrderParameter);
+			}
+			sortedParams.addAll(params);
 		}
+		transformRelativePositionToIndex(sortedParams);
+		//TODO set natural order if unset.
 		Collections.sort(sortedParams);
 		return sortedParams;
+	}
+
+	private void transformRelativePositionToIndex(LinkedList<RenderingParameters> sortedParams) {
+		for(RenderingParameters params : sortedParams) {
+			if(!params.getDestinationOrderAlias().isEmpty()) {
+				int index = getIndexDestination(sortedParams, params.getDestinationOrderAlias(), params.isDestinationPositionAfter());
+				params.setRenderingIndex(index);
+			}
+		}
+	}
+
+	private int getIndexDestination(LinkedList<RenderingParameters> sortedParams, String destinationOrderAlias, boolean destinationPositionAfter) {
+		Iterator<RenderingParameters> itParams= destinationPositionAfter ? sortedParams.descendingIterator() : sortedParams.iterator();
+		int index = destinationPositionAfter ? sortedParams.size() : -1;
+		while(itParams.hasNext()) {	
+			RenderingParameters currentParam =itParams.next();
+			if(currentParam.getAlias().equals(destinationOrderAlias)) {
+				break;
+			}
+			index += destinationPositionAfter ? -1 : 1;
+		}
+		return index;
 	}
 }

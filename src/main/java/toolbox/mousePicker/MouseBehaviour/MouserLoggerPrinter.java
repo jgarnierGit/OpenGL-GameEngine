@@ -150,7 +150,7 @@ public class MouserLoggerPrinter {
 		frustrumParams.setRenderMode(GL11.GL_LINES);
 		frustrumParams.setAlias("frustrumLines");
 		frustrumPlainParams.setRenderMode(GL11.GL_TRIANGLES);
-		frustrumPlainParams.setRenderingIndex(20000);
+		frustrumPlainParams.renderAfter("bboxEntities"); 
 		for(ISimpleGeom cameraFrustrum : cameraBboxes) {
 			this.draw3DRenderer.reloadAndprocess(cameraFrustrum);
 		}

@@ -14,12 +14,16 @@ public class RenderingParameters implements Comparable<RenderingParameters> {
 	private Optional<Integer> renderingIndex;
 	private ISimpleGeom simpleGeom;
 	private String alias;
+	private String destinationOrderAlias;
+	private boolean renderAfter;
 
 	public RenderingParameters(ISimpleGeom simpleGeom) {
 		this.simpleGeom = simpleGeom;
 		this.glStatesRendering = new HashMap<>();
 		this.renderingIndex = Optional.empty();
 		this.glRenderMode = Optional.empty();
+		this.renderAfter = false;
+		this.destinationOrderAlias = "";
 	}
 
 	/**
@@ -113,5 +117,23 @@ public class RenderingParameters implements Comparable<RenderingParameters> {
 	
 	public String getAlias() {
 		return this.alias;
+	}
+	
+	public String getDestinationOrderAlias() {
+		return this.destinationOrderAlias;
+	}
+	
+	public boolean isDestinationPositionAfter() {
+		return this.renderAfter;
+	}
+
+	public void renderBefore(String alias) {
+		this.destinationOrderAlias=alias;
+		this.renderAfter = false;
+	}
+	
+	public void renderAfter(String alias) {
+		this.destinationOrderAlias=alias;
+		this.renderAfter = true;
 	}
 }
