@@ -20,116 +20,216 @@ import org.mockito.Spy;
 
 import modelsLibrary.ISimpleGeom;
 
+/**
+ * don't know when to use beforeAll...
+ * @author chezmoi
+ *
+ */
 class DrawRendererTest {
-	
+
 	List<ISimpleGeom> geoms;
 	DrawRenderer renderer;
 	List<RenderingParameters> renderingParams;
-	ISimpleGeom simpleGeomMock;
-	ISimpleGeom simpleGeomMockLast;
-	
-	@Nested
-	@TestInstance(Lifecycle.PER_CLASS)
-	@DisplayName("Test ordering On Geoms without RenderinParameters")
-	class noParams {
-		
-		@BeforeAll 
-		void setUpBeforeClass() throws Exception {
-			MockitoAnnotations.initMocks(this);
-			geoms = new ArrayList<>();
-			simpleGeomMock = Mockito.mock(
-					ISimpleGeom.class);
-			Mockito.when(simpleGeomMock.getVaoId()).thenReturn(1);
-			simpleGeomMockLast = Mockito.mock(
-					ISimpleGeom.class);
-			Mockito.when(simpleGeomMockLast.getVaoId()).thenReturn(2);
-			geoms.add(simpleGeomMock);
-			geoms.add(simpleGeomMockLast);
-			renderer = Mockito.mock(
-					DrawRenderer.class, 
-				      Mockito.CALLS_REAL_METHODS);
-			renderer.geoms = geoms;
-			renderingParams = renderer.getOrderedRenderingParameters();
-		}
-				
-		@Test
-		@DisplayName("Test ordering without renderingParameters must not be empty")
-		void testOrderingGeomsWithoutParamsNotEmpty() {
-			assertFalse(renderingParams.isEmpty(), "output renderingParams is empty");
-		}
-		
-		@Test
-		@DisplayName("Test ordering without renderingParameters must have same elements")
-		void testOrderingGeomsWithoutParamsSize() {
-			assertEquals(2, renderingParams.size(), "output renderingParams miss geoms");
-		}
-		
-		@Test
-		@DisplayName("Test ordering without renderingParameters must have first geom first")
-		void testOrderingGeomsWithoutParamsFirstGeomFirst() {
-			assertEquals(simpleGeomMock.getVaoId(), renderingParams.get(0).getGeom().getVaoId(), "expected first geom to be first in output");
-		}
+	ISimpleGeom firstGeomMock;
+	ISimpleGeom secondGeomMock;
+	ISimpleGeom thirdGeomMock;
+
+	@BeforeEach
+	void setUpBeforeClass() throws Exception {
+		MockitoAnnotations.initMocks(this);
+		geoms = new ArrayList<>();
+		firstGeomMock = Mockito.mock(ISimpleGeom.class);
+		Mockito.when(firstGeomMock.getVaoId()).thenReturn(1);
+		secondGeomMock = Mockito.mock(ISimpleGeom.class);
+		Mockito.when(secondGeomMock.getVaoId()).thenReturn(2);
+		thirdGeomMock = Mockito.mock(ISimpleGeom.class);
+		Mockito.when(secondGeomMock.getVaoId()).thenReturn(3);
+		geoms.add(firstGeomMock);
+		geoms.add(secondGeomMock);
+		geoms.add(thirdGeomMock);
+		renderer = Mockito.mock(DrawRenderer.class, Mockito.CALLS_REAL_METHODS);
+		renderer.geoms = geoms;
 	}
 
 	@Nested
-	@TestInstance(Lifecycle.PER_CLASS)
-	@DisplayName("Test ordering On Geoms with RenderinParameters")
-	class withParamsNaturalOrder {
-		
-		@BeforeAll 
-		void setUpBeforeClass() throws Exception {
-			MockitoAnnotations.initMocks(this);
-			geoms = new ArrayList<>();
-			simpleGeomMock = Mockito.mock(
-					ISimpleGeom.class);
-			Mockito.when(simpleGeomMock.getVaoId()).thenReturn(1);
-			RenderingParameters param1 = new RenderingParameters(simpleGeomMock);
-			List<RenderingParameters> params1 = new ArrayList<>();
-			params1.add(param1);
-			Mockito.when(simpleGeomMock.getRenderingParameters()).thenReturn(params1);
-			
-			simpleGeomMockLast = Mockito.mock(
-					ISimpleGeom.class);
-			Mockito.when(simpleGeomMockLast.getVaoId()).thenReturn(2);
-			RenderingParameters param2 = new RenderingParameters(simpleGeomMockLast);
-			List<RenderingParameters> params2 = new ArrayList<>();
-			params2.add(param2);
-			Mockito.when(simpleGeomMockLast.getRenderingParameters()).thenReturn(params2);
-			
-			geoms.add(simpleGeomMock);
-			geoms.add(simpleGeomMockLast);
-			renderer = Mockito.mock(
-					DrawRenderer.class, 
-				      Mockito.CALLS_REAL_METHODS);
-			renderer.geoms = geoms;
-			renderingParams = renderer.getOrderedRenderingParameters();
+	@DisplayName("Test ordering that must not affect order")
+	class NotAffectingOrder {
+
+		/**
+		 * Parameterized could have been interesting if it would have taken Objects, not
+		 * only primitives
+		 * 
+		 * @author chezmoi
+		 *
+		 */
+		@Nested
+		@TestInstance(Lifecycle.PER_CLASS)
+		@DisplayName("Geoms without Params")
+		class NoParams {
+
+			@BeforeEach
+			void setUpBeforeEach() throws Exception {
+				renderingParams = renderer.getOrderedRenderingParameters();
+			}
+
+			/**
+			 * A;B;C result list not empty
+			 */
+			@Test
+			@DisplayName("Must not be empty")
+			void testOrderingGeomsWithoutParamsNotEmpty() {
+				assertFalse(renderingParams.isEmpty(), "output renderingParams is empty");
+			}
+
+			/**
+			 * A;B;C result list.size() = 3
+			 */
+			@Test
+			@DisplayName("Must have same elements")
+			void testOrderingGeomsWithoutParamsSize() {
+				assertEquals(3, renderingParams.size(), "output renderingParams miss geoms");
+			}
+
+			/**
+			 * A;B;C result A first, B second
+			 */
+			@Test
+			@DisplayName("Must have first geom first")
+			void testOrderingGeomsWithoutParamsFirstGeomFirst() {
+				assertEquals(firstGeomMock.getVaoId(), renderingParams.get(0).getGeom().getVaoId(),
+						"expected first geom to be first in output");
+				assertEquals(secondGeomMock.getVaoId(), renderingParams.get(1).getGeom().getVaoId(),
+						"expected second geom to be second in output");
+			}
 		}
 
-		@AfterEach
-		void tearDown() throws Exception {
-		}
+		@Nested
+		@DisplayName("Geoms with Params")
+		class Params {
+			List<RenderingParameters> firstParams;
+			List<RenderingParameters> secondParams;
+			List<RenderingParameters> thirdParams;
+			
+			RenderingParameters firstParam;
+			RenderingParameters secondParam;
+			RenderingParameters thirdParam;
+			
+			
+			@BeforeEach
+			void setUpBeforeEach() throws Exception {
+				firstParam = new RenderingParameters(firstGeomMock);
+				firstParams = new ArrayList<>();
+				firstParams.add(firstParam);
+				Mockito.when(firstGeomMock.getRenderingParameters()).thenReturn(firstParams);
 
-		//TODO maybe parametrized test can avoid duplication
-		@Test
-		@DisplayName("Test ordering without renderingParameters must not be empty")
-		void testOrderingGeomsWithoutParamsNotEmpty() {
-			assertFalse(renderingParams.isEmpty(), "output renderingParams is empty");
+				secondParam = new RenderingParameters(secondGeomMock);
+				secondParams = new ArrayList<>();
+				secondParams.add(secondParam);
+				Mockito.when(secondGeomMock.getRenderingParameters()).thenReturn(secondParams);
+
+				thirdParam = new RenderingParameters(thirdGeomMock);
+				thirdParams = new ArrayList<>();
+				thirdParams.add(thirdParam);
+				Mockito.when(thirdGeomMock.getRenderingParameters()).thenReturn(thirdParams);
+			}
+
+			@Nested
+			@DisplayName("Params without alias (natural order)")
+			class NaturalOrder {
+
+				@BeforeEach
+				void setUpBeforeEach() throws Exception {
+					renderingParams = renderer.getOrderedRenderingParameters();
+				}
+
+				/**
+				 * A;B;C result list not empty
+				 */
+				@Test
+				@DisplayName("Must not be empty")
+				void testOrderingGeomsWithoutParamsNotEmpty() {
+					assertFalse(renderingParams.isEmpty(), "output renderingParams is empty");
+				}
+
+				/**
+				 * A;B;C result list.size() = 3
+				 */
+				@Test
+				@DisplayName("Must have same elements")
+				void testOrderingGeomsWithoutParamsSize() {
+					assertEquals(3, renderingParams.size(), "output renderingParams miss geoms");
+				}
+
+				/**
+				 * A;B;C result A first, B second
+				 */
+				@Test
+				@DisplayName("Must have first geom first")
+				void testOrderingGeomsWithoutParamsFirstGeomFirst() {
+					assertEquals(firstGeomMock.getVaoId(), renderingParams.get(0).getGeom().getVaoId(),
+							"expected first geom to be first in output");
+					assertEquals(secondGeomMock.getVaoId(), renderingParams.get(1).getGeom().getVaoId(),
+							"expected second geom to be second in output");
+				}
+			}
+
+			@Nested
+			@DisplayName("Params with alias")
+			class ParamsWithChanges {
+				@Nested
+				@DisplayName("One change per ordering")
+				class ParamsUnitaryChangePerOrderingOperation {
+
+					@BeforeEach
+					void setUpBeforeEach() throws Exception {
+						geoms = new ArrayList<>();
+						geoms.add(firstGeomMock);
+						geoms.add(secondGeomMock);
+						geoms.add(thirdGeomMock);
+						firstParam = new RenderingParameters(firstGeomMock);
+						secondParam = new RenderingParameters(secondGeomMock);
+						thirdParam = new RenderingParameters(thirdGeomMock);
+					}
+
+					/**
+					 * A; B->B(before); C result: A;B
+					 */
+					@Test
+					@DisplayName("Refers to itself as Before")
+					void testOneReferenceItselfBefore() {
+						renderingParams = renderer.getOrderedRenderingParameters();
+						fail("Not implemented");
+					}
+
+					/**
+					 * A; B->B(after); C result: A;B
+					 */
+					@Test
+					@DisplayName("Refers to itself as After")
+					void testOneReferenceItselfAfter() {
+						renderingParams = renderer.getOrderedRenderingParameters();
+						fail("Not implemented");
+					}
+
+					/**
+					 * A ; B -> C (before); C result: A;B; C
+					 */
+					@Test
+					@DisplayName("Refers to Next as Before")
+					void testReferenceNextAsBefore() {
+						fail("Not implemented");
+					}
+
+					/**
+					 * A ; B -> A (after); C result: A;B; C
+					 */
+					@Test
+					@DisplayName("Refers to Previous as After")
+					void testReferencePreviousAsAfter() {
+						fail("Not implemented");
+					}
+				}
+			}
 		}
-		
-		@Test
-		@DisplayName("Test ordering without renderingParameters must have same elements")
-		void testOrderingGeomsWithoutParamsSize() {
-			assertEquals(2, renderingParams.size(), "output renderingParams miss geoms");
-		}
-		
-		@Test
-		@DisplayName("Test ordering without renderingParameters must have first geom first")
-		void testOrderingGeomsWithoutParamsFirstGeomFirst() {
-			assertEquals(simpleGeomMock.getVaoId(), renderingParams.get(0).getGeom().getVaoId(), "expected first geom to be first in output");
-		}
-		
 	}
-	
-	
-
 }
