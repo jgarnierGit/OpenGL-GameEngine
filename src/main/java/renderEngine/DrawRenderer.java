@@ -82,16 +82,21 @@ public abstract class DrawRenderer implements IDrawRenderer {
 
 	protected List<RenderingParameters> getOrderedRenderingParameters() {
 		LinkedList<RenderingParameters> sortedParams = new LinkedList<>();
+		int naturalIndex =0;
 		for (ISimpleGeom simpleGeom : this.geoms) {
 			List<RenderingParameters> params = simpleGeom.getRenderingParameters();
 			if(params.isEmpty()) {
 				RenderingParameters naturalOrderParameter = new RenderingParameters(simpleGeom);
 				params.add(naturalOrderParameter);
 			}
+			for(RenderingParameters param :params) {
+				param.setRenderingIndex(naturalIndex);
+				naturalIndex++;
+			}
 			sortedParams.addAll(params);
+			naturalIndex++;
 		}
 		transformRelativePositionToIndex(sortedParams);
-		//TODO set natural order if unset.
 		Collections.sort(sortedParams);
 		return sortedParams;
 	}
@@ -107,14 +112,21 @@ public abstract class DrawRenderer implements IDrawRenderer {
 
 	private int getIndexDestination(LinkedList<RenderingParameters> sortedParams, String destinationOrderAlias, boolean destinationPositionAfter) {
 		Iterator<RenderingParameters> itParams= destinationPositionAfter ? sortedParams.descendingIterator() : sortedParams.iterator();
-		int index = destinationPositionAfter ? sortedParams.size() : -1;
+		int index = destinationPositionAfter ? sortedParams.size()-1 : 0;
+		boolean found=false;
 		while(itParams.hasNext()) {	
+			
 			RenderingParameters currentParam =itParams.next();
-			if(currentParam.getAlias().equals(destinationOrderAlias)) {
+			if(destinationOrderAlias.equals(currentParam.getAlias())) {
+				found=true;
 				break;
 			}
 			index += destinationPositionAfter ? -1 : 1;
 		}
+		if(!found) {
+			throw new IllegalArgumentException("unknown alias "+ destinationOrderAlias);
+		}
+		index += destinationPositionAfter ? 1 : -1;
 		return index;
 	}
 }

@@ -19,9 +19,11 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
 import modelsLibrary.ISimpleGeom;
+import modelsLibrary.SimpleGeom3D;
 
 /**
  * don't know when to use beforeAll...
+ * @Nested can't be used to factorize beforeEach, because each Nested has its own context
  * @author chezmoi
  *
  */
@@ -38,12 +40,12 @@ class DrawRendererTest {
 	void setUpBeforeClass() throws Exception {
 		MockitoAnnotations.initMocks(this);
 		geoms = new ArrayList<>();
-		firstGeomMock = Mockito.mock(ISimpleGeom.class);
+		firstGeomMock = Mockito.mock(ISimpleGeom.class, Mockito.CALLS_REAL_METHODS);
 		Mockito.when(firstGeomMock.getVaoId()).thenReturn(1);
-		secondGeomMock = Mockito.mock(ISimpleGeom.class);
+		secondGeomMock = Mockito.mock(ISimpleGeom.class, Mockito.CALLS_REAL_METHODS);
 		Mockito.when(secondGeomMock.getVaoId()).thenReturn(2);
-		thirdGeomMock = Mockito.mock(ISimpleGeom.class);
-		Mockito.when(secondGeomMock.getVaoId()).thenReturn(3);
+		thirdGeomMock = Mockito.mock(ISimpleGeom.class, Mockito.CALLS_REAL_METHODS);
+		Mockito.when(thirdGeomMock.getVaoId()).thenReturn(3);
 		geoms.add(firstGeomMock);
 		geoms.add(secondGeomMock);
 		geoms.add(thirdGeomMock);
@@ -113,32 +115,28 @@ class DrawRendererTest {
 			RenderingParameters firstParam;
 			RenderingParameters secondParam;
 			RenderingParameters thirdParam;
-			
-			
-			@BeforeEach
-			void setUpBeforeEach() throws Exception {
-				firstParam = new RenderingParameters(firstGeomMock);
-				firstParams = new ArrayList<>();
-				firstParams.add(firstParam);
-				Mockito.when(firstGeomMock.getRenderingParameters()).thenReturn(firstParams);
-
-				secondParam = new RenderingParameters(secondGeomMock);
-				secondParams = new ArrayList<>();
-				secondParams.add(secondParam);
-				Mockito.when(secondGeomMock.getRenderingParameters()).thenReturn(secondParams);
-
-				thirdParam = new RenderingParameters(thirdGeomMock);
-				thirdParams = new ArrayList<>();
-				thirdParams.add(thirdParam);
-				Mockito.when(thirdGeomMock.getRenderingParameters()).thenReturn(thirdParams);
-			}
 
 			@Nested
-			@DisplayName("Params without alias (natural order)")
+			@DisplayName("Params without alias reference (natural order)")
 			class NaturalOrder {
-
+				
 				@BeforeEach
 				void setUpBeforeEach() throws Exception {
+					firstParam = new RenderingParameters(firstGeomMock);
+					firstParams = new ArrayList<>();
+					firstParams.add(firstParam);
+					Mockito.when(firstGeomMock.getRenderingParameters()).thenReturn(firstParams);
+					
+					secondParam = new RenderingParameters(secondGeomMock);
+					secondParams = new ArrayList<>();
+					secondParams.add(secondParam);
+					Mockito.when(secondGeomMock.getRenderingParameters()).thenReturn(secondParams);
+					
+					thirdParam = new RenderingParameters(thirdGeomMock);
+					thirdParams = new ArrayList<>();
+					thirdParams.add(thirdParam);
+					Mockito.when(thirdGeomMock.getRenderingParameters()).thenReturn(thirdParams);
+
 					renderingParams = renderer.getOrderedRenderingParameters();
 				}
 
@@ -174,11 +172,15 @@ class DrawRendererTest {
 			}
 
 			@Nested
-			@DisplayName("Params with alias")
+			@DisplayName("Params with alias reference")
 			class ParamsWithChanges {
+				String firstAlias = "firstAlias";
+				String secondAlias = "secondAlias";
+				String thirdAlias ="thirdAlias";
+				
 				@Nested
-				@DisplayName("One change per ordering")
-				class ParamsUnitaryChangePerOrderingOperation {
+				@DisplayName("All params have aliases, and each Geom have one Param")
+				class AllParamsHaveAliasOneParamPerGeom {
 
 					@BeforeEach
 					void setUpBeforeEach() throws Exception {
@@ -189,44 +191,173 @@ class DrawRendererTest {
 						firstParam = new RenderingParameters(firstGeomMock);
 						secondParam = new RenderingParameters(secondGeomMock);
 						thirdParam = new RenderingParameters(thirdGeomMock);
+						firstParam.setAlias(firstAlias);
+						secondParam.setAlias(secondAlias);
+						thirdParam.setAlias(thirdAlias);
+						
+						firstParams = new ArrayList<>();
+						firstParams.add(firstParam);
+						Mockito.when(firstGeomMock.getRenderingParameters()).thenReturn(firstParams);
+						
+						secondParams = new ArrayList<>();
+						secondParams.add(secondParam);
+						Mockito.when(secondGeomMock.getRenderingParameters()).thenReturn(secondParams);
+						
+						thirdParams = new ArrayList<>();
+						thirdParams.add(thirdParam);
+						Mockito.when(thirdGeomMock.getRenderingParameters()).thenReturn(thirdParams);
+					}
+					
+					/**
+					 * A; B->?; C result: IllegalArgumentException
+					 */
+					@Test
+					@DisplayName("Unknown alias should throws Exception")
+					void testUnknownAliasException() {
+						secondParam.renderBefore("unknown");
+						assertThrows(IllegalArgumentException.class, () -> { renderer.getOrderedRenderingParameters();});
 					}
 
 					/**
-					 * A; B->B(before); C result: A;B
+					 * A; B->B(before); C result: A;B;C
 					 */
 					@Test
 					@DisplayName("Refers to itself as Before")
 					void testOneReferenceItselfBefore() {
+						secondParam.renderBefore(secondAlias);
 						renderingParams = renderer.getOrderedRenderingParameters();
-						fail("Not implemented");
+						assertEquals(3,renderingParams.size());
+						assertEquals(firstGeomMock.getVaoId(), renderingParams.get(0).getGeom().getVaoId());
+						assertEquals(secondGeomMock.getVaoId(), renderingParams.get(1).getGeom().getVaoId());
 					}
 
 					/**
-					 * A; B->B(after); C result: A;B
+					 * A; B->B(after); C result: A;B;C
 					 */
 					@Test
 					@DisplayName("Refers to itself as After")
 					void testOneReferenceItselfAfter() {
+						secondParam.renderAfter(secondAlias);
 						renderingParams = renderer.getOrderedRenderingParameters();
-						fail("Not implemented");
+						assertEquals(3,renderingParams.size());
+						assertEquals(firstGeomMock.getVaoId(), renderingParams.get(0).getGeom().getVaoId());
+						assertEquals(secondGeomMock.getVaoId(), renderingParams.get(1).getGeom().getVaoId());
 					}
 
 					/**
-					 * A ; B -> C (before); C result: A;B; C
+					 * A ; B -> C (before); C result: A;B;C
 					 */
 					@Test
 					@DisplayName("Refers to Next as Before")
 					void testReferenceNextAsBefore() {
-						fail("Not implemented");
+						secondParam.renderBefore(thirdAlias);
+						renderingParams = renderer.getOrderedRenderingParameters();
+						assertEquals(3,renderingParams.size());
+						assertEquals(firstGeomMock.getVaoId(), renderingParams.get(0).getGeom().getVaoId());
+						assertEquals(secondGeomMock.getVaoId(), renderingParams.get(1).getGeom().getVaoId());
 					}
 
 					/**
-					 * A ; B -> A (after); C result: A;B; C
+					 * A ; B -> A (after); C result: A;B;C
 					 */
 					@Test
 					@DisplayName("Refers to Previous as After")
 					void testReferencePreviousAsAfter() {
-						fail("Not implemented");
+						secondParam.renderAfter(firstAlias);
+						renderingParams = renderer.getOrderedRenderingParameters();
+						assertEquals(3,renderingParams.size());
+						assertEquals(firstGeomMock.getVaoId(), renderingParams.get(0).getGeom().getVaoId());
+						assertEquals(secondGeomMock.getVaoId(), renderingParams.get(1).getGeom().getVaoId());
+					}
+				}
+				
+				@Nested
+				@DisplayName("1 Param over 3 have no Alias")
+				class OneParamHaveNoAlias {
+
+					@BeforeEach
+					void setUpBeforeEach() throws Exception {
+						geoms = new ArrayList<>();
+						geoms.add(firstGeomMock);
+						geoms.add(secondGeomMock);
+						geoms.add(thirdGeomMock);
+						firstParam = new RenderingParameters(firstGeomMock);
+						secondParam = new RenderingParameters(secondGeomMock);
+						thirdParam = new RenderingParameters(thirdGeomMock);
+						
+						firstParams = new ArrayList<>();
+						firstParams.add(firstParam);
+						Mockito.when(firstGeomMock.getRenderingParameters()).thenReturn(firstParams);
+						
+						secondParams = new ArrayList<>();
+						secondParams.add(secondParam);
+						Mockito.when(secondGeomMock.getRenderingParameters()).thenReturn(secondParams);
+						
+						thirdParams = new ArrayList<>();
+						thirdParams.add(thirdParam);
+						Mockito.when(thirdGeomMock.getRenderingParameters()).thenReturn(thirdParams);
+					}
+
+					/**
+					 * x = no alias
+					 * A:x; B->B(before); C:x result: A;B;C
+					 */
+					@Test
+					@DisplayName("Refers to itself as Before")
+					void testOneReferenceItselfBefore() {
+						secondParam.setAlias(secondAlias);
+						secondParam.renderBefore(secondAlias);
+						renderingParams = renderer.getOrderedRenderingParameters();
+						assertEquals(3,renderingParams.size());
+						assertEquals(firstGeomMock.getVaoId(), renderingParams.get(0).getGeom().getVaoId());
+						assertEquals(secondGeomMock.getVaoId(), renderingParams.get(1).getGeom().getVaoId());
+					}
+
+					/**
+					 * x = no alias
+					 * A:x; B->B(after); C:x result: A;B;C
+					 */
+					@Test
+					@DisplayName("Refers to itself as After")
+					void testOneReferenceItselfAfter() {
+						secondParam.setAlias(secondAlias);
+						secondParam.renderAfter(secondAlias);
+						renderingParams = renderer.getOrderedRenderingParameters();
+						assertEquals(3,renderingParams.size());
+						assertEquals(firstGeomMock.getVaoId(), renderingParams.get(0).getGeom().getVaoId());
+						assertEquals(secondGeomMock.getVaoId(), renderingParams.get(1).getGeom().getVaoId());
+					}
+
+					/**
+					 * x = no alias
+					 * A:x ; B -> C (before); C result: A;B;C
+					 */
+					@Test
+					@DisplayName("Refers to Next as Before")
+					void testReferenceNextAsBefore() {
+						secondParam.setAlias(secondAlias);
+						thirdParam.setAlias(thirdAlias);
+						secondParam.renderBefore(thirdAlias);
+						renderingParams = renderer.getOrderedRenderingParameters();
+						assertEquals(3,renderingParams.size());
+						assertEquals(firstGeomMock.getVaoId(), renderingParams.get(0).getGeom().getVaoId());
+						assertEquals(secondGeomMock.getVaoId(), renderingParams.get(1).getGeom().getVaoId());
+					}
+
+					/**
+					 * x = no alias
+					 * A ; B -> A (after); C:x result: A;B;C
+					 */
+					@Test
+					@DisplayName("Refers to Previous as After")
+					void testReferencePreviousAsAfter() {
+						firstParam.setAlias(firstAlias);
+						secondParam.setAlias(secondAlias);
+						secondParam.renderAfter(firstAlias);
+						renderingParams = renderer.getOrderedRenderingParameters();
+						assertEquals(3,renderingParams.size());
+						assertEquals(firstGeomMock.getVaoId(), renderingParams.get(0).getGeom().getVaoId());
+						assertEquals(secondGeomMock.getVaoId(), renderingParams.get(1).getGeom().getVaoId());
 					}
 				}
 			}

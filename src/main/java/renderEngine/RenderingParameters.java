@@ -102,7 +102,7 @@ public class RenderingParameters implements Comparable<RenderingParameters> {
 	 * 
 	 * @param renderingIndex higher value will render later.
 	 */
-	public void setRenderingIndex(int renderingIndex) {
+	protected void setRenderingIndex(int renderingIndex) {
 		this.renderingIndex = Optional.ofNullable(renderingIndex);
 	}
 
