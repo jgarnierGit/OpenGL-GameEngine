@@ -88,5 +88,10 @@ public interface ISimpleGeom {
 	 * @return index of newly created RenderingParameter
 	 */
 	public int createRenderingPamater();
+	
+	/**
+	 * Invert normals of every triangles
+	 */
+	public void invertNormals();
 
 }

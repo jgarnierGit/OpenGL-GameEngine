@@ -27,6 +27,11 @@ public class SimpleGeom2D extends SimpleGeom {
 		addPoint2f(point);
 	}
 	
+	@Override
+	public void invertNormals() {
+		//nothing to do in 2D
+	}
+	
 	private void addPoint2f(Vector point) {
 		if (!(point instanceof Vector2f)) {
 			throw new IllegalArgumentException("Vector2f excepted, got " + point.getClass());

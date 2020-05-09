@@ -100,10 +100,10 @@ public class MouserLoggerPrinter {
 	 * print frustrum bbox
 	 */
 	public void printCameraBBox() {
-		/**for (SimpleGeom point : cameraBboxes) {
+		for (SimpleGeom point : cameraBboxes) {
 			point.resetGeom();
 		}
-		cameraBboxes.clear();**/
+		cameraBboxes.clear();
 		/***
 		 * Near plane will be [-1,1] plane range Far plane must be far-near
 		 */
@@ -149,6 +149,7 @@ public class MouserLoggerPrinter {
 		frustrumParams.setAlias("frustrumLines");
 		frustrumPlainParams.setRenderMode(GL11.GL_TRIANGLES);
 		frustrumPlainParams.renderBefore("bboxEntities"); 
+		frustrumPlain.invertNormals();
 		for(SimpleGeom cameraFrustrum : cameraBboxes) {
 			this.draw3DRenderer.reloadAndprocess(cameraFrustrum);
 		}
