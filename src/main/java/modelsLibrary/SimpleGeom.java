@@ -57,6 +57,12 @@ public abstract class SimpleGeom implements ISimpleGeom {
 	public List<RenderingParameters> getRenderingParameters() {
 		return this.renderingParameters;
 	}
+	
+	@Override
+	public int createRenderingPamater() {
+		this.renderingParameters.add(new RenderingParameters(this));
+		return this.renderingParameters.size()-1;
+	}
 
 	public Vector4f getDefaultColor() {
 		return new Vector4f(DEFAULT_COLOR[0], DEFAULT_COLOR[1], DEFAULT_COLOR[2], DEFAULT_COLOR[3]);

@@ -83,4 +83,10 @@ public interface ISimpleGeom {
 
 	public boolean hasTransparency();
 
+	/**
+	 * create a RenderingParameter and add it to list for current geom
+	 * @return index of newly created RenderingParameter
+	 */
+	public int createRenderingPamater();
+
 }

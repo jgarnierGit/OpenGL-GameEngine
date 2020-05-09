@@ -13,9 +13,10 @@ import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
 import modelsLibrary.ISimpleGeom;
+import modelsLibrary.SimpleGeom;
 
 public abstract class DrawRenderer implements IDrawRenderer {
-	protected List<ISimpleGeom> geoms;
+	protected List<SimpleGeom> geoms;
 	protected List<RenderingParameters> renderingParams;
 
 	public DrawRenderer() {
@@ -24,7 +25,7 @@ public abstract class DrawRenderer implements IDrawRenderer {
 	}
 
 	@Override
-	public void process(ISimpleGeom geom) {
+	public void process(SimpleGeom geom) {
 		this.geoms.add(geom);
 	}
 
@@ -82,13 +83,11 @@ public abstract class DrawRenderer implements IDrawRenderer {
 
 	protected List<RenderingParameters> getOrderedRenderingParameters() {
 		LinkedList<RenderingParameters> rawParams = new LinkedList<>();
-		for (ISimpleGeom simpleGeom : this.geoms) {
-			List<RenderingParameters> params = simpleGeom.getRenderingParameters();
-			if (params.isEmpty()) {
-				RenderingParameters naturalOrderParameter = new RenderingParameters(simpleGeom);
-				params.add(naturalOrderParameter);
+		for (SimpleGeom simpleGeom : this.geoms) {
+			if (simpleGeom.getRenderingParameters().isEmpty()) {
+				simpleGeom.createRenderingPamater();
 			}
-			rawParams.addAll(params);
+			rawParams.addAll(simpleGeom.getRenderingParameters());
 		}
 		LinkedList<RenderingParameters> paramsToMove = rawParams.stream().filter((renderingParam) -> {
 			return !renderingParam.getDestinationOrderAlias().isEmpty() && !renderingParam.getDestinationOrderAlias().equals(renderingParam.getAlias());

@@ -89,8 +89,8 @@ public class MouserLoggerPrinter {
 
 		raysWorldOrigin.addPoint(camPos, new Vector4f(1, 0.6f, 0.5f, 1));
 		raysWorldOrigin.addPoint(rayFromCamera, new Vector4f(1, 0.6f, 0.5f, 1));
-		RenderingParameters rayParams = new RenderingParameters(raysWorldOrigin);
-		raysWorldOrigin.getRenderingParameters().add(rayParams);
+		int indexRayParam = raysWorldOrigin.createRenderingPamater();
+		RenderingParameters rayParams = raysWorldOrigin.getRenderingParameters().get(indexRayParam);
 		rayParams.setRenderMode(GL11.GL_LINES);
 		rayParams.setAlias("ray");
 		this.draw3DRenderer.reloadAndprocess(raysWorldOrigin);
@@ -138,12 +138,10 @@ public class MouserLoggerPrinter {
 				rbfWorldCoord, ltnWorldCoord, rtnWorldCoord, lbnWorldCoord, rbnWorldCoord);
 		cameraBboxes.add(frustrum);
 		cameraBboxes.add(frustrumPlain);
-		// TODO might be cool to hide this circular setter.
-		RenderingParameters frustrumPlainParams = new RenderingParameters(frustrumPlain);
-		frustrumPlain.getRenderingParameters().add(frustrumPlainParams);
-
-		RenderingParameters frustrumParams = new RenderingParameters(frustrum);
-		frustrum.getRenderingParameters().add(frustrumParams);
+		int indexPlainParam = frustrumPlain.createRenderingPamater();
+		int indexFrustrumParam = frustrum.createRenderingPamater();
+		RenderingParameters frustrumPlainParams = frustrumPlain.getRenderingParameters().get(indexPlainParam);
+		RenderingParameters frustrumParams = frustrum.getRenderingParameters().get(indexFrustrumParam);
 
 		frustrumPlainParams.addGlState(GL11.GL_BLEND, true);
 		frustrumPlainParams.setAlias("frustrumPlain");
@@ -230,9 +228,9 @@ public class MouserLoggerPrinter {
 		});
 		boundingBoxes.add(boundingBox);
 
-		for (ISimpleGeom bbox : boundingBoxes) {
-			RenderingParameters bboxParam = new RenderingParameters(bbox);
-			bbox.getRenderingParameters().add(bboxParam);
+		for (SimpleGeom bbox : boundingBoxes) {
+			int index = bbox.createRenderingPamater();
+			RenderingParameters bboxParam = bbox.getRenderingParameters().get(index);
 			bboxParam.setRenderMode(GL11.GL_LINES);
 			bboxParam.setAlias("bboxEntities");
 			this.draw3DRenderer.reloadAndprocess(bbox);
@@ -241,12 +239,12 @@ public class MouserLoggerPrinter {
 	
 	public void printRay() {
 		this.ray3D.resetGeom();
-		RenderingParameters rayParamPoints = new RenderingParameters(this.ray3D);
-		this.ray3D.getRenderingParameters().add(rayParamPoints);
+		int renderingParamIndex = this.ray3D.createRenderingPamater();
+		RenderingParameters rayParamPoints = this.ray3D.getRenderingParameters().get(renderingParamIndex);
 		rayParamPoints.setRenderMode(GL11.GL_POINTS);
 		rayParamPoints.setAlias("RayPoints");
-		RenderingParameters rayParamLines = new RenderingParameters(this.ray3D);
-		this.ray3D.getRenderingParameters().add(rayParamLines);
+		int renderingParamIndexLines = this.ray3D.createRenderingPamater();
+		RenderingParameters rayParamLines = this.ray3D.getRenderingParameters().get(renderingParamIndexLines);
 		rayParamLines.setRenderMode(GL11.GL_LINE_STRIP);
 		rayParamLines.setAlias("rayLines");
 		this.draw3DRenderer.reloadAndprocess(this.ray3D);
@@ -298,21 +296,21 @@ public class MouserLoggerPrinter {
 		debugPoints.add(nearPlane);
 		// retry to render on 2D rendered. may compute this by taking care nearLenght
 		// while dividing by distance.
-		RenderingParameters pointScreenSpaceParams = new RenderingParameters(pointToScreenSpace);
-		pointToScreenSpace.getRenderingParameters().add(pointScreenSpaceParams);
+		int indexScreenSpaceParam = pointToScreenSpace.createRenderingPamater();
+		RenderingParameters pointScreenSpaceParams = pointToScreenSpace.getRenderingParameters().get(indexScreenSpaceParam);
 		pointScreenSpaceParams.setRenderMode(GL11.GL_LINE_LOOP);
 		pointScreenSpaceParams.setAlias("pointScreenSpace");
 		this.draw2DRenderer.reloadAndprocess(pointToScreenSpace);
 
-		RenderingParameters pointCartesiansParams = new RenderingParameters(pointToCartesianSpace);
-		pointToCartesianSpace.getRenderingParameters().add(pointCartesiansParams);
+		int indexcartesianParam = pointToCartesianSpace.createRenderingPamater();
+		RenderingParameters pointCartesiansParams = pointToCartesianSpace.getRenderingParameters().get(indexcartesianParam);
 		pointCartesiansParams.setRenderMode(GL11.GL_LINE_LOOP);
 		pointCartesiansParams.setAlias("pointCartesian");
 		this.draw2DRenderer.reloadAndprocess(pointToCartesianSpace);
 
-		RenderingParameters pointNearParams = new RenderingParameters(nearPlane);
+		int indexNearParam = nearPlane.createRenderingPamater();
+		RenderingParameters pointNearParams =nearPlane.getRenderingParameters().get(indexNearParam);
 		pointNearParams.setAlias("pointNear");
-		nearPlane.getRenderingParameters().add(pointNearParams);
 		pointNearParams.setRenderMode(GL11.GL_LINE_LOOP);
 		this.draw2DRenderer.reloadAndprocess(nearPlane);
 	}
