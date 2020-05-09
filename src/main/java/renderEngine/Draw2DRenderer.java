@@ -1,18 +1,12 @@
 package renderEngine;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL15;
-import org.lwjgl.opengl.GL20;
-import org.lwjgl.opengl.GL30;
 
-import modelsLibrary.ISimpleGeom;
+import modelsLibrary.SimpleGeom;
 import renderEngine.Loader.VBOIndex;
 import shaderManager.Draw2DShader;
-import shaderManager.Draw3DShader;
 
 /**
  * Render as is geom
@@ -50,7 +44,7 @@ public class Draw2DRenderer extends DrawRenderer {
 	}
 
 	@Override
-	public void reloadAndprocess(ISimpleGeom geom) {
+	public void reloadAndprocess(SimpleGeom geom) {
 		geom.reloadPositions(Draw2DShader.COLOR_INDEX);
 		this.geoms.add(geom);
 	}

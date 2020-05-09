@@ -14,38 +14,45 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
+import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import org.powermock.reflect.Whitebox;
 
 import modelsLibrary.ISimpleGeom;
+import modelsLibrary.SimpleGeom;
 import modelsLibrary.SimpleGeom3D;
 
 /**
  *  * don't know when to use beforeAll...
  *  * Parameterized could have been interesting if it would have taken Objects, not
  * only primitives
+ *  * @InjectMocks is not needed anymore and should be a hint for bad practice if used
+ *  * used Whitebox.setInternalState (PowerMock) to initialize internal state of SimpleGeom mocks in order to avoid
+ *  npe on unset private List<RenderingParameters> renderingParameters, (as constructor is not used in mock abstract class)
  * @author chezmoi
  *
  */
 class DrawRendererTest {
 
-	List<ISimpleGeom> geoms;
+	List<SimpleGeom> geoms;
 	DrawRenderer renderer;
 	List<RenderingParameters> renderingParams;
-	ISimpleGeom firstGeomMock;
-	ISimpleGeom secondGeomMock;
-	ISimpleGeom thirdGeomMock;
+
+	SimpleGeom firstGeomMock;
+	SimpleGeom secondGeomMock;
+	SimpleGeom thirdGeomMock;
 
 	@BeforeEach
 	void setUpBeforeEach() throws Exception {
 		MockitoAnnotations.initMocks(this);
 		geoms = new ArrayList<>();
-		firstGeomMock = Mockito.mock(ISimpleGeom.class, Mockito.CALLS_REAL_METHODS);
+		firstGeomMock = Mockito.mock(SimpleGeom.class, Mockito.CALLS_REAL_METHODS);
 		Mockito.when(firstGeomMock.getVaoId()).thenReturn(1);
-		secondGeomMock = Mockito.mock(ISimpleGeom.class, Mockito.CALLS_REAL_METHODS);
+		secondGeomMock = Mockito.mock(SimpleGeom.class, Mockito.CALLS_REAL_METHODS);
 		Mockito.when(secondGeomMock.getVaoId()).thenReturn(2);
-		thirdGeomMock = Mockito.mock(ISimpleGeom.class, Mockito.CALLS_REAL_METHODS);
+		thirdGeomMock = Mockito.mock(SimpleGeom.class, Mockito.CALLS_REAL_METHODS);
 		Mockito.when(thirdGeomMock.getVaoId()).thenReturn(3);
 		geoms.add(firstGeomMock);
 		geoms.add(secondGeomMock);
@@ -69,6 +76,9 @@ class DrawRendererTest {
 
 				@BeforeEach
 				void setUpBeforeEach() throws Exception {
+					Whitebox.setInternalState(firstGeomMock, "renderingParameters", new ArrayList<>());
+					Whitebox.setInternalState(secondGeomMock, "renderingParameters", new ArrayList<>());
+					Whitebox.setInternalState(thirdGeomMock, "renderingParameters", new ArrayList<>());
 					renderingParams = renderer.getOrderedRenderingParameters();
 				}
 

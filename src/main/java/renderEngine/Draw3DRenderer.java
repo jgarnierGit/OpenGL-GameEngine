@@ -1,18 +1,12 @@
 package renderEngine;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
 
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL15;
-import org.lwjgl.opengl.GL20;
-import org.lwjgl.opengl.GL30;
 import org.lwjglx.util.vector.Matrix4f;
 
 import entities.Camera;
-import modelsLibrary.ISimpleGeom;
+import modelsLibrary.SimpleGeom;
 import renderEngine.Loader.VBOIndex;
 import shaderManager.Draw3DShader;
 import toolbox.Maths;
@@ -63,7 +57,7 @@ public class Draw3DRenderer extends DrawRenderer {
 	}
 
 	@Override
-	public void reloadAndprocess(ISimpleGeom geom) {
+	public void reloadAndprocess(SimpleGeom geom) {
 		geom.reloadPositions(Draw3DShader.COLOR_INDEX);
 		this.geoms.add(geom);
 	}

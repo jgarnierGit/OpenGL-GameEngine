@@ -27,11 +27,11 @@ public class MouserLoggerPrinter {
 	private CoordinatesSystemManager coordSysManager;
 	private Draw3DRenderer draw3DRenderer;
 	private Draw2DRenderer draw2DRenderer;
-	private List<ISimpleGeom> boundingBoxes;
-	private List<ISimpleGeom> cameraBboxes;
+	private List<SimpleGeom> boundingBoxes;
+	private List<SimpleGeom> cameraBboxes;
 	private SimpleGeom3D raysWorldOrigin;
-	private List<ISimpleGeom> debugPoints;
-	private ISimpleGeom ray3D;
+	private List<SimpleGeom> debugPoints;
+	private SimpleGeom ray3D;
 	private Loader loader;
 	private Vector3f camPos;
 	private static final Vector4f BOUNDING_BOX_COLOR = new Vector4f(0.5f, 1.0f, 0.5f, 1.0f);
@@ -100,7 +100,7 @@ public class MouserLoggerPrinter {
 	 * print frustrum bbox
 	 */
 	public void printCameraBBox() {
-		/**for (ISimpleGeom point : cameraBboxes) {
+		/**for (SimpleGeom point : cameraBboxes) {
 			point.resetGeom();
 		}
 		cameraBboxes.clear();**/
@@ -148,8 +148,8 @@ public class MouserLoggerPrinter {
 		frustrumParams.setRenderMode(GL11.GL_LINES);
 		frustrumParams.setAlias("frustrumLines");
 		frustrumPlainParams.setRenderMode(GL11.GL_TRIANGLES);
-		frustrumPlainParams.renderAfter("bboxEntities"); 
-		for(ISimpleGeom cameraFrustrum : cameraBboxes) {
+		frustrumPlainParams.renderBefore("bboxEntities"); 
+		for(SimpleGeom cameraFrustrum : cameraBboxes) {
 			this.draw3DRenderer.reloadAndprocess(cameraFrustrum);
 		}
 	}
@@ -160,7 +160,7 @@ public class MouserLoggerPrinter {
 	 * order of 100 000 took like 10sec
 	 */
 	public void printBoundingBoxes(List<Entity> entities) {
-		for (ISimpleGeom boundingBox : boundingBoxes) {
+		for (SimpleGeom boundingBox : boundingBoxes) {
 			boundingBox.resetGeom();
 		}
 		this.boundingBoxes.clear();
@@ -259,7 +259,7 @@ public class MouserLoggerPrinter {
 	 * @param entity
 	 */
 	public void printSelectedBboxIn2D(Entity entity) {
-		for (ISimpleGeom point : debugPoints) {
+		for (SimpleGeom point : debugPoints) {
 			point.resetGeom();
 		}
 		debugPoints.clear();
