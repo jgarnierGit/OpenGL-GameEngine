@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
@@ -31,12 +32,11 @@ public abstract class DrawRenderer implements IDrawRenderer {
 	public void sendForRendering() {
 		renderingParams = getOrderedRenderingParameters();
 	}
-	
+
 	@Override
 	public void clearGeom() {
 		this.geoms.clear();
 	}
-
 
 	/**
 	 * Before we can render a VAO it needs to be made active, and we can do this by
@@ -81,52 +81,52 @@ public abstract class DrawRenderer implements IDrawRenderer {
 	}
 
 	protected List<RenderingParameters> getOrderedRenderingParameters() {
-		LinkedList<RenderingParameters> sortedParams = new LinkedList<>();
-		int naturalIndex =0;
+		LinkedList<RenderingParameters> rawParams = new LinkedList<>();
 		for (ISimpleGeom simpleGeom : this.geoms) {
 			List<RenderingParameters> params = simpleGeom.getRenderingParameters();
-			if(params.isEmpty()) {
+			if (params.isEmpty()) {
 				RenderingParameters naturalOrderParameter = new RenderingParameters(simpleGeom);
 				params.add(naturalOrderParameter);
 			}
-			for(RenderingParameters param :params) {
-				param.setRenderingIndex(naturalIndex);
-				naturalIndex++;
-			}
-			sortedParams.addAll(params);
-			naturalIndex++;
+			rawParams.addAll(params);
 		}
-		transformRelativePositionToIndex(sortedParams);
-		Collections.sort(sortedParams);
-		return sortedParams;
+		LinkedList<RenderingParameters> paramsToMove = rawParams.stream().filter((renderingParam) -> {
+			return !renderingParam.getDestinationOrderAlias().isEmpty() && !renderingParam.getDestinationOrderAlias().equals(renderingParam.getAlias());
+		}).collect(Collectors.toCollection(LinkedList::new));
+		return transformRelativePositionToIndex(rawParams, paramsToMove);
 	}
 
-	private void transformRelativePositionToIndex(LinkedList<RenderingParameters> sortedParams) {
-		for(RenderingParameters params : sortedParams) {
-			if(!params.getDestinationOrderAlias().isEmpty()) {
-				int index = getIndexDestination(sortedParams, params.getDestinationOrderAlias(), params.isDestinationPositionAfter());
-				params.setRenderingIndex(index);
-			}
+	private List<RenderingParameters> transformRelativePositionToIndex(LinkedList<RenderingParameters> rawParams,
+			LinkedList<RenderingParameters> paramsToMove) {
+		LinkedList<RenderingParameters> sortedList = new LinkedList<>();
+		sortedList.addAll(rawParams);
+		for (RenderingParameters param : paramsToMove) {
+			sortedList.remove(param);
+			int index = getIndexDestination(sortedList, param.getDestinationOrderAlias(),
+					param.isDestinationPositionAfter());
+			sortedList.add(index, param);
 		}
+		return sortedList;
 	}
 
-	private int getIndexDestination(LinkedList<RenderingParameters> sortedParams, String destinationOrderAlias, boolean destinationPositionAfter) {
-		Iterator<RenderingParameters> itParams= destinationPositionAfter ? sortedParams.descendingIterator() : sortedParams.iterator();
-		int index = destinationPositionAfter ? sortedParams.size()-1 : 0;
-		boolean found=false;
-		while(itParams.hasNext()) {	
-			
-			RenderingParameters currentParam =itParams.next();
-			if(destinationOrderAlias.equals(currentParam.getAlias())) {
-				found=true;
+	private int getIndexDestination(LinkedList<RenderingParameters> sortedParams, String destinationOrderAlias,
+			boolean destinationPositionAfter) {
+		Iterator<RenderingParameters> itParams = destinationPositionAfter ? sortedParams.descendingIterator()
+				: sortedParams.iterator();
+		int index = destinationPositionAfter ? sortedParams.size() : 0;
+		boolean found = false;
+		while (itParams.hasNext()) {
+
+			RenderingParameters currentParam = itParams.next();
+			if (destinationOrderAlias.equals(currentParam.getAlias())) {
+				found = true;
 				break;
 			}
 			index += destinationPositionAfter ? -1 : 1;
 		}
-		if(!found) {
-			throw new IllegalArgumentException("unknown alias "+ destinationOrderAlias);
+		if (!found) {
+			throw new IllegalArgumentException("unknown alias " + destinationOrderAlias);
 		}
-		index += destinationPositionAfter ? 1 : -1;
 		return index;
 	}
 }

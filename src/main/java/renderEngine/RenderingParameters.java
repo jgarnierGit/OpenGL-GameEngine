@@ -7,11 +7,10 @@ import org.lwjgl.opengl.GL11;
 
 import modelsLibrary.ISimpleGeom;
 
-public class RenderingParameters implements Comparable<RenderingParameters> {
+public class RenderingParameters {
 
 	private Optional<Integer> glRenderMode;
 	private HashMap<Integer, Boolean> glStatesRendering;
-	private Optional<Integer> renderingIndex;
 	private ISimpleGeom simpleGeom;
 	private String alias;
 	private String destinationOrderAlias;
@@ -20,19 +19,19 @@ public class RenderingParameters implements Comparable<RenderingParameters> {
 	public RenderingParameters(ISimpleGeom simpleGeom) {
 		this.simpleGeom = simpleGeom;
 		this.glStatesRendering = new HashMap<>();
-		this.renderingIndex = Optional.empty();
 		this.glRenderMode = Optional.empty();
 		this.renderAfter = false;
 		this.destinationOrderAlias = "";
 	}
-
-	/**
-	 * return rendering index
-	 * 
-	 * @return rendering index
-	 */
-	public Optional<Integer> getRenderingIndex() {
-		return this.renderingIndex;
+	
+	public RenderingParameters(RenderingParameters toClone) {
+		this.simpleGeom = toClone.simpleGeom;
+		this.alias = toClone.alias;
+		this.destinationOrderAlias = toClone.destinationOrderAlias;
+		 this.glRenderMode = toClone.glRenderMode;
+		this.glStatesRendering = new HashMap<>();
+		this.glStatesRendering.putAll(toClone.glStatesRendering);
+		this.renderAfter = toClone.renderAfter;
 	}
 
 	public ISimpleGeom getGeom() {
@@ -97,20 +96,6 @@ public class RenderingParameters implements Comparable<RenderingParameters> {
 		glStatesRendering.put(glBlend, b);
 	}
 
-	/**
-	 * force index rendering order for transparency interactions
-	 * 
-	 * @param renderingIndex higher value will render later.
-	 */
-	protected void setRenderingIndex(int renderingIndex) {
-		this.renderingIndex = Optional.ofNullable(renderingIndex);
-	}
-
-	@Override
-	public int compareTo(RenderingParameters params) {
-		return this.getRenderingIndex().orElse(0).compareTo(params.getRenderingIndex().orElse(0));
-	}
-
 	public void setAlias(String alias) {
 		this.alias = alias;
 	}
@@ -136,4 +121,11 @@ public class RenderingParameters implements Comparable<RenderingParameters> {
 		this.destinationOrderAlias=alias;
 		this.renderAfter = true;
 	}
+
+	@Override
+	public String toString() {
+		return "RenderingParameters [alias=" + alias + "]";
+	}
+	
+	
 }
