@@ -122,9 +122,9 @@ class DrawRendererTest {
 				
 				@BeforeEach
 				void setUpBeforeEach() throws Exception {
-					firstParam = firstGeomMock.createRenderingPamater("");
-					secondParam = secondGeomMock.createRenderingPamater("");
-					thirdParam = thirdGeomMock.createRenderingPamater("");
+					firstParam = firstGeomMock.createRenderingParameters("");
+					secondParam = secondGeomMock.createRenderingParameters("");
+					thirdParam = thirdGeomMock.createRenderingParameters("");
 					firstParams = new ArrayList<>();
 					secondParams = new ArrayList<>();
 					thirdParams = new ArrayList<>();
@@ -347,9 +347,9 @@ class DrawRendererTest {
 			
 			@BeforeEach
 			void setUpBeforeEach() throws Exception {
-				firstParam = firstGeomMock.createRenderingPamater(firstAlias);
-				secondParam = secondGeomMock.createRenderingPamater(secondAlias);
-				thirdParam = thirdGeomMock.createRenderingPamater(thirdAlias);
+				firstParam = firstGeomMock.createRenderingParameters(firstAlias);
+				secondParam = secondGeomMock.createRenderingParameters(secondAlias);
+				thirdParam = thirdGeomMock.createRenderingParameters(thirdAlias);
 				firstParams = new ArrayList<>();
 				secondParams = new ArrayList<>();
 				thirdParams = new ArrayList<>();
@@ -443,9 +443,9 @@ class DrawRendererTest {
 		
 		@BeforeEach
 		void setUpBeforeEach() throws Exception {
-			firstParam = firstGeomMock.createRenderingPamater(firstAlias);
-			secondParam = secondGeomMock.createRenderingPamater(secondAlias);
-			thirdParam = thirdGeomMock.createRenderingPamater(thirdAlias);
+			firstParam = firstGeomMock.createRenderingParameters(firstAlias);
+			secondParam = secondGeomMock.createRenderingParameters(secondAlias);
+			thirdParam = thirdGeomMock.createRenderingParameters(thirdAlias);
 			firstParams = new ArrayList<>();
 			secondParams = new ArrayList<>();
 			thirdParams = new ArrayList<>();
@@ -519,12 +519,12 @@ class DrawRendererTest {
 			
 			private void setParametersThreeForEach() {
 				
-				firstParams.add(firstGeomMock.createRenderingPamater(firstParam, firstAlias));
-				firstParams.add(firstGeomMock.createRenderingPamater(firstParam, firstAlias));
-				secondParams.add(secondGeomMock.createRenderingPamater(secondParam, secondAlias));
-				secondParams.add(secondGeomMock.createRenderingPamater(secondParam, secondAlias));
-				thirdParams.add(thirdGeomMock.createRenderingPamater(thirdParam, thirdAlias));
-				thirdParams.add(thirdGeomMock.createRenderingPamater(thirdParam, thirdAlias));
+				firstParams.add(firstGeomMock.createRenderingParameters(firstParam, firstAlias));
+				firstParams.add(firstGeomMock.createRenderingParameters(firstParam, firstAlias));
+				secondParams.add(secondGeomMock.createRenderingParameters(secondParam, secondAlias));
+				secondParams.add(secondGeomMock.createRenderingParameters(secondParam, secondAlias));
+				thirdParams.add(thirdGeomMock.createRenderingParameters(thirdParam, thirdAlias));
+				thirdParams.add(thirdGeomMock.createRenderingParameters(thirdParam, thirdAlias));
 			}
 			
 			/**

@@ -99,7 +99,7 @@ public interface ISimpleGeom {
 	 * @param alias to identify new RenderingParameter
 	 * @return newly created RenderingParameter
 	 */
-	public RenderingParameters createRenderingPamater(String alias);
+	public RenderingParameters createRenderingParameters(String alias);
 	
 	/**
 	 * create a RenderingParameter based on model and add it to its list
@@ -107,7 +107,7 @@ public interface ISimpleGeom {
 	 * @param alias new alias
 	 * @return newly created RenderingParameter
 	 */
-	public RenderingParameters createRenderingPamater(RenderingParameters modelParameters, String alias);
+	public RenderingParameters createRenderingParameters(RenderingParameters modelParameters, String alias);
 	
 	/**
 	 * Invert normals of every triangles

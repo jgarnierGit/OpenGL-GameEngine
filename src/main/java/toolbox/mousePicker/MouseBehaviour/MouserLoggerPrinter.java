@@ -92,7 +92,7 @@ public class MouserLoggerPrinter {
 
 		raysWorldOrigin.addPoint(camPos, new Vector4f(1, 0.6f, 0.5f, 1));
 		raysWorldOrigin.addPoint(rayFromCamera, new Vector4f(1, 0.6f, 0.5f, 1));
-		RenderingParameters rayParams = raysWorldOrigin.createRenderingPamater("ray");
+		RenderingParameters rayParams = raysWorldOrigin.createRenderingParameters("ray");
 		rayParams.setRenderMode(GL11.GL_LINES);
 		this.draw3DRenderer.reloadAndprocess(raysWorldOrigin);
 	}
@@ -139,8 +139,8 @@ public class MouserLoggerPrinter {
 				rbfWorldCoord, ltnWorldCoord, rtnWorldCoord, lbnWorldCoord, rbnWorldCoord);
 		cameraBboxes.add(frustrum);
 		cameraBboxes.add(frustrumPlain);
-		RenderingParameters frustrumPlainParams = frustrumPlain.createRenderingPamater("frustrumPlain");
-		RenderingParameters frustrumParams = frustrum.createRenderingPamater("frustrumLines");
+		RenderingParameters frustrumPlainParams = frustrumPlain.createRenderingParameters("frustrumPlain");
+		RenderingParameters frustrumParams = frustrum.createRenderingParameters("frustrumLines");
 
 		frustrumPlainParams.addGlState(GL11.GL_BLEND, true);
 		frustrumParams.setRenderMode(GL11.GL_LINES);
@@ -151,7 +151,7 @@ public class MouserLoggerPrinter {
 		SimpleGeom3D frustrumPlainInside = frustrumPlain.copy();
 		cameraBboxes.add(frustrumPlainInside);
 		frustrumPlainInside.setColor(BOUNDING_BOX_INSIDE_COLOR);//);
-		RenderingParameters frustrumPlainInsideParams = frustrumPlainInside.createRenderingPamater(frustrumPlainParams, "frustrumPlainInside");
+		RenderingParameters frustrumPlainInsideParams = frustrumPlainInside.createRenderingParameters(frustrumPlainParams, "frustrumPlainInside");
 		frustrumPlainInsideParams.renderBefore("frustrumPlain");//frustrumPlain");
 		frustrumPlainInsideParams.addGlState(GL11.GL_BLEND, true);
 		frustrumPlainInside.invertNormals();
@@ -241,7 +241,7 @@ public class MouserLoggerPrinter {
 		boundingBoxes.add(boundingBox);
 
 		for (SimpleGeom bbox : boundingBoxes) {
-			RenderingParameters bboxParam = bbox.createRenderingPamater("bboxEntities");
+			RenderingParameters bboxParam = bbox.createRenderingParameters("bboxEntities");
 			bboxParam.setRenderMode(GL11.GL_LINES);
 			this.draw3DRenderer.reloadAndprocess(bbox);
 		}
@@ -249,9 +249,9 @@ public class MouserLoggerPrinter {
 
 	public void printRay() {
 		this.ray3D.resetGeom();
-		RenderingParameters rayParamPoints = this.ray3D.createRenderingPamater("RayPoints");
+		RenderingParameters rayParamPoints = this.ray3D.createRenderingParameters("RayPoints");
 		rayParamPoints.setRenderMode(GL11.GL_POINTS);
-		RenderingParameters rayParamLines = this.ray3D.createRenderingPamater("rayLines");
+		RenderingParameters rayParamLines = this.ray3D.createRenderingParameters("rayLines");
 		rayParamLines.setRenderMode(GL11.GL_LINE_STRIP);
 		this.draw3DRenderer.reloadAndprocess(this.ray3D);
 	}
@@ -302,15 +302,15 @@ public class MouserLoggerPrinter {
 		debugPoints.add(nearPlane);
 		// retry to render on 2D rendered. may compute this by taking care nearLenght
 		// while dividing by distance.
-		RenderingParameters pointScreenSpaceParams = pointToScreenSpace.createRenderingPamater("pointScreenSpace");
+		RenderingParameters pointScreenSpaceParams = pointToScreenSpace.createRenderingParameters("pointScreenSpace");
 		pointScreenSpaceParams.setRenderMode(GL11.GL_LINE_LOOP);
 		this.draw2DRenderer.reloadAndprocess(pointToScreenSpace);
 
-		RenderingParameters pointCartesiansParams = pointToCartesianSpace.createRenderingPamater("pointCartesian");
+		RenderingParameters pointCartesiansParams = pointToCartesianSpace.createRenderingParameters("pointCartesian");
 		pointCartesiansParams.setRenderMode(GL11.GL_LINE_LOOP);
 		this.draw2DRenderer.reloadAndprocess(pointToCartesianSpace);
 
-		RenderingParameters pointNearParams = nearPlane.createRenderingPamater("pointNear");
+		RenderingParameters pointNearParams = nearPlane.createRenderingParameters("pointNear");
 		pointNearParams.setRenderMode(GL11.GL_LINE_LOOP);
 		this.draw2DRenderer.reloadAndprocess(nearPlane);
 	}

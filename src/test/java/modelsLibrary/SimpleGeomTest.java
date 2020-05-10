@@ -53,7 +53,7 @@ class SimpleGeomTest {
 	 */
 	@Test
 	void testCreateRenderingPamater() {
-		RenderingParameters params = geom.createRenderingPamater(alias);
+		RenderingParameters params = geom.createRenderingParameters(alias);
 		assertEquals(geom, params.getGeom());
 		assertEquals(1, geom.getRenderingParameters().size());
 		assertEquals(params, geom.getRenderingParameters().get(0));
@@ -69,7 +69,7 @@ class SimpleGeomTest {
 		SimpleGeom geom2;
 		@BeforeEach
 		void setUp() throws Exception {
-			params = geom.createRenderingPamater(alias);
+			params = geom.createRenderingParameters(alias);
 			geom2 = Mockito.mock(SimpleGeom.class,Mockito.CALLS_REAL_METHODS);
 		}
 		
@@ -87,7 +87,7 @@ class SimpleGeomTest {
 		@DisplayName("Copy default RenderingParameter on new geom must have fields if new signature reference")
 		void testCopyDefaultRenderingPamaterSignatures() {
 			geom2.copy(geom);
-			geom2.createRenderingPamater(params, "alias2");
+			geom2.createRenderingParameters(params, "alias2");
 			RenderingParameters geom2Params = geom2.getRenderingParameters().get(0);
 			geom2Params.setRenderMode(1);
 			geom2Params.renderAfter("toto");
@@ -106,7 +106,7 @@ class SimpleGeomTest {
 			params.setRenderMode(2);
 			params.renderBefore("test");
 			geom2.copy(geom);
-			geom2.createRenderingPamater(params, "alias2");
+			geom2.createRenderingParameters(params, "alias2");
 			RenderingParameters geom2Params = geom2.getRenderingParameters().get(0);
 			geom2Params.setRenderMode(1);
 			geom2Params.renderAfter("toto");

@@ -57,14 +57,14 @@ public abstract class SimpleGeom implements ISimpleGeom {
 	}
 
 	@Override
-	public RenderingParameters createRenderingPamater(String alias) {
+	public RenderingParameters createRenderingParameters(String alias) {
 		RenderingParameters renderingParams = new RenderingParameters(this,alias);
 		this.renderingParameters.add(renderingParams);
 		return renderingParams;
 	}
 
 	@Override
-	public RenderingParameters createRenderingPamater(RenderingParameters modelParameters, String alias) {
+	public RenderingParameters createRenderingParameters(RenderingParameters modelParameters, String alias) {
 		RenderingParameters renderingParams = new RenderingParameters(modelParameters, this, alias);
 		this.renderingParameters.add(renderingParams);
 		return renderingParams;
