@@ -29,6 +29,13 @@ public class SimpleGeom3D extends SimpleGeom {
 	public SimpleGeom3D(Loader loader) {
 		super(loader, 3);
 	}
+	
+	@Override
+	public SimpleGeom3D copy() {
+		SimpleGeom3D copy = new SimpleGeom3D(this.loader);
+		copy.copy(this);
+		return copy;
+	}
 
 	@Override
 	public void addPoint(Vector point) {
@@ -44,10 +51,15 @@ public class SimpleGeom3D extends SimpleGeom {
 	
 	@Override
 	public void invertNormals() {
+		boolean configurationIncorrect=true;
 		for(RenderingParameters param : this.getRenderingParameters()) {
-			if(!param.getRenderMode().isPresent() || GL11.GL_TRIANGLES != param.getRenderMode().get().intValue()) {
-				throw new IllegalStateException("invert normals is only available for GL_TRIANGLES, please consider specify a renderMode for this geom");
+			if(param.getRenderMode().isPresent() && GL11.GL_TRIANGLES == param.getRenderMode().get().intValue()) {
+				configurationIncorrect=false;
 			}
+		}
+		
+		if(configurationIncorrect) {
+			throw new IllegalStateException("invert normals is only available for GL_TRIANGLES, please consider specify a renderMode for this geom");
 		}
 		Iterator<Vector3f> vertices = this.getVertices().iterator();
 		ArrayList<Vector3f> invertedVertices = new ArrayList<>();

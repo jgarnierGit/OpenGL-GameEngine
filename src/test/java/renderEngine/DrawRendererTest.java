@@ -31,6 +31,7 @@ import modelsLibrary.SimpleGeom3D;
  *  * @InjectMocks is not needed anymore and should be a hint for bad practice if used
  *  * used Whitebox.setInternalState (PowerMock) to initialize internal state of SimpleGeom mocks in order to avoid
  *  npe on unset private List<RenderingParameters> renderingParameters, (as constructor is not used in mock abstract class)
+ *   => field is protected but packages are not the same.
  * @author chezmoi
  *
  */
@@ -269,6 +270,7 @@ class DrawRendererTest {
 
 					@Nested
 					@DisplayName("1 Param over 3 have no Alias")
+					@Deprecated
 					class OneParamHaveNoAlias {
 
 						/**
@@ -527,12 +529,12 @@ class DrawRendererTest {
 		class AffectingCardinality {
 			
 			private void setParametersThreeForEach() {
-				firstParams.add(new RenderingParameters(firstParam));
-				firstParams.add(new RenderingParameters(firstParam));
-				secondParams.add(new RenderingParameters(secondParam));
-				secondParams.add(new RenderingParameters(secondParam));
-				thirdParams.add(new RenderingParameters(thirdParam));
-				thirdParams.add(new RenderingParameters(thirdParam));
+				firstParams.add(new RenderingParameters(firstParam,firstParam.getGeom()));
+				firstParams.add(new RenderingParameters(firstParam,firstParam.getGeom()));
+				secondParams.add(new RenderingParameters(secondParam,secondParam.getGeom()));
+				secondParams.add(new RenderingParameters(secondParam,secondParam.getGeom()));
+				thirdParams.add(new RenderingParameters(thirdParam,thirdParam.getGeom()));
+				thirdParams.add(new RenderingParameters(thirdParam,thirdParam.getGeom()));
 			}
 			
 			/**

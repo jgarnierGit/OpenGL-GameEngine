@@ -14,6 +14,13 @@ public class SimpleGeom2D extends SimpleGeom {
 	public SimpleGeom2D(Loader loader) {
 		super(loader, 2);
 	}
+	
+	@Override
+	public SimpleGeom2D copy() {
+		SimpleGeom2D copy = new SimpleGeom2D(this.loader);
+		copy.copy(this);
+		return copy;
+	}
 
 	@Override
 	public void addPoint(Vector point) {

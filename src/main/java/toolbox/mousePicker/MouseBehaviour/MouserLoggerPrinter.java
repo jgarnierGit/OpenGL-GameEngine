@@ -35,9 +35,13 @@ public class MouserLoggerPrinter {
 	private Loader loader;
 	private Vector3f camPos;
 	private static final Vector4f BOUNDING_BOX_COLOR = new Vector4f(0.5f, 1.0f, 0.5f, 1.0f);
+	private static final Vector4f BOUNDING_BOX_INSIDE_COLOR = new Vector4f(1.0f, 0.5f, 0.5f, 0.6f);
+	private static final Vector4f FRUSTRUM_PLAIN_COLOR = new Vector4f(0.5f, 0.98f, 0.4f, 0.41f);
+	private static final Vector4f MASK_COLOR = new Vector4f(0.5f, 0.98f, 0.4f, 0.0f);
 	public static final float BOUNDING_BOX = 4f;
 
-	public MouserLoggerPrinter(Loader loader, Draw3DRenderer draw3DRenderer, Draw2DRenderer draw2DRenderer, CoordinatesSystemManager coordSysManager) {
+	public MouserLoggerPrinter(Loader loader, Draw3DRenderer draw3DRenderer, Draw2DRenderer draw2DRenderer,
+			CoordinatesSystemManager coordSysManager) {
 		this.boundingBoxes = new ArrayList<>();
 		this.debugPoints = new ArrayList<>();
 		this.cameraBboxes = new ArrayList<>();
@@ -48,25 +52,25 @@ public class MouserLoggerPrinter {
 		this.raysWorldOrigin = new SimpleGeom3D(this.loader);
 		this.ray3D = new SimpleGeom3D(this.loader);
 	}
-	
+
 	public ISimpleGeom getRay3D() {
 		return this.ray3D;
 	}
-	
+
 	public void setCameraPosition(Vector3f camPos) {
 		this.camPos = camPos;
 	}
-	
+
 	public void clear() {
 		draw2DRenderer.clearGeom();
 		draw3DRenderer.clearGeom();
 	}
-	
+
 	public void prepareRendering() {
 		this.draw2DRenderer.sendForRendering();
 		this.draw3DRenderer.sendForRendering();
 	}
-	
+
 	public void printFilterByRayProximity(List<Entity> orderedList, Vector3f rayPosNormalizedToCam,
 			Vector3f rayFromCamera) {
 		this.raysWorldOrigin.resetGeom();
@@ -89,10 +93,8 @@ public class MouserLoggerPrinter {
 
 		raysWorldOrigin.addPoint(camPos, new Vector4f(1, 0.6f, 0.5f, 1));
 		raysWorldOrigin.addPoint(rayFromCamera, new Vector4f(1, 0.6f, 0.5f, 1));
-		int indexRayParam = raysWorldOrigin.createRenderingPamater();
-		RenderingParameters rayParams = raysWorldOrigin.getRenderingParameters().get(indexRayParam);
+		RenderingParameters rayParams = raysWorldOrigin.createRenderingPamater("ray");
 		rayParams.setRenderMode(GL11.GL_LINES);
-		rayParams.setAlias("ray");
 		this.draw3DRenderer.reloadAndprocess(raysWorldOrigin);
 	}
 
@@ -138,27 +140,30 @@ public class MouserLoggerPrinter {
 				rbfWorldCoord, ltnWorldCoord, rtnWorldCoord, lbnWorldCoord, rbnWorldCoord);
 		cameraBboxes.add(frustrum);
 		cameraBboxes.add(frustrumPlain);
-		int indexPlainParam = frustrumPlain.createRenderingPamater();
-		int indexFrustrumParam = frustrum.createRenderingPamater();
-		RenderingParameters frustrumPlainParams = frustrumPlain.getRenderingParameters().get(indexPlainParam);
-		RenderingParameters frustrumParams = frustrum.getRenderingParameters().get(indexFrustrumParam);
+		RenderingParameters frustrumPlainParams = frustrumPlain.createRenderingPamater("frustrumPlain");
+		RenderingParameters frustrumParams = frustrum.createRenderingPamater("frustrumLines");
 
 		frustrumPlainParams.addGlState(GL11.GL_BLEND, true);
-		frustrumPlainParams.setAlias("frustrumPlain");
 		frustrumParams.setRenderMode(GL11.GL_LINES);
-		frustrumParams.setAlias("frustrumLines");
 		frustrumPlainParams.setRenderMode(GL11.GL_TRIANGLES);
-		frustrumPlainParams.renderBefore("bboxEntities"); 
-		frustrumPlain.invertNormals();
-		for(SimpleGeom cameraFrustrum : cameraBboxes) {
+		frustrumPlainParams.renderBefore("bboxEntities");
+		//frustrumPlain.setColor(MASK_COLOR);
+
+		SimpleGeom3D frustrumPlainInside = frustrumPlain.copy();
+		cameraBboxes.add(frustrumPlainInside);
+		frustrumPlainInside.setColor(BOUNDING_BOX_INSIDE_COLOR);//);
+		RenderingParameters frustrumPlainInsideParams = frustrumPlainInside.createRenderingPamater(frustrumPlainParams, "frustrumPlainInside");
+		frustrumPlainInsideParams.renderBefore("frustrumPlain");//frustrumPlain");
+		frustrumPlainInsideParams.addGlState(GL11.GL_BLEND, true);
+		frustrumPlainInside.invertNormals();
+		for (SimpleGeom cameraFrustrum : cameraBboxes) {
 			this.draw3DRenderer.reloadAndprocess(cameraFrustrum);
 		}
 	}
 
-
 	/**
-	 * loading many little objects (lines forming cube) is faster than combining each lines to one unique geometry.
-	 * order of 100 000 took like 10sec
+	 * loading many little objects (lines forming cube) is faster than combining
+	 * each lines to one unique geometry. order of 100 000 took like 10sec
 	 */
 	public void printBoundingBoxes(List<Entity> entities) {
 		for (SimpleGeom boundingBox : boundingBoxes) {
@@ -169,52 +174,59 @@ public class MouserLoggerPrinter {
 		Vector4f outsideColor = new Vector4f(0.85f, 0.2f, 0.25f, 1);
 		entities.forEach(entity -> {
 			Vector3f worldPositionEntity = entity.getPositions();
-			
-			Vector3f ltn = new Vector3f(worldPositionEntity.x - BOUNDING_BOX,worldPositionEntity.y + BOUNDING_BOX, worldPositionEntity.z - BOUNDING_BOX);
-			Vector3f rtn = new Vector3f(worldPositionEntity.x + BOUNDING_BOX,worldPositionEntity.y + BOUNDING_BOX, worldPositionEntity.z - BOUNDING_BOX);
-			Vector3f lbn = new Vector3f(worldPositionEntity.x - BOUNDING_BOX,worldPositionEntity.y - BOUNDING_BOX, worldPositionEntity.z - BOUNDING_BOX);
-			Vector3f rbn = new Vector3f(worldPositionEntity.x + BOUNDING_BOX,worldPositionEntity.y - BOUNDING_BOX, worldPositionEntity.z - BOUNDING_BOX);
-			Vector3f ltf = new Vector3f(worldPositionEntity.x - BOUNDING_BOX,worldPositionEntity.y + BOUNDING_BOX, worldPositionEntity.z + BOUNDING_BOX);
-			Vector3f rtf = new Vector3f(worldPositionEntity.x + BOUNDING_BOX,worldPositionEntity.y + BOUNDING_BOX, worldPositionEntity.z + BOUNDING_BOX);
-			Vector3f lbf = new Vector3f(worldPositionEntity.x - BOUNDING_BOX,worldPositionEntity.y - BOUNDING_BOX, worldPositionEntity.z + BOUNDING_BOX);
-			Vector3f rbf = new Vector3f(worldPositionEntity.x + BOUNDING_BOX,worldPositionEntity.y - BOUNDING_BOX, worldPositionEntity.z + BOUNDING_BOX);
-			List<Vector3f> bbox = Arrays.asList(ltn,rtn,lbn,rbn,ltf,rtf,lbf,rbf);
+
+			Vector3f ltn = new Vector3f(worldPositionEntity.x - BOUNDING_BOX, worldPositionEntity.y + BOUNDING_BOX,
+					worldPositionEntity.z - BOUNDING_BOX);
+			Vector3f rtn = new Vector3f(worldPositionEntity.x + BOUNDING_BOX, worldPositionEntity.y + BOUNDING_BOX,
+					worldPositionEntity.z - BOUNDING_BOX);
+			Vector3f lbn = new Vector3f(worldPositionEntity.x - BOUNDING_BOX, worldPositionEntity.y - BOUNDING_BOX,
+					worldPositionEntity.z - BOUNDING_BOX);
+			Vector3f rbn = new Vector3f(worldPositionEntity.x + BOUNDING_BOX, worldPositionEntity.y - BOUNDING_BOX,
+					worldPositionEntity.z - BOUNDING_BOX);
+			Vector3f ltf = new Vector3f(worldPositionEntity.x - BOUNDING_BOX, worldPositionEntity.y + BOUNDING_BOX,
+					worldPositionEntity.z + BOUNDING_BOX);
+			Vector3f rtf = new Vector3f(worldPositionEntity.x + BOUNDING_BOX, worldPositionEntity.y + BOUNDING_BOX,
+					worldPositionEntity.z + BOUNDING_BOX);
+			Vector3f lbf = new Vector3f(worldPositionEntity.x - BOUNDING_BOX, worldPositionEntity.y - BOUNDING_BOX,
+					worldPositionEntity.z + BOUNDING_BOX);
+			Vector3f rbf = new Vector3f(worldPositionEntity.x + BOUNDING_BOX, worldPositionEntity.y - BOUNDING_BOX,
+					worldPositionEntity.z + BOUNDING_BOX);
+			List<Vector3f> bbox = Arrays.asList(ltn, rtn, lbn, rbn, ltf, rtf, lbf, rbf);
 			boundingBox.addPoint(new Vector3f(lbf), BOUNDING_BOX_COLOR);
 			boundingBox.addPoint(new Vector3f(ltf), BOUNDING_BOX_COLOR);// LEFT-FAR
 
 			boundingBox.addPoint(new Vector3f(ltf), BOUNDING_BOX_COLOR);
-			boundingBox.addPoint(new Vector3f(rtf), BOUNDING_BOX_COLOR);//TOP-FAR
+			boundingBox.addPoint(new Vector3f(rtf), BOUNDING_BOX_COLOR);// TOP-FAR
 
 			boundingBox.addPoint(new Vector3f(rtf), BOUNDING_BOX_COLOR);
-			boundingBox.addPoint(new Vector3f(rbf), BOUNDING_BOX_COLOR);//RIGHT-FAR
+			boundingBox.addPoint(new Vector3f(rbf), BOUNDING_BOX_COLOR);// RIGHT-FAR
 
 			boundingBox.addPoint(new Vector3f(rbf), BOUNDING_BOX_COLOR);
-			boundingBox.addPoint(new Vector3f(lbf), BOUNDING_BOX_COLOR);//BOTTOM-FAR
+			boundingBox.addPoint(new Vector3f(lbf), BOUNDING_BOX_COLOR);// BOTTOM-FAR
 
 			boundingBox.addPoint(new Vector3f(lbf), BOUNDING_BOX_COLOR);
-			boundingBox.addPoint(new Vector3f(lbn), BOUNDING_BOX_COLOR);//LEFT-BOTTOM
+			boundingBox.addPoint(new Vector3f(lbn), BOUNDING_BOX_COLOR);// LEFT-BOTTOM
 
 			boundingBox.addPoint(new Vector3f(lbn), BOUNDING_BOX_COLOR);
-			boundingBox.addPoint(new Vector3f(rbn), BOUNDING_BOX_COLOR);//BOTTOM-NEAR
+			boundingBox.addPoint(new Vector3f(rbn), BOUNDING_BOX_COLOR);// BOTTOM-NEAR
 
 			boundingBox.addPoint(new Vector3f(rbn), BOUNDING_BOX_COLOR);
-			boundingBox.addPoint(new Vector3f(rbf), BOUNDING_BOX_COLOR);//RIGH-BOTTOM
+			boundingBox.addPoint(new Vector3f(rbf), BOUNDING_BOX_COLOR);// RIGH-BOTTOM
 
 			boundingBox.addPoint(new Vector3f(rbn), BOUNDING_BOX_COLOR);
-			boundingBox.addPoint(new Vector3f(rtn), BOUNDING_BOX_COLOR);//RIGHT-NEAR
+			boundingBox.addPoint(new Vector3f(rtn), BOUNDING_BOX_COLOR);// RIGHT-NEAR
 
 			boundingBox.addPoint(new Vector3f(rtn), BOUNDING_BOX_COLOR);
-			boundingBox.addPoint(new Vector3f(rtf), BOUNDING_BOX_COLOR);//RIGHT-TOP
+			boundingBox.addPoint(new Vector3f(rtf), BOUNDING_BOX_COLOR);// RIGHT-TOP
 
 			boundingBox.addPoint(new Vector3f(rtn), BOUNDING_BOX_COLOR);
-			boundingBox.addPoint(new Vector3f(ltn), BOUNDING_BOX_COLOR);//TOP-NEAR
+			boundingBox.addPoint(new Vector3f(ltn), BOUNDING_BOX_COLOR);// TOP-NEAR
 
 			boundingBox.addPoint(new Vector3f(ltn), BOUNDING_BOX_COLOR);
-			boundingBox.addPoint(new Vector3f(ltf), BOUNDING_BOX_COLOR);//LEFT-TOP
+			boundingBox.addPoint(new Vector3f(ltf), BOUNDING_BOX_COLOR);// LEFT-TOP
 
 			boundingBox.addPoint(new Vector3f(ltn), BOUNDING_BOX_COLOR);
-			boundingBox.addPoint(new Vector3f(lbn), BOUNDING_BOX_COLOR);//LEFT-NEAR
-
+			boundingBox.addPoint(new Vector3f(lbn), BOUNDING_BOX_COLOR);// LEFT-NEAR
 
 			int indexPoint = 0;
 			for (Vector3f point : bbox) {
@@ -230,27 +242,21 @@ public class MouserLoggerPrinter {
 		boundingBoxes.add(boundingBox);
 
 		for (SimpleGeom bbox : boundingBoxes) {
-			int index = bbox.createRenderingPamater();
-			RenderingParameters bboxParam = bbox.getRenderingParameters().get(index);
+			RenderingParameters bboxParam = bbox.createRenderingPamater("bboxEntities");
 			bboxParam.setRenderMode(GL11.GL_LINES);
-			bboxParam.setAlias("bboxEntities");
 			this.draw3DRenderer.reloadAndprocess(bbox);
 		}
 	}
-	
+
 	public void printRay() {
 		this.ray3D.resetGeom();
-		int renderingParamIndex = this.ray3D.createRenderingPamater();
-		RenderingParameters rayParamPoints = this.ray3D.getRenderingParameters().get(renderingParamIndex);
+		RenderingParameters rayParamPoints = this.ray3D.createRenderingPamater("RayPoints");
 		rayParamPoints.setRenderMode(GL11.GL_POINTS);
-		rayParamPoints.setAlias("RayPoints");
-		int renderingParamIndexLines = this.ray3D.createRenderingPamater();
-		RenderingParameters rayParamLines = this.ray3D.getRenderingParameters().get(renderingParamIndexLines);
+		RenderingParameters rayParamLines = this.ray3D.createRenderingPamater("rayLines");
 		rayParamLines.setRenderMode(GL11.GL_LINE_STRIP);
-		rayParamLines.setAlias("rayLines");
 		this.draw3DRenderer.reloadAndprocess(this.ray3D);
 	}
-	
+
 	/**
 	 * Project bbox worldCoordinates points to the rendering plane. Last step
 	 * (converting to clipSpace) is equals to the cartesian conversion as w is equal
@@ -297,29 +303,23 @@ public class MouserLoggerPrinter {
 		debugPoints.add(nearPlane);
 		// retry to render on 2D rendered. may compute this by taking care nearLenght
 		// while dividing by distance.
-		int indexScreenSpaceParam = pointToScreenSpace.createRenderingPamater();
-		RenderingParameters pointScreenSpaceParams = pointToScreenSpace.getRenderingParameters().get(indexScreenSpaceParam);
+		RenderingParameters pointScreenSpaceParams = pointToScreenSpace.createRenderingPamater("pointScreenSpace");
 		pointScreenSpaceParams.setRenderMode(GL11.GL_LINE_LOOP);
-		pointScreenSpaceParams.setAlias("pointScreenSpace");
 		this.draw2DRenderer.reloadAndprocess(pointToScreenSpace);
 
-		int indexcartesianParam = pointToCartesianSpace.createRenderingPamater();
-		RenderingParameters pointCartesiansParams = pointToCartesianSpace.getRenderingParameters().get(indexcartesianParam);
+		RenderingParameters pointCartesiansParams = pointToCartesianSpace.createRenderingPamater("pointCartesian");
 		pointCartesiansParams.setRenderMode(GL11.GL_LINE_LOOP);
-		pointCartesiansParams.setAlias("pointCartesian");
 		this.draw2DRenderer.reloadAndprocess(pointToCartesianSpace);
 
-		int indexNearParam = nearPlane.createRenderingPamater();
-		RenderingParameters pointNearParams =nearPlane.getRenderingParameters().get(indexNearParam);
-		pointNearParams.setAlias("pointNear");
+		RenderingParameters pointNearParams = nearPlane.createRenderingPamater("pointNear");
 		pointNearParams.setRenderMode(GL11.GL_LINE_LOOP);
 		this.draw2DRenderer.reloadAndprocess(nearPlane);
 	}
-	
+
 	private SimpleGeom3D getFrustrumForPlainTriangles(Vector3f ltfWorldCoord, Vector3f rtfWorldCoord,
 			Vector3f lbfWorldCoord, Vector3f rbfWorldCoord, Vector3f ltnWorldCoord, Vector3f rtnWorldCoord,
 			Vector3f lbnWorldCoord, Vector3f rbnWorldCoord) {
-		Vector4f cameraTransparency = new Vector4f(0.5f, 0.98f, 0.4f, 0.41f);
+		Vector4f cameraTransparency = FRUSTRUM_PLAIN_COLOR;
 		SimpleGeom3D frustrum = new SimpleGeom3D(loader);
 		frustrum.addPoint(ltnWorldCoord, cameraTransparency);
 		frustrum.addPoint(lbnWorldCoord, cameraTransparency);

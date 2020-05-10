@@ -16,19 +16,30 @@ public class RenderingParameters {
 	private String destinationOrderAlias;
 	private boolean renderAfter;
 
+	/**
+	 * hide this constructor, only way to get a RenderingParameters is by SimpleGeom
+	 * @param simpleGeom
+	 */
+	@Deprecated
 	public RenderingParameters(ISimpleGeom simpleGeom) {
 		this.simpleGeom = simpleGeom;
 		this.glStatesRendering = new HashMap<>();
 		this.glRenderMode = Optional.empty();
 		this.renderAfter = false;
 		this.destinationOrderAlias = "";
+		this.alias= ""; //TODO set alias
 	}
 	
-	public RenderingParameters(RenderingParameters toClone) {
-		this.simpleGeom = toClone.simpleGeom;
+	public RenderingParameters(RenderingParameters toClone, ISimpleGeom geomToApply) {
+		this.simpleGeom = geomToApply;
 		this.alias = toClone.alias;
 		this.destinationOrderAlias = toClone.destinationOrderAlias;
-		 this.glRenderMode = toClone.glRenderMode;
+		if(toClone.glRenderMode.isPresent()) {
+			 this.glRenderMode = Optional.ofNullable(toClone.glRenderMode.get());//not duplicated by value
+		}else {
+			this.glRenderMode = Optional.empty();
+		}
+		
 		this.glStatesRendering = new HashMap<>();
 		this.glStatesRendering.putAll(toClone.glStatesRendering);
 		this.renderAfter = toClone.renderAfter;
@@ -57,6 +68,10 @@ public class RenderingParameters {
 	 */
 	public void setRenderMode(int glRenderMode) {
 		this.glRenderMode = Optional.ofNullable(glRenderMode);
+	}
+	
+	public HashMap<Integer, Boolean> getStatesRendering(){
+		return this.glStatesRendering;
 	}
 
 	/**

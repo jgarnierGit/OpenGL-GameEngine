@@ -85,7 +85,7 @@ public abstract class DrawRenderer implements IDrawRenderer {
 		LinkedList<RenderingParameters> rawParams = new LinkedList<>();
 		for (SimpleGeom simpleGeom : this.geoms) {
 			if (simpleGeom.getRenderingParameters().isEmpty()) {
-				simpleGeom.createRenderingPamater();
+				simpleGeom.createRenderingPamater("");
 			}
 			rawParams.addAll(simpleGeom.getRenderingParameters());
 		}

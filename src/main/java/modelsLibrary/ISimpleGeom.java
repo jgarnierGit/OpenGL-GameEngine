@@ -10,6 +10,7 @@ import org.lwjglx.util.vector.Vector4f;
 import renderEngine.RenderingParameters;
 
 public interface ISimpleGeom {
+	
 	/**
 	 * returns Vertex Array Object Id already binded.
 	 * 
@@ -38,6 +39,12 @@ public interface ISimpleGeom {
 	public float[] getColors();
 
 	public List<? extends Vector> getVertices();
+	
+	/**
+	 * return a deep copy of geom
+	 * @return SimpleGeom
+	 */
+	public ISimpleGeom copy();
 
 	/**
 	 * add a point with last active color to apply
@@ -61,6 +68,12 @@ public interface ISimpleGeom {
 	 * @param color
 	 */
 	public void updateColor(int index, Vector4f color);
+	
+	/**
+	 * set each point color
+	 * @param color
+	 */
+	public void setColor(Vector4f color);
 
 	/**
 	 * Reload points coordinates to binded Vertex Buffer Object attached to VAO
@@ -84,10 +97,19 @@ public interface ISimpleGeom {
 	public boolean hasTransparency();
 
 	/**
-	 * create a RenderingParameter and add it to list for current geom
-	 * @return index of newly created RenderingParameter
+	 * create an empty RenderingParameter and add it to its list
+	 * @param alias to identify new RenderingParameter
+	 * @return newly created RenderingParameter
 	 */
-	public int createRenderingPamater();
+	public RenderingParameters createRenderingPamater(String alias);
+	
+	/**
+	 * create a RenderingParameter based on model and add it to its list
+	 * @param modelParameters model
+	 * @param alias new alias
+	 * @return newly created RenderingParameter
+	 */
+	public RenderingParameters createRenderingPamater(RenderingParameters modelParameters, String alias);
 	
 	/**
 	 * Invert normals of every triangles
