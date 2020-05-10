@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.lwjgl.opengl.GL11;
-import org.lwjglx.util.vector.Matrix4f;
 import org.lwjglx.util.vector.Vector2f;
 import org.lwjglx.util.vector.Vector3f;
 import org.lwjglx.util.vector.Vector4f;

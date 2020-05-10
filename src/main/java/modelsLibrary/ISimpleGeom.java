@@ -1,10 +1,8 @@
 package modelsLibrary;
 
 import java.util.List;
-import java.util.SortedSet;
 
 import org.lwjglx.util.vector.Vector;
-import org.lwjglx.util.vector.Vector3f;
 import org.lwjglx.util.vector.Vector4f;
 
 import renderEngine.RenderingParameters;
@@ -47,14 +45,14 @@ public interface ISimpleGeom {
 	public ISimpleGeom copy();
 
 	/**
-	 * add a point with last active color to apply
+	 * add a point with last active color
 	 * 
 	 * @param point
 	 */
 	public void addPoint(Vector point);
 
 	/**
-	 * add Point coordinates with a color to apply
+	 * add Point coordinates with specified color
 	 * 
 	 * @param vector
 	 * @param color
@@ -70,7 +68,7 @@ public interface ISimpleGeom {
 	public void updateColor(int index, Vector4f color);
 	
 	/**
-	 * set each point color
+	 * set each point with color
 	 * @param color
 	 */
 	public void setColor(Vector4f color);

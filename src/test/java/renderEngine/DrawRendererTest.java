@@ -1,28 +1,23 @@
 package renderEngine;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
-import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
 import org.powermock.reflect.Whitebox;
 
-import modelsLibrary.ISimpleGeom;
 import modelsLibrary.SimpleGeom;
-import modelsLibrary.SimpleGeom3D;
 
 /**
  *  * don't know when to use beforeAll...
@@ -55,6 +50,9 @@ class DrawRendererTest {
 		Mockito.when(secondGeomMock.getVaoId()).thenReturn(2);
 		thirdGeomMock = Mockito.mock(SimpleGeom.class, Mockito.CALLS_REAL_METHODS);
 		Mockito.when(thirdGeomMock.getVaoId()).thenReturn(3);
+		Whitebox.setInternalState(firstGeomMock, "renderingParameters", new ArrayList<>());
+		Whitebox.setInternalState(secondGeomMock, "renderingParameters", new ArrayList<>());
+		Whitebox.setInternalState(thirdGeomMock, "renderingParameters", new ArrayList<>());
 		geoms.add(firstGeomMock);
 		geoms.add(secondGeomMock);
 		geoms.add(thirdGeomMock);
@@ -77,9 +75,6 @@ class DrawRendererTest {
 
 				@BeforeEach
 				void setUpBeforeEach() throws Exception {
-					Whitebox.setInternalState(firstGeomMock, "renderingParameters", new ArrayList<>());
-					Whitebox.setInternalState(secondGeomMock, "renderingParameters", new ArrayList<>());
-					Whitebox.setInternalState(thirdGeomMock, "renderingParameters", new ArrayList<>());
 					renderingParams = renderer.getOrderedRenderingParameters();
 				}
 
@@ -127,9 +122,9 @@ class DrawRendererTest {
 				
 				@BeforeEach
 				void setUpBeforeEach() throws Exception {
-					firstParam = new RenderingParameters(firstGeomMock);
-					secondParam = new RenderingParameters(secondGeomMock);
-					thirdParam = new RenderingParameters(thirdGeomMock);
+					firstParam = firstGeomMock.createRenderingPamater("");
+					secondParam = secondGeomMock.createRenderingPamater("");
+					thirdParam = thirdGeomMock.createRenderingPamater("");
 					firstParams = new ArrayList<>();
 					secondParams = new ArrayList<>();
 					thirdParams = new ArrayList<>();
@@ -352,12 +347,9 @@ class DrawRendererTest {
 			
 			@BeforeEach
 			void setUpBeforeEach() throws Exception {
-				firstParam = new RenderingParameters(firstGeomMock);
-				secondParam = new RenderingParameters(secondGeomMock);
-				thirdParam = new RenderingParameters(thirdGeomMock);
-				firstParam.setAlias(firstAlias);
-				secondParam.setAlias(secondAlias);
-				thirdParam.setAlias(thirdAlias);
+				firstParam = firstGeomMock.createRenderingPamater(firstAlias);
+				secondParam = secondGeomMock.createRenderingPamater(secondAlias);
+				thirdParam = thirdGeomMock.createRenderingPamater(thirdAlias);
 				firstParams = new ArrayList<>();
 				secondParams = new ArrayList<>();
 				thirdParams = new ArrayList<>();
@@ -451,12 +443,9 @@ class DrawRendererTest {
 		
 		@BeforeEach
 		void setUpBeforeEach() throws Exception {
-			firstParam = new RenderingParameters(firstGeomMock);
-			secondParam = new RenderingParameters(secondGeomMock);
-			thirdParam = new RenderingParameters(thirdGeomMock);
-			firstParam.setAlias(firstAlias);
-			secondParam.setAlias(secondAlias);
-			thirdParam.setAlias(thirdAlias);
+			firstParam = firstGeomMock.createRenderingPamater(firstAlias);
+			secondParam = secondGeomMock.createRenderingPamater(secondAlias);
+			thirdParam = thirdGeomMock.createRenderingPamater(thirdAlias);
 			firstParams = new ArrayList<>();
 			secondParams = new ArrayList<>();
 			thirdParams = new ArrayList<>();
@@ -529,12 +518,13 @@ class DrawRendererTest {
 		class AffectingCardinality {
 			
 			private void setParametersThreeForEach() {
-				firstParams.add(new RenderingParameters(firstParam,firstParam.getGeom()));
-				firstParams.add(new RenderingParameters(firstParam,firstParam.getGeom()));
-				secondParams.add(new RenderingParameters(secondParam,secondParam.getGeom()));
-				secondParams.add(new RenderingParameters(secondParam,secondParam.getGeom()));
-				thirdParams.add(new RenderingParameters(thirdParam,thirdParam.getGeom()));
-				thirdParams.add(new RenderingParameters(thirdParam,thirdParam.getGeom()));
+				
+				firstParams.add(firstGeomMock.createRenderingPamater(firstParam, firstAlias));
+				firstParams.add(firstGeomMock.createRenderingPamater(firstParam, firstAlias));
+				secondParams.add(secondGeomMock.createRenderingPamater(secondParam, secondAlias));
+				secondParams.add(secondGeomMock.createRenderingPamater(secondParam, secondAlias));
+				thirdParams.add(thirdGeomMock.createRenderingPamater(thirdParam, thirdAlias));
+				thirdParams.add(thirdGeomMock.createRenderingPamater(thirdParam, thirdAlias));
 			}
 			
 			/**

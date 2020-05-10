@@ -2,23 +2,11 @@ package modelsLibrary;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.lwjgl.opengl.GL11;
-import org.lwjglx.util.vector.Vector;
-import org.lwjglx.util.vector.Vector2f;
-import org.lwjglx.util.vector.Vector3f;
 import org.lwjglx.util.vector.Vector4f;
 
-import modelsManager.Model3D;
 import renderEngine.Loader;
 import renderEngine.RenderingParameters;
 
@@ -70,16 +58,14 @@ public abstract class SimpleGeom implements ISimpleGeom {
 
 	@Override
 	public RenderingParameters createRenderingPamater(String alias) {
-		RenderingParameters renderingParams = new RenderingParameters(this);
-		renderingParams.setAlias(alias);// TODO maybe refactor to set in constructor
+		RenderingParameters renderingParams = new RenderingParameters(this,alias);
 		this.renderingParameters.add(renderingParams);
 		return renderingParams;
 	}
 
 	@Override
 	public RenderingParameters createRenderingPamater(RenderingParameters modelParameters, String alias) {
-		RenderingParameters renderingParams = new RenderingParameters(modelParameters, this);
-		renderingParams.setAlias(alias);// TODO maybe refactor to set in constructor
+		RenderingParameters renderingParams = new RenderingParameters(modelParameters, this, alias);
 		this.renderingParameters.add(renderingParams);
 		return renderingParams;
 	}
@@ -88,12 +74,7 @@ public abstract class SimpleGeom implements ISimpleGeom {
 		return new Vector4f(DEFAULT_COLOR[0], DEFAULT_COLOR[1], DEFAULT_COLOR[2], DEFAULT_COLOR[3]);
 	}
 
-	/**
-	 * @FIXME do not expose this method. Make it harder to understand how to use
-	 *        this API. internal usage only, or in a builder context
-	 */
-	@Deprecated
-	public void duplicateLastColor() {
+	protected void duplicateLastColor() {
 		if (this.colors.length == 0) {
 			this.colors = SimpleGeom.DEFAULT_COLOR.clone();
 		} else {
@@ -103,12 +84,8 @@ public abstract class SimpleGeom implements ISimpleGeom {
 		}
 	}
 
-	/**
-	 * @FIXME do not expose this method. Make it harder to understand how to use
-	 *        this API. internal usage only, or in a builder context
-	 */
-	@Deprecated
-	public void addColor(Vector4f color) {
+
+	protected void addColor(Vector4f color) {
 		this.colors = ArrayUtils.addAll(this.colors, color.x, color.y, color.z, color.w);
 	}
 

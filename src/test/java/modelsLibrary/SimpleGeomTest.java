@@ -71,7 +71,6 @@ class SimpleGeomTest {
 		void setUp() throws Exception {
 			params = geom.createRenderingPamater(alias);
 			geom2 = Mockito.mock(SimpleGeom.class,Mockito.CALLS_REAL_METHODS);
-			//geom2.renderingParameters = new ArrayList<>();
 		}
 		
 		@Test
@@ -85,8 +84,8 @@ class SimpleGeomTest {
 		}
 		
 		@Test
-		@DisplayName("Copy RenderingParameter on new geom must have fields if new signature reference")
-		void testCopyRenderingPamaterSignatures() {
+		@DisplayName("Copy default RenderingParameter on new geom must have fields if new signature reference")
+		void testCopyDefaultRenderingPamaterSignatures() {
 			geom2.copy(geom);
 			geom2.createRenderingPamater(params, "alias2");
 			RenderingParameters geom2Params = geom2.getRenderingParameters().get(0);
@@ -101,32 +100,23 @@ class SimpleGeomTest {
 		}
 		
 		@Test
-		@DisplayName("Duplicate RenderingParameter on new geom must have fields set as original")
-		void testDuplicateRenderingPamaterValues() {
-			// createRenderingPamater(RenderingParameters frustrumPlainParams, String alias)
-			// geom => this.geom2
-			// this.renderingParameters.get(this.renderingParameters) => size 1
-			//this.glStatesRendering => frustrumPlainParams.glStatesRendering
-			//this.glRenderMode => frustrumPlainParams.glRenderMode
-			// this.renderAfter => frustrumPlainParams.renderAfter;
-			// this.destinationOrderAlias => frustrumPlainParams.destinationOrderAlias;
-			
-			fail("Not yet implemented");
+		@DisplayName("Copy RenderingParameter on new geom must have fields if new signature reference")
+		void testCopyRenderingPamaterSignatures() {
+			params.addGlState(2, true);
+			params.setRenderMode(2);
+			params.renderBefore("test");
+			geom2.copy(geom);
+			geom2.createRenderingPamater(params, "alias2");
+			RenderingParameters geom2Params = geom2.getRenderingParameters().get(0);
+			geom2Params.setRenderMode(1);
+			geom2Params.renderAfter("toto");
+			assertNotSame(params.getAlias(), geom2Params.getAlias());
+			assertNotSame(params.getRenderMode(), geom2Params.getRenderMode());
+			assertNotSame(params.getDestinationOrderAlias(), geom2Params.getDestinationOrderAlias());
+			assertNotSame(params.getStatesRendering(), geom2Params.getStatesRendering());
+			assertNotSame(params.getGeom(), geom2Params.getGeom());
+			assertNotEquals(params.isDestinationPositionAfter(), geom2Params.isDestinationPositionAfter());
 		}
-		/**
-		@Test
-		@DisplayName("Modifying duplicated RenderingParameter must apply changes on duplicated and leave original unmodified")
-		void testModifyDuplicateRenderingPamater() {
-			// createRenderingPamater(RenderingParameters frustrumPlainParams, String alias)
-			// geom => this.geom2
-			// this.renderingParameters.get(this.renderingParameters) => size 1
-			//this.glStatesRendering => frustrumPlainParams.glStatesRendering
-			//this.glRenderMode => frustrumPlainParams.glRenderMode
-			// this.renderAfter => frustrumPlainParams.renderAfter;
-			// this.destinationOrderAlias => frustrumPlainParams.destinationOrderAlias;
-			
-			fail("Not yet implemented");
-		}**/
 	}
 	
 	

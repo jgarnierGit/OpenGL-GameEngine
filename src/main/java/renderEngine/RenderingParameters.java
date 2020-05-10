@@ -20,22 +20,21 @@ public class RenderingParameters {
 	 * hide this constructor, only way to get a RenderingParameters is by SimpleGeom
 	 * @param simpleGeom
 	 */
-	@Deprecated
-	public RenderingParameters(ISimpleGeom simpleGeom) {
+	public RenderingParameters(ISimpleGeom simpleGeom, String alias) {
 		this.simpleGeom = simpleGeom;
 		this.glStatesRendering = new HashMap<>();
 		this.glRenderMode = Optional.empty();
 		this.renderAfter = false;
 		this.destinationOrderAlias = "";
-		this.alias= ""; //TODO set alias
+		this.alias= alias; 
 	}
 	
-	public RenderingParameters(RenderingParameters toClone, ISimpleGeom geomToApply) {
+	public RenderingParameters(RenderingParameters toClone, ISimpleGeom geomToApply, String alias) {
 		this.simpleGeom = geomToApply;
-		this.alias = toClone.alias;
+		this.alias = alias;
 		this.destinationOrderAlias = toClone.destinationOrderAlias;
 		if(toClone.glRenderMode.isPresent()) {
-			 this.glRenderMode = Optional.ofNullable(toClone.glRenderMode.get());//not duplicated by value
+			 this.glRenderMode = Optional.ofNullable(toClone.glRenderMode.get());
 		}else {
 			this.glRenderMode = Optional.empty();
 		}
