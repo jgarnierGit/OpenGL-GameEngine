@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.lwjgl.opengl.GL11;
+import org.lwjglx.util.vector.Vector;
 import org.lwjglx.util.vector.Vector2f;
 import org.lwjglx.util.vector.Vector3f;
 import org.lwjglx.util.vector.Vector4f;
@@ -108,10 +109,9 @@ public class MouserLoggerPrinter {
 		/***
 		 * Near plane will be [-1,1] plane range Far plane must be far-near
 		 */
-		float fovRatio = (float) Math.tan(Math.toRadians(MasterRenderer.getFOV() / 2f))
-				* MasterRenderer.getAspectRatio();
-		float xCamNearRatio = MasterRenderer.getNearPlane();
-		float xCamFarRatio = MasterRenderer.getFarPlane() / fovRatio;
+		float fovRatio = (float) Math.tan(Math.toRadians(MasterRenderer.getFOV() / 2f));
+		float xCamNearRatio = MasterRenderer.getNearPlane() * fovRatio;
+		float xCamFarRatio = MasterRenderer.getFarPlane() * fovRatio;
 		float yCamNearRatio = xCamNearRatio / MasterRenderer.getAspectRatio();
 		float yCamFarRatio = xCamFarRatio / MasterRenderer.getAspectRatio();
 
@@ -146,11 +146,11 @@ public class MouserLoggerPrinter {
 		frustrumParams.setRenderMode(GL11.GL_LINES);
 		frustrumPlainParams.setRenderMode(GL11.GL_TRIANGLES);
 		frustrumPlainParams.renderBefore("bboxEntities");
-		//frustrumPlain.setColor(MASK_COLOR);
+		frustrumPlain.setColor(MASK_COLOR);
 
 		SimpleGeom3D frustrumPlainInside = frustrumPlain.copy();
 		cameraBboxes.add(frustrumPlainInside);
-		frustrumPlainInside.setColor(BOUNDING_BOX_INSIDE_COLOR);//);
+		frustrumPlainInside.setColor(MASK_COLOR);//);BOUNDING_BOX_INSIDE_COLOR
 		RenderingParameters frustrumPlainInsideParams = frustrumPlainInside.createRenderingParameters(frustrumPlainParams, "frustrumPlainInside");
 		frustrumPlainInsideParams.renderBefore("frustrumPlain");//frustrumPlain");
 		frustrumPlainInsideParams.addGlState(GL11.GL_BLEND, true);
@@ -228,8 +228,8 @@ public class MouserLoggerPrinter {
 			boundingBox.addPoint(new Vector3f(lbn), BOUNDING_BOX_COLOR);// LEFT-NEAR
 
 			int indexPoint = 0;
-			for (Vector3f point : bbox) {
-				Vector3f viewCoordPoint = this.coordSysManager.objectToViewCoord(point);
+			for (Vector point : boundingBox.getVertices()) {
+				Vector3f viewCoordPoint = this.coordSysManager.objectToViewCoord((Vector3f)point);
 				Vector4f projectedPoint = this.coordSysManager.objectToProjectionMatrix(viewCoordPoint);
 				if (!this.coordSysManager.isInClipSpace(projectedPoint)) {
 					boundingBox.updateColor(indexPoint, outsideColor);
