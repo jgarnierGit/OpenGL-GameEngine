@@ -14,9 +14,7 @@ import org.lwjglx.util.vector.Vector3f;
 import org.lwjglx.util.vector.Vector4f;
 
 import entities.Camera;
-import entities.Entity;
-import renderEngine.Draw2DRenderer;
-import renderEngine.Draw3DRenderer;
+import entities.EntityTutos;
 import renderEngine.Loader;
 import renderEngine.MasterRenderer;
 import toolbox.CoordinatesSystemManager;
@@ -24,7 +22,7 @@ import toolbox.Maths;
 import toolbox.mousePicker.MouseInputListener;
 
 public class MouseLogger implements IMouseBehaviour {
-	private List<Entity> entities;
+	private List<EntityTutos> entities;
 	private Camera camera;
 	private MouserLoggerPrinter mouserLoggerPrinter;
 	private Matrix4f viewMatrix;
@@ -33,13 +31,12 @@ public class MouseLogger implements IMouseBehaviour {
 	private MouseInputListener mouseInputListener;
 	private Vector3f ray;
 
-	public MouseLogger(Camera camera, Draw3DRenderer draw3DRenderer, Draw2DRenderer draw2DRenderer, Matrix4f projection,
-			Loader loader, MouseInputListener mouseInputListener) {
+	public MouseLogger(Camera camera, MasterRenderer masterRenderer, Loader loader, MouseInputListener mouseInputListener) {
 		this.entities = new ArrayList<>();
 		this.camera = camera;
-		this.coordSysManager = new CoordinatesSystemManager(projection);
+		this.coordSysManager = new CoordinatesSystemManager(masterRenderer.getProjectionMatrix());
 		this.mouseInputListener = mouseInputListener;
-		this.mouserLoggerPrinter = new MouserLoggerPrinter(loader, draw3DRenderer, draw2DRenderer, this.coordSysManager);
+		this.mouserLoggerPrinter = new MouserLoggerPrinter(loader,masterRenderer, this.coordSysManager);
 	}
 
 	@Override
@@ -48,7 +45,7 @@ public class MouseLogger implements IMouseBehaviour {
 		this.mouseInputListener.addRunner(() -> processPicking());
 	}
 
-	public void processEntity(Entity entities) {
+	public void processEntity(EntityTutos entities) {
 		this.entities.add(entities);
 	}
 
@@ -92,7 +89,7 @@ public class MouseLogger implements IMouseBehaviour {
 		rayFromCamera.normalise(normalizedrayFromMouse);
 		Vector3f rayPosNormalizedToCam = Maths.normalizeFromOrigin(rayFromCamera, camPos);
 
-		List<Entity> orderedList = this.entities.stream().sorted((entity1, entity2) -> {
+		List<EntityTutos> orderedList = this.entities.stream().sorted((entity1, entity2) -> {
 			Vector3f entity1PosNormalizedToCam = Maths.normalizeFromOrigin(entity1.getPositions(), camPos);
 			Vector3f delta = Vector3f.sub(rayPosNormalizedToCam, entity1PosNormalizedToCam, null);
 
@@ -108,7 +105,7 @@ public class MouseLogger implements IMouseBehaviour {
 		}
 		this.mouserLoggerPrinter.printFilterByRayProximity(orderedList, rayPosNormalizedToCam, rayFromCamera);
 
-		List<Entity> filteredList = this.entities.stream().filter(entity -> {
+		List<EntityTutos> filteredList = this.entities.stream().filter(entity -> {
 			return false;
 		}).collect(Collectors.toList());
 		this.entities = filteredList;
@@ -116,7 +113,7 @@ public class MouseLogger implements IMouseBehaviour {
 
 
 
-	private Vector3f objectToViewCoordNormalized(Entity entity) {
+	private Vector3f objectToViewCoordNormalized(EntityTutos entity) {
 		Vector3f objectPosition = entity.getPositions();
 		// makes position as homogeneous vector to allows applying translation
 		// transformation given by viewMatrix.
@@ -136,7 +133,7 @@ public class MouseLogger implements IMouseBehaviour {
 	 * worldOrigin wil be kept.
 	 */
 	private void filterEntitiesByCameraClip() {
-		List<Entity> filteredList = this.entities.stream().filter(entity -> {
+		List<EntityTutos> filteredList = this.entities.stream().filter(entity -> {
 			Vector3f viewCoordEntityPos = coordSysManager.objectToViewCoord(entity.getPositions());
 			Vector4f projectedCoordEntity = coordSysManager.objectToProjectionMatrix(viewCoordEntityPos);
 			Vector3f clippedVector = coordSysManager.objectToClipSpace(projectedCoordEntity);
@@ -148,7 +145,7 @@ public class MouseLogger implements IMouseBehaviour {
 	}
 
 	private void cleanSelected() {
-		for (Entity entity : entities) {
+		for (EntityTutos entity : entities) {
 			entity.unselect();
 		}
 		this.mouserLoggerPrinter.clear();
@@ -170,9 +167,9 @@ public class MouseLogger implements IMouseBehaviour {
 
 	private void rayCasting(Vector3f mouseCoord) {
 		Float distance = 5f;
-		Optional<Entity> selectedEntity = rayMarching(mouseCoord, 0f, distance);
+		Optional<EntityTutos> selectedEntity = rayMarching(mouseCoord, 0f, distance);
 		if (selectedEntity.isPresent()) {
-			Entity entity = selectedEntity.get();
+			EntityTutos entity = selectedEntity.get();
 			System.out.println(entity.getModel().getClass() + " is selected");
 			entity.select();
 			// Vector3f objectWorld = objectToWorldCoord(selectedEntity.getPositions());
@@ -201,7 +198,7 @@ public class MouseLogger implements IMouseBehaviour {
 		this.mouserLoggerPrinter.printBoundingBoxes(this.entities);
 	}
 
-	private Optional<Entity> rayMarching(Vector3f mouseCoord, Float startPointDistance, Float distance) {
+	private Optional<EntityTutos> rayMarching(Vector3f mouseCoord, Float startPointDistance, Float distance) {
 		Vector3f beginRay = getPointOnRay(mouseCoord, startPointDistance);
 		if (distance > MasterRenderer.getFarPlane()) {
 			distance = MasterRenderer.getFarPlane();
@@ -212,7 +209,7 @@ public class MouseLogger implements IMouseBehaviour {
 		Vector3f endRay = getPointOnRay(mouseCoord, distance);
 		this.mouserLoggerPrinter.getRay3D().addPoint(endRay);
 
-		Optional<Entity> matchedEntity = getMatchingEntities(beginRay, endRay);
+		Optional<EntityTutos> matchedEntity = getMatchingEntities(beginRay, endRay);
 		if (matchedEntity.isPresent()) {
 			return matchedEntity;
 		}
@@ -226,11 +223,11 @@ public class MouseLogger implements IMouseBehaviour {
 	 * @param endRay
 	 * @return nearest Entity if any
 	 */
-	private Optional<Entity> getMatchingEntities(Vector3f beginRay, Vector3f endRay) {
-		Map<Entity, Vector3f> entitiesViewPosition = this.entities.stream()
-				.collect(Collectors.toMap(Function.identity(), Entity::getPositions));
-		TreeMap<Float, Entity> result = entitiesViewPosition.entrySet().stream().filter(entry -> {
-			Entity entity = entry.getKey();
+	private Optional<EntityTutos> getMatchingEntities(Vector3f beginRay, Vector3f endRay) {
+		Map<EntityTutos, Vector3f> entitiesViewPosition = this.entities.stream()
+				.collect(Collectors.toMap(Function.identity(), EntityTutos::getPositions));
+		TreeMap<Float, EntityTutos> result = entitiesViewPosition.entrySet().stream().filter(entry -> {
+			EntityTutos entity = entry.getKey();
 			Vector3f worldPositionEntity = entity.getPositions();
 			if ((worldPositionEntity.x + MouserLoggerPrinter.BOUNDING_BOX <= endRay.x && worldPositionEntity.x + MouserLoggerPrinter.BOUNDING_BOX >= beginRay.x)
 					|| (worldPositionEntity.x - MouserLoggerPrinter.BOUNDING_BOX <= endRay.x
@@ -262,10 +259,10 @@ public class MouseLogger implements IMouseBehaviour {
 	 * @param rayCasting
 	 * @return
 	 */
-	private Entity filterInDistance(List<Entity> filteredEntities, Vector3f minRayCast, Vector3f maxRayCast,
+	private EntityTutos filterInDistance(List<EntityTutos> filteredEntities, Vector3f minRayCast, Vector3f maxRayCast,
 			int iteration, boolean gotResult) {
 		// TODO update filtering.
-		List<Entity> filteredInZ = filteredEntities.stream().filter(entity -> {
+		List<EntityTutos> filteredInZ = filteredEntities.stream().filter(entity -> {
 			Vector3f objectWorld = entity.getPositions(); // objectToWorldCoord(
 			// System.out.println(entity.getPositions());
 			return objectWorld.z < maxRayCast.z && objectWorld.z > minRayCast.z;

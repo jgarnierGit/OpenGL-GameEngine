@@ -40,9 +40,10 @@ public interface ISimpleGeom {
 	
 	/**
 	 * return a deep copy of geom
+	 * @param alias to identify copy
 	 * @return SimpleGeom
 	 */
-	public ISimpleGeom copy();
+	public ISimpleGeom copy(String alias);
 
 	/**
 	 * add a point with last active color
@@ -60,12 +61,12 @@ public interface ISimpleGeom {
 	public void addPoint(Vector point, Vector4f color);
 
 	/**
-	 * update color for active point.
+	 * update color for each vector matched.
 	 * 
-	 * @param index of point in list
-	 * @param color
+	 * @param ref vector position to updated
+	 * @param color to apply for position
 	 */
-	public void updateColor(int index, Vector4f color);
+	public void updateColorByPosition(Vector ref, Vector4f color);
 	
 	/**
 	 * set each point with color
@@ -75,39 +76,22 @@ public interface ISimpleGeom {
 
 	/**
 	 * Reload points coordinates to binded Vertex Buffer Object attached to VAO
-	 * 
-	 * @param colorIndex index binded by glEnableVertexAttribArray
 	 */
-	public void reloadPositions(int colorIndex);
+	public void reloadVao();
 
 	/**
 	 * clear points arrays coordinates.
 	 */
-	public void resetGeom();
+	public void reset();
 
 	/**
-	 * return the rendering parameters list for current geom.
+	 * return the rendering parameters for current geom.
 	 * 
-	 * @return the rendering parameters list for current geom.
+	 * @return the rendering parameters for current geom.
 	 */
-	public List<RenderingParameters> getRenderingParameters();
+	public RenderingParameters getRenderingParameters();
 
 	public boolean hasTransparency();
-
-	/**
-	 * create an empty RenderingParameter and add it to its list
-	 * @param alias to identify new RenderingParameter
-	 * @return newly created RenderingParameter
-	 */
-	public RenderingParameters createRenderingParameters(String alias);
-	
-	/**
-	 * create a RenderingParameter based on model and add it to its list
-	 * @param modelParameters model
-	 * @param alias new alias
-	 * @return newly created RenderingParameter
-	 */
-	public RenderingParameters createRenderingParameters(RenderingParameters modelParameters, String alias);
 	
 	/**
 	 * Invert normals of every triangles

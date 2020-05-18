@@ -6,7 +6,6 @@ import org.lwjgl.opengl.GL11;
 import org.lwjglx.util.vector.Matrix4f;
 
 import entities.Camera;
-import modelsLibrary.SimpleGeom;
 import renderEngine.Loader.VBOIndex;
 import shaderManager.Draw3DShader;
 import toolbox.Maths;
@@ -42,7 +41,19 @@ public class Draw3DRenderer extends DrawRenderer {
 			// Disable distance filtering.
 			GL11.glDisable(GL11.GL_DEPTH);
 			params.enableRenderOptions();
-			genericDrawRender(params);
+			if(params.getEntities() == null || params.getEntities().isEmpty()) { // not good at all
+				Matrix4f transformationM = new Matrix4f();
+				draw3DShader.loadTransformationMatrix(transformationM);
+				genericDrawRender(params);
+			}
+			else {
+				params.getEntities().forEach(entity -> {
+					Matrix4f transformationM = Maths.createTransformationMatrix(entity.getPositions(), entity.getRotX(), entity.getRotY(), entity.getRotZ(), entity.getScale());
+					draw3DShader.loadTransformationMatrix(transformationM);
+					genericDrawRender(params);
+				});
+			}
+			
 			unbindGeom(VBOIndex.POSITION_INDEX, Draw3DShader.COLOR_INDEX);
 			// GL11.glLineWidth(1);
 			params.disableRenderOptions();
@@ -54,12 +65,6 @@ public class Draw3DRenderer extends DrawRenderer {
 	@Override
 	public void cleanUp() {
 		draw3DShader.cleanUp();
-	}
-
-	@Override
-	public void reloadAndprocess(SimpleGeom geom) {
-		geom.reloadPositions(Draw3DShader.COLOR_INDEX);
-		this.geoms.add(geom);
 	}
 
 	/**
