@@ -8,6 +8,8 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.lwjgl.opengl.GL11;
@@ -29,10 +31,12 @@ import modelsLibrary.SimpleGeom;
 public abstract class DrawRenderer implements IDrawRenderer {
 	protected List<SimpleGeom> geoms;
 	protected List<RenderingParameters> renderingParams;
+	protected Logger logger;
 
 	public DrawRenderer() {
 		this.geoms = new ArrayList<>();
 		this.renderingParams = new ArrayList<>();
+		this.logger = Logger.getLogger("DrawRenderer");
 	}
 
 	@Override
@@ -44,6 +48,7 @@ public abstract class DrawRenderer implements IDrawRenderer {
 	public void sendForRendering() {
 		updateOverridingColors();
 		renderingParams = getOrderedRenderingParameters();
+
 	}
 
 	/**
@@ -121,7 +126,13 @@ public abstract class DrawRenderer implements IDrawRenderer {
 		LinkedHashSet<RenderingParameters> uniqueParams = rawParams.stream()
 				.collect(Collectors.toCollection(LinkedHashSet::new));
 		uniqueParams = removeMissConfiguratedReference(uniqueParams);
-		List<RenderingParameters> sortedUniqueParams = sortPositionsAliases(uniqueParams);
+		//List<RenderingParameters> sortedUniqueParams = sortPositionsAliases(uniqueParams);
+		LinkedList<RenderingParameters> paramsToMove = rawParams.stream().filter((renderingParam) -> {
+			return !renderingParam.getDestinationOrderAlias().isEmpty()
+					&& !renderingParam.getDestinationOrderAlias().equals(renderingParam.getAlias());
+		}).collect(Collectors.toCollection(LinkedList::new));
+		List<RenderingParameters> sortedUniqueParams = transformRelativePositionToIndex(uniqueParams,paramsToMove);
+		System.out.println(sortedUniqueParams);
 		return orderRawParams(rawParams, sortedUniqueParams);
 	}
 
@@ -149,13 +160,11 @@ public abstract class DrawRenderer implements IDrawRenderer {
 			if (!param.getDestinationOrderAlias().isEmpty()) {
 				boolean isPresent = checkReferencePresence(uniqueParams, param.getDestinationOrderAlias());
 				if (!isPresent) {
-					System.err.println(
-							"reference to " + param.getDestinationOrderAlias() + " is unknown. Will be removed");
+					this.logger.log(Level.WARNING, "reference to " + param.getDestinationOrderAlias() + " is unknown. Will be removed");
 					param.renderBefore("");
 				} else {
 					if (param.getAlias().equals(param.getDestinationOrderAlias())) {
-						System.err.println(
-								"reference to itself " + param.getDestinationOrderAlias() + ". Will be removed");
+						this.logger.log(Level.WARNING, "reference to itself " + param.getDestinationOrderAlias() + ". Will be removed");
 						param.renderBefore("");
 					}
 				}
@@ -181,32 +190,34 @@ public abstract class DrawRenderer implements IDrawRenderer {
 	 * @return
 	 */
 	private List<RenderingParameters> sortPositionsAliases(LinkedHashSet<RenderingParameters> uniqueParams) {
+		LinkedList<RenderingParameters> workingList = new LinkedList<>();
+		workingList.addAll(uniqueParams);
 		LinkedList<RenderingParameters> sortedList = new LinkedList<>();
 		for (RenderingParameters param : uniqueParams) {
 			int indexDestination = -1;
-
+			workingList.remove(param);
 			if (!param.getDestinationOrderAlias().isEmpty()) {
-				indexDestination = getDestinationRef(sortedList, param);
+				indexDestination = getDestinationRef(workingList, param);
 			}
 
-			indexDestination = findIndexBasedOnDestinationUsages(sortedList, param, indexDestination);
+			indexDestination = findIndexBasedOnDestinationUsages(workingList, param, indexDestination);
 
 			if (indexDestination == -1 && !param.getDestinationOrderAlias().isEmpty()) {
 				// if current param not used yet as destination, neither it as same destination
 				// as another param.
-				indexDestination = getDestinationBasedOnSameDestinationUsage(sortedList, param);
+				indexDestination = getDestinationBasedOnSameDestinationUsage(workingList, param);
 			}
 
-			if (indexDestination == -1 || indexDestination >= sortedList.size()) {
-				sortedList.addLast(param);
-			} else if (indexDestination < sortedList.size()) {
-				sortedList.add(indexDestination, param);
+			if (indexDestination == -1 || indexDestination >= workingList.size()) {
+				workingList.addLast(param);
+			} else if (indexDestination < workingList.size()) {
+				workingList.add(indexDestination, param);
 			} else {
-				sortedList.addFirst(param);
+				workingList.addFirst(param);
 			}
 
 		}
-		return sortedList;
+		return workingList;
 	}
 
 	private int getDestinationBasedOnSameDestinationUsage(LinkedList<RenderingParameters> sortedList,
@@ -288,13 +299,15 @@ public abstract class DrawRenderer implements IDrawRenderer {
 		}
 
 		if (minIndex > maxIndex) {
-			System.err.println("impossible configuration : minIndex > maxIndex");
+			this.logger.log(Level.WARNING, "impossible configuration : minIndex > maxIndex");
 		}
 
 		if (destinationAliasIndex != -1) {
-			if ((minIndex > -1 && destinationAliasIndex < minIndex)
-					|| (maxIndex > -1 && destinationAliasIndex > maxIndex)) {
-				System.err.println("Cyclic configuration detected, naturally broke it");
+			if (minIndex > -1 && destinationAliasIndex < minIndex) {
+				this.logger.log(Level.WARNING, "Cyclic configuration detected with MIN in conflict with ["+ currentParam +"->"+ currentParam.getDestinationOrderAlias() +"], naturally broke it");
+			}else if(maxIndex > -1 && destinationAliasIndex > maxIndex) {
+			//	RenderingParameters conflictParam = sortedList.get(destinationAliasIndex);
+				this.logger.log(Level.WARNING, "Cyclic configuration detected with MAX in conflict with ["+ currentParam +"->"+ currentParam.getDestinationOrderAlias() +"], naturally broke it");
 			} else {
 				if (currentParam.isDestinationPositionAfter()) {
 					minIndex = destinationAliasIndex;
@@ -309,6 +322,19 @@ public abstract class DrawRenderer implements IDrawRenderer {
 		returnIndex = minIndex != -1 ? minIndex : returnIndex;
 
 		return returnIndex;
+	}
+	
+	private List<RenderingParameters> transformRelativePositionToIndex(LinkedHashSet<RenderingParameters> rawParams,
+			LinkedList<RenderingParameters> paramsToMove) {
+		LinkedList<RenderingParameters> sortedList = new LinkedList<>();
+		sortedList.addAll(rawParams);
+		for (RenderingParameters param : paramsToMove) {
+			sortedList.remove(param);
+			int index = getIndexDestination(sortedList, param.getDestinationOrderAlias(),
+					param.isDestinationPositionAfter());
+			sortedList.add(index, param);
+		}
+		return sortedList;
 	}
 
 	private int getIndexDestination(LinkedList<RenderingParameters> sortedParams, String destinationOrderAlias,

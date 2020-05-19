@@ -273,6 +273,7 @@ public class MouserLoggerPrinter {
 		RenderingParameters bboxParam = boundingBox.getRenderingParameters();
 		bboxParam.setAlias("bboxEntities");
 		bboxParam.setRenderMode(GL11.GL_LINES);
+		bboxParam.renderBefore("frustrumPlain");
 		//looks like left and right need to be inverted
 		SimpleGeom bboxPlain = getFrustrumForPlainTriangles(ltf, rtf, lbf, rbf, ltn, rtn, lbn, rbn);
 		RenderingParameters bboxParamPlain = bboxPlain.getRenderingParameters();
@@ -327,7 +328,7 @@ public class MouserLoggerPrinter {
 				geoms.add(boundingBoxPlaincateg);
 				//TODO debug, rendering params not set.
 				RenderingParameters plainBboxParam = boundingBoxPlaincateg.getRenderingParameters();
-				plainBboxParam.renderAfter("bboxEntities");
+				//plainBboxParam.renderAfter("bboxEntities");
 				boundingBoxPlaincateg.invertNormals();
 				float r = random.nextFloat()%100;
 				float g = random.nextFloat()%100;

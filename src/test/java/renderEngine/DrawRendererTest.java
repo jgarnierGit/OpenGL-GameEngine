@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -42,6 +44,8 @@ class DrawRendererTest {
 	SimpleGeom firstGeomMock;
 	SimpleGeom secondGeomMock;
 	SimpleGeom thirdGeomMock;
+	
+	Logger spyLogger;
 
 	@BeforeEach
 	void setUpBeforeEach() throws Exception {
@@ -61,6 +65,10 @@ class DrawRendererTest {
 		geoms.add(thirdGeomMock);
 		renderer = Mockito.mock(DrawRenderer.class, Mockito.CALLS_REAL_METHODS);
 		renderer.geoms = geoms;
+		
+		Logger logger = Logger.getLogger("DrawRendererTests");
+		this.spyLogger = Mockito.spy(logger);
+		renderer.logger = spyLogger;
 	}
 
 	@Nested
@@ -235,8 +243,8 @@ class DrawRendererTest {
 						secondParam.renderBefore(thirdAlias);
 						renderingParams = renderer.getOrderedRenderingParameters();
 						assertEquals(3, renderingParams.size());
-						assertEquals(firstGeomMock.getVaoId(), renderingParams.get(0).getGeom().getVaoId());
-						assertEquals(secondGeomMock.getVaoId(), renderingParams.get(1).getGeom().getVaoId());
+						assertTrue(renderingParams.indexOf(secondGeomMock.getRenderingParameters()) < renderingParams
+								.indexOf(thirdGeomMock.getRenderingParameters()), renderingParams.toString());
 					}
 
 					/**
@@ -320,8 +328,8 @@ class DrawRendererTest {
 						secondParam.renderBefore(thirdAlias);
 						renderingParams = renderer.getOrderedRenderingParameters();
 						assertEquals(3, renderingParams.size());
-						assertEquals(firstGeomMock.getVaoId(), renderingParams.get(0).getGeom().getVaoId());
-						assertEquals(secondGeomMock.getVaoId(), renderingParams.get(1).getGeom().getVaoId());
+						assertTrue(renderingParams.indexOf(secondGeomMock.getRenderingParameters()) < renderingParams
+								.indexOf(thirdGeomMock.getRenderingParameters()), renderingParams.toString());
 					}
 
 					/**
@@ -389,16 +397,15 @@ class DrawRendererTest {
 				}
 
 				/**
-				 * A; B->C(after); C result: [A,C,B]
+				 * A; B->C(after); C result: [A,C,B] or [C,B,A]
 				 */
 				@Test
-				@DisplayName("Moving middle Params to last : [A,C,B]")
+				@DisplayName("Moving middle Params to last : [A,C,B] or [C,B,A]")
 				void testReferenceNextAsAfter() {
 					secondParam.renderAfter(thirdAlias);
 					renderingParams = renderer.getOrderedRenderingParameters();
-					assertEquals(firstGeomMock.getVaoId(), renderingParams.get(0).getGeom().getVaoId());
-					assertEquals(thirdGeomMock.getVaoId(), renderingParams.get(1).getGeom().getVaoId());
-					assertEquals(secondGeomMock.getVaoId(), renderingParams.get(2).getGeom().getVaoId());
+					assertTrue(renderingParams.indexOf(thirdGeomMock.getRenderingParameters()) < renderingParams
+							.indexOf(secondGeomMock.getRenderingParameters()), renderingParams.toString());
 				}
 				
 				/**
@@ -483,37 +490,35 @@ class DrawRendererTest {
 
 					/**
 					 * Cycles breaks on first detection TODO try to test logger here 
-					 * Will not apply last modification that forms a cycle
-					 * A->C(after); B; C->A(after) result: [B,C,A] or [C,A,B]
+					 * apply last modification that forms a cycle
+					 * A->C(after); B; C->A(after) result: [B,A,C] or [A,C,B]
 					 */
 					@Test
-					@DisplayName("CycleFlow : Moving A after C and C after A gives : [B,C,A] or [C,A,B]")
+					@DisplayName("CycleFlow : Moving A after C and C after A gives : [B,A,C] or [A,C,B]")
 					void testReferenceChainingAftersCycleFlow() {
 						firstParam.renderAfter(thirdAlias);
 						thirdParam.renderAfter(firstAlias);
-
 						renderingParams = renderer.getOrderedRenderingParameters();
-						assertTrue(renderingParams.indexOf(thirdGeomMock.getRenderingParameters()) < renderingParams
-								.indexOf(firstGeomMock.getRenderingParameters()), renderingParams.toString());
+						assertTrue(renderingParams.indexOf(firstGeomMock.getRenderingParameters()) < renderingParams
+								.indexOf(thirdGeomMock.getRenderingParameters()), renderingParams.toString());
 					}
 					
 					/**
 					 * Cycles breaks on first detection TODO try to test logger here
-					 * Will not apply last modification that forms a cycle 
-					 * A->B(after); B->C(after); C->A(after) result: [C,B,A]
+					 * apply last modification that forms a cycle 
+					 * A->B(after); B->C(after); C->A(after) result: [A,C,B]
 					 */
 					@Test
-					@DisplayName("Complex CycleFlow : Moving A after B, B after C, C after A gives : [C,B,A]")
+					@DisplayName("Complex CycleFlow : Moving A after B, B after C, C after A gives : [A,C,B]")
 					void testReferenceChainingAftersComplexCycleFlow() {
 						firstParam.renderAfter(secondAlias);
 						secondParam.renderAfter(thirdAlias);
 						thirdParam.renderAfter(firstAlias);
-
 						renderingParams = renderer.getOrderedRenderingParameters();
+						assertTrue(renderingParams.indexOf(firstGeomMock.getRenderingParameters()) < renderingParams
+								.indexOf(thirdGeomMock.getRenderingParameters()), renderingParams.toString());
 						assertTrue(renderingParams.indexOf(thirdGeomMock.getRenderingParameters()) < renderingParams
 								.indexOf(secondGeomMock.getRenderingParameters()), renderingParams.toString());
-						assertTrue(renderingParams.indexOf(secondGeomMock.getRenderingParameters()) < renderingParams
-								.indexOf(firstGeomMock.getRenderingParameters()), renderingParams.toString());
 					}
 				}
 
@@ -553,38 +558,36 @@ class DrawRendererTest {
 
 					/**
 					 * Hard to detect because A is effectively before C.
-					 * Will not apply last modification that forms a cycle
-					 * A->C(before); B; C->A(before) result: [A,B,C]
+					 * apply last modification that forms a cycle
+					 * A->C(before); B; C->A(before) result: [C,A,B]
 					 */
 					@Test
-					@DisplayName("CycleFlow : Moving A before C and C before A gives : [A,B,C]")
+					@DisplayName("CycleFlow : Moving A before C and C before A gives : [C,A,B]")
 					void testReferenceChainingBeforesCycleFlow() {
 						firstParam.renderBefore(thirdAlias);
 						thirdParam.renderBefore(firstAlias);
-
 						renderingParams = renderer.getOrderedRenderingParameters();
-						assertTrue(renderingParams.indexOf(firstGeomMock.getRenderingParameters()) < renderingParams
-								.indexOf(thirdGeomMock.getRenderingParameters()), renderingParams.toString());
+						assertTrue(renderingParams.indexOf(thirdGeomMock.getRenderingParameters()) < renderingParams
+								.indexOf(firstGeomMock.getRenderingParameters()), renderingParams.toString());
 					}
 					
 					/**
 					 * Hard to detect because A is effectively before C.
 					 * TODO try to test logger here 
-					 * Will not apply last modification that forms a cycle
-					 * A->C(before);B->A(before); C->B(before) result: [B,A,C]
+					 * apply last modification that forms a cycle
+					 * A->C(before);B->A(before); C->B(before) result: [C,B,A]
 					 */
 					@Test
-					@DisplayName("Complex CycleFlow : Moving A before C, C before B, B before A  gives : [B,A,C]")
+					@DisplayName("Complex CycleFlow : Moving A before C, C before B, B before A  gives : [C,B,A]")
 					void testReferenceChainingBeforesComplexCycleFlow() {
 						firstParam.renderBefore(thirdAlias);
 						secondParam.renderBefore(firstAlias);
 						thirdParam.renderBefore(secondAlias);
-
 						renderingParams = renderer.getOrderedRenderingParameters();
+						assertTrue(renderingParams.indexOf(thirdGeomMock.getRenderingParameters()) < renderingParams
+								.indexOf(secondGeomMock.getRenderingParameters()), renderingParams.toString());
 						assertTrue(renderingParams.indexOf(secondGeomMock.getRenderingParameters()) < renderingParams
 								.indexOf(firstGeomMock.getRenderingParameters()), renderingParams.toString());
-						assertTrue(renderingParams.indexOf(firstGeomMock.getRenderingParameters()) < renderingParams
-								.indexOf(thirdGeomMock.getRenderingParameters()), renderingParams.toString());
 					}
 				}
 			}
