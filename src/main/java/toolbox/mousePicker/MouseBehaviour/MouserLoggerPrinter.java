@@ -239,7 +239,7 @@ public class MouserLoggerPrinter {
 		frustrumPlainParams.addGlState(GL11.GL_BLEND, true);
 		frustrumParams.setRenderMode(GL11.GL_LINES);
 		frustrumPlainParams.setRenderMode(GL11.GL_TRIANGLES);
-		frustrumPlainParams.renderAfter("bboxEntities");
+		frustrumPlainParams.renderBefore("bboxEntitiesPlainCategColor");
 		frustrumPlain.setColor(MASK_COLOR);
 
 		SimpleGeom3D frustrumPlainInside = frustrumPlain.copy("frustrumPlainInside");
@@ -273,26 +273,19 @@ public class MouserLoggerPrinter {
 		RenderingParameters bboxParam = boundingBox.getRenderingParameters();
 		bboxParam.setAlias("bboxEntities");
 		bboxParam.setRenderMode(GL11.GL_LINES);
-		
-		generatedGeomLineConfiguration.put(0, (SimpleGeom3D) boundingBox);
-		
 		//looks like left and right need to be inverted
 		SimpleGeom bboxPlain = getFrustrumForPlainTriangles(ltf, rtf, lbf, rbf, ltn, rtn, lbn, rbn);
 		RenderingParameters bboxParamPlain = bboxPlain.getRenderingParameters();
-		bboxParamPlain.setAlias("bboxEntities");
+		bboxParamPlain.setAlias("bboxEntitiesPlainCategColor");
 		bboxParamPlain.setRenderMode(GL11.GL_TRIANGLES);
 		bboxParamPlain.addGlState(GL11.GL_BLEND, true);
 		
-		generatedGeomPlainConfiguration.put(0,(SimpleGeom3D) bboxPlain);
-
 		//bboxPlain.invertNormals();
-
-		//boundingBoxes.add(boundingBox);
 
 		Vector4f outsideColor = new Vector4f(0.85f, 0.2f, 0.25f, 1);
 		Random random = new Random();
 		System.out.println("process over "+ entities.size() +" entities");
-		entities.forEach(entity -> {
+		for(EntityTutos entity : entities) {
 			Vector3f worldPositionEntity = entity.getPositions();
 			int indexPoint = 0;
 			int hash = 0;
@@ -326,30 +319,31 @@ public class MouserLoggerPrinter {
 				geoms.add(boundingBoxOutside);
 			}
 			// TODO FIXME generating classes over a param affect every Geoms, geoms generation is not good either.
-			/**SimpleGeom3D boundingBoxPlaincateg = generatedGeomPlainConfiguration.get(hash);
+			SimpleGeom3D boundingBoxPlaincateg = generatedGeomPlainConfiguration.get(hash);
 			if (boundingBoxPlaincateg == null) {
-				boundingBoxPlaincateg = (SimpleGeom3D) bboxPlain.copy();
+				boundingBoxPlaincateg = (SimpleGeom3D) bboxPlain.copy("bboxEntitiesPlainCategColor");
 				
 				generatedGeomPlainConfiguration.put(hash, boundingBoxPlaincateg);
-				boundingBoxes.add(boundingBoxPlaincateg);
+				geoms.add(boundingBoxPlaincateg);
 				//TODO debug, rendering params not set.
-				RenderingParameters plainBboxParam = boundingBoxPlaincateg.createRenderingParameters(bboxParamPlain, "bboxEntities");
-				//boundingBoxPlaincateg.invertNormals();
+				RenderingParameters plainBboxParam = boundingBoxPlaincateg.getRenderingParameters();
+				plainBboxParam.renderAfter("bboxEntities");
+				boundingBoxPlaincateg.invertNormals();
 				float r = random.nextFloat()%100;
 				float g = random.nextFloat()%100;
 				float b = random.nextFloat()%100;
 				plainBboxParam.overrideEachColor(new Vector4f(r, g, b,1));
 				System.out.println("colorOverride :"+ hash +" "+ plainBboxParam.getOverridedColors());
-			}**/
+			}
 			
 			RenderingParameters renderParam= boundingBoxOutside.getRenderingParameters();
-				renderParam.addEntity(entity.getPositions(), 0f, 0f, 0f, 1);
-			/**RenderingParameters renderParam = boundingBoxPlaincateg.getRenderingParameters();
-				renderParam.addEntity(entity.getPositions(), 0f, 0f, 0f, 1);**/
-		});
+			renderParam.addEntity(entity.getPositions(), 0f, 0f, 0f, 1);
+			RenderingParameters renderParamPlain = boundingBoxPlaincateg.getRenderingParameters();
+			renderParamPlain.addEntity(entity.getPositions(), 0f, 0f, 0f, 1);
+		}
 		
 		generatedGeomLineConfiguration.forEach((hash, geom)-> {
-			System.out.println(hash +" : "+ geom.getRenderingParameters().getEntities().size());
+			System.out.println(hash +" : "+ geom.getRenderingParameters().getEntities().size() +" "+ geom.getRenderingParameters().getAlias());
 		});
 	}
 

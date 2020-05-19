@@ -13,8 +13,7 @@ import org.lwjglx.util.vector.Vector4f;
 import entities.SimpleEntity;
 import modelsLibrary.ISimpleGeom;
 
-public class RenderingParameters {
-
+public class RenderingParameters implements IRenderingParameters{
 	private Optional<Integer> glRenderMode;
 	private HashMap<Integer, Boolean> glStatesRendering;
 	private ISimpleGeom simpleGeom;
@@ -37,6 +36,7 @@ public class RenderingParameters {
 		this.glRenderMode = Optional.empty();
 		this.overridedColors = Optional.empty();
 		this.overrideColorsAtIndex = new HashMap<>();
+		
 		this.renderAfter = false;
 		this.destinationOrderAlias = "";
 		this.alias= alias; 
@@ -50,8 +50,8 @@ public class RenderingParameters {
 	 * @param alias
 	 */
 	public RenderingParameters(RenderingParameters toClone, ISimpleGeom geomToApply, String alias) {
+		this.alias= alias; 
 		this.simpleGeom = geomToApply;
-		this.alias = alias;
 		this.destinationOrderAlias = toClone.destinationOrderAlias;
 		if(toClone.glRenderMode.isPresent()) {
 			 this.glRenderMode = Optional.ofNullable(toClone.glRenderMode.get());
@@ -64,6 +64,33 @@ public class RenderingParameters {
 		this.entities = new ArrayList<>();
 		this.overridedColors = Optional.empty();
 		this.overrideColorsAtIndex = new HashMap<>();
+	}
+	
+	@Override
+	public void setAlias(String alias) {
+		this.alias = alias;
+	}
+	@Override
+	public String getAlias() {
+		return this.alias;
+	}
+	@Override
+	public String getDestinationOrderAlias() {
+		return this.destinationOrderAlias;
+	}
+	@Override
+	public boolean isDestinationPositionAfter() {
+		return this.renderAfter;
+	}
+	@Override
+	public void renderBefore(String alias) {
+		this.destinationOrderAlias=alias;
+		this.renderAfter = false;
+	}
+	@Override
+	public void renderAfter(String alias) {
+		this.destinationOrderAlias=alias;
+		this.renderAfter = true;
 	}
 
 	public ISimpleGeom getGeom() {
@@ -180,32 +207,6 @@ public class RenderingParameters {
 		glStatesRendering.put(glBlend, b);
 	}
 
-	public void setAlias(String alias) {
-		this.alias = alias;
-	}
-	
-	public String getAlias() {
-		return this.alias;
-	}
-	
-	public String getDestinationOrderAlias() {
-		return this.destinationOrderAlias;
-	}
-	
-	public boolean isDestinationPositionAfter() {
-		return this.renderAfter;
-	}
-
-	public void renderBefore(String alias) {
-		this.destinationOrderAlias=alias;
-		this.renderAfter = false;
-	}
-	
-	public void renderAfter(String alias) {
-		this.destinationOrderAlias=alias;
-		this.renderAfter = true;
-	}
-
 	@Override
 	public String toString() {
 		return "RenderingParameters [alias=" + alias + "]";
@@ -213,6 +214,29 @@ public class RenderingParameters {
 
 	public void reset() {
 		this.entities = new ArrayList<>();
+	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((alias == null) ? 0 : alias.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!(obj instanceof RenderingParameters))
+			return false;
+		RenderingParameters other = (RenderingParameters) obj;
+		if (alias == null) {
+			if (other.alias != null)
+				return false;
+		} else if (!alias.equals(other.alias))
+			return false;
+		return true;
 	}
 	
 	
