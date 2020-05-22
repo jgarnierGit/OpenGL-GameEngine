@@ -1,13 +1,10 @@
 package renderEngine;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -126,7 +123,6 @@ public abstract class DrawRenderer implements IDrawRenderer {
 		LinkedHashSet<RenderingParameters> uniqueParams = rawParams.stream()
 				.collect(Collectors.toCollection(LinkedHashSet::new));
 		uniqueParams = removeMissConfiguratedReference(uniqueParams);
-		//List<RenderingParameters> sortedUniqueParams = sortPositionsAliases(uniqueParams);
 		LinkedList<RenderingParameters> paramsToMove = rawParams.stream().filter((renderingParam) -> {
 			return !renderingParam.getDestinationOrderAlias().isEmpty()
 					&& !renderingParam.getDestinationOrderAlias().equals(renderingParam.getAlias());
@@ -181,147 +177,6 @@ public abstract class DrawRenderer implements IDrawRenderer {
 			}
 		}
 		return false;
-	}
-
-	/**
-	 * sort every aliases, then add each unsorted param in the end list ?
-	 * 
-	 * @param uniqueParams
-	 * @return
-	 */
-	private List<RenderingParameters> sortPositionsAliases(LinkedHashSet<RenderingParameters> uniqueParams) {
-		LinkedList<RenderingParameters> workingList = new LinkedList<>();
-		workingList.addAll(uniqueParams);
-		LinkedList<RenderingParameters> sortedList = new LinkedList<>();
-		for (RenderingParameters param : uniqueParams) {
-			int indexDestination = -1;
-			workingList.remove(param);
-			if (!param.getDestinationOrderAlias().isEmpty()) {
-				indexDestination = getDestinationRef(workingList, param);
-			}
-
-			indexDestination = findIndexBasedOnDestinationUsages(workingList, param, indexDestination);
-
-			if (indexDestination == -1 && !param.getDestinationOrderAlias().isEmpty()) {
-				// if current param not used yet as destination, neither it as same destination
-				// as another param.
-				indexDestination = getDestinationBasedOnSameDestinationUsage(workingList, param);
-			}
-
-			if (indexDestination == -1 || indexDestination >= workingList.size()) {
-				workingList.addLast(param);
-			} else if (indexDestination < workingList.size()) {
-				workingList.add(indexDestination, param);
-			} else {
-				workingList.addFirst(param);
-			}
-
-		}
-		return workingList;
-	}
-
-	private int getDestinationBasedOnSameDestinationUsage(LinkedList<RenderingParameters> sortedList,
-			RenderingParameters currentParam) {
-		int sameDestinationIndex = -1;
-		int currentIndex = 0;
-		for (RenderingParameters param : sortedList) {
-			// find if any other param have same destination as itself
-			// avoid "before" to be after "after" and vice-versa.
-			if (param.getDestinationOrderAlias().equals(currentParam.getDestinationOrderAlias())) {
-				if (currentParam.isDestinationPositionAfter()) {
-					// set as before; current param must be after this one.
-					if (!param.isDestinationPositionAfter()) {
-						sameDestinationIndex = Math.max(sameDestinationIndex, currentIndex);
-					}
-				} else {
-					// set as after; current param must be before this one.
-					if (param.isDestinationPositionAfter()) {
-						sameDestinationIndex = Math.min(sameDestinationIndex, currentIndex);
-					}
-				}
-			}
-			currentIndex++;
-		}
-		return sameDestinationIndex;
-	}
-
-	/**
-	 * returns destinationAlias param used if already known
-	 * 
-	 * @param sortedList
-	 * @param currentParam
-	 * @return destinationAlias param used if already known
-	 */
-	private int getDestinationRef(LinkedList<RenderingParameters> sortedList, RenderingParameters currentParam) {
-		Optional<RenderingParameters> found = Optional.empty();
-		for (RenderingParameters param : sortedList) {
-			if (param.getAlias().equals(currentParam.getDestinationOrderAlias())) {
-				found = Optional.ofNullable(param);
-				break;
-			}
-		}
-		int indexDestination = -1;
-		if (found.isPresent()) {
-			if (currentParam.isDestinationPositionAfter()) {
-				indexDestination = sortedList.indexOf(found.get()) + 1;
-			} else {
-				indexDestination = sortedList.indexOf(found.get());
-			}
-		}
-		return indexDestination;
-	}
-
-	/**
-	 * returns destination index taking care of destinationAliasIndex and usages of
-	 * current param as destination of others known params
-	 * 
-	 * @param sortedList
-	 * @param currentParam
-	 * @param destinationAliasIndex
-	 * @return destination index taking care of destinationAliasIndex and usages of
-	 *         current param as destination of others known params
-	 */
-	private int findIndexBasedOnDestinationUsages(LinkedList<RenderingParameters> sortedList,
-			RenderingParameters currentParam, int destinationAliasIndex) {
-		int minIndex = -1;
-		int maxIndex = -1;
-		int currentIndex = 0;
-		for (RenderingParameters param : sortedList) {
-			// find interval where current param belongs as destination usage
-			if (param.getDestinationOrderAlias().equals(currentParam.getAlias())) {
-				if (param.isDestinationPositionAfter()) {
-					maxIndex = Math.max(maxIndex, currentIndex);
-				} else {
-					minIndex = Math.min(minIndex, currentIndex);
-				}
-			}
-			currentIndex++;
-		}
-
-		if (minIndex > maxIndex) {
-			this.logger.log(Level.WARNING, "impossible configuration : minIndex > maxIndex");
-		}
-
-		if (destinationAliasIndex != -1) {
-			if (minIndex > -1 && destinationAliasIndex < minIndex) {
-				this.logger.log(Level.WARNING, "Cyclic configuration detected with MIN in conflict with ["+ currentParam +"->"+ currentParam.getDestinationOrderAlias() +"], naturally broke it");
-			}else if(maxIndex > -1 && destinationAliasIndex > maxIndex) {
-			//	RenderingParameters conflictParam = sortedList.get(destinationAliasIndex);
-				this.logger.log(Level.WARNING, "Cyclic configuration detected with MAX in conflict with ["+ currentParam +"->"+ currentParam.getDestinationOrderAlias() +"], naturally broke it");
-			} else {
-				if (currentParam.isDestinationPositionAfter()) {
-					minIndex = destinationAliasIndex;
-				} else {
-					maxIndex = destinationAliasIndex;
-				}
-			}
-		}
-
-		int returnIndex = -1;
-		returnIndex = maxIndex != -1 ? maxIndex : returnIndex;
-		returnIndex = minIndex != -1 ? minIndex : returnIndex;
-
-		return returnIndex;
 	}
 	
 	private List<RenderingParameters> transformRelativePositionToIndex(LinkedHashSet<RenderingParameters> rawParams,
