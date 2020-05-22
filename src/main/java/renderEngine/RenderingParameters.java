@@ -30,6 +30,17 @@ public class RenderingParameters implements IRenderingParameters{
 	private Optional<Vector4f> overridedColors;
 	private HashMap<Vector, Vector4f> overrideColorsAtIndex;
 
+	private RenderingParameters() {
+		this.glStatesRendering = new HashMap<>();
+		this.entities = new ArrayList<>();
+		this.glRenderMode = Optional.empty();
+		this.overridedColors = Optional.empty();
+		this.overrideColorsAtIndex = new HashMap<>();
+		this.skipEntities = false;
+		this.renderAfter = false;
+		this.destinationOrderAlias = "";
+		this.logger = Logger.getLogger("RenderingParameters");
+	}
 	/**
 	 * hide this constructor, only way to get a RenderingParameters is by SimpleGeom
 	 * @param simpleGeom
@@ -38,6 +49,18 @@ public class RenderingParameters implements IRenderingParameters{
 		this();
 		this.simpleGeom = simpleGeom;
 		this.alias= alias; 
+	}
+	
+	/**
+	 * Use direct vertices coordinates to render.
+	 * This must be used only for unique objects.
+	 */
+	public void doNotUseEntities() {
+		skipEntities = true;
+	}
+	
+	public boolean isNotUsingEntities() {
+		return this.skipEntities;
 	}
 	
 	/**

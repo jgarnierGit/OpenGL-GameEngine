@@ -45,7 +45,22 @@ public abstract class DrawRenderer implements IDrawRenderer {
 	public void sendForRendering() {
 		updateOverridingColors();
 		renderingParams = getOrderedRenderingParameters();
+		renderingParams = checkForEntitiesPresence();
+	}
 
+	private LinkedList<RenderingParameters> checkForEntitiesPresence() {
+		LinkedList<RenderingParameters> noEmptyParameters = new LinkedList<>();
+		for(RenderingParameters param : renderingParams) {
+			if(!param.isNotUsingEntities() && param.getEntities().isEmpty()) {
+				if(this.logger.isLoggable(Level.INFO)) {
+					this.logger.info(param.getAlias() +" has no entities set, will not be rendered");
+				}
+			}
+			else {
+				noEmptyParameters.add(param);
+			}
+		}
+		return noEmptyParameters;
 	}
 
 	/**
