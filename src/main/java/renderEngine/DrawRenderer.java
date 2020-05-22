@@ -123,7 +123,7 @@ public abstract class DrawRenderer implements IDrawRenderer {
 		LinkedHashSet<RenderingParameters> uniqueParams = rawParams.stream()
 				.collect(Collectors.toCollection(LinkedHashSet::new));
 		uniqueParams = removeMissConfiguratedReference(uniqueParams);
-		LinkedList<RenderingParameters> paramsToMove = rawParams.stream().filter((renderingParam) -> {
+		LinkedList<RenderingParameters> paramsToMove = uniqueParams.stream().filter((renderingParam) -> {
 			return !renderingParam.getDestinationOrderAlias().isEmpty()
 					&& !renderingParam.getDestinationOrderAlias().equals(renderingParam.getAlias());
 		}).collect(Collectors.toCollection(LinkedList::new));
