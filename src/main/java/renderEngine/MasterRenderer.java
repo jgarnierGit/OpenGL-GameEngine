@@ -12,8 +12,9 @@ import org.lwjgl.opengl.GL11;
 import org.lwjglx.util.vector.Matrix4f;
 
 import entities.Camera;
-import entities.Entity;
+import entities.EntityTutos;
 import entities.Light;
+import modelsLibrary.SimpleGeom;
 import modelsManager.Model3D;
 import shaderManager.StaticShader;
 import shaderManager.TerrainShader;
@@ -49,21 +50,33 @@ public class MasterRenderer {
 	private EntityRenderer renderer;
 	private TerrainRenderer terrainRenderer;
 	private TerrainShader terrainShader = new TerrainShader();
+	private Draw3DRenderer draw3DRenderer;
+	private Draw2DRenderer draw2DRenderer;
 	private List<Model3D> terrains = new ArrayList<>();
 	
 	private SkyboxRenderer skyboxRender;
 	
 	private Matrix4f projectionMatrix;
 	
-	private HashMap<Model3D, List<Entity>> entities = new HashMap<>();
+	private HashMap<Model3D, List<EntityTutos>> entities = new HashMap<>();
 	
-	public MasterRenderer(Loader loader) throws IOException {
+	public MasterRenderer(Loader loader, Camera camera) throws IOException {
 		shader = new StaticShader();
 		enableCulling();
 		createProjectionMatrix();
 		renderer = new EntityRenderer(shader, projectionMatrix);
 		terrainRenderer = new TerrainRenderer(terrainShader, projectionMatrix);
 		skyboxRender = new SkyboxRenderer(loader, projectionMatrix);
+		draw3DRenderer = new Draw3DRenderer(camera, projectionMatrix);
+		draw2DRenderer = new Draw2DRenderer();
+	}
+	
+	public Draw3DRenderer get3DRenderer() {
+		return this.draw3DRenderer;
+	}
+	
+	public Draw2DRenderer get2DRenderer() {
+		return this.draw2DRenderer;
 	}
 	
 	
@@ -123,6 +136,8 @@ public class MasterRenderer {
 		terrainRenderer.render(terrains);
 		terrainShader.stop();
 		skyboxRender.render(camera,RED, GREEN, BLUE);
+		draw3DRenderer.render();
+		draw2DRenderer.render();
 		terrains.clear();
 		entities.clear();
 	}
@@ -135,11 +150,11 @@ public class MasterRenderer {
 	 * TODO adapt logic to process list based on same texture but different models?
 	 * @param entity
 	 */
-	public void processEntity(Entity entity) {
+	public void processEntity(EntityTutos entity) {
 		Model3D entityModel = entity.getModel();
-		List<Entity> batch = entities.getOrDefault(entityModel, new ArrayList<>());
+		List<EntityTutos> batch = entities.getOrDefault(entityModel, new ArrayList<>());
 		if(batch.isEmpty()) {
-			entities.put(entityModel, new ArrayList<Entity>(Arrays.asList(entity)));
+			entities.put(entityModel, new ArrayList<EntityTutos>(Arrays.asList(entity)));
 		}
 		else {
 			batch.add(entity);
@@ -149,6 +164,8 @@ public class MasterRenderer {
 	public void cleanUp() {
 		shader.cleanUp();
 		terrainShader.cleanUp();
+		draw3DRenderer.cleanUp();
+		draw2DRenderer.cleanUp();
 	}
 	
 	public void prepare() {
@@ -184,5 +201,25 @@ public class MasterRenderer {
 		buffer.put(data);
 		buffer.flip();
 		return buffer;
+	}
+
+	/**
+	 * One more optimization must be done in future to not reload unchanged geometries (vertices + colors)
+	 * @param geom
+	 */
+	public void reloadAndprocess(SimpleGeom geom) {
+		geom.reloadVao();
+		geom.updateRenderer();
+	}
+
+	//TODO maybe find another way for those 2 methods. delegate to another class to keep this one clean.
+	public void sendForRendering() {
+		this.draw2DRenderer.sendForRendering();
+		this.draw3DRenderer.sendForRendering();
+	}
+
+	public void clearGeom() {
+		this.draw2DRenderer.clearGeom();
+		this.draw3DRenderer.clearGeom();
 	}
 }

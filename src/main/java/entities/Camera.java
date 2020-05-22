@@ -1,6 +1,6 @@
 package entities;
 
-import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_MIDDLE;
 
 import org.lwjglx.util.vector.Vector3f;
 
@@ -9,7 +9,7 @@ import modelsLibrary.Terrain;
 //poute 
 public class Camera {
 
-	private float distanceFromPlayer = 10;
+	private float distanceFromPlayer = 70;
 	private float angleAroundPlayer;
 
 	private Vector3f position = new Vector3f(0,40,-20);

@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import org.lwjgl.opengl.GL11;
 
-import modelsLibrary.SimpleGeom;
 import renderEngine.Loader.VBOIndex;
 import shaderManager.Draw2DShader;
 
@@ -41,11 +40,5 @@ public class Draw2DRenderer extends DrawRenderer {
 	@Override
 	public void cleanUp() {
 		draw2DShader.cleanUp();
-	}
-
-	@Override
-	public void reloadAndprocess(SimpleGeom geom) {
-		geom.reloadPositions(Draw2DShader.COLOR_INDEX);
-		this.geoms.add(geom);
 	}
 }

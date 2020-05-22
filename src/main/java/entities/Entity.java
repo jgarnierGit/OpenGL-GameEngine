@@ -1,31 +1,18 @@
 package entities;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
 import org.lwjglx.util.vector.Vector3f;
 
-import modelsLibrary.SimpleGeom;
-import modelsLibrary.SimpleGeom3D;
-import modelsManager.Model3D;
-
-public class Entity {
-	private Model3D model;
+public abstract class Entity {
 	private Vector3f position;
 	private float rotX, rotY, rotZ;
 	private float scale;
-	private boolean selected;
-	private List<Vector3f> boundingBox;
-	public Entity(Model3D model, Vector3f positions, float rotX, float rotY, float rotZ, float scale) {
-		this.model = model;
+	
+	public Entity(Vector3f positions, float rotX, float rotY, float rotZ, float scale) {
 		this.position = positions;
 		this.rotX = rotX;
 		this.rotY = rotY;
 		this.rotZ = rotZ;
 		this.scale = scale;
-		this.selected = false;
-		this.boundingBox = new ArrayList<>();
 	}
 	
 	public void increasePosition(float dx, float dy, float dz) {
@@ -40,12 +27,6 @@ public class Entity {
 		this.rotZ+=dz;
 	}
 	
-	public Model3D getModel() {
-		return model;
-	}
-	public void setModel(Model3D model) {
-		this.model = model;
-	}
 	public Vector3f getPositions() {
 		return position;
 	}
@@ -76,26 +57,4 @@ public class Entity {
 	public void setScale(float scale) {
 		this.scale = scale;
 	}
-
-	public void select() {
-		selected = true;
-	}
-
-	public boolean isSelected() {
-		return selected;
-	}
-
-	public void unselect() {
-		selected = false;
-	}
-
-	public void setBoundingBox(List<Vector3f> boundingBox) {
-		this.boundingBox = boundingBox;
-	}
-	
-	public List<Vector3f> getBoundingBox(){
-		return this.boundingBox;
-	}
-	
-	
 }

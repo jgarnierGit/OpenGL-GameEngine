@@ -1,12 +1,11 @@
 package modelsLibrary;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.lwjglx.util.vector.Vector4f;
 
+import renderEngine.DrawRenderer;
 import renderEngine.Loader;
 import renderEngine.RenderingParameters;
 
@@ -28,46 +27,39 @@ public abstract class SimpleGeom implements ISimpleGeom {
 	protected int dimension;
 	protected int vaoId;
 	protected Loader loader;
-	protected List<RenderingParameters> renderingParameters;
+	protected RenderingParameters renderingParameters;
+	protected DrawRenderer drawRenderer;
 	protected float[] points;
 	protected float[] colors;
 	protected static final float[] DEFAULT_COLOR = new float[] { 1.0f, 0.0f, 1.0f, 1.0f };
 
-	public void copy(SimpleGeom source) {
+	/**
+	 * copy geom and load it in a new Vao
+	 * copy renderingParameters with empty entities list.
+	 * @param source
+	 */
+	public void copy(SimpleGeom source, String alias) {
 		this.loader = source.loader;
 		this.dimension = source.dimension;
 		this.points = ArrayUtils.addAll(source.points);
 		this.colors = ArrayUtils.addAll(source.colors);
 		this.vaoId = loader.loadToVAO(points, this.dimension);
-		this.renderingParameters = new ArrayList<>();
+		this.renderingParameters = new RenderingParameters(source.renderingParameters, this, alias);
+		this.drawRenderer = source.drawRenderer;
 	}
 
-	public SimpleGeom(Loader loader2, int dimension) {
+	public SimpleGeom(Loader loader2, int dimension, String alias) {
 		this.loader = loader2;
 		this.dimension = dimension;
 		this.points = new float[] {};
 		this.colors = new float[] {};
 		this.vaoId = loader.loadToVAO(points, this.dimension);
-		this.renderingParameters = new ArrayList<>();
+		this.renderingParameters = new RenderingParameters(this,alias);
 	}
 
 	@Override
-	public List<RenderingParameters> getRenderingParameters() {
+	public RenderingParameters getRenderingParameters() {
 		return this.renderingParameters;
-	}
-
-	@Override
-	public RenderingParameters createRenderingParameters(String alias) {
-		RenderingParameters renderingParams = new RenderingParameters(this,alias);
-		this.renderingParameters.add(renderingParams);
-		return renderingParams;
-	}
-
-	@Override
-	public RenderingParameters createRenderingParameters(RenderingParameters modelParameters, String alias) {
-		RenderingParameters renderingParams = new RenderingParameters(modelParameters, this, alias);
-		this.renderingParameters.add(renderingParams);
-		return renderingParams;
 	}
 
 	public Vector4f getDefaultColor() {
@@ -119,8 +111,7 @@ public abstract class SimpleGeom implements ISimpleGeom {
 		return this.dimension;
 	}
 
-	@Override
-	public void reloadPositions(int colorIndex) {
+	protected void reloadVao(int colorIndex) {
 		loader.reloadVAOPosition(vaoId, points, colors, colorIndex, this.dimension);
 	}
 
@@ -130,13 +121,14 @@ public abstract class SimpleGeom implements ISimpleGeom {
 	}
 
 	@Override
-	public void resetGeom() {
+	public void reset() {
 		points = new float[] {};
 		colors = new float[] {};
+		renderingParameters.reset();
 	}
 
-	@Override
-	public void updateColor(int index, Vector4f color) {
+	protected void updateColor(int index, Vector4f color) {
+		index*=4;
 		this.colors[index] = color.x;
 		this.colors[index + 1] = color.y;
 		this.colors[index + 2] = color.z;
@@ -151,6 +143,10 @@ public abstract class SimpleGeom implements ISimpleGeom {
 			this.colors[i + 2] = boundingBoxInsideColor.z;
 			this.colors[i + 3] = boundingBoxInsideColor.w;
 		}
+	}
+
+	public void updateRenderer() {
+		this.drawRenderer.process(this);
 	}
 
 }

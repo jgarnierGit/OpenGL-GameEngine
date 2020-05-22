@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.lwjgl.opengl.ARBClipControl;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL20;
@@ -13,7 +12,7 @@ import org.lwjglx.util.vector.Matrix4f;
 
 import com.mokiat.data.front.parser.MTLMaterial;
 
-import entities.Entity;
+import entities.EntityTutos;
 import modelsManager.MTLUtils;
 import modelsManager.MaterialMapper;
 import modelsManager.MaterialType;
@@ -57,12 +56,12 @@ public class EntityRenderer{
 	 * @param rawModel
 	 *            - The model to be rendered.
 	 */
-	public void render(Map<Model3D,List<Entity>> entities) {
+	public void render(Map<Model3D,List<EntityTutos>> entities) {
 		for(Model3D model : entities.keySet()) {
 			prepareTextureModel(model);
-			List<Entity> batch = entities.get(model);
+			List<EntityTutos> batch = entities.get(model);
 			OBJUtils objUtil = model.getObjUtils().getOBJUtils();
-			for(Entity entity : batch) {
+			for(EntityTutos entity : batch) {
 				prepareInstance(entity);
 				GL11.glDrawElements(GL11.GL_TRIANGLES, MasterRenderer.storeDataInIntBuffer(objUtil.getIndices()));
 				//GL11.glDrawArrays(GL11.GL_POINTS, 0, objUtil.getPositions().getContent().length);
@@ -127,7 +126,7 @@ public class EntityRenderer{
 	 * Rendering active {Entity}
 	 * @param entity
 	 */
-	private void prepareInstance(Entity entity) {
+	private void prepareInstance(EntityTutos entity) {
 		Matrix4f transformationMatrix = Maths.createTransformationMatrix(entity.getPositions(), entity.getRotX(), entity.getRotY(), entity.getRotZ(), entity.getScale());
 		shader.loadTransformationMatrix(transformationMatrix);
 		shader.loadSelected(entity.isSelected());
