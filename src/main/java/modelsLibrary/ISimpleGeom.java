@@ -69,7 +69,7 @@ public interface ISimpleGeom {
 	public void updateColorByPosition(Vector ref, Vector4f color);
 	
 	/**
-	 * set each point with color
+	 * set each point with color, if a canal is set to -1 original value will be used
 	 * @param color
 	 */
 	public void setColor(Vector4f color);

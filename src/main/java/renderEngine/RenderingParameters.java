@@ -4,12 +4,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjglx.util.vector.Vector;
 import org.lwjglx.util.vector.Vector3f;
 import org.lwjglx.util.vector.Vector4f;
 
+import entities.EntityTutos;
 import entities.SimpleEntity;
 import modelsLibrary.ISimpleGeom;
 
@@ -18,9 +21,11 @@ public class RenderingParameters implements IRenderingParameters{
 	private HashMap<Integer, Boolean> glStatesRendering;
 	private ISimpleGeom simpleGeom;
 	private List<SimpleEntity> entities;
+	private boolean skipEntities;
 	private String alias;
 	private String destinationOrderAlias;
 	private boolean renderAfter;
+	protected Logger logger;
 	
 	private Optional<Vector4f> overridedColors;
 	private HashMap<Vector, Vector4f> overrideColorsAtIndex;
@@ -30,15 +35,8 @@ public class RenderingParameters implements IRenderingParameters{
 	 * @param simpleGeom
 	 */
 	public RenderingParameters(ISimpleGeom simpleGeom, String alias) {
+		this();
 		this.simpleGeom = simpleGeom;
-		this.glStatesRendering = new HashMap<>();
-		this.entities = new ArrayList<>();
-		this.glRenderMode = Optional.empty();
-		this.overridedColors = Optional.empty();
-		this.overrideColorsAtIndex = new HashMap<>();
-		
-		this.renderAfter = false;
-		this.destinationOrderAlias = "";
 		this.alias= alias; 
 	}
 	
@@ -50,20 +48,16 @@ public class RenderingParameters implements IRenderingParameters{
 	 * @param alias
 	 */
 	public RenderingParameters(RenderingParameters toClone, ISimpleGeom geomToApply, String alias) {
+		this();
 		this.alias= alias; 
 		this.simpleGeom = geomToApply;
 		this.destinationOrderAlias = toClone.destinationOrderAlias;
 		if(toClone.glRenderMode.isPresent()) {
 			 this.glRenderMode = Optional.ofNullable(toClone.glRenderMode.get());
-		}else {
-			this.glRenderMode = Optional.empty();
 		}
-		this.glStatesRendering = new HashMap<>();
+		
 		this.glStatesRendering.putAll(toClone.glStatesRendering);
 		this.renderAfter = toClone.renderAfter;
-		this.entities = new ArrayList<>();
-		this.overridedColors = Optional.empty();
-		this.overrideColorsAtIndex = new HashMap<>();
 	}
 	
 	@Override
@@ -105,6 +99,9 @@ public class RenderingParameters implements IRenderingParameters{
 		this.overridedColors = Optional.ofNullable(color);
 	}
 	
+	/**
+	 * first applies global color changes, then unitary color changes.
+	 */
 	public void applyColorOverriding() {
 		this.overridedColors.ifPresent(color -> {
 			simpleGeom.setColor(color);
@@ -237,6 +234,23 @@ public class RenderingParameters implements IRenderingParameters{
 		} else if (!alias.equals(other.alias))
 			return false;
 		return true;
+	}
+
+	public void removeEntity(EntityTutos entity) {
+		boolean removed = this.entities.removeIf(simpleEntity -> {
+			Vector3f posA = simpleEntity.getPositions();
+			Vector3f posB = entity.getPositions();
+			return posA.x == posB.x && posA.y == posB.y && posA.z == posB.z;
+		});
+		if(removed) {
+			if(this.logger.isLoggable(Level.INFO)){
+				this.logger.info("some entities updated from "+ entity.getModel());
+			}
+		}
+	}
+
+	public void overrideGlobalTransparency(float transparency) {
+		this.overridedColors = Optional.of(new Vector4f(-1f,-1f,-1f,transparency));
 	}
 	
 	

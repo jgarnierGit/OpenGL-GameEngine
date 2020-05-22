@@ -138,10 +138,10 @@ public abstract class SimpleGeom implements ISimpleGeom {
 	@Override
 	public void setColor(Vector4f boundingBoxInsideColor) {
 		for (int i = 0; i < colors.length; i += 4) {
-			this.colors[i] = boundingBoxInsideColor.x;
-			this.colors[i + 1] = boundingBoxInsideColor.y;
-			this.colors[i + 2] = boundingBoxInsideColor.z;
-			this.colors[i + 3] = boundingBoxInsideColor.w;
+			this.colors[i] = boundingBoxInsideColor.x == -1 ? this.colors[i] : boundingBoxInsideColor.x;
+			this.colors[i + 1] = boundingBoxInsideColor.y == -1 ? this.colors[i+1] : boundingBoxInsideColor.y;
+			this.colors[i + 2] = boundingBoxInsideColor.z == -1 ? this.colors[i+2] : boundingBoxInsideColor.z;
+			this.colors[i + 3] = boundingBoxInsideColor.w == -1 ? this.colors[i+3] : boundingBoxInsideColor.w;
 		}
 	}
 
