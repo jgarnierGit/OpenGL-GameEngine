@@ -68,10 +68,8 @@ public class CoordinatesSystemManager {
 	 */
 	public boolean isInClipSpace(Vector4f position) {
 		return position.x >= -position.w && position.x <= position.w && position.y >= -position.w
-				&& position.y <= position.w && position.z >= -position.w && position.z <= position.w; // z clipped seems
-																										// to be twice
-																										// as it should
-																										// be.
+				&& position.y <= position.w && position.z >= -position.w && position.z <= position.w;
+		// clipped z seems to be twice as it should but I can't change value here as z, once projected is no more linear.
 	}
 
 	public void setViewMatrix(Matrix4f viewMatrix) {

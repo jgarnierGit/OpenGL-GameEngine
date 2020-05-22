@@ -121,7 +121,7 @@ public abstract class DrawRenderer implements IDrawRenderer {
 		int verticesCount = geom.getPoints().length / geom.getDimension();
 		// Add default lineLoop rendering.
 		// GL11.drawArrays can draw points with GL_POINTS, not GL_POINT
-		GL11.glDrawArrays(params.getRenderMode().orElse(GL11.GL_LINE_LOOP), 0, verticesCount);
+		GL11.glDrawArrays(params.getRenderMode().orElse(GL11.GL_POINTS), 0, verticesCount);
 	}
 
 	protected List<RenderingParameters> getOrderedRenderingParameters() {

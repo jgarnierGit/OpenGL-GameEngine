@@ -30,7 +30,7 @@ public class SimpleGeom3D extends SimpleGeom {
 
 	public SimpleGeom3D(Loader loader, Draw3DRenderer draw3DRenderer, String alias) {
 		super(loader, 3, alias);
-		drawRenderer = draw3DRenderer;
+		this.drawRenderer = draw3DRenderer;
 	}
 	
 	private SimpleGeom3D(Loader loader, String alias) {
