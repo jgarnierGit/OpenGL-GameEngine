@@ -2,16 +2,20 @@ package entities;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.lwjglx.util.vector.Vector3f;
 
 import modelsManager.Model3D;
+import renderEngine.RenderingParameters;
 
 public class EntityTutos extends Entity {
 	private Model3D model;
 	
 	private boolean selected;
 	private List<Vector3f> boundingBox;
+	
+	private RenderingParameters renderingParameters;
 	public EntityTutos(Model3D model, Vector3f positions, float rotX, float rotY, float rotZ, float scale) {
 		super(positions, rotX, rotY, rotZ, scale);
 		this.model = model;
@@ -26,6 +30,13 @@ public class EntityTutos extends Entity {
 		this.model = model;
 	}
 	
+	public void setRenderingParameters(RenderingParameters renderingParameters) {
+		this.renderingParameters = renderingParameters;
+	}
+	
+	public Optional<RenderingParameters> getRenderingParameters() {
+		return Optional.ofNullable(this.renderingParameters);
+	}
 
 	public void select() {
 		selected = true;
