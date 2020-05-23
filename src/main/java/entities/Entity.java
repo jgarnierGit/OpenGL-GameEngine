@@ -1,11 +1,25 @@
 package entities;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 import org.lwjglx.util.vector.Vector3f;
 
+import renderEngine.RenderingParameters;
+
+/**
+ * Model acn be attached here. Model will be equals to unique points. Model must implements methods to use for as many rendering type as needed;
+ * @author chezmoi
+ *
+ */
 public abstract class Entity {
 	private Vector3f position;
 	private float rotX, rotY, rotZ;
 	private float scale;
+	
+	private List<Vector3f> boundingBox;
+	private List<RenderingParameters> renderingParameters;
 	
 	public Entity(Vector3f positions, float rotX, float rotY, float rotZ, float scale) {
 		this.position = positions;
@@ -13,6 +27,8 @@ public abstract class Entity {
 		this.rotY = rotY;
 		this.rotZ = rotZ;
 		this.scale = scale;
+		this.boundingBox = new ArrayList<>();
+		this.renderingParameters = new ArrayList<>();
 	}
 	
 	public void increasePosition(float dx, float dy, float dz) {
@@ -25,6 +41,22 @@ public abstract class Entity {
 		this.rotX+= dx;
 		this.rotY+=dy;
 		this.rotZ+=dz;
+	}
+	
+	public void addRenderingParameters(RenderingParameters renderingParameters) {
+		this.renderingParameters.add(renderingParameters);
+	}
+	
+	public List<RenderingParameters> getRenderingParameters() {
+		return this.renderingParameters;
+	}
+	
+	public void setBoundingBox(List<Vector3f> boundingBox) {
+		this.boundingBox = boundingBox;
+	}
+	
+	public List<Vector3f> getBoundingBox(){
+		return this.boundingBox;
 	}
 	
 	public Vector3f getPositions() {
