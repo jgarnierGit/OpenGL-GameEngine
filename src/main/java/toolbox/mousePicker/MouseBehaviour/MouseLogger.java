@@ -71,7 +71,7 @@ public class MouseLogger implements IMouseBehaviour {
 		this.mouserLoggerPrinter.printFilterByRayProximity(this.entities, rayFromCamera, largeRay);
 		filterEntitiesByBboxIntersection();
 		
-	//	this.mouserLoggerPrinter.printCameraBBox();
+		this.mouserLoggerPrinter.printCameraBBox();
 		this.mouserLoggerPrinter.updateTransparency(this.entities, Arrays.asList("bboxEntities","bboxEntitiesPlainCategColor"));
 		filterByRayPromixity(ray);
 

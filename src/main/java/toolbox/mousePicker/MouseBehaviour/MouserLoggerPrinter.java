@@ -113,7 +113,7 @@ public class MouserLoggerPrinter {
 		  raysWorldOrigin.addPoint(camPos, new Vector4f(1, 0.6f, 0.5f, 1));
 		  raysWorldOrigin.addPoint(largeRay, new Vector4f(1, 0.6f, 0.5f, 1));
 
-		geoms.add(raysWorldOrigin);
+		//geoms.add(raysWorldOrigin);
 	}
 
 	private void buildRaysByEntity(List<EntityTutos> orderedList, RenderingParameters rayParams) {
@@ -246,13 +246,14 @@ public class MouserLoggerPrinter {
 				ltnWorldCoord, rtnWorldCoord, lbnWorldCoord, rbnWorldCoord);
 		RenderingParameters frustrumParams = frustrum.getRenderingParameters();
 		frustrumParams.setAlias("frustrumLines");
+		frustrumParams.doNotUseEntities();
 		
 		SimpleGeom3D frustrumPlain = getFrustrumForPlainTriangles(ltfWorldCoord, rtfWorldCoord, lbfWorldCoord,
 				rbfWorldCoord, ltnWorldCoord, rtnWorldCoord, lbnWorldCoord, rbnWorldCoord);
 		System.out.println(frustrumPlain.getVertices());
 		RenderingParameters frustrumPlainParams = frustrumPlain.getRenderingParameters();
 		frustrumPlainParams.setAlias("frustrumPlain");
-		
+		frustrumPlainParams.doNotUseEntities();
 		cameraBboxes.add(frustrum);
 		cameraBboxes.add(frustrumPlain);
 
@@ -268,6 +269,7 @@ public class MouserLoggerPrinter {
 		RenderingParameters frustrumPlainInsideParams = frustrumPlainInside.getRenderingParameters();
 		frustrumPlainInsideParams.renderBefore("frustrumPlain");// frustrumPlain");
 		frustrumPlainInsideParams.addGlState(GL11.GL_BLEND, true);
+		frustrumPlainInsideParams.doNotUseEntities();
 		frustrumPlainInside.invertNormals();
 		geoms.addAll(cameraBboxes);
 	}
