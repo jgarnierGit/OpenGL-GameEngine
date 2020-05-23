@@ -72,7 +72,7 @@ public class MouseLogger implements IMouseBehaviour {
 		filterEntitiesByBboxIntersection();
 		
 	//	this.mouserLoggerPrinter.printCameraBBox();
-		this.mouserLoggerPrinter.updateTransparency(this.entities);
+		this.mouserLoggerPrinter.updateTransparency(this.entities, Arrays.asList("bboxEntities","bboxEntitiesPlainCategColor"));
 		filterByRayPromixity(ray);
 
 		// rayCasting(ray);
@@ -93,6 +93,39 @@ public class MouseLogger implements IMouseBehaviour {
 			Vector3f lbfWorld = Vector3f.add(entity.getPositions(), bbox.get(6), null);
 			Vector3f rbfWorld = Vector3f.add(entity.getPositions(), bbox.get(7), null);
 			
+			//need to know one point of the plane => get the distance
+			// dot products entre normale du plan et le vector (camera -> plan)
+			// application à notre rayon
+			
+			Vector3f nearMouseIntersection = new Vector3f(MouseRayWorldCoord.x,MouseRayWorldCoord.y,MouseRayWorldCoord.z);
+			
+			Vector3f nearFromCamera =  Vector3f.sub(lbnWorld, camPos, null);
+			nearFromCamera.normalise();
+			Vector3f nearPlaneU2= Vector3f.sub(ltnWorld, lbnWorld, null);
+			Vector3f nearPlaneV2 = Vector3f.sub(rbnWorld, lbnWorld, null);
+			Vector3f nearNormal = Vector3f.cross(nearPlaneU2, nearPlaneV2, null);
+			nearNormal.normalise();
+			nearNormal.scale(3);
+			nearNormal= Vector3f.add(lbnWorld, nearNormal, null);
+			this.mouserLoggerPrinter.drawBboxNormals(entity, "bboxEntitiesPlainCategColor", 3);
+			
+			this.mouserLoggerPrinter.print3DVectors("3DClipped", Arrays.asList(lbnWorld, nearNormal), new Vector4f(0.87f,0.2f,0.2f,1f));
+			
+			
+			float nearToCameraRatio = Vector3f.dot(nearFromCamera, nearNormal);
+			nearFromCamera.scale(nearToCameraRatio);
+			//float nearRatio = Vector3f.dot(nearRefPoint, nearNormal);
+			//float nearRatio = Vector3f.dot(nearRefPoint, nearNormal);
+			//float nearDist = nearRefPoint.length();
+			
+		//	nearMouseIntersection.scale(nearRatio);
+			
+			this.mouserLoggerPrinter.print3DVectors("3DClipped", Arrays.asList(nearFromCamera), null);
+
+			//
+			
+			
+			
 			// TODO try to define a new Vector3f which provides methods to transform point to different coordinates system.
 			Vector3f ltnClipped = coordSysManager.objectToClipSpace(coordSysManager.objectToProjectionMatrix(coordSysManager.objectToViewCoord(ltnWorld)));
 			Vector3f rtnClipped = coordSysManager.objectToClipSpace(coordSysManager.objectToProjectionMatrix(coordSysManager.objectToViewCoord(rtnWorld)));
@@ -105,7 +138,7 @@ public class MouseLogger implements IMouseBehaviour {
 			Vector3f mouseClipped = coordSysManager.objectToClipSpace(coordSysManager.objectToProjectionMatrix(coordSysManager.objectToViewCoord(MouseRayWorldCoord)));
 			List<Vector3f> clippedCoords = Arrays.asList(ltnClipped,rtnClipped,lbnClipped,rbnClipped,ltfClipped,rtfClipped,lbfClipped,rbfClipped,mouseClipped);
 			
-			this.mouserLoggerPrinter.print2DVectors(clippedCoords);
+		//	this.mouserLoggerPrinter.print2DVectors(clippedCoords);
 			ArrayList<Vector3f> localCoordinates = new ArrayList<>();
 			Vector3f nearPlaneU = Vector3f.sub(ltnClipped, lbnClipped, null);
 			Vector3f nearPlaneV = Vector3f.sub(rbnClipped, lbnClipped, null);
@@ -148,21 +181,28 @@ public class MouseLogger implements IMouseBehaviour {
 			localCoordinates.add(bottomPlaneU);
 			localCoordinates.add(bottomPlaneV);
 			localCoordinates.add(bottomPlaneM);
-			System.out.println("testing "+ entity.getModel());
+			//System.out.println("testing "+ entity.getModel());
+
+			
+
 			for(int i =0; i< localCoordinates.size(); i+=3) {
 				Vector3f u = localCoordinates.get(i);
 				Vector3f v = localCoordinates.get(i+1);
 				Vector3f mouse = localCoordinates.get(i+2);
-				//System.out.println("mouse: "+ mouse +", u: "+ u +", v: "+ v);
 				Vector3f max = Vector3f.add(u, v, null);
+			//	System.out.println("mouse: "+ mouse +", u: "+ u +", v: "+ v +", max : "+ max);
+				
 				float absxMouse = Math.abs(mouse.x);
 				float absyMouse = Math.abs(mouse.y);
 				float absxMax =  Math.abs(max.x);
 				float absyMax = Math.abs(max.y);
-				System.out.println("absxMouse: "+ absxMouse +", absyMouse: "+ absyMouse +", absxMax: "+ absxMax +", absyMax: "+ absyMax);
-				if(mouse.x >= 0 && mouse.x <= max.x && mouse.y >= 0 && mouse.y <= max.y) {
+			//	System.out.println("absxMouse: "+ absxMouse +", absyMouse: "+ absyMouse +", absxMax: "+ absxMax +", absyMax: "+ absyMax);
+				boolean isInsideX = max.x < 0 ? mouse.x <= 0 && mouse.x >= max.x : mouse.x >= 0 && mouse.x <= max.x;
+				boolean isInsideY = max.y < 0 ? mouse.y <= 0 && mouse.y >= max.y : mouse.y >= 0 && mouse.y <= max.y;
+			//	System.out.println("isInsideX "+ isInsideX +", isInsideY "+ isInsideY);
+				if(isInsideX && isInsideY) {
 				//if(absxMouse <= absxMax && absyMouse <= absyMax) {
-					System.out.println("matched");
+			//		System.out.println("matched");
 					filteredEntities.add(entity);
 					break;
 				}

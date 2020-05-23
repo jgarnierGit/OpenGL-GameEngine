@@ -53,7 +53,7 @@ public abstract class DrawRenderer implements IDrawRenderer {
 		for(RenderingParameters param : renderingParams) {
 			if(!param.isNotUsingEntities() && param.getEntities().isEmpty()) {
 				if(this.logger.isLoggable(Level.INFO)) {
-					this.logger.info(param.getAlias() +" has no entities set, will not be rendered");
+					this.logger.info(param.getAlias() +" has no entities set, will not be rendered. Tip : This filtering can be bypassed by setting doNotUseEntities to active RenderingParam");
 				}
 			}
 			else {
@@ -139,7 +139,7 @@ public abstract class DrawRenderer implements IDrawRenderer {
 				.collect(Collectors.toCollection(LinkedHashSet::new));
 		uniqueParams = removeMissConfiguratedReference(uniqueParams);
 		LinkedList<RenderingParameters> paramsToMove = uniqueParams.stream().filter((renderingParam) -> {
-			return !renderingParam.getDestinationOrderAlias().isEmpty()
+			return renderingParam.isDestinationPositionAfter().isPresent()
 					&& !renderingParam.getDestinationOrderAlias().equals(renderingParam.getAlias());
 		}).collect(Collectors.toCollection(LinkedList::new));
 		List<RenderingParameters> sortedUniqueParams = transformRelativePositionToIndex(uniqueParams,paramsToMove);
@@ -172,12 +172,7 @@ public abstract class DrawRenderer implements IDrawRenderer {
 				boolean isPresent = checkReferencePresence(uniqueParams, param.getDestinationOrderAlias());
 				if (!isPresent) {
 					this.logger.log(Level.WARNING, "reference to " + param.getDestinationOrderAlias() + " is unknown. Will be removed");
-					param.renderBefore("");
-				} else {
-					if (param.getAlias().equals(param.getDestinationOrderAlias())) {
-						this.logger.log(Level.WARNING, "reference to itself " + param.getDestinationOrderAlias() + ". Will be removed");
-						param.renderBefore("");
-					}
+					param.resetRenderingOrder();
 				}
 			}
 		}
@@ -199,9 +194,17 @@ public abstract class DrawRenderer implements IDrawRenderer {
 		LinkedList<RenderingParameters> sortedList = new LinkedList<>();
 		sortedList.addAll(rawParams);
 		for (RenderingParameters param : paramsToMove) {
+			Boolean positionedAfter = param.isDestinationPositionAfter().get();
 			sortedList.remove(param);
-			int index = getIndexDestination(sortedList, param.getDestinationOrderAlias(),
-					param.isDestinationPositionAfter());
+			int index = 0;
+			if(param.getDestinationOrderAlias().isEmpty()) {
+				index = positionedAfter ? sortedList.size() : 0;
+			}
+			else {
+				index= getIndexDestination(sortedList, param.getDestinationOrderAlias(),
+						positionedAfter);
+			}
+			
 			sortedList.add(index, param);
 		}
 		return sortedList;

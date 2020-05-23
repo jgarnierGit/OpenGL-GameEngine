@@ -431,6 +431,32 @@ class DrawRendererTest {
 					assertTrue(renderingParams.indexOf(secondGeomMock.getRenderingParameters()) < renderingParams
 							.indexOf(firstGeomMock.getRenderingParameters()), renderingParams.toString());
 				}
+				
+				/**
+				 * A->last(); B; C result: [B,C,A]
+				 */
+				@Test
+				@DisplayName("Moving first Params to last position : [B,C,A]")
+				void testReferenceToLast() {
+					firstParam.renderLast();
+					renderingParams = renderer.getOrderedRenderingParameters();
+					assertEquals(secondGeomMock.getVaoId(), renderingParams.get(0).getGeom().getVaoId());
+					assertEquals(thirdGeomMock.getVaoId(), renderingParams.get(1).getGeom().getVaoId());
+					assertEquals(firstGeomMock.getVaoId(), renderingParams.get(2).getGeom().getVaoId());
+				}
+				
+				/**
+				 * A; B; C->first() result: [C,A,B]
+				 */
+				@Test
+				@DisplayName("Moving last Params to first position : [C,A,B]")
+				void testReferenceToFirst() {
+					thirdParam.renderFirst();
+					renderingParams = renderer.getOrderedRenderingParameters();
+					assertEquals(thirdGeomMock.getVaoId(), renderingParams.get(0).getGeom().getVaoId());
+					assertEquals(firstGeomMock.getVaoId(), renderingParams.get(1).getGeom().getVaoId());
+					assertEquals(secondGeomMock.getVaoId(), renderingParams.get(2).getGeom().getVaoId());
+				}
 			}
 
 			@Nested
@@ -590,6 +616,36 @@ class DrawRendererTest {
 								.indexOf(firstGeomMock.getRenderingParameters()), renderingParams.toString());
 					}
 				}
+				
+					/**
+					 * A->last(); B->last(); C result: [C,B,A] or [C,A,B]
+					 */
+					@Test
+					@DisplayName("Moving 2 Params to last position : [C,B,A] or [C,A,B]")
+					void testChainingLast() {
+						firstParam.renderLast();
+						secondParam.renderLast();
+						renderingParams = renderer.getOrderedRenderingParameters();
+						assertTrue(renderingParams.indexOf(thirdGeomMock.getRenderingParameters()) < renderingParams
+								.indexOf(secondGeomMock.getRenderingParameters()), renderingParams.toString());
+						assertTrue(renderingParams.indexOf(thirdGeomMock.getRenderingParameters()) < renderingParams
+								.indexOf(firstGeomMock.getRenderingParameters()), renderingParams.toString());
+					}
+					
+					/**
+					 * A; B->first(); C->first() result: [C,B,A] or [B,C,A]
+					 */
+					@Test
+					@DisplayName("Moving 2 Params to first position : [C,A,B] or [B,C,A]")
+					void testChainingFirst() {
+						thirdParam.renderFirst();
+						secondParam.renderFirst();
+						renderingParams = renderer.getOrderedRenderingParameters();
+						assertTrue(renderingParams.indexOf(thirdGeomMock.getRenderingParameters()) < renderingParams
+								.indexOf(firstGeomMock.getRenderingParameters()), renderingParams.toString());
+						assertTrue(renderingParams.indexOf(secondGeomMock.getRenderingParameters()) < renderingParams
+								.indexOf(firstGeomMock.getRenderingParameters()), renderingParams.toString());
+					}
 			}
 		}
 

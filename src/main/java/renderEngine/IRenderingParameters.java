@@ -1,5 +1,7 @@
 package renderEngine;
 
+import java.util.Optional;
+
 public interface IRenderingParameters {
 	/**
 	 * set an alias
@@ -23,7 +25,7 @@ public interface IRenderingParameters {
 	 * get destination position relative to alias destination specified
 	 * @return true if positioned after alias destination, false elsewhere
 	 */
-	public boolean isDestinationPositionAfter();
+	public Optional<Boolean> isDestinationPositionAfter();
 	
 	/**
 	 * set reference destination ordering as before

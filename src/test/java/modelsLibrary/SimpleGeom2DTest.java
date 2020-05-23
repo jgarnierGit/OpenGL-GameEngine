@@ -14,6 +14,7 @@ import org.lwjglx.util.vector.Vector4f;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
+import entities.EntityTutos;
 import renderEngine.Draw2DRenderer;
 import renderEngine.Loader;
 import renderEngine.RenderingParameters;
@@ -75,7 +76,7 @@ class SimpleGeom2DTest {
 		@BeforeEach
 		void setUp() throws Exception {
 			RenderingParameters params = geom.getRenderingParameters();
-			params.addEntity(new Vector3f(0, 0,0), 1, 1, 1, 1);
+			params.addEntity(Mockito.mock(EntityTutos.class),new Vector3f(0, 0,0), 1, 1, 1, 1);
 			geom.addPoint(new Vector2f(1, 1), new Vector4f(1, 1, 1, 1));
 
 		}

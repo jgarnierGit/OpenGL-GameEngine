@@ -24,7 +24,7 @@ public class RenderingParameters implements IRenderingParameters{
 	private boolean skipEntities;
 	private String alias;
 	private String destinationOrderAlias;
-	private boolean renderAfter;
+	private Boolean renderAfter;
 	protected Logger logger;
 	
 	private Optional<Vector4f> overridedColors;
@@ -37,7 +37,7 @@ public class RenderingParameters implements IRenderingParameters{
 		this.overridedColors = Optional.empty();
 		this.overrideColorsAtIndex = new HashMap<>();
 		this.skipEntities = false;
-		this.renderAfter = false;
+		this.renderAfter = null;
 		this.destinationOrderAlias = "";
 		this.logger = Logger.getLogger("RenderingParameters");
 	}
@@ -58,6 +58,7 @@ public class RenderingParameters implements IRenderingParameters{
 	public void doNotUseEntities() {
 		skipEntities = true;
 	}
+	
 	
 	public boolean isNotUsingEntities() {
 		return this.skipEntities;
@@ -96,8 +97,8 @@ public class RenderingParameters implements IRenderingParameters{
 		return this.destinationOrderAlias;
 	}
 	@Override
-	public boolean isDestinationPositionAfter() {
-		return this.renderAfter;
+	public Optional<Boolean> isDestinationPositionAfter() {
+		return Optional.ofNullable(this.renderAfter);
 	}
 	@Override
 	public void renderBefore(String alias) {
@@ -148,16 +149,26 @@ public class RenderingParameters implements IRenderingParameters{
 	public void overrideColorAtIndex(Vector position, Vector4f color) {
 		this.overrideColorsAtIndex.put(position, color);
 	}
+	
+	/**
+	 * add same world transformation (position/rotation/scale) as entity to apply for geom.
+	 * @param entity
+	 */
+	public void addEntity(EntityTutos entity) {
+		this.addEntity(entity,entity.getPositions(),entity.getRotX(),entity.getRotY(),entity.getRotZ(),entity.getScale());
+	}
 
 	/**
-	 * add world transformation (position/rotation/scale) to apply for geom.
-	 * @param positions
-	 * @param rotX
-	 * @param rotY
-	 * @param rotZ
-	 * @param scale
+	 * add entity and override its world transformation (position/rotation/scale) to apply for geom.
+	 * @param entity 
+	 * @param positions override position given by entity
+	 * @param rotX override rotX given by entity
+	 * @param rotY override rotY given by entity
+	 * @param rotZ override rotZ given by entity
+	 * @param scale override scale given by entity
 	 */
-	public void addEntity(Vector3f positions, float rotX, float rotY, float rotZ, float scale) {
+	public void addEntity(EntityTutos entity, Vector3f positions, float rotX, float rotY, float rotZ, float scale) {
+		entity.addRenderingParameters(this);
 		entities.add(new SimpleEntity(positions, rotX, rotY, rotZ, scale));
 	}
 	
@@ -244,8 +255,9 @@ public class RenderingParameters implements IRenderingParameters{
 		return result;
 	}
 
+	//FIXME don't know if this is really helpful. To retreive a RenderingParam I still need to compare based on an alias.
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(Object obj) { 
 		if (this == obj)
 			return true;
 		if (!(obj instanceof RenderingParameters))
@@ -265,15 +277,27 @@ public class RenderingParameters implements IRenderingParameters{
 			Vector3f posB = entity.getPositions();
 			return posA.x == posB.x && posA.y == posB.y && posA.z == posB.z;
 		});
-		if(removed) {
+	/**	if(removed) {
 			if(this.logger.isLoggable(Level.INFO)){
 				this.logger.info("some entities updated from "+ entity.getModel());
 			}
-		}
+		}**/
 	}
 
 	public void overrideGlobalTransparency(float transparency) {
 		this.overridedColors = Optional.of(new Vector4f(-1f,-1f,-1f,transparency));
+	}
+	public void renderLast() {
+		this.renderAfter=true;
+		this.destinationOrderAlias="";
+	}
+	public void renderFirst() {
+		this.renderAfter=false;
+		this.destinationOrderAlias="";
+	}
+	public void resetRenderingOrder() {
+		this.renderAfter=null;
+		this.destinationOrderAlias="";
 	}
 	
 	

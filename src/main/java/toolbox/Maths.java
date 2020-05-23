@@ -62,6 +62,10 @@ public class Maths {
 		return l1 * p1.y + l2 * p2.y + l3 * p3.y;
 	}
 	
+	public static Vector3f getBarycenter(Vector3f origin, Vector3f uPoint, Vector3f vPoint) {
+		return new Vector3f((origin.x + uPoint.x + vPoint.x)/3, (origin.y + uPoint.y + vPoint.y)/3,(origin.z + uPoint.z + vPoint.z)/3);
+	}
+	
 	/**
 	 * Normalize vector from specified origin.
 	 * 

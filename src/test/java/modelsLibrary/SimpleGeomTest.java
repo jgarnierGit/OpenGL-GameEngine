@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.lwjglx.util.vector.Vector3f;
 import org.mockito.Mockito;
 
+import entities.EntityTutos;
 import renderEngine.Loader;
 import renderEngine.RenderingParameters;
 
@@ -115,7 +116,7 @@ class SimpleGeomTest {
 				geom.renderingParameters.addGlState(2, true);
 				geom.renderingParameters.setRenderMode(2);
 				geom.renderingParameters.renderBefore("test");
-				geom.renderingParameters.addEntity(positionEntity, 0, 0, 0, 1);
+				geom.renderingParameters.addEntity(Mockito.mock(EntityTutos.class), positionEntity, 0, 0, 0, 1);
 				geom2.copy(geom, alias2);
 				geom2Params = geom2.getRenderingParameters();
 				geom2Params.setRenderMode(1);
