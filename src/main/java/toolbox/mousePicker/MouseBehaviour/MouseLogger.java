@@ -11,6 +11,7 @@ import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.lwjgl.opengl.GL11;
 import org.lwjglx.util.vector.Matrix4f;
 import org.lwjglx.util.vector.Vector3f;
 import org.lwjglx.util.vector.Vector4f;
@@ -33,12 +34,13 @@ public class MouseLogger implements IMouseBehaviour {
 	private MouseInputListener mouseInputListener;
 	private Vector3f ray;
 
-	public MouseLogger(Camera camera, MasterRenderer masterRenderer, Loader loader, MouseInputListener mouseInputListener) {
+	public MouseLogger(Camera camera, MasterRenderer masterRenderer, Loader loader,
+			MouseInputListener mouseInputListener) {
 		this.entities = new ArrayList<>();
 		this.camera = camera;
 		this.coordSysManager = new CoordinatesSystemManager(masterRenderer.getProjectionMatrix());
 		this.mouseInputListener = mouseInputListener;
-		this.mouserLoggerPrinter = new MouserLoggerPrinter(loader,masterRenderer, this.coordSysManager);
+		this.mouserLoggerPrinter = new MouserLoggerPrinter(loader, masterRenderer, this.coordSysManager);
 	}
 
 	@Override
@@ -56,7 +58,7 @@ public class MouseLogger implements IMouseBehaviour {
 	}
 
 	private void processPicking() {
-		cleanSelected(); //TODO try to put it in clear()
+		cleanSelected(); // TODO try to put it in clear()
 
 		this.camPos = camera.getPosition();
 		this.mouserLoggerPrinter.setCameraPosition(this.camPos);
@@ -67,12 +69,14 @@ public class MouseLogger implements IMouseBehaviour {
 		generateBoundingBoxes();
 		this.mouserLoggerPrinter.printBoundingBoxes(this.entities);
 		Vector3f rayFromCamera = getPointOnRay(ray, 1);
-		Vector3f largeRay =  getPointOnRay(ray, 1000);
+		Vector3f largeRay = getPointOnRay(ray, 1000);
 		this.mouserLoggerPrinter.printFilterByRayProximity(this.entities, rayFromCamera, largeRay);
 		filterEntitiesByBboxIntersection();
-		
+		this.mouserLoggerPrinter.drawBboxNormals(this.entities, "bboxEntitiesPlainCategColor", 3);
+
 		this.mouserLoggerPrinter.printCameraBBox();
-		this.mouserLoggerPrinter.updateTransparency(this.entities, Arrays.asList("bboxEntities","bboxEntitiesPlainCategColor"));
+		this.mouserLoggerPrinter.updateTransparency(this.entities,
+				Arrays.asList("bboxEntities", "bboxEntitiesPlainCategColor"));
 		filterByRayPromixity(ray);
 
 		// rayCasting(ray);
@@ -82,7 +86,7 @@ public class MouseLogger implements IMouseBehaviour {
 	private void filterEntitiesByBboxIntersection() {
 		Vector3f MouseRayWorldCoord = Vector3f.add(camPos, this.ray, null);
 		ArrayList<EntityTutos> filteredEntities = new ArrayList<>();
-		for(EntityTutos entity : this.entities) {
+		for (EntityTutos entity : this.entities) {
 			List<Vector3f> bbox = entity.getBoundingBox();
 			Vector3f ltnWorld = Vector3f.add(entity.getPositions(), bbox.get(0), null);
 			Vector3f rtnWorld = Vector3f.add(entity.getPositions(), bbox.get(1), null);
@@ -92,126 +96,141 @@ public class MouseLogger implements IMouseBehaviour {
 			Vector3f rtfWorld = Vector3f.add(entity.getPositions(), bbox.get(5), null);
 			Vector3f lbfWorld = Vector3f.add(entity.getPositions(), bbox.get(6), null);
 			Vector3f rbfWorld = Vector3f.add(entity.getPositions(), bbox.get(7), null);
-			
-			//need to know one point of the plane => get the distance
-			// dot products entre normale du plan et le vector (camera -> plan)
-			// application à notre rayon
-			
-			Vector3f nearMouseIntersection = new Vector3f(MouseRayWorldCoord.x,MouseRayWorldCoord.y,MouseRayWorldCoord.z);
-			
-			Vector3f nearFromCamera =  Vector3f.sub(lbnWorld, camPos, null);
-			nearFromCamera.normalise();
-			Vector3f nearPlaneU2= Vector3f.sub(ltnWorld, lbnWorld, null);
-			Vector3f nearPlaneV2 = Vector3f.sub(rbnWorld, lbnWorld, null);
-			Vector3f nearNormal = Vector3f.cross(nearPlaneU2, nearPlaneV2, null);
-			nearNormal.normalise();
-			nearNormal.scale(3);
-			nearNormal= Vector3f.add(lbnWorld, nearNormal, null);
-			this.mouserLoggerPrinter.drawBboxNormals(entity, "bboxEntitiesPlainCategColor", 3);
-			
-			this.mouserLoggerPrinter.print3DVectors("3DClipped", Arrays.asList(lbnWorld, nearNormal), new Vector4f(0.87f,0.2f,0.2f,1f));
-			
-			
-			float nearToCameraRatio = Vector3f.dot(nearFromCamera, nearNormal);
-			nearFromCamera.scale(nearToCameraRatio);
-			//float nearRatio = Vector3f.dot(nearRefPoint, nearNormal);
-			//float nearRatio = Vector3f.dot(nearRefPoint, nearNormal);
-			//float nearDist = nearRefPoint.length();
-			
-		//	nearMouseIntersection.scale(nearRatio);
-			
-			this.mouserLoggerPrinter.print3DVectors("3DClipped", Arrays.asList(nearFromCamera), null);
-
-			//
-			
-			
-			
-			// TODO try to define a new Vector3f which provides methods to transform point to different coordinates system.
-			Vector3f ltnClipped = coordSysManager.objectToClipSpace(coordSysManager.objectToProjectionMatrix(coordSysManager.objectToViewCoord(ltnWorld)));
-			Vector3f rtnClipped = coordSysManager.objectToClipSpace(coordSysManager.objectToProjectionMatrix(coordSysManager.objectToViewCoord(rtnWorld)));
-			Vector3f lbnClipped = coordSysManager.objectToClipSpace(coordSysManager.objectToProjectionMatrix(coordSysManager.objectToViewCoord(lbnWorld)));
-			Vector3f rbnClipped = coordSysManager.objectToClipSpace(coordSysManager.objectToProjectionMatrix(coordSysManager.objectToViewCoord(rbnWorld)));
-			Vector3f ltfClipped = coordSysManager.objectToClipSpace(coordSysManager.objectToProjectionMatrix(coordSysManager.objectToViewCoord(ltfWorld)));
-			Vector3f rtfClipped = coordSysManager.objectToClipSpace(coordSysManager.objectToProjectionMatrix(coordSysManager.objectToViewCoord(rtfWorld)));
-			Vector3f lbfClipped = coordSysManager.objectToClipSpace(coordSysManager.objectToProjectionMatrix(coordSysManager.objectToViewCoord(lbfWorld)));
-			Vector3f rbfClipped = coordSysManager.objectToClipSpace(coordSysManager.objectToProjectionMatrix(coordSysManager.objectToViewCoord(rbfWorld)));
-			Vector3f mouseClipped = coordSysManager.objectToClipSpace(coordSysManager.objectToProjectionMatrix(coordSysManager.objectToViewCoord(MouseRayWorldCoord)));
-			List<Vector3f> clippedCoords = Arrays.asList(ltnClipped,rtnClipped,lbnClipped,rbnClipped,ltfClipped,rtfClipped,lbfClipped,rbfClipped,mouseClipped);
-			
-		//	this.mouserLoggerPrinter.print2DVectors(clippedCoords);
-			ArrayList<Vector3f> localCoordinates = new ArrayList<>();
-			Vector3f nearPlaneU = Vector3f.sub(ltnClipped, lbnClipped, null);
-			Vector3f nearPlaneV = Vector3f.sub(rbnClipped, lbnClipped, null);
-			Vector3f nearPlaneM = Vector3f.sub(mouseClipped, lbnClipped, null);
-			localCoordinates.add(nearPlaneU);
-			localCoordinates.add(nearPlaneV);
-			localCoordinates.add(nearPlaneM);
-			
-			Vector3f leftPlaneU = Vector3f.sub(ltfClipped, lbfClipped, null);
-			Vector3f leftPlaneV = Vector3f.sub(lbnClipped, lbfClipped, null);
-			Vector3f leftPlaneM = Vector3f.sub(mouseClipped, lbfClipped, null);
-			localCoordinates.add(leftPlaneU);
-			localCoordinates.add(leftPlaneV);
-			localCoordinates.add(leftPlaneM);
-			
-			Vector3f rightPlaneU = Vector3f.sub(rtnClipped, rbnClipped, null);
-			Vector3f rightPlaneV = Vector3f.sub(rbfClipped, rbnClipped, null);
-			Vector3f rightPlaneM = Vector3f.sub(mouseClipped, rbnClipped, null);
-			localCoordinates.add(rightPlaneU);
-			localCoordinates.add(rightPlaneV);
-			localCoordinates.add(rightPlaneM);
-			
-			Vector3f farPlaneU = Vector3f.sub(rtfClipped, rbfClipped, null);
-			Vector3f farPlaneV = Vector3f.sub(lbfClipped, rbfClipped, null);
-			Vector3f farPlaneM = Vector3f.sub(mouseClipped, rbfClipped, null);
-			localCoordinates.add(farPlaneU);
-			localCoordinates.add(farPlaneV);
-			localCoordinates.add(farPlaneM);
-			
-			Vector3f topPlaneU = Vector3f.sub(ltfClipped, ltnClipped, null);
-			Vector3f topPlaneV = Vector3f.sub(rtnClipped, ltnClipped, null);
-			Vector3f topPlaneM = Vector3f.sub(mouseClipped, ltnClipped, null);
-			localCoordinates.add(topPlaneU);
-			localCoordinates.add(topPlaneV);
-			localCoordinates.add(topPlaneM);
-			
-			Vector3f bottomPlaneU = Vector3f.sub(rbnClipped, rbfClipped, null);
-			Vector3f bottomPlaneV = Vector3f.sub(lbfClipped, ltnClipped, null);
-			Vector3f bottomPlaneM = Vector3f.sub(mouseClipped, ltnClipped, null);
-			localCoordinates.add(bottomPlaneU);
-			localCoordinates.add(bottomPlaneV);
-			localCoordinates.add(bottomPlaneM);
-			//System.out.println("testing "+ entity.getModel());
-
-			
-
-			for(int i =0; i< localCoordinates.size(); i+=3) {
-				Vector3f u = localCoordinates.get(i);
-				Vector3f v = localCoordinates.get(i+1);
-				Vector3f mouse = localCoordinates.get(i+2);
-				Vector3f max = Vector3f.add(u, v, null);
-			//	System.out.println("mouse: "+ mouse +", u: "+ u +", v: "+ v +", max : "+ max);
-				
-				float absxMouse = Math.abs(mouse.x);
-				float absyMouse = Math.abs(mouse.y);
-				float absxMax =  Math.abs(max.x);
-				float absyMax = Math.abs(max.y);
-			//	System.out.println("absxMouse: "+ absxMouse +", absyMouse: "+ absyMouse +", absxMax: "+ absxMax +", absyMax: "+ absyMax);
-				boolean isInsideX = max.x < 0 ? mouse.x <= 0 && mouse.x >= max.x : mouse.x >= 0 && mouse.x <= max.x;
-				boolean isInsideY = max.y < 0 ? mouse.y <= 0 && mouse.y >= max.y : mouse.y >= 0 && mouse.y <= max.y;
-			//	System.out.println("isInsideX "+ isInsideX +", isInsideY "+ isInsideY);
-				if(isInsideX && isInsideY) {
-				//if(absxMouse <= absxMax && absyMouse <= absyMax) {
-			//		System.out.println("matched");
-					filteredEntities.add(entity);
-					break;
+			List<Vector3f> vectorsAsFaces = Arrays.asList(ltnWorld,lbnWorld,rbnWorld,ltfWorld,lbfWorld,lbnWorld,rtnWorld,rbnWorld,rbfWorld,
+					rtfWorld,rbfWorld,lbfWorld,ltfWorld,ltnWorld,rtnWorld,rbnWorld,rbfWorld,lbfWorld);
+			for(int i=0; i<vectorsAsFaces.size();i+=3) {
+				Vector3f originFace = vectorsAsFaces.get(i+1);
+				Vector3f uPoint = vectorsAsFaces.get(i);
+				Vector3f vPoint = vectorsAsFaces.get(i+2);
+				// getting length of a face from camera.
+				Vector3f nearFromCamera = Vector3f.sub(originFace, camPos, null);
+				// getting normal from a face.
+				Vector3f nearPlaneU2 = Vector3f.sub(uPoint, originFace, null);
+				Vector3f nearPlaneV2 = Vector3f.sub(vPoint, originFace, null);
+				Vector3f nearNormal = Vector3f.cross(nearPlaneU2, nearPlaneV2, null);
+				nearNormal.normalise();
+				// getting ratio to apply
+				float cosThetaFromNormal = Vector3f.dot(nearFromCamera, nearNormal);
+				float cosThetaFromRay = Vector3f.dot(this.ray, nearNormal);
+				float k = cosThetaFromNormal / cosThetaFromRay;
+				Vector3f intersect = new Vector3f(this.ray.x, this.ray.y, this.ray.z);
+				intersect.scale(k);
+				if(k >= 0) {
+					this.mouserLoggerPrinter.print3DVectors("3DClipped",
+							Arrays.asList(camPos, Vector3f.add(camPos, intersect, null)), null, GL11.GL_POINTS);
+					this.mouserLoggerPrinter.print3DVectors("3DClippedRef",
+							Arrays.asList(originFace, Vector3f.add(camPos, intersect, null)), new Vector4f(0,0,0,1), GL11.GL_LINES);
 				}
 				
 			}
+			// end
+
+			filteredEntities = oldway(entity, MouseRayWorldCoord, ltnWorld, rtnWorld, lbnWorld, rbnWorld, ltfWorld,
+					rtfWorld, lbfWorld, rbfWorld);
 		}
-		
+
 		this.entities = filteredEntities;
-		
+
+	}
+
+	private ArrayList<EntityTutos> oldway(EntityTutos entity, Vector3f MouseRayWorldCoord, Vector3f ltnWorld,
+			Vector3f rtnWorld, Vector3f lbnWorld, Vector3f rbnWorld, Vector3f ltfWorld, Vector3f rtfWorld,
+			Vector3f lbfWorld, Vector3f rbfWorld) {
+		ArrayList<EntityTutos> filteredEntities = new ArrayList<>();
+		// TODO try to define a new Vector3f which provides methods to transform point
+		// to different coordinates system.
+		Vector3f ltnClipped = coordSysManager.objectToClipSpace(
+				coordSysManager.objectToProjectionMatrix(coordSysManager.objectToViewCoord(ltnWorld)));
+		Vector3f rtnClipped = coordSysManager.objectToClipSpace(
+				coordSysManager.objectToProjectionMatrix(coordSysManager.objectToViewCoord(rtnWorld)));
+		Vector3f lbnClipped = coordSysManager.objectToClipSpace(
+				coordSysManager.objectToProjectionMatrix(coordSysManager.objectToViewCoord(lbnWorld)));
+		Vector3f rbnClipped = coordSysManager.objectToClipSpace(
+				coordSysManager.objectToProjectionMatrix(coordSysManager.objectToViewCoord(rbnWorld)));
+		Vector3f ltfClipped = coordSysManager.objectToClipSpace(
+				coordSysManager.objectToProjectionMatrix(coordSysManager.objectToViewCoord(ltfWorld)));
+		Vector3f rtfClipped = coordSysManager.objectToClipSpace(
+				coordSysManager.objectToProjectionMatrix(coordSysManager.objectToViewCoord(rtfWorld)));
+		Vector3f lbfClipped = coordSysManager.objectToClipSpace(
+				coordSysManager.objectToProjectionMatrix(coordSysManager.objectToViewCoord(lbfWorld)));
+		Vector3f rbfClipped = coordSysManager.objectToClipSpace(
+				coordSysManager.objectToProjectionMatrix(coordSysManager.objectToViewCoord(rbfWorld)));
+		Vector3f mouseClipped = coordSysManager.objectToClipSpace(
+				coordSysManager.objectToProjectionMatrix(coordSysManager.objectToViewCoord(MouseRayWorldCoord)));
+		List<Vector3f> clippedCoords = Arrays.asList(ltnClipped, rtnClipped, lbnClipped, rbnClipped, ltfClipped,
+				rtfClipped, lbfClipped, rbfClipped, mouseClipped);
+
+		// this.mouserLoggerPrinter.print2DVectors(clippedCoords);
+		ArrayList<Vector3f> localCoordinates = new ArrayList<>();
+		Vector3f nearPlaneU = Vector3f.sub(ltnClipped, lbnClipped, null);
+		Vector3f nearPlaneV = Vector3f.sub(rbnClipped, lbnClipped, null);
+		Vector3f nearPlaneM = Vector3f.sub(mouseClipped, lbnClipped, null);
+		localCoordinates.add(nearPlaneU);
+		localCoordinates.add(nearPlaneV);
+		localCoordinates.add(nearPlaneM);
+
+		Vector3f leftPlaneU = Vector3f.sub(ltfClipped, lbfClipped, null);
+		Vector3f leftPlaneV = Vector3f.sub(lbnClipped, lbfClipped, null);
+		Vector3f leftPlaneM = Vector3f.sub(mouseClipped, lbfClipped, null);
+		localCoordinates.add(leftPlaneU);
+		localCoordinates.add(leftPlaneV);
+		localCoordinates.add(leftPlaneM);
+
+		Vector3f rightPlaneU = Vector3f.sub(rtnClipped, rbnClipped, null);
+		Vector3f rightPlaneV = Vector3f.sub(rbfClipped, rbnClipped, null);
+		Vector3f rightPlaneM = Vector3f.sub(mouseClipped, rbnClipped, null);
+		localCoordinates.add(rightPlaneU);
+		localCoordinates.add(rightPlaneV);
+		localCoordinates.add(rightPlaneM);
+
+		Vector3f farPlaneU = Vector3f.sub(rtfClipped, rbfClipped, null);
+		Vector3f farPlaneV = Vector3f.sub(lbfClipped, rbfClipped, null);
+		Vector3f farPlaneM = Vector3f.sub(mouseClipped, rbfClipped, null);
+		localCoordinates.add(farPlaneU);
+		localCoordinates.add(farPlaneV);
+		localCoordinates.add(farPlaneM);
+
+		Vector3f topPlaneU = Vector3f.sub(ltfClipped, ltnClipped, null);
+		Vector3f topPlaneV = Vector3f.sub(rtnClipped, ltnClipped, null);
+		Vector3f topPlaneM = Vector3f.sub(mouseClipped, ltnClipped, null);
+		localCoordinates.add(topPlaneU);
+		localCoordinates.add(topPlaneV);
+		localCoordinates.add(topPlaneM);
+
+		Vector3f bottomPlaneU = Vector3f.sub(rbnClipped, rbfClipped, null);
+		Vector3f bottomPlaneV = Vector3f.sub(lbfClipped, ltnClipped, null);
+		Vector3f bottomPlaneM = Vector3f.sub(mouseClipped, ltnClipped, null);
+		localCoordinates.add(bottomPlaneU);
+		localCoordinates.add(bottomPlaneV);
+		localCoordinates.add(bottomPlaneM);
+		// System.out.println("testing "+ entity.getModel());
+
+		for (int i = 0; i < localCoordinates.size(); i += 3) {
+			Vector3f u = localCoordinates.get(i);
+			Vector3f v = localCoordinates.get(i + 1);
+			Vector3f mouse = localCoordinates.get(i + 2);
+			Vector3f max = Vector3f.add(u, v, null);
+			// System.out.println("mouse: "+ mouse +", u: "+ u +", v: "+ v +", max : "+
+			// max);
+
+			float absxMouse = Math.abs(mouse.x);
+			float absyMouse = Math.abs(mouse.y);
+			float absxMax = Math.abs(max.x);
+			float absyMax = Math.abs(max.y);
+			// System.out.println("absxMouse: "+ absxMouse +", absyMouse: "+ absyMouse +",
+			// absxMax: "+ absxMax +", absyMax: "+ absyMax);
+			boolean isInsideX = max.x < 0 ? mouse.x <= 0 && mouse.x >= max.x : mouse.x >= 0 && mouse.x <= max.x;
+			boolean isInsideY = max.y < 0 ? mouse.y <= 0 && mouse.y >= max.y : mouse.y >= 0 && mouse.y <= max.y;
+			// System.out.println("isInsideX "+ isInsideX +", isInsideY "+ isInsideY);
+			if (isInsideX && isInsideY) {
+				// if(absxMouse <= absxMax && absyMouse <= absyMax) {
+				// System.out.println("matched");
+				filteredEntities.add(entity);
+				break;
+			}
+
+		}
+		return filteredEntities;
 	}
 
 	/**
@@ -253,8 +272,6 @@ public class MouseLogger implements IMouseBehaviour {
 		}).collect(Collectors.toList());
 		this.entities = filteredList;
 	}
-
-
 
 	private Vector3f objectToViewCoordNormalized(EntityTutos entity) {
 		Vector3f objectPosition = entity.getPositions();
@@ -324,10 +341,10 @@ public class MouseLogger implements IMouseBehaviour {
 	}
 
 	private void generateBoundingBoxes() {
-		for(EntityTutos entity : this.entities) {
+		for (EntityTutos entity : this.entities) {
 			entity.setBoundingBox(this.mouserLoggerPrinter.bboxUniquePoints);
 		}
-		
+
 	}
 
 	private Optional<EntityTutos> rayMarching(Vector3f mouseCoord, Float startPointDistance, Float distance) {
@@ -361,7 +378,8 @@ public class MouseLogger implements IMouseBehaviour {
 		TreeMap<Float, EntityTutos> result = entitiesViewPosition.entrySet().stream().filter(entry -> {
 			EntityTutos entity = entry.getKey();
 			Vector3f worldPositionEntity = entity.getPositions();
-			if ((worldPositionEntity.x + MouserLoggerPrinter.BOUNDING_BOX <= endRay.x && worldPositionEntity.x + MouserLoggerPrinter.BOUNDING_BOX >= beginRay.x)
+			if ((worldPositionEntity.x + MouserLoggerPrinter.BOUNDING_BOX <= endRay.x
+					&& worldPositionEntity.x + MouserLoggerPrinter.BOUNDING_BOX >= beginRay.x)
 					|| (worldPositionEntity.x - MouserLoggerPrinter.BOUNDING_BOX <= endRay.x
 							&& worldPositionEntity.x - MouserLoggerPrinter.BOUNDING_BOX >= beginRay.x)
 					|| (worldPositionEntity.y + MouserLoggerPrinter.BOUNDING_BOX <= endRay.y
