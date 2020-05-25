@@ -98,6 +98,8 @@ public class MouseLogger implements IMouseBehaviour {
 			Vector3f rbfWorld = Vector3f.add(entity.getPositions(), bbox.get(7), null);
 			List<Vector3f> vectorsAsFaces = Arrays.asList(ltnWorld,lbnWorld,rbnWorld,ltfWorld,lbfWorld,lbnWorld,rtnWorld,rbnWorld,rbfWorld,
 					rtfWorld,rbfWorld,lbfWorld,ltfWorld,ltnWorld,rtnWorld,rbnWorld,rbfWorld,lbfWorld);
+			
+			boolean matched = false;
 			for(int i=0; i<vectorsAsFaces.size();i+=3) {
 				Vector3f originFace = vectorsAsFaces.get(i+1);
 				Vector3f uPoint = vectorsAsFaces.get(i);
@@ -115,18 +117,36 @@ public class MouseLogger implements IMouseBehaviour {
 				float k = cosThetaFromNormal / cosThetaFromRay;
 				Vector3f intersect = new Vector3f(this.ray.x, this.ray.y, this.ray.z);
 				intersect.scale(k);
+				Vector3f rayIntersectToWorld = Vector3f.add(camPos, intersect, null);
 				if(k >= 0) {
-					this.mouserLoggerPrinter.print3DVectors("3DClipped",
-							Arrays.asList(camPos, Vector3f.add(camPos, intersect, null)), null, GL11.GL_POINTS);
-					this.mouserLoggerPrinter.print3DVectors("3DClippedRef",
-							Arrays.asList(originFace, Vector3f.add(camPos, intersect, null)), new Vector4f(0,0,0,1), GL11.GL_LINES);
+					double roundedRayX = Math.floor(rayIntersectToWorld.x *100);
+					double roundedRayY =  Math.floor(rayIntersectToWorld.y *100);
+					double roundedRayZ =  Math.floor(rayIntersectToWorld.z *100);
+					double uPointX =  Math.floor(uPoint.x *100);
+					double uPointY =  Math.floor(uPoint.y *100);
+					double uPointZ =  Math.floor(uPoint.z *100);
+					double vPointX =  Math.floor(vPoint.x *100);
+					double vPointY =  Math.floor(vPoint.y *100);
+					double vPointZ =  Math.floor(vPoint.z *100);
+					if(roundedRayX >= Math.min(uPointX, vPointX) && roundedRayX <= Math.max(uPointX, vPointX) && 
+							roundedRayY >= Math.min(uPointY, vPointY) && roundedRayY <= Math.max(uPointY, vPointY) && 
+									roundedRayZ >= Math.min(uPointZ, vPointZ) && roundedRayZ <= Math.max(uPointZ, vPointZ)) {
+						this.mouserLoggerPrinter.print3DVectors("3DClipped",
+								Arrays.asList(camPos, Vector3f.add(camPos, intersect, null)), null, GL11.GL_POINTS);
+						this.mouserLoggerPrinter.print3DVectors("3DClippedRef",
+								Arrays.asList(originFace, Vector3f.add(camPos, intersect, null)), new Vector4f(0,0,0,1), GL11.GL_LINES);
+						matched = true;
+					}
 				}
-				
 			}
+			if(matched) {
+				filteredEntities.add(entity);
+			}
+			
 			// end
 
-			filteredEntities = oldway(entity, MouseRayWorldCoord, ltnWorld, rtnWorld, lbnWorld, rbnWorld, ltfWorld,
-					rtfWorld, lbfWorld, rbfWorld);
+		//	filteredEntities = oldway(entity, MouseRayWorldCoord, ltnWorld, rtnWorld, lbnWorld, rbnWorld, ltfWorld,
+		//			rtfWorld, lbfWorld, rbfWorld);
 		}
 
 		this.entities = filteredEntities;
