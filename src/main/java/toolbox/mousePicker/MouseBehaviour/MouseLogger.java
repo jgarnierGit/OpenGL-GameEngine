@@ -7,9 +7,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import javax.swing.event.ListSelectionEvent;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjglx.util.vector.Matrix4f;
@@ -20,6 +23,7 @@ import entities.Camera;
 import entities.EntityTutos;
 import renderEngine.Loader;
 import renderEngine.MasterRenderer;
+import renderEngine.RenderingParameters;
 import toolbox.CoordinatesSystemManager;
 import toolbox.Maths;
 import toolbox.mousePicker.MouseInputListener;
@@ -77,6 +81,15 @@ public class MouseLogger implements IMouseBehaviour {
 		this.mouserLoggerPrinter.printCameraBBox();
 		this.mouserLoggerPrinter.updateTransparency(this.entities,
 				Arrays.asList("bboxEntities", "bboxEntitiesPlainCategColor"));
+		if(!this.entities.isEmpty()) {
+			//TODO if I want to override color from an entity, it means it must process set separation and creation.
+			this.mouserLoggerPrinter.flemme(Arrays.asList(this.entities.get(0)), Arrays.asList("bboxEntitiesPlainCategColor"));
+			Optional<RenderingParameters> param = this.entities.get(0).getRenderingParameters("bboxEntitiesPlainCategColor");
+			/**param.ifPresent(paramFirst -> {
+				paramFirst.overrideEachColor(new Vector4f(1f,1f,1f,1f));
+			});**/
+		}
+		
 		filterByRayPromixity(ray);
 
 		// rayCasting(ray);
@@ -85,6 +98,7 @@ public class MouseLogger implements IMouseBehaviour {
 
 	private void filterEntitiesByBboxIntersection() {
 		Vector3f MouseRayWorldCoord = Vector3f.add(camPos, this.ray, null);
+		TreeMap<Float, EntityTutos> filteredByDistanceEntities = new TreeMap<>();
 		ArrayList<EntityTutos> filteredEntities = new ArrayList<>();
 		for (EntityTutos entity : this.entities) {
 			List<Vector3f> bbox = entity.getBoundingBox();
@@ -99,7 +113,7 @@ public class MouseLogger implements IMouseBehaviour {
 			List<Vector3f> vectorsAsFaces = Arrays.asList(ltnWorld,lbnWorld,rbnWorld,ltfWorld,lbfWorld,lbnWorld,rtnWorld,rbnWorld,rbfWorld,
 					rtfWorld,rbfWorld,lbfWorld,ltfWorld,ltnWorld,rtnWorld,rbnWorld,rbfWorld,lbfWorld);
 			
-			boolean matched = false;
+			boolean added = false;
 			for(int i=0; i<vectorsAsFaces.size();i+=3) {
 				Vector3f originFace = vectorsAsFaces.get(i+1);
 				Vector3f uPoint = vectorsAsFaces.get(i);
@@ -135,20 +149,21 @@ public class MouseLogger implements IMouseBehaviour {
 								Arrays.asList(camPos, Vector3f.add(camPos, intersect, null)), null, GL11.GL_POINTS);
 						this.mouserLoggerPrinter.print3DVectors("3DClippedRef",
 								Arrays.asList(originFace, Vector3f.add(camPos, intersect, null)), new Vector4f(0,0,0,1), GL11.GL_LINES);
-						matched = true;
+						if(!added) {
+							added = true;
+							filteredByDistanceEntities.put(intersect.length(), entity);
+						}
 					}
 				}
 			}
-			if(matched) {
-				filteredEntities.add(entity);
-			}
+			
 			
 			// end
 
 		//	filteredEntities = oldway(entity, MouseRayWorldCoord, ltnWorld, rtnWorld, lbnWorld, rbnWorld, ltfWorld,
 		//			rtfWorld, lbfWorld, rbfWorld);
 		}
-
+		filteredEntities.addAll(filteredByDistanceEntities.values());
 		this.entities = filteredEntities;
 
 	}

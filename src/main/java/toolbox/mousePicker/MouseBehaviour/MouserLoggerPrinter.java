@@ -261,8 +261,8 @@ public class MouserLoggerPrinter {
 		frustrumPlainParams.addGlState(GL11.GL_BLEND, true);
 		frustrumParams.setRenderMode(GL11.GL_LINES);
 		frustrumPlainParams.setRenderMode(GL11.GL_TRIANGLES);
-		//frustrumPlainParams.renderAfter("bboxEntitiesPlainCategColor");
-		frustrumPlainParams.renderLast();
+		frustrumPlainParams.renderBefore("bboxEntitiesPlainCategColor");
+		//frustrumPlainParams.renderLast();
 		frustrumPlain.setColor(MASK_COLOR);
 
 		SimpleGeom3D frustrumPlainInside = frustrumPlain.copy("frustrumPlainInside");
@@ -663,6 +663,31 @@ public class MouserLoggerPrinter {
 				if (geomMatched == null) {
 					geomMatched = uniqueGeomMapping.get(param.getGeom());
 					geomMatched.getRenderingParameters().overrideGlobalTransparency(1f);
+					geomMatched.getRenderingParameters().renderFirst();
+				}
+				geomMatched.getRenderingParameters().addEntity(entity, entity.getPositions(), 0, 0, 0, 1);
+				param.removeEntity(entity);
+			}
+		}
+		for (ISimpleGeom entry : uniqueGeomMapping.values()) {
+			geoms.add((SimpleGeom) entry);
+		}
+	}
+	
+	public void flemme(List<EntityTutos> entities, List<String> aliases) {
+		HashMap<ISimpleGeom, ISimpleGeom> uniqueGeomMapping = new HashMap<>();
+		for (EntityTutos entity : entities) {
+			List<RenderingParameters> nonConcurrentParams = new ArrayList<>();
+			nonConcurrentParams.addAll(entity.getRenderingParameters());
+			for (RenderingParameters param : nonConcurrentParams) {
+				if (!aliases.isEmpty() && !aliases.contains(param.getAlias())) {
+					continue;
+				}
+				ISimpleGeom geomMatched = uniqueGeomMapping.putIfAbsent(param.getGeom(),
+						param.getGeom().copy("matchedPicker"));
+				if (geomMatched == null) {
+					geomMatched = uniqueGeomMapping.get(param.getGeom());
+					geomMatched.getRenderingParameters().overrideEachColor(new Vector4f(1,1,1,1));
 					geomMatched.getRenderingParameters().renderFirst();
 				}
 				geomMatched.getRenderingParameters().addEntity(entity, entity.getPositions(), 0, 0, 0, 1);

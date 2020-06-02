@@ -51,6 +51,15 @@ public abstract class Entity {
 		return this.renderingParameters;
 	}
 	
+	public Optional<RenderingParameters> getRenderingParameters(String alias) {
+		for(RenderingParameters param : this.renderingParameters) {
+			if(param.getAlias().equals(alias)) {
+				return Optional.of(param);
+			}
+		}
+		return Optional.empty();
+	}
+	
 	public void setBoundingBox(List<Vector3f> boundingBox) {
 		this.boundingBox = boundingBox;
 	}
