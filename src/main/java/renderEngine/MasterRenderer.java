@@ -1,6 +1,7 @@
 package renderEngine;
 
 import java.io.IOException;
+import java.nio.Buffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -199,7 +200,7 @@ public class MasterRenderer {
 	public static IntBuffer storeDataInIntBuffer(int[] data) {
 		IntBuffer buffer = BufferUtils.createIntBuffer(data.length);
 		buffer.put(data);
-		buffer.flip();
+		((Buffer) buffer).flip();
 		return buffer;
 	}
 

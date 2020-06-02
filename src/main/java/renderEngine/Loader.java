@@ -2,6 +2,7 @@ package renderEngine;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -142,7 +143,7 @@ public class Loader {
 				decoder.decode(imageByteBuffer, decoder.getWidth()*4,PNGDecoder.RGBA);
 				GL11.glTexImage2D(GL13.GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL11.GL_RGBA, decoder.getWidth(),
 						decoder.getHeight(), 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE,
-						(ByteBuffer) imageByteBuffer.flip());
+						(ByteBuffer) ((Buffer) imageByteBuffer).flip());
 				GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
 				
 				GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
@@ -243,7 +244,7 @@ public class Loader {
 		// create direct ByteBuffer then cast it as float buffer.
 		FloatBuffer buffer = BufferUtils.createFloatBuffer(arrayList.length);
 		buffer.put(arrayList);
-		buffer.flip();
+		((Buffer) buffer).flip();
 		return buffer;
 	}
 
@@ -273,7 +274,7 @@ public class Loader {
 	private IntBuffer storeDataInIntBuffer(int[] data) {
 		IntBuffer buffer = BufferUtils.createIntBuffer(data.length);
 		buffer.put(data);
-		buffer.flip();
+		((Buffer) buffer).flip();
 		return buffer;
 	}
 }

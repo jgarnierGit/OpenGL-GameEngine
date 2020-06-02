@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.Buffer;
 import java.nio.FloatBuffer;
 
 import org.lwjgl.BufferUtils;
@@ -65,7 +66,7 @@ public abstract class ShaderProgram {
 	    
 	    protected void loadMatrix(int location, Matrix4f matrix) {
 	    	matrix.store(matrixBuffer);
-	    	matrixBuffer.flip();
+	    	((Buffer) matrixBuffer).flip();
 	    	GL20.glUniformMatrix4fv(location, false, matrixBuffer);
 	    }
 	     
