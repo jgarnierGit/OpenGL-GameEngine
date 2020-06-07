@@ -50,10 +50,12 @@ public class MasterRenderer {
 	private StaticShader shader;
 	private EntityRenderer renderer;
 	private TerrainRenderer terrainRenderer;
-	private TerrainShader terrainShader = new TerrainShader();
+	private TerrainShader terrainShader;
 	private Draw3DRenderer draw3DRenderer;
 	private Draw2DRenderer draw2DRenderer;
 	private List<Model3D> terrains = new ArrayList<>();
+	private  Camera camera;
+	private Loader loader;
 	
 	private SkyboxRenderer skyboxRender;
 	
@@ -61,15 +63,29 @@ public class MasterRenderer {
 	
 	private HashMap<Model3D, List<EntityTutos>> entities = new HashMap<>();
 	
-	public MasterRenderer(Loader loader, Camera camera) throws IOException {
-		shader = new StaticShader();
+	private MasterRenderer(Loader loader, Camera camera, StaticShader shader, EntityRenderer renderer,Draw3DRenderer draw3DRenderer, Draw2DRenderer draw2DRenderer, TerrainShader terrainShader) {
+		this.loader =loader;
+		this.camera = camera;
+		this.draw3DRenderer = draw3DRenderer;
+		this.draw2DRenderer = draw2DRenderer;
+		this.renderer = renderer;
+		this.shader = shader;
+		this.terrainShader = terrainShader;
+	}
+	
+	public static MasterRenderer create(Camera camera) throws IOException {
+		StaticShader shader = new StaticShader();
 		enableCulling();
-		createProjectionMatrix();
-		renderer = new EntityRenderer(shader, projectionMatrix);
-		terrainRenderer = new TerrainRenderer(terrainShader, projectionMatrix);
-		skyboxRender = new SkyboxRenderer(loader, projectionMatrix);
-		draw3DRenderer = new Draw3DRenderer(camera, projectionMatrix);
-		draw2DRenderer = new Draw2DRenderer();
+		Matrix4f projectionMatrix = createProjectionMatrix();
+		EntityRenderer renderer = new EntityRenderer(shader, projectionMatrix);
+		//terrainRenderer = new TerrainRenderer(terrainShader, projectionMatrix);
+		//skyboxRender = new SkyboxRenderer(loader, projectionMatrix); TODO extract
+		Draw3DRenderer draw3DRenderer = new Draw3DRenderer(camera, projectionMatrix);
+		Draw2DRenderer draw2DRenderer = new Draw2DRenderer();
+		TerrainShader terrainShader = new TerrainShader();
+		Loader loader = new Loader();
+		
+		return new MasterRenderer(loader, camera, shader, renderer, draw3DRenderer, draw2DRenderer, terrainShader);
 	}
 	
 	public Draw3DRenderer get3DRenderer() {
@@ -83,6 +99,10 @@ public class MasterRenderer {
 	
 	public Matrix4f getProjectionMatrix() {
 		return projectionMatrix;
+	}
+	
+	public Loader getLoader() {
+		return this.loader;
 	}
 
 
@@ -121,7 +141,7 @@ public class MasterRenderer {
 		
 	}
 	
-	public void render(List<Light> lights, Camera camera) {
+	public void render(List<Light> lights) {
 		//updateProjectionInTime();
 		prepare();
 		shader.start();
@@ -130,13 +150,13 @@ public class MasterRenderer {
 		shader.loadLightsColor(lights);
 		renderer.render(entities);
 		shader.stop();
-		terrainShader.start();
+	/**	terrainShader.start();
 		terrainShader.loadSkyColour(RED, GREEN, BLUE);
 		terrainShader.loadViewMatrix(camera);
 		terrainShader.loadLightsColor(lights);
 		terrainRenderer.render(terrains);
-		terrainShader.stop();
-		skyboxRender.render(camera,RED, GREEN, BLUE);
+		terrainShader.stop();**/
+		//skyboxRender.render(camera,RED, GREEN, BLUE);
 		draw3DRenderer.render();
 		draw2DRenderer.render();
 		terrains.clear();
@@ -164,9 +184,10 @@ public class MasterRenderer {
 	
 	public void cleanUp() {
 		shader.cleanUp();
-		terrainShader.cleanUp();
+	//	terrainShader.cleanUp();
 		draw3DRenderer.cleanUp();
 		draw2DRenderer.cleanUp();
+		loader.cleanUp();
 	}
 	
 	public void prepare() {
@@ -176,18 +197,19 @@ public class MasterRenderer {
 
 	}
 	
-	private void createProjectionMatrix() {
+	private static Matrix4f createProjectionMatrix() {
 		float y_scale = (float)  ((1f / Math.tan(Math.toRadians(FOV/ 2f))) * ASPECT_RATIO);
 		float x_scale = y_scale / ASPECT_RATIO;
 		float frustum_length = FAR_PLANE - NEAR_PLANE;
 		
-		projectionMatrix = new Matrix4f();
+		Matrix4f projectionMatrix = new Matrix4f();
 		projectionMatrix.m00 = x_scale;
 		projectionMatrix.m11 = y_scale;
 		projectionMatrix.m22 = -((FAR_PLANE + NEAR_PLANE) / frustum_length);
 		projectionMatrix.m23 = -1;
 		projectionMatrix.m32 =  -((2 * NEAR_PLANE * FAR_PLANE) / frustum_length);
 		projectionMatrix.m33 = 0;
+		return projectionMatrix;
 	}
 	
 	
