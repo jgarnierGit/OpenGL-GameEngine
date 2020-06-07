@@ -108,7 +108,7 @@ public class DisplayManager {
 	 * Timer has changed between lwjgl 2 and 3, now and because java is much stronger on time consistency , we can use direct function.
 	 * @return
 	 */
-	private static double getCurrentTime() {
+	public static double getCurrentTime() {
 		return glfwGetTime() * 1000;
 	}
 
