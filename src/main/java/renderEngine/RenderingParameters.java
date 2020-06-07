@@ -191,6 +191,8 @@ public class RenderingParameters implements IRenderingParameters{
 	 * add GL constant to render current object. Each renderMode added are rendered
 	 * simultaneously.
 	 * 
+	 * TODO only GL_POINTS is compatibles with other ones. Transfer from GL_LINES to GL_TRIANGLES needs new points ordering.
+	 * 
 	 * @param glRenderMode (GL11.GL_POINTS / GL_LINES / GL_TRIANGLES and subtypes)
 	 */
 	public void setRenderMode(int glRenderMode) {
@@ -215,6 +217,7 @@ public class RenderingParameters implements IRenderingParameters{
 	}
 
 	/**
+	 * TODO hide from this interface.
 	 * Unset each Gl_State when rendering is done.
 	 */
 	public void disableRenderOptions() {

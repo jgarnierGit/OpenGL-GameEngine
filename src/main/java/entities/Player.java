@@ -1,9 +1,13 @@
 package entities;
 
 import static org.lwjgl.glfw.GLFW.*;
+
+import java.util.Optional;
+
 import org.lwjglx.util.vector.Vector3f;
 
 import modelsLibrary.Terrain;
+import modelsLibrary.ITerrain;
 import modelsManager.Model3D;
 import renderEngine.DisplayManager;
 
@@ -16,14 +20,14 @@ public class Player extends EntityTutos {
 	private float currentSpeed = 0;
 	private float currentTurnSpeed = 0;
 	private float upwardSpeed = 0;
+	private float falling = 0;
 	private boolean isInAir = false;
 
 	public Player(Model3D model, Vector3f positions, float rotX, float rotY, float rotZ, float scale) {
 		super(model, positions, rotX, rotY, rotZ, scale);
-		// TODO Auto-generated constructor stub
 	}
 	
-	public void move(Terrain terrain) {
+	public void move(ITerrain terrain) {
 		checkInputs();
 		super.increaseRotation(0, currentTurnSpeed * DisplayManager.getFrameTimeSeconds(), 0);
 		float distance = currentSpeed * DisplayManager.getFrameTimeSeconds();
@@ -32,12 +36,23 @@ public class Player extends EntityTutos {
 		super.increasePosition(dx, 0, dz);
 		upwardSpeed -= GRAVITY * DisplayManager.getFrameTimeSeconds();
 		super.increasePosition(0, upwardSpeed * DisplayManager.getFrameTimeSeconds(), 0);
-		float terrainHeight = terrain.getHeight(super.getPositions().x, super.getPositions().z);
-		if(super.getPositions().y < terrainHeight) {
-			upwardSpeed = 0;
-			super.getPositions().y = terrainHeight;
-			isInAir = false;
+		Optional<Float> terrainHeight = terrain.getHeight(this.getPositions().x, this.getPositions().z);
+		if(terrainHeight.isPresent()) {
+			float elevation = terrainHeight.get();
+			if(this.getPositions().y < elevation) {
+				upwardSpeed = 0;
+				this.getPositions().y = elevation;
+				isInAir = false;
+				falling = 0;
+			}
 		}
+		else {
+			falling += DisplayManager.getFrameTimeSeconds();
+			if(falling > 3) {
+				this.setPositions(new Vector3f(0,10,0));
+			}
+		}
+		
 	}
 	
 	private void jump() {

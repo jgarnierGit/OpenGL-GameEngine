@@ -23,6 +23,11 @@ import modelsManager.OBJUtils;
 import renderEngine.Loader;
 import toolbox.Maths;
 
+/**
+ * TODO try to change extends for RegularElevationTerrain3D
+ * @author chezmoi
+ *
+ */
 public class Terrain extends Model3D {
 	private static final float SIZE = 800;
 	private static final float MAX_HEIGHT = 40;
