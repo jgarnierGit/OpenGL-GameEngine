@@ -13,10 +13,11 @@ import entities.UserInputHandler;
  * @author chezmoi
  *
  */
-public class MouseInputListener {
+public class MouseInputListener extends UserInputHandler{
 	private List<Runnable> runners;
 	
 	public MouseInputListener() {
+		super();
 		this.runners = new ArrayList<>();
 	}
 

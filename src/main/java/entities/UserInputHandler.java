@@ -3,46 +3,66 @@ package entities;
 import static org.lwjgl.glfw.GLFW.*;
 
 import renderEngine.DisplayManager;
+import toolbox.mousePicker.MouseInputListener;
 
 public class UserInputHandler {
 
-	private static final boolean[] inputs = new boolean[65535];
-	private static final int[] activeCounter = new int[65535];
-	private static boolean isButtonPressedNow = false;
-	private static float mouseXposition = 0;
-	private static float mouseYposition = 0;
-	private static float lastMouseXPos = 0;
-	private static float lastMouseYPos = 0;
-	private static float scrollValue = 0;
-	private static boolean isScrollingUp = false;
+	private final boolean[] inputs;
+	private final int[] activeCounter;
+	private boolean isButtonPressedNow;
+	private float mouseXposition;
+	private float mouseYposition;
+	private float lastMouseXPos;
+	private float lastMouseYPos;
+	private float scrollValue;
+	private boolean isScrollingUp;
+	private static UserInputHandler userInputHandler = null;
 
-	public static void updateInputHandler() {
-		updateKeyboardInputHandler();
-		updateMouseInputHandler();
-		updateScrollInputHandler();
+	private UserInputHandler() {
+		inputs = new boolean[65535];
+		activeCounter = new int[65535];
+		isButtonPressedNow = false;
+		mouseXposition = 0;
+		mouseYposition = 0;
+		lastMouseXPos = 0;
+		lastMouseYPos = 0;
+		scrollValue = 0;
+		isScrollingUp = false;
 	}
-	
-	private static void updateScrollInputHandler() {
+
+	/**
+	 * Lazy-loading singleton is enough as inputListener can only be performed on main thread
+	 * @return
+	 */
+	public static UserInputHandler create() {
+		if(userInputHandler == null) {
+			userInputHandler = new UserInputHandler();
+			userInputHandler.initKeyboardInputHandler();
+			userInputHandler.initMouseInputHandler();
+			userInputHandler.initScrollInputHandler();
+		}
+		return userInputHandler;
+	}
+
+	private void initScrollInputHandler() {
 		glfwSetScrollCallback(DisplayManager.WINDOW_ID, (long window, double xoffset, double yoffset) -> {
 			isScrollingUp = yoffset > 0;
-			if(scrollValue != 0 && isScrollingUp != (scrollValue > 0)) {
+			if (scrollValue != 0 && isScrollingUp != (scrollValue > 0)) {
 				scrollValue = 0;
-			}
-			else {
-				scrollValue +=  (float) yoffset;
+			} else {
+				scrollValue += (float) yoffset;
 			}
 		});
 	}
-	
-	private static void updateMouseInputHandler() {
+
+	private void initMouseInputHandler() {
 		updateMousePosition();
 		glfwSetMouseButtonCallback(DisplayManager.WINDOW_ID, (long window, int button, int action, int mods) -> {
 			// no GLFW_REPEAT for mouse inputs
-			if(action == GLFW_PRESS) {
+			if (action == GLFW_PRESS) {
 				inputs[button] = true;
-				isButtonPressedNow = true;				
-			}
-			else {
+				isButtonPressedNow = true;
+			} else {
 				resetCount(button);
 				inputs[button] = false;
 				isButtonPressedNow = false;
@@ -50,80 +70,79 @@ public class UserInputHandler {
 		});
 	}
 
-	private static void updateKeyboardInputHandler() {
-		glfwSetKeyCallback(DisplayManager.WINDOW_ID,(long window, int key, int scancode, int action, int mods) -> {
-			// GLFW_REPEAT returned after a small delay.	
-			if(action != GLFW_RELEASE) {
-					inputs[key] = true;
-					isButtonPressedNow = action == GLFW_PRESS;
-				}
-				else {
-					resetCount(key);
-					inputs[key] = false;
-					isButtonPressedNow = false;
-				}
+	private void initKeyboardInputHandler() {
+		glfwSetKeyCallback(DisplayManager.WINDOW_ID, (long window, int key, int scancode, int action, int mods) -> {
+			// GLFW_REPEAT returned after a small delay.
+			if (action != GLFW_RELEASE) {
+				inputs[key] = true;
+				isButtonPressedNow = action == GLFW_PRESS;
+			} else {
+				resetCount(key);
+				inputs[key] = false;
+				isButtonPressedNow = false;
+			}
 		});
 	}
-	
-	private static void incrementCount(int button) {
-		if(!inputs[button]) {
+
+	private void incrementCount(int button) {
+		if (!inputs[button]) {
 			activeCounter[button] = 1;
-		}
-		else {
+		} else {
 			activeCounter[button] += 1;
 		}
 	}
-	
-	private static void resetCount(int button) {
-		activeCounter[button] =  0;
+
+	private void resetCount(int button) {
+		activeCounter[button] = 0;
 	}
-	
-	public static boolean isPressed() {
+
+	public boolean isPressed() {
 		return isButtonPressedNow;
 	}
-	
+
 	/**
 	 * return true while button is pressed
+	 * 
 	 * @param button
 	 * @return
 	 */
-	public static boolean activateOnPress(int button) {
+	public boolean activateOnPress(int button) {
 		return inputs[button];
 	}
-	
+
 	/**
 	 * @param button
 	 * @return code{true} only once when button is pressed
 	 */
-	public static boolean activateOnPressOneTime(int button) {
-		if(isButtonPressedNow) {
+	public boolean activateOnPressOneTime(int button) {
+		if (isButtonPressedNow) {
 			incrementCount(button);
 			return inputs[button] && activeCounter[button] == 1;
 		}
 		return false;
 	}
 
-	public static float getMouseXpos() {
+	public float getMouseXpos() {
 		return mouseXposition;
 	}
-	
-	public static float getMouseYpos() {
+
+	public float getMouseYpos() {
 		return mouseYposition;
 	}
-	
-	public static float getMouseDeltaX() {
+
+	public float getMouseDeltaX() {
 		return mouseXposition - lastMouseXPos;
 	}
-	
-	public static float getMouseDeltaY() {
+
+	public float getMouseDeltaY() {
 		return mouseYposition - lastMouseYPos;
 	}
-	
-	public static float getScrollValue() {
+
+	public float getScrollValue() {
 		return scrollValue;
 	}
 
-	public static void updateMousePosition() {
+	public void updateMousePosition() {
 		glfwSetCursorPosCallback(DisplayManager.WINDOW_ID, (long window, double xpos, double ypos) -> {
 			lastMouseXPos = mouseXposition;
 			lastMouseYPos = mouseYposition;
