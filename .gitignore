@@ -1,0 +1,8 @@
+.project
+.classpath
+bin
+*.log
+target
+.settings
+*.blend1
+.git

@@ -1,0 +1,9 @@
+#version 400
+
+in vec4 pass_color;
+
+out vec4 out_Color;
+
+void main(void){
+    out_Color = pass_color; //vec4(0.6f, 1.0f, 0.6f, 1.0f);
+}
