@@ -12,16 +12,27 @@ public class Camera {
 	private float distanceFromPlayer = 70;
 	private float angleAroundPlayer;
 
-	private Vector3f position = new Vector3f(0,40,-20);
-	private float pitch = 20;
-	private float yaw = 50;
-	private float roll = 0;
+	private Vector3f position;
+	private float pitch;
+	private float yaw;
+	private float roll;
 
-	private Player player;
+	private Entity player;
 
-
-	public Camera(Player player) {
+	public Camera() {
+		position = new Vector3f(0,10,50);
+		pitch = 20;
+		yaw = 0;
+		roll = 0;
+	}
+	
+	public Camera(Entity player) {
+		this();
 		this.player = player;
+	}
+	
+	public void attachToEntity(Entity entity) {
+		player = entity;
 	}
 
 	public Vector3f getPosition() {
@@ -53,6 +64,22 @@ public class Camera {
 	 */
 	public float getRoll() {
 		return roll;
+	}
+	
+	public void updateYaw(float angle) {
+		yaw += angle;
+	}
+	
+	public void updateRoll(float angle) {
+		roll += angle;
+	}
+	
+	public void updatePitch(float angle) {
+		pitch += angle;
+	}
+	
+	public void updatePosition(Vector3f position) {
+		this.position=position;
 	}
 
 	private void calculateCameraPosition(Terrain terrain, float horizontalDist, float verticalDist) {
