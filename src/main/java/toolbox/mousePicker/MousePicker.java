@@ -1,5 +1,6 @@
 package toolbox.mousePicker;
 
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_W;
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
 
 import java.util.ArrayList;
@@ -12,7 +13,8 @@ import org.lwjglx.util.vector.Vector3f;
 import org.lwjglx.util.vector.Vector4f;
 
 import entities.Camera;
-import entities.UserInputHandler;
+import inputListeners.MouseInputListener;
+import inputListeners.UserInputHandler;
 import renderEngine.DisplayManager;
 import toolbox.Maths;
 import toolbox.mousePicker.MouseBehaviour.IMouseBehaviour;
@@ -39,28 +41,29 @@ public class MousePicker {
 		// currentRay has coordinate near world(0,0,0) : has to be used as a delta to
 		// apply to camera position.
 		Vector3f currentRay = calculateMouseRay();
-		this.mouseInputListener.addRunner(() -> log());
-		
+		this.mouseInputListener.addRunnerOnUniquePress(GLFW_MOUSE_BUTTON_LEFT, () -> log());
+
 		for (IMouseBehaviour behaviour : mouseBehaviours) {
 			behaviour.process(currentRay);
 		}
 	}
 
 	private void log() {
-			float mouseX = UserInputHandler.getMouseXpos();
-			float mouseY = UserInputHandler.getMouseYpos();
-			System.out.println("ViewPort Space [" + mouseX + ", " + mouseY + "]");
-			Vector2f normalizedCoords = getNormalizedDeviceCoords(mouseX, mouseY);
-			System.out.println("Normalized device Space [" + normalizedCoords.x + ", " + normalizedCoords.y + "]");
-			Vector4f clipCoords = new Vector4f(normalizedCoords.x, normalizedCoords.y, -1f, 1f);
-			System.out.println("Homogeneous clip Space [" + clipCoords.x + ", " + clipCoords.y + ", " + clipCoords.z
-					+ ", " + clipCoords.w + "]");
-			Vector4f eyeCoords = toEyeCoords(clipCoords);
-			System.out.println(
-					"Eye Space [" + eyeCoords.x + ", " + eyeCoords.y + ", " + eyeCoords.z + ", " + eyeCoords.w + "]");
-			Vector3f worldCoords = toWorldCoords(eyeCoords);
-			System.out.println("World Space [" + worldCoords.x + ", " + worldCoords.y + ", " + worldCoords.z + "]");
-			System.out.println("-----");
+		UserInputHandler inputHandler = this.mouseInputListener.getUserInputHandler();
+		float mouseX = inputHandler.getMouseXpos();
+		float mouseY = inputHandler.getMouseYpos();
+		System.out.println("ViewPort Space [" + mouseX + ", " + mouseY + "]");
+		Vector2f normalizedCoords = getNormalizedDeviceCoords(mouseX, mouseY);
+		System.out.println("Normalized device Space [" + normalizedCoords.x + ", " + normalizedCoords.y + "]");
+		Vector4f clipCoords = new Vector4f(normalizedCoords.x, normalizedCoords.y, -1f, 1f);
+		System.out.println("Homogeneous clip Space [" + clipCoords.x + ", " + clipCoords.y + ", " + clipCoords.z + ", "
+				+ clipCoords.w + "]");
+		Vector4f eyeCoords = toEyeCoords(clipCoords);
+		System.out.println(
+				"Eye Space [" + eyeCoords.x + ", " + eyeCoords.y + ", " + eyeCoords.z + ", " + eyeCoords.w + "]");
+		Vector3f worldCoords = toWorldCoords(eyeCoords);
+		System.out.println("World Space [" + worldCoords.x + ", " + worldCoords.y + ", " + worldCoords.z + "]");
+		System.out.println("-----");
 	}
 
 	public void addMouseBehaviour(IMouseBehaviour mouseBehaviour) {
@@ -68,8 +71,9 @@ public class MousePicker {
 	}
 
 	private Vector3f calculateMouseRay() {
-		float mouseX = UserInputHandler.getMouseXpos();
-		float mouseY = UserInputHandler.getMouseYpos();
+		UserInputHandler inputHandler = this.mouseInputListener.getUserInputHandler();
+		float mouseX = inputHandler.getMouseXpos();
+		float mouseY = inputHandler.getMouseYpos();
 		Vector2f normalizedCoords = getNormalizedDeviceCoords(mouseX, mouseY);
 		Vector4f clipCoords = new Vector4f(normalizedCoords.x, normalizedCoords.y, -1f, 1f); // pointing into the screen
 		Vector4f eyeCoords = toEyeCoords(clipCoords);
@@ -77,7 +81,8 @@ public class MousePicker {
 	}
 
 	/**
-	 * Origin of cursor Point becomes the world(0,0,0) 
+	 * Origin of cursor Point becomes the world(0,0,0)
+	 * 
 	 * @param eyeCoords
 	 * @return
 	 */
@@ -92,8 +97,8 @@ public class MousePicker {
 	/**
 	 * 
 	 * @param clipCoords
-	 * @return vec4 with x and y set by mouse coordinate conversion, -1 as z stands for "forward" and 0 as w stands for 
-	 * "not a point a.k.a no depth".
+	 * @return vec4 with x and y set by mouse coordinate conversion, -1 as z stands
+	 *         for "forward" and 0 as w stands for "not a point a.k.a no depth".
 	 */
 	private Vector4f toEyeCoords(Vector4f clipCoords) {
 		Matrix4f invertedProjection = Matrix4f.invert(projectionMatrix, null);

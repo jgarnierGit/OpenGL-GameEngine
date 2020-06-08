@@ -1,13 +1,8 @@
 package entities;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
 import org.lwjglx.util.vector.Vector3f;
 
 import modelsManager.Model3D;
-import renderEngine.RenderingParameters;
 
 public class EntityTutos extends Entity {
 	private Model3D model;

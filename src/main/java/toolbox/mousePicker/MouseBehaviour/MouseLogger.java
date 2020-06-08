@@ -1,5 +1,6 @@
 package toolbox.mousePicker.MouseBehaviour;
 
+import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -21,12 +22,12 @@ import org.lwjglx.util.vector.Vector4f;
 
 import entities.Camera;
 import entities.EntityTutos;
+import inputListeners.MouseInputListener;
 import renderEngine.Loader;
 import renderEngine.MasterRenderer;
 import renderEngine.RenderingParameters;
 import toolbox.CoordinatesSystemManager;
 import toolbox.Maths;
-import toolbox.mousePicker.MouseInputListener;
 
 public class MouseLogger implements IMouseBehaviour {
 	private List<EntityTutos> entities;
@@ -50,7 +51,7 @@ public class MouseLogger implements IMouseBehaviour {
 	@Override
 	public void process(Vector3f normalizedRay) {
 		this.ray = normalizedRay;
-		this.mouseInputListener.addRunner(() -> processPicking());
+		this.mouseInputListener.addRunnerOnUniquePress(GLFW_MOUSE_BUTTON_LEFT, () -> processPicking());
 	}
 
 	public void processEntity(EntityTutos entities) {

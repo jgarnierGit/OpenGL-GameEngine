@@ -1,7 +1,6 @@
 package modelsLibrary;
 
 import java.util.Optional;
-import java.util.logging.Level;
 
 import org.lwjglx.util.vector.Vector3f;
 

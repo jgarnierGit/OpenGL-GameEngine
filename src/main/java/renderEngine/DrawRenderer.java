@@ -143,7 +143,6 @@ public abstract class DrawRenderer implements IDrawRenderer {
 					&& !renderingParam.getDestinationOrderAlias().equals(renderingParam.getAlias());
 		}).collect(Collectors.toCollection(LinkedList::new));
 		List<RenderingParameters> sortedUniqueParams = transformRelativePositionToIndex(uniqueParams,paramsToMove);
-		System.out.println(sortedUniqueParams);
 		return orderRawParams(rawParams, sortedUniqueParams);
 	}
 

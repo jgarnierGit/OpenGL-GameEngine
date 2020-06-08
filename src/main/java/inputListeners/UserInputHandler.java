@@ -1,15 +1,21 @@
-package entities;
+package inputListeners;
 
-import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
+import static org.lwjgl.glfw.GLFW.GLFW_RELEASE;
+import static org.lwjgl.glfw.GLFW.glfwSetCursorPosCallback;
+import static org.lwjgl.glfw.GLFW.glfwSetKeyCallback;
+import static org.lwjgl.glfw.GLFW.glfwSetMouseButtonCallback;
+import static org.lwjgl.glfw.GLFW.glfwSetScrollCallback;
+
+import java.util.logging.Logger;
 
 import renderEngine.DisplayManager;
-import toolbox.mousePicker.MouseInputListener;
 
 public class UserInputHandler {
 
 	private final boolean[] inputs;
 	private final int[] activeCounter;
-	private boolean isButtonPressedNow;
+	private final boolean[] releaseIsEnabled;
 	private float mouseXposition;
 	private float mouseYposition;
 	private float lastMouseXPos;
@@ -17,11 +23,12 @@ public class UserInputHandler {
 	private float scrollValue;
 	private boolean isScrollingUp;
 	private static UserInputHandler userInputHandler = null;
+	private Logger logger;
 
 	private UserInputHandler() {
 		inputs = new boolean[65535];
 		activeCounter = new int[65535];
-		isButtonPressedNow = false;
+		releaseIsEnabled = new boolean[65535];
 		mouseXposition = 0;
 		mouseYposition = 0;
 		lastMouseXPos = 0;
@@ -31,20 +38,23 @@ public class UserInputHandler {
 	}
 
 	/**
-	 * Lazy-loading singleton is enough as inputListener can only be performed on main thread
+	 * Lazy-loading singleton is enough as inputListener can only be performed on
+	 * main thread
+	 * 
 	 * @return
 	 */
 	public static UserInputHandler create() {
-		if(userInputHandler == null) {
+		if (userInputHandler == null) {
 			userInputHandler = new UserInputHandler();
-			userInputHandler.initKeyboardInputHandler();
-			userInputHandler.initMouseInputHandler();
-			userInputHandler.initScrollInputHandler();
+			userInputHandler.logger = Logger.getLogger("UserInputHandler");
 		}
 		return userInputHandler;
 	}
 
-	private void initScrollInputHandler() {
+	/**
+	 * Those 3 update methods as to be called every frame to update inputs states
+	 */
+	private void updateScrollInputHandler() {
 		glfwSetScrollCallback(DisplayManager.WINDOW_ID, (long window, double xoffset, double yoffset) -> {
 			isScrollingUp = yoffset > 0;
 			if (scrollValue != 0 && isScrollingUp != (scrollValue > 0)) {
@@ -55,49 +65,34 @@ public class UserInputHandler {
 		});
 	}
 
-	private void initMouseInputHandler() {
+	private void updateMouseInputHandler() {
 		updateMousePosition();
 		glfwSetMouseButtonCallback(DisplayManager.WINDOW_ID, (long window, int button, int action, int mods) -> {
 			// no GLFW_REPEAT for mouse inputs
 			if (action == GLFW_PRESS) {
 				inputs[button] = true;
-				isButtonPressedNow = true;
 			} else {
 				resetCount(button);
 				inputs[button] = false;
-				isButtonPressedNow = false;
 			}
 		});
 	}
 
-	private void initKeyboardInputHandler() {
+	private void updateKeyboardInputHandler() {
 		glfwSetKeyCallback(DisplayManager.WINDOW_ID, (long window, int key, int scancode, int action, int mods) -> {
 			// GLFW_REPEAT returned after a small delay.
 			if (action != GLFW_RELEASE) {
 				inputs[key] = true;
-				isButtonPressedNow = action == GLFW_PRESS;
+				releaseIsEnabled[key] = true;
 			} else {
 				resetCount(key);
 				inputs[key] = false;
-				isButtonPressedNow = false;
 			}
 		});
 	}
 
-	private void incrementCount(int button) {
-		if (!inputs[button]) {
-			activeCounter[button] = 1;
-		} else {
-			activeCounter[button] += 1;
-		}
-	}
-
 	private void resetCount(int button) {
 		activeCounter[button] = 0;
-	}
-
-	public boolean isPressed() {
-		return isButtonPressedNow;
 	}
 
 	/**
@@ -111,15 +106,29 @@ public class UserInputHandler {
 	}
 
 	/**
+	 * return true when button can be released, then release it.
+	 * 
+	 * @param button
+	 * @return
+	 */
+	public boolean activateOnReleaseOnce(int button) {
+		if (!inputs[button] && releaseIsEnabled[button]) {
+			releaseIsEnabled[button] = false;
+			return true;
+		}
+		return false;
+	}
+
+	/**
 	 * @param button
 	 * @return code{true} only once when button is pressed
 	 */
 	public boolean activateOnPressOneTime(int button) {
-		if (isButtonPressedNow) {
-			incrementCount(button);
-			return inputs[button] && activeCounter[button] == 1;
+		if(!inputs[button]) {
+			return false;
 		}
-		return false;
+		activeCounter[button]++;
+		return inputs[button] && activeCounter[button] == 1;
 	}
 
 	public float getMouseXpos() {
@@ -149,5 +158,11 @@ public class UserInputHandler {
 			mouseXposition = (float) xpos;
 			mouseYposition = (float) ypos;
 		});
+	}
+
+	public void updateUserInputs() {
+		userInputHandler.updateKeyboardInputHandler();
+		userInputHandler.updateMouseInputHandler();
+		userInputHandler.updateScrollInputHandler();
 	}
 }

@@ -1,6 +1,5 @@
 package modelsLibrary;
 
-import java.util.Optional;
 import java.util.logging.Logger;
 
 import renderEngine.Draw3DRenderer;
