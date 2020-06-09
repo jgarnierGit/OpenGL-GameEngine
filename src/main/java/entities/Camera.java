@@ -128,7 +128,6 @@ public class Camera extends InputInteractable {
 			UserInputHandler userInput = inputListener.getUserInputHandler();
 			float ypos = userInput.getMouseDeltaY();
 			pitch -= -ypos * 0.05f;
-			this.logger.log(Level.INFO, "calculatePitch y"+ pitch);
 	}
 
 	private void calculateAngleAroundPlayer() {
@@ -136,7 +135,6 @@ public class Camera extends InputInteractable {
 		float xpos = userInput.getMouseDeltaX();
 		//angleAroundPlayer -= xpos * 0.5f; use it if entity is linked.
 		yaw += xpos * 0.05f;
-		this.logger.log(Level.INFO, "calculateAngleAroundPlayer x"+ yaw);
 	}
 
 	/**
