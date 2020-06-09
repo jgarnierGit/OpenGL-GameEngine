@@ -35,6 +35,7 @@ public abstract class InputListeners {
 	
 	/**
 	 * Add a function to be executed just once when input is pressed.
+	 * @param Integer GLFW.*
 	 * @param function
 	 */
 	public void addRunnerOnUniquePress(Integer glfwInput, Runnable function) {
