@@ -19,8 +19,7 @@ public class RegularElevationTerrain3D extends RegularTerrain3D{
 		heights = new float[definition][definition];
 	}
 
-	@Override
-	protected void generateRegular() {
+	public static RegularElevationTerrain3D generateRegular() {
 		throw new NotImplementedException("");
 		/**for(int gz=0;gz<definition;gz++){
 			for(int gx=0;gx<definition;gx++){
