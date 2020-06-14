@@ -12,9 +12,9 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjglx.util.vector.Matrix4f;
 
-import entities.Camera;
 import entities.EntityTutos;
 import entities.Light;
+import entities.Camera;
 import modelsLibrary.SimpleGeom;
 import modelsManager.Model3D;
 import shaderManager.StaticShader;

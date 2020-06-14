@@ -2,12 +2,7 @@ package shaderManager;
 
 import java.io.IOException;
 
-import org.lwjglx.util.vector.Matrix4f;
-
-import entities.Camera;
-import modelsLibrary.SimpleGeom;
 import renderEngine.Loader.VBOIndex;
-import toolbox.Maths;
 
 public class Draw2DShader extends ShaderProgram {
 	private static final String VERTEX_FILE= "draw2DVertexShader.txt";
