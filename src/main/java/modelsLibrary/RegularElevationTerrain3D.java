@@ -6,6 +6,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.lwjglx.util.vector.Vector2f;
 import org.lwjglx.util.vector.Vector3f;
 
+import entities.Entity;
 import renderEngine.Draw3DRenderer;
 import renderEngine.Loader;
 import toolbox.Maths;
@@ -14,8 +15,8 @@ public class RegularElevationTerrain3D extends RegularTerrain3D{
 	private float[][] heights;
 
 	public RegularElevationTerrain3D(Loader loader, Draw3DRenderer draw3dRenderer, String alias, int size,
-			int definition, int x, int z) {
-		super(loader, draw3dRenderer, alias, size, definition, x, z);
+			int definition, Entity entity) {
+		super(loader, draw3dRenderer, alias, size, definition, entity);
 		heights = new float[definition][definition];
 	}
 

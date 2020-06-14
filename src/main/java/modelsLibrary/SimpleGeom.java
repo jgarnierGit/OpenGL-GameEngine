@@ -5,6 +5,7 @@ import java.util.Arrays;
 import org.apache.commons.lang3.ArrayUtils;
 import org.lwjglx.util.vector.Vector4f;
 
+import entities.Entity;
 import renderEngine.DrawRenderer;
 import renderEngine.Loader;
 import renderEngine.RenderingParameters;
@@ -38,23 +39,24 @@ public abstract class SimpleGeom implements ISimpleGeom {
 	 * copy renderingParameters with empty entities list.
 	 * @param source
 	 */
-	public void copy(SimpleGeom source, String alias) {
+
+	protected void setCopyParams(SimpleGeom source, String alias, Entity entity) {
 		this.loader = source.loader;
 		this.dimension = source.dimension;
 		this.points = ArrayUtils.addAll(source.points);
 		this.colors = ArrayUtils.addAll(source.colors);
 		this.vaoId = loader.loadToVAO(points, this.dimension);
-		this.renderingParameters = new RenderingParameters(source.renderingParameters, this, alias);
+		this.renderingParameters = new RenderingParameters(source.renderingParameters, this, alias, entity);
 		this.drawRenderer = source.drawRenderer;
 	}
 
-	public SimpleGeom(Loader loader2, int dimension, String alias) {
+	public SimpleGeom(Loader loader2, int dimension, String alias, Entity entity) {
 		this.loader = loader2;
 		this.dimension = dimension;
 		this.points = new float[] {};
 		this.colors = new float[] {};
 		this.vaoId = loader.loadToVAO(points, this.dimension);
-		this.renderingParameters = new RenderingParameters(this,alias);
+		this.renderingParameters = new RenderingParameters(this,alias, entity);
 	}
 
 	@Override

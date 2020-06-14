@@ -3,8 +3,8 @@ package renderEngine;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.lwjgl.opengl.GL11;
@@ -12,6 +12,7 @@ import org.lwjglx.util.vector.Vector;
 import org.lwjglx.util.vector.Vector3f;
 import org.lwjglx.util.vector.Vector4f;
 
+import entities.Entity;
 import entities.EntityTutos;
 import entities.SimpleEntity;
 import modelsLibrary.ISimpleGeom;
@@ -20,7 +21,7 @@ public class RenderingParameters implements IRenderingParameters{
 	private Optional<Integer> glRenderMode;
 	private HashMap<Integer, Boolean> glStatesRendering;
 	private ISimpleGeom simpleGeom;
-	private List<SimpleEntity> entities;
+	private List<Entity> entities;
 	private boolean skipEntities;
 	private String alias;
 	private String destinationOrderAlias;
@@ -30,9 +31,10 @@ public class RenderingParameters implements IRenderingParameters{
 	private Optional<Vector4f> overridedColors;
 	private HashMap<Vector, Vector4f> overrideColorsAtIndex;
 
-	private RenderingParameters() {
+	private RenderingParameters(Entity entity) {
 		this.glStatesRendering = new HashMap<>();
 		this.entities = new ArrayList<>();
+		this.entities.add(entity);
 		this.glRenderMode = Optional.empty();
 		this.overridedColors = Optional.empty();
 		this.overrideColorsAtIndex = new HashMap<>();
@@ -45,8 +47,8 @@ public class RenderingParameters implements IRenderingParameters{
 	 * hide this constructor, only way to get a RenderingParameters is by SimpleGeom
 	 * @param simpleGeom
 	 */
-	public RenderingParameters(ISimpleGeom simpleGeom, String alias) {
-		this();
+	public RenderingParameters(ISimpleGeom simpleGeom, String alias, Entity entity) {
+		this(entity);
 		this.simpleGeom = simpleGeom;
 		this.alias= alias; 
 	}
@@ -71,8 +73,8 @@ public class RenderingParameters implements IRenderingParameters{
 	 * @param geomToApply
 	 * @param alias
 	 */
-	public RenderingParameters(RenderingParameters toClone, ISimpleGeom geomToApply, String alias) {
-		this();
+	public RenderingParameters(RenderingParameters toClone, ISimpleGeom geomToApply, String alias, Entity entity) {
+		this(entity);
 		this.alias= alias; 
 		this.simpleGeom = geomToApply;
 		this.destinationOrderAlias = toClone.destinationOrderAlias;
@@ -151,28 +153,26 @@ public class RenderingParameters implements IRenderingParameters{
 	}
 	
 	/**
-	 * add same world transformation (position/rotation/scale) as entity to apply for geom.
+	 * Add same world transformation (position/rotation/scale) as entity to apply for geom.
 	 * @param entity
 	 */
-	public void addEntity(EntityTutos entity) {
-		this.addEntity(entity,entity.getPositions(),entity.getRotX(),entity.getRotY(),entity.getRotZ(),entity.getScale());
+	public void addEntity(Entity entity) {
+		this.addEntity(entity.getPositions(),entity.getRotX(),entity.getRotY(),entity.getRotZ(),entity.getScale());
 	}
 
 	/**
-	 * add entity and override its world transformation (position/rotation/scale) to apply for geom.
-	 * @param entity 
+	 * Create entity with world transformation (position/rotation/scale) to apply for geom.
 	 * @param positions override position given by entity
 	 * @param rotX override rotX given by entity
 	 * @param rotY override rotY given by entity
 	 * @param rotZ override rotZ given by entity
 	 * @param scale override scale given by entity
 	 */
-	public void addEntity(EntityTutos entity, Vector3f positions, float rotX, float rotY, float rotZ, float scale) {
-		entity.addRenderingParameters(this);
+	public void addEntity(Vector3f positions, float rotX, float rotY, float rotZ, float scale) {
 		entities.add(new SimpleEntity(positions, rotX, rotY, rotZ, scale));
 	}
 	
-	public List<SimpleEntity> getEntities() {
+	public List<Entity> getEntities() {
 		return this.entities;
 	}
 
@@ -199,7 +199,7 @@ public class RenderingParameters implements IRenderingParameters{
 		this.glRenderMode = Optional.ofNullable(glRenderMode);
 	}
 	
-	public HashMap<Integer, Boolean> getStatesRendering(){
+	public Map<Integer, Boolean> getStatesRendering(){
 		return this.glStatesRendering;
 	}
 
@@ -274,17 +274,12 @@ public class RenderingParameters implements IRenderingParameters{
 		return true;
 	}
 
-	public void removeEntity(EntityTutos entity) {
-		boolean removed = this.entities.removeIf(simpleEntity -> {
+	public void removeEntity(Entity entity) {
+		this.entities.removeIf(simpleEntity -> {
 			Vector3f posA = simpleEntity.getPositions();
 			Vector3f posB = entity.getPositions();
 			return posA.x == posB.x && posA.y == posB.y && posA.z == posB.z;
 		});
-	/**	if(removed) {
-			if(this.logger.isLoggable(Level.INFO)){
-				this.logger.info("some entities updated from "+ entity.getModel());
-			}
-		}**/
 	}
 
 	public void overrideGlobalTransparency(float transparency) {

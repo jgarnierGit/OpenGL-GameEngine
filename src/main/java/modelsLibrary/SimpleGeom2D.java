@@ -8,28 +8,34 @@ import org.lwjglx.util.vector.Vector;
 import org.lwjglx.util.vector.Vector2f;
 import org.lwjglx.util.vector.Vector4f;
 
+import entities.Entity;
+import entities.SimpleEntity;
 import renderEngine.Draw2DRenderer;
 import renderEngine.Loader;
 import shaderManager.Draw2DShader;
 
 public class SimpleGeom2D extends SimpleGeom {
 	
-	public SimpleGeom2D(Loader loader,Draw2DRenderer draw2DRenderer, String alias) {
-		super(loader, 2, alias);
+	//FIXME 4 constructor is a bit too much.
+	public SimpleGeom2D(Loader loader,Draw2DRenderer draw2DRenderer, String alias, Entity entity) {
+		super(loader, 2, alias, entity);
 		this.drawRenderer = draw2DRenderer;
 	}
 	
-	private SimpleGeom2D(Loader loader, String alias) {
-		super(loader, 2, alias);
+	private SimpleGeom2D(Loader loader, String alias, Entity entity) {
+		super(loader, 2, alias, entity);
 	}
 	
-	@Override
-	public SimpleGeom2D copy(String alias) {
-		SimpleGeom2D copy = new SimpleGeom2D(this.loader, alias);
-		copy.copy(this, alias);
-		return copy;
+	public SimpleGeom2D(Loader loader, Draw2DRenderer draw2DRenderer, String alias) {
+		this(loader, draw2DRenderer, alias, SimpleEntity.createDefaultEntity());
 	}
 
+	@Override
+	public SimpleGeom2D copy(String alias) {
+		SimpleGeom2D copy = new SimpleGeom2D(this.loader, alias, SimpleEntity.createDefaultEntity());
+		copy.setCopyParams(this, alias, SimpleEntity.createDefaultEntity());
+		return copy;
+	}
 	@Override
 	public void addPoint(Vector point) {
 		duplicateLastColor();

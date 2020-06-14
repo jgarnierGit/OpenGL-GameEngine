@@ -2,12 +2,10 @@ package renderEngine;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -20,6 +18,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.powermock.reflect.Whitebox;
 
+import entities.Entity;
 import modelsLibrary.SimpleGeom;
 
 /**
@@ -57,9 +56,9 @@ class DrawRendererTest {
 		Mockito.when(secondGeomMock.getVaoId()).thenReturn(2);
 		thirdGeomMock = Mockito.mock(SimpleGeom.class, Mockito.CALLS_REAL_METHODS);
 		Mockito.when(thirdGeomMock.getVaoId()).thenReturn(3);
-		Whitebox.setInternalState(firstGeomMock, "renderingParameters", new RenderingParameters(firstGeomMock, ""));
-		Whitebox.setInternalState(secondGeomMock, "renderingParameters", new RenderingParameters(secondGeomMock, ""));
-		Whitebox.setInternalState(thirdGeomMock, "renderingParameters", new RenderingParameters(thirdGeomMock, ""));
+		Whitebox.setInternalState(firstGeomMock, "renderingParameters", new RenderingParameters(firstGeomMock, "",Mockito.mock(Entity.class)));
+		Whitebox.setInternalState(secondGeomMock, "renderingParameters", new RenderingParameters(secondGeomMock, "",Mockito.mock(Entity.class)));
+		Whitebox.setInternalState(thirdGeomMock, "renderingParameters", new RenderingParameters(thirdGeomMock, "",Mockito.mock(Entity.class)));
 		geoms.add(firstGeomMock);
 		geoms.add(secondGeomMock);
 		geoms.add(thirdGeomMock);
@@ -665,11 +664,11 @@ class DrawRendererTest {
 				thirdGeomMockBis = Mockito.mock(SimpleGeom.class, Mockito.CALLS_REAL_METHODS);
 				Mockito.when(thirdGeomMockBis.getVaoId()).thenReturn(6);
 				Whitebox.setInternalState(firstGeomMockBis, "renderingParameters",
-						new RenderingParameters(firstGeomMockBis, firstAlias));
+						new RenderingParameters(firstGeomMockBis, firstAlias,Mockito.mock(Entity.class)));
 				Whitebox.setInternalState(secondGeomMockBis, "renderingParameters",
-						new RenderingParameters(secondGeomMockBis, secondAlias));
+						new RenderingParameters(secondGeomMockBis, secondAlias,Mockito.mock(Entity.class)));
 				Whitebox.setInternalState(thirdGeomMockBis, "renderingParameters",
-						new RenderingParameters(thirdGeomMockBis, thirdAlias));
+						new RenderingParameters(thirdGeomMockBis, thirdAlias, Mockito.mock(Entity.class)));
 
 				geoms.add(firstGeomMockBis);
 				geoms.add(secondGeomMockBis);

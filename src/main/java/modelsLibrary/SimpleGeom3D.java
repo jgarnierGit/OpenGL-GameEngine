@@ -13,6 +13,9 @@ import org.lwjglx.util.vector.Vector;
 import org.lwjglx.util.vector.Vector3f;
 import org.lwjglx.util.vector.Vector4f;
 
+import entities.Entity;
+import entities.SimpleEntity;
+import renderEngine.Draw2DRenderer;
 import renderEngine.Draw3DRenderer;
 import renderEngine.Loader;
 import renderEngine.RenderingParameters;
@@ -28,19 +31,23 @@ import shaderManager.Draw3DShader;
  */
 public class SimpleGeom3D extends SimpleGeom {
 
-	public SimpleGeom3D(Loader loader, Draw3DRenderer draw3DRenderer, String alias) {
-		super(loader, 3, alias);
+	public SimpleGeom3D(Loader loader, Draw3DRenderer draw3DRenderer, String alias, Entity entity) {
+		super(loader, 3, alias, entity);
 		this.drawRenderer = draw3DRenderer;
 	}
 	
-	private SimpleGeom3D(Loader loader, String alias) {
-		super(loader, 3, alias);
+	private SimpleGeom3D(Loader loader, String alias, Entity entity) {
+		super(loader, 3, alias, entity);
+	}
+	
+	public SimpleGeom3D(Loader loader, Draw3DRenderer draw3DRenderer, String alias) {
+		this(loader, draw3DRenderer, alias, SimpleEntity.createDefaultEntity());
 	}
 
 	@Override
 	public SimpleGeom3D copy(String alias) {
-		SimpleGeom3D copy = new SimpleGeom3D(this.loader, alias);
-		copy.copy(this, alias); // TODO maybe improve to not set twice renderingParameters?
+		SimpleGeom3D copy = new SimpleGeom3D(this.loader, alias, SimpleEntity.createDefaultEntity());
+		copy.setCopyParams(this, alias, SimpleEntity.createDefaultEntity()); // TODO maybe improve to not set twice renderingParameters?
 		return copy;
 	}
 

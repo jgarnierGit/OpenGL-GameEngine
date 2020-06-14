@@ -76,7 +76,7 @@ class SimpleGeom2DTest {
 		@BeforeEach
 		void setUp() throws Exception {
 			RenderingParameters params = geom.getRenderingParameters();
-			params.addEntity(Mockito.mock(EntityTutos.class),new Vector3f(0, 0,0), 1, 1, 1, 1);
+			params.addEntity(new Vector3f(0, 0,0), 1, 1, 1, 1);
 			geom.addPoint(new Vector2f(1, 1), new Vector4f(1, 1, 1, 1));
 
 		}
