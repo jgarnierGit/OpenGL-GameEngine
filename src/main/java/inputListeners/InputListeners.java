@@ -5,6 +5,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Logger;
 
+/**
+ * Do not use Keyboard library, (lwjgl 2 compatible). use GLFW instead 
+ * english keyboard.
+ * @author chezmoi
+ *
+ */
 public abstract class InputListeners {
 	protected HashMap<Integer, List<Runnable>> runnersOnPress;
 	protected HashMap<Integer, List<Runnable>> runnersOnUiquePress;

@@ -1,19 +1,16 @@
 package toolbox.mousePicker.MouseBehaviour;
 
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
+
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import javax.swing.event.ListSelectionEvent;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjglx.util.vector.Matrix4f;

@@ -9,7 +9,6 @@ import org.lwjgl.opengl.GL30;
 import org.lwjglx.util.vector.Matrix4f;
 
 import entities.Camera;
-import shaderManager.GuiShader;
 import shaderManager.SkyboxShader;
 
 public class SkyboxRenderer {
