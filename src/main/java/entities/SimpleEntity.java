@@ -8,4 +8,7 @@ public class SimpleEntity extends Entity{
 		super(positions, rotX, rotY, rotZ, scale);
 	}
 
+	public static SimpleEntity createDefaultEntity() {
+		return new SimpleEntity(new Vector3f(0,0,0),0,0,0,1);
+	}
 }

@@ -39,6 +39,7 @@ public interface ISimpleGeom {
 	public List<? extends Vector> getVertices();
 	
 	/**
+	 * TODO find a better way.
 	 * return a deep copy of geom
 	 * @param alias to identify copy
 	 * @return SimpleGeom
