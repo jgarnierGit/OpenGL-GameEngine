@@ -18,7 +18,9 @@ import org.lwjglx.util.vector.Vector2f;
 import org.lwjglx.util.vector.Vector3f;
 import org.lwjglx.util.vector.Vector4f;
 
+import entities.Entity;
 import entities.EntityTutos;
+import entities.SimpleEntity;
 import modelsLibrary.ISimpleGeom;
 import modelsLibrary.SimpleGeom;
 import modelsLibrary.SimpleGeom2D;
@@ -96,14 +98,14 @@ public class MouserLoggerPrinter {
 		this.masterRenderer.sendForRendering();
 	}
 
-	public void printFilterByRayProximity(List<EntityTutos> orderedList, Vector3f rayPosNormalizedToCam,
+	public void printFilterByRayProximity(List<Entity> orderedList, Vector3f rayPosNormalizedToCam,
 			Vector3f largeRay) {
 		this.raysWorldOrigin.reset();
 		RenderingParameters rayParams = raysWorldOrigin.getRenderingParameters();
 		rayParams.renderFirst();
 		rayParams.setRenderMode(GL11.GL_LINES);
 
-		//buildRaysByAddingPoints(orderedList);
+		// buildRaysByAddingPoints(orderedList);
 
 		// buildRaysByEntity(orderedList,rayParams);
 
@@ -113,10 +115,10 @@ public class MouserLoggerPrinter {
 		raysWorldOrigin.addPoint(camPos, new Vector4f(1, 0.6f, 0.5f, 1));
 		raysWorldOrigin.addPoint(largeRay, new Vector4f(1, 0.6f, 0.5f, 1));
 
-		 geoms.add(raysWorldOrigin);
+		geoms.add(raysWorldOrigin);
 	}
 
-	private void buildRaysByEntity(List<EntityTutos> orderedList, RenderingParameters rayParams) {
+	private void buildRaysByEntity(List<SimpleGeom> orderedList, RenderingParameters rayParams) {
 		Vector4f selectedColor = new Vector4f(0, 0, 0, 1);
 		Vector3f originV = new Vector3f(0, 0, 0);
 		Vector3f destV = new Vector3f(1, 1, 1);
@@ -129,7 +131,8 @@ public class MouserLoggerPrinter {
 		Vector3f zAxis = new Vector3f(0, 0, 1);
 		destV.normalise();
 		// destV.normalise();
-		orderedList.forEach(entity -> {
+		orderedList.forEach(geom -> {
+			geom.getRenderingParameters().getEntities().forEach(entity -> {
 			Vector3f rayPositionOriginCam = Vector3f.sub(entity.getPositions(), camPos, null);
 			// Vector3f rayPositionOriginCam =
 			// this.coordSysManager.objectToViewCoord(entity.getPositions());
@@ -179,6 +182,8 @@ public class MouserLoggerPrinter {
 			Vector4f finalDest2 = new Vector4f();
 			Vector4f.sub(transformedDest2, transformedOrigin2, finalDest2);
 			// System.out.println("length 2 : "+ finalDest2.length());
+			
+		});
 		});
 
 	}
@@ -262,7 +267,7 @@ public class MouserLoggerPrinter {
 		frustrumParams.setRenderMode(GL11.GL_LINES);
 		frustrumPlainParams.setRenderMode(GL11.GL_TRIANGLES);
 		frustrumPlainParams.renderBefore("bboxEntitiesPlainCategColor");
-		//frustrumPlainParams.renderLast();
+		// frustrumPlainParams.renderLast();
 		frustrumPlain.setColor(MASK_COLOR);
 
 		SimpleGeom3D frustrumPlainInside = frustrumPlain.copy("frustrumPlainInside");
@@ -280,7 +285,7 @@ public class MouserLoggerPrinter {
 	 * loading many little objects (lines forming cube) is faster than combining
 	 * each lines to one unique geometry. order of 100 000 took like 10sec
 	 */
-	public void printBoundingBoxes(List<EntityTutos> entities) {
+	public void printBoundingBoxes(List<Entity> entities) {
 		HashMap<Integer, SimpleGeom3D> generatedGeomLineConfiguration = new HashMap<>();
 		HashMap<Integer, SimpleGeom3D> generatedGeomPlainConfiguration = new HashMap<>();
 
@@ -307,67 +312,67 @@ public class MouserLoggerPrinter {
 		Vector4f outsideColor = new Vector4f(0.85f, 0.2f, 0.25f, 0.4f);
 		Random random = new Random();
 		System.out.println("process over " + entities.size() + " entities");
-		for (EntityTutos entity : entities) {
-			Vector3f worldPositionEntity = entity.getPositions();
+			for (Entity entity : entities) {
+				Vector3f worldPositionEntity = entity.getPositions();
 
-			int indexPoint = 0;
-			int hash = 0;
-			int indexHash = 0;
-			// detect configuration to apply (mix between inside/outside vertices)
-			for (Vector3f point : bboxUniquePoints) {
-				Vector3f worldCoordPoint = Vector3f.add(worldPositionEntity, point, null);
-				Vector3f viewCoordPoint = this.coordSysManager.objectToViewCoord((Vector3f) worldCoordPoint);
-				Vector4f projectedPoint = this.coordSysManager.objectToProjectionMatrix(viewCoordPoint);
-				if (!this.coordSysManager.isInClipSpace(projectedPoint)) {
-					hash += Math.pow(2, indexHash);
-				}
-				indexHash++;
-			}
-			// get or create new configuration and add it an entity
-			SimpleGeom3D boundingBoxOutside = generatedGeomLineConfiguration.get(hash);
-			if (boundingBoxOutside == null) {
-				System.out.println("generate hash : " + hash);
-				boundingBoxOutside = (SimpleGeom3D) boundingBox.copy("bboxEntities");
-				generatedGeomLineConfiguration.put(hash, boundingBoxOutside);
-				int pointHashIndex = 128;
-				int pointIndex = 7;
-				while (hash > 0) {
-					if (hash >= pointHashIndex) {
-						boundingBoxOutside.updateColorByPosition(bboxUniquePoints.get(pointIndex), outsideColor);
-						hash -= pointHashIndex;
+				int indexPoint = 0;
+				int hash = 0;
+				int indexHash = 0;
+				// detect configuration to apply (mix between inside/outside vertices)
+				for (Vector3f point : bboxUniquePoints) {
+					Vector3f worldCoordPoint = Vector3f.add(worldPositionEntity, point, null);
+					Vector3f viewCoordPoint = this.coordSysManager.objectToViewCoord((Vector3f) worldCoordPoint);
+					Vector4f projectedPoint = this.coordSysManager.objectToProjectionMatrix(viewCoordPoint);
+					if (!this.coordSysManager.isInClipSpace(projectedPoint)) {
+						hash += Math.pow(2, indexHash);
 					}
-					pointIndex--;
-					pointHashIndex = (int) Math.pow(2, pointIndex);
+					indexHash++;
 				}
-				geoms.add(boundingBoxOutside);
-			}
-			// TODO FIXME generating classes over a param affect every Geoms, geoms
-			// generation is not good either.
-			SimpleGeom3D boundingBoxPlaincateg = generatedGeomPlainConfiguration.get(hash);
-			if (boundingBoxPlaincateg == null) {
-				boundingBoxPlaincateg = (SimpleGeom3D) bboxPlain.copy("bboxEntitiesPlainCategColor");
+				// get or create new configuration and add it an entity
+				SimpleGeom3D boundingBoxOutside = generatedGeomLineConfiguration.get(hash);
+				if (boundingBoxOutside == null) {
+					System.out.println("generate hash : " + hash);
+					boundingBoxOutside = (SimpleGeom3D) boundingBox.copy("bboxEntities");
+					generatedGeomLineConfiguration.put(hash, boundingBoxOutside);
+					int pointHashIndex = 128;
+					int pointIndex = 7;
+					while (hash > 0) {
+						if (hash >= pointHashIndex) {
+							boundingBoxOutside.updateColorByPosition(bboxUniquePoints.get(pointIndex), outsideColor);
+							hash -= pointHashIndex;
+						}
+						pointIndex--;
+						pointHashIndex = (int) Math.pow(2, pointIndex);
+					}
+					geoms.add(boundingBoxOutside);
+				}
+				// TODO FIXME generating classes over a param affect every Geoms, geoms
+				// generation is not good either.
+				SimpleGeom3D boundingBoxPlaincateg = generatedGeomPlainConfiguration.get(hash);
+				if (boundingBoxPlaincateg == null) {
+					boundingBoxPlaincateg = (SimpleGeom3D) bboxPlain.copy("bboxEntitiesPlainCategColor");
 
-				generatedGeomPlainConfiguration.put(hash, boundingBoxPlaincateg);
-				geoms.add(boundingBoxPlaincateg);
-				// TODO debug, rendering params not set.
-				RenderingParameters plainBboxParam = boundingBoxPlaincateg.getRenderingParameters();
-				// plainBboxParam.renderAfter("bboxEntities");
-				boundingBoxPlaincateg.invertNormals();
-				float r = random.nextFloat() % 100;
-				float g = random.nextFloat() % 100;
-				float b = random.nextFloat() % 100;
-				plainBboxParam.overrideEachColor(new Vector4f(r, g, b, 0.4f));
-				plainBboxParam.addGlState(GL11.GL_BLEND, true);
-				System.out.println("colorOverride :" + hash + " " + plainBboxParam.getOverridedColors());
-			}
+					generatedGeomPlainConfiguration.put(hash, boundingBoxPlaincateg);
+					geoms.add(boundingBoxPlaincateg);
+					// TODO debug, rendering params not set.
+					RenderingParameters plainBboxParam = boundingBoxPlaincateg.getRenderingParameters();
+					// plainBboxParam.renderAfter("bboxEntities");
+					boundingBoxPlaincateg.invertNormals();
+					float r = random.nextFloat() % 100;
+					float g = random.nextFloat() % 100;
+					float b = random.nextFloat() % 100;
+					plainBboxParam.overrideEachColor(new Vector4f(r, g, b, 0.4f));
+					plainBboxParam.addGlState(GL11.GL_BLEND, true);
+					System.out.println("colorOverride :" + hash + " " + plainBboxParam.getOverridedColors());
+				}
 
-			RenderingParameters renderParam = boundingBoxOutside.getRenderingParameters();
-			renderParam.addEntity(entity, entity.getPositions(), 0f, 0f, 0f, 1);
+				RenderingParameters renderParam = boundingBoxOutside.getRenderingParameters();
+				renderParam.addEntity(entity.getPositions(), 0f, 0f, 0f, 1);
 
-			RenderingParameters renderParamPlain = boundingBoxPlaincateg.getRenderingParameters();
-			renderParamPlain.addEntity(entity, entity.getPositions(), 0f, 0f, 0f, 1);
+				RenderingParameters renderParamPlain = boundingBoxPlaincateg.getRenderingParameters();
+				renderParamPlain.addEntity(entity.getPositions(), 0f, 0f, 0f, 1);
 
-			// printSelectedBboxIn2D(entity.getPositions(), boundingBox.getVertices());
+				// printSelectedBboxIn2D(entity.getPositions(), boundingBox.getVertices());
 		}
 
 		generatedGeomLineConfiguration.forEach((hash, geom) -> {
@@ -644,56 +649,47 @@ public class MouserLoggerPrinter {
 	 * Create RenderingParameters subset of every RP set containing entity to
 	 * update, then delete it from initial set; TODO extract logic to a more
 	 * suitable class
-	 * 
+	 * @param geom 	   update entities of this geom
 	 * @param entities update transparency for every entities given.
 	 * @param aliases  update transparency for specified aliases only. Leave empty
 	 *                 to update every RenderingParameters using this entity.
 	 */
-	public void updateTransparency(List<EntityTutos> entities, List<String> aliases) {
+	public void updateTransparency(SimpleGeom geom, List<Entity> entities) {
 		HashMap<ISimpleGeom, ISimpleGeom> uniqueGeomMapping = new HashMap<>();
-		for (EntityTutos entity : entities) {
-			List<RenderingParameters> nonConcurrentParams = new ArrayList<>();
-			nonConcurrentParams.addAll(entity.getRenderingParameters());
-			for (RenderingParameters param : nonConcurrentParams) {
-				if (!aliases.isEmpty() && !aliases.contains(param.getAlias())) {
-					continue;
-				}
-				ISimpleGeom geomMatched = uniqueGeomMapping.putIfAbsent(param.getGeom(),
-						param.getGeom().copy("rayMatchedBbox"));
-				if (geomMatched == null) {
-					geomMatched = uniqueGeomMapping.get(param.getGeom());
-					geomMatched.getRenderingParameters().overrideGlobalTransparency(1f);
-					geomMatched.getRenderingParameters().renderFirst();
-				}
-				geomMatched.getRenderingParameters().addEntity(entity, entity.getPositions(), 0, 0, 0, 1);
-				param.removeEntity(entity);
-			}
+		ISimpleGeom geomMatched = uniqueGeomMapping.putIfAbsent(geom, geom.copy("rayMatchedBbox"));
+		if (geomMatched == null) {
+			geomMatched = uniqueGeomMapping.get(geom);
+			geomMatched.getRenderingParameters().overrideGlobalTransparency(1f);
+			geomMatched.getRenderingParameters().renderFirst();
+		}
+		for (Entity entity : entities) {
+			geomMatched.getRenderingParameters().addEntity(entity.getPositions(), 0, 0, 0, 1);
+			geom.getRenderingParameters().removeEntity(entity);
 		}
 		for (ISimpleGeom entry : uniqueGeomMapping.values()) {
 			geoms.add((SimpleGeom) entry);
 		}
 	}
-	
-	public void flemme(List<EntityTutos> entities, List<String> aliases) {
+
+	/**
+	 * FIXME duplicated with updateTransparency
+	 * @param geom
+	 * @param entities
+	 */
+	public void flemme(SimpleGeom geom, List<Entity> entities) {
 		HashMap<ISimpleGeom, ISimpleGeom> uniqueGeomMapping = new HashMap<>();
-		for (EntityTutos entity : entities) {
-			List<RenderingParameters> nonConcurrentParams = new ArrayList<>();
-			nonConcurrentParams.addAll(entity.getRenderingParameters());
-			for (RenderingParameters param : nonConcurrentParams) {
-				if (!aliases.isEmpty() && !aliases.contains(param.getAlias())) {
-					continue;
-				}
-				ISimpleGeom geomMatched = uniqueGeomMapping.putIfAbsent(param.getGeom(),
-						param.getGeom().copy("matchedPicker"));
+			RenderingParameters param = geom.getRenderingParameters();
+				ISimpleGeom geomMatched = uniqueGeomMapping.putIfAbsent(geom,
+						geom.copy("matchedPicker"));
 				if (geomMatched == null) {
-					geomMatched = uniqueGeomMapping.get(param.getGeom());
-					geomMatched.getRenderingParameters().overrideEachColor(new Vector4f(1,1,1,1));
+					geomMatched = uniqueGeomMapping.get(geom);
+					geomMatched.getRenderingParameters().overrideEachColor(new Vector4f(1, 1, 1, 1));
 					geomMatched.getRenderingParameters().renderFirst();
 				}
-				geomMatched.getRenderingParameters().addEntity(entity, entity.getPositions(), 0, 0, 0, 1);
-				param.removeEntity(entity);
-			}
-		}
+				for(Entity entity : entities) {
+					geomMatched.getRenderingParameters().addEntity(entity.getPositions(), 0, 0, 0, 1);
+					param.removeEntity(entity);
+				}
 		for (ISimpleGeom entry : uniqueGeomMapping.values()) {
 			geoms.add((SimpleGeom) entry);
 		}
@@ -710,6 +706,7 @@ public class MouserLoggerPrinter {
 
 	/**
 	 * TODO if alias exists do not add one
+	 * 
 	 * @param alias
 	 * @param list
 	 * @param color
@@ -733,33 +730,20 @@ public class MouserLoggerPrinter {
 	 * Draw normals for a given entity
 	 * 
 	 * @param entity
-	 * @param alias      get entity SimpleGeom as reference to performs normals.
-	 *                   TODO can be refactored by using real model3D linked to
-	 *                   entity..
 	 * @param normalSize
 	 */
-	public void drawBboxNormals(List<EntityTutos> entities, String alias, int normalSize) {
+	public void drawBboxNormals(SimpleGeom geom, int normalSize) {
 		RenderingParameters normalsParams = null;
-		// TODO perform real match with unique geom that will be retreived in many entities to group normals together
-		if(entities.isEmpty()) {
-			return;
-		}
-		if (entities.get(0).getRenderingParameters().isEmpty()) {
-			System.err.println(
-					"no SimpleGeom generated for moment, consider adding one. Will maybe be implemented in future");
-		}
-		for (RenderingParameters param : entities.get(0).getRenderingParameters()) {
-			if (param.getAlias().equals(alias)) {
-				SimpleGeom3D normalsGeom = createNormalsGeom(param, normalSize);
-				normalsParams = normalsGeom.getRenderingParameters();
-				geoms.add(normalsGeom);
-			}
-		}
-
-		if (normalsParams != null) {
-			for (EntityTutos entity : entities) {
-				normalsParams.addEntity(entity, entity.getPositions(), 0f, 0f, 0f, 1f);
-			}
+		// TODO perform real match with unique geom that will be retreived in many
+		// entities to group normals together
+		RenderingParameters param = geom.getRenderingParameters();
+		SimpleGeom3D normalsGeom = createNormalsGeom(param, normalSize);
+		normalsParams = normalsGeom.getRenderingParameters();
+		geoms.add(normalsGeom);
+		
+		//FIXME first one will be added twice.
+		for (Entity entity : geom.getRenderingParameters().getEntities()) {
+			normalsParams.addEntity(entity.getPositions(), 0f, 0f, 0f, 1f);
 		}
 	}
 

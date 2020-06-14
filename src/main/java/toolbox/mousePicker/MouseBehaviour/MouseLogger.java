@@ -4,6 +4,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -18,8 +19,10 @@ import org.lwjglx.util.vector.Vector3f;
 import org.lwjglx.util.vector.Vector4f;
 
 import entities.Camera;
+import entities.Entity;
 import entities.EntityTutos;
 import inputListeners.MouseInputListener;
+import modelsLibrary.SimpleGeom;
 import renderEngine.Loader;
 import renderEngine.MasterRenderer;
 import renderEngine.RenderingParameters;
@@ -27,7 +30,7 @@ import toolbox.CoordinatesSystemManager;
 import toolbox.Maths;
 
 public class MouseLogger implements IMouseBehaviour {
-	private List<EntityTutos> entities;
+	private Map<SimpleGeom, List<Entity>> entitiesByGeom;
 	private Camera camera;
 	private MouserLoggerPrinter mouserLoggerPrinter;
 	private Matrix4f viewMatrix;
@@ -38,7 +41,7 @@ public class MouseLogger implements IMouseBehaviour {
 
 	public MouseLogger(Camera camera, MasterRenderer masterRenderer, Loader loader,
 			MouseInputListener mouseInputListener) {
-		this.entities = new ArrayList<>();
+		this.entitiesByGeom = new HashMap<>();
 		this.camera = camera;
 		this.coordSysManager = new CoordinatesSystemManager(masterRenderer.getProjectionMatrix());
 		this.mouseInputListener = mouseInputListener;
@@ -51,12 +54,12 @@ public class MouseLogger implements IMouseBehaviour {
 		this.mouseInputListener.addRunnerOnUniquePress(GLFW_MOUSE_BUTTON_LEFT, () -> processPicking());
 	}
 
-	public void processEntity(EntityTutos entities) {
-		this.entities.add(entities);
+	public void processEntity(SimpleGeom geom) {
+		this.entitiesByGeom.put(geom, new ArrayList<>(geom.getRenderingParameters().getEntities()));
 	}
 
 	public void clear() {
-		entities.clear();
+		entitiesByGeom.clear();
 	}
 
 	private void processPicking() {
@@ -69,23 +72,39 @@ public class MouseLogger implements IMouseBehaviour {
 
 		filterEntitiesByCameraClip();
 		generateBoundingBoxes();
-		this.mouserLoggerPrinter.printBoundingBoxes(this.entities);
+		for(List<Entity> entities : this.entitiesByGeom.values()) {
+			this.mouserLoggerPrinter.printBoundingBoxes(entities);
+		}
+		
 		Vector3f rayFromCamera = getPointOnRay(ray, 1);
 		Vector3f largeRay = getPointOnRay(ray, 1000);
-		this.mouserLoggerPrinter.printFilterByRayProximity(this.entities, rayFromCamera, largeRay);
+		for(List<Entity> entities : this.entitiesByGeom.values()) {
+		this.mouserLoggerPrinter.printFilterByRayProximity(entities, rayFromCamera, largeRay);
+		}
 		filterEntitiesByBboxIntersection();
-		this.mouserLoggerPrinter.drawBboxNormals(this.entities, "bboxEntitiesPlainCategColor", 3);
+		SimpleGeom bboxPlain = null;
+		for (SimpleGeom entity : this.entitiesByGeom.keySet()) {
+			if("bboxEntitiesPlainCategColor".equals(entity.getRenderingParameters().getAlias())) {
+				bboxPlain = entity;
+			}
+		}
+		this.mouserLoggerPrinter.drawBboxNormals(bboxPlain, 3);
 
 		this.mouserLoggerPrinter.printCameraBBox();
-		this.mouserLoggerPrinter.updateTransparency(this.entities,
-				Arrays.asList("bboxEntities", "bboxEntitiesPlainCategColor"));
-		if(!this.entities.isEmpty()) {
+		List<String> aliases = Arrays.asList("bboxEntities", "bboxEntitiesPlainCategColor");
+		for(Entry<SimpleGeom,List<Entity>> entry : this.entitiesByGeom.entrySet()) {
+			if(aliases.contains(entry.getKey().getRenderingParameters().getAlias())) {
+				this.mouserLoggerPrinter.updateTransparency(entry.getKey(),entry.getValue());
+			}
+		}
+		if(!this.entitiesByGeom.isEmpty()) {
 			//TODO if I want to override color from an entity, it means it must process set separation and creation.
-			this.mouserLoggerPrinter.flemme(Arrays.asList(this.entities.get(0)), Arrays.asList("bboxEntitiesPlainCategColor"));
-			Optional<RenderingParameters> param = this.entities.get(0).getRenderingParameters("bboxEntitiesPlainCategColor");
-			/**param.ifPresent(paramFirst -> {
-				paramFirst.overrideEachColor(new Vector4f(1f,1f,1f,1f));
-			});**/
+			List<String> aliasesToSelect = Arrays.asList("bboxEntitiesPlainCategColor");
+			for(Entry<SimpleGeom,List<Entity>> entry : this.entitiesByGeom.entrySet()) {
+				if(aliasesToSelect.contains(entry.getKey().getRenderingParameters().getAlias())) {
+					this.mouserLoggerPrinter.flemme(entry.getKey(),Arrays.asList(entry.getValue().get(0)));
+				}
+			}
 		}
 		
 		filterByRayPromixity(ray);
@@ -96,9 +115,11 @@ public class MouseLogger implements IMouseBehaviour {
 
 	private void filterEntitiesByBboxIntersection() {
 		Vector3f MouseRayWorldCoord = Vector3f.add(camPos, this.ray, null);
-		TreeMap<Float, EntityTutos> filteredByDistanceEntities = new TreeMap<>();
-		ArrayList<EntityTutos> filteredEntities = new ArrayList<>();
-		for (EntityTutos entity : this.entities) {
+		TreeMap<Float, Entity> filteredByDistanceEntities = new TreeMap<>();
+		ArrayList<Entity> filteredEntities = new ArrayList<>();
+		for(SimpleGeom geom : this.entitiesByGeom) {
+
+		for (Entity entity : geom.getRenderingParameters().getEntities()) {
 			List<Vector3f> bbox = entity.getBoundingBox();
 			Vector3f ltnWorld = Vector3f.add(entity.getPositions(), bbox.get(0), null);
 			Vector3f rtnWorld = Vector3f.add(entity.getPositions(), bbox.get(1), null);
@@ -161,8 +182,10 @@ public class MouseLogger implements IMouseBehaviour {
 		//	filteredEntities = oldway(entity, MouseRayWorldCoord, ltnWorld, rtnWorld, lbnWorld, rbnWorld, ltfWorld,
 		//			rtfWorld, lbfWorld, rbfWorld);
 		}
+		
+	}
 		filteredEntities.addAll(filteredByDistanceEntities.values());
-		this.entities = filteredEntities;
+		this.entitiesByGeom = filteredEntities;
 
 	}
 
@@ -285,7 +308,7 @@ public class MouseLogger implements IMouseBehaviour {
 		rayFromCamera.normalise(normalizedrayFromMouse);
 		Vector3f rayPosNormalizedToCam = Maths.normalizeFromOrigin(rayFromCamera, camPos); // equals rayFromCamera
 
-		List<EntityTutos> orderedList = this.entities.stream().sorted((entity1, entity2) -> {
+		List<EntityTutos> orderedList = this.entitiesByGeom.stream().sorted((entity1, entity2) -> {
 			Vector3f entity1PosNormalizedToCam = Maths.normalizeFromOrigin(entity1.getPositions(), camPos);
 			Vector3f delta = Vector3f.sub(rayPosNormalizedToCam, entity1PosNormalizedToCam, null);
 
@@ -300,10 +323,10 @@ public class MouseLogger implements IMouseBehaviour {
 			// printSelectedBboxIn2D(orderedList.get(0));
 		}
 
-		List<EntityTutos> filteredList = this.entities.stream().filter(entity -> {
+		List<EntityTutos> filteredList = this.entitiesByGeom.stream().filter(entity -> {
 			return false;
 		}).collect(Collectors.toList());
-		this.entities = filteredList;
+		this.entitiesByGeom = filteredList;
 	}
 
 	private Vector3f objectToViewCoordNormalized(EntityTutos entity) {
@@ -326,7 +349,7 @@ public class MouseLogger implements IMouseBehaviour {
 	 * worldOrigin wil be kept.
 	 */
 	private void filterEntitiesByCameraClip() {
-		List<EntityTutos> filteredList = this.entities.stream().filter(entity -> {
+		List<EntityTutos> filteredList = this.entitiesByGeom.stream().filter(entity -> {
 			Vector3f viewCoordEntityPos = coordSysManager.objectToViewCoord(entity.getPositions());
 			Vector4f projectedCoordEntity = coordSysManager.objectToProjectionMatrix(viewCoordEntityPos);
 			Vector3f clippedVector = coordSysManager.objectToClipSpace(projectedCoordEntity);
@@ -334,11 +357,11 @@ public class MouseLogger implements IMouseBehaviour {
 			// projectedCoordEntity.length() <= MasterRenderer.getFarPlane(); //if i want to
 			// use getFarPlane i may want to multiply it by cos(fov)
 		}).collect(Collectors.toList());
-		this.entities = filteredList;
+		this.entitiesByGeom = filteredList;
 	}
 
 	private void cleanSelected() {
-		for (EntityTutos entity : entities) {
+		for (EntityTutos entity : entitiesByGeom) {
 			entity.unselect();
 		}
 		this.mouserLoggerPrinter.clear();
@@ -374,7 +397,7 @@ public class MouseLogger implements IMouseBehaviour {
 	}
 
 	private void generateBoundingBoxes() {
-		for (EntityTutos entity : this.entities) {
+		for (EntityTutos entity : this.entitiesByGeom) {
 			entity.setBoundingBox(this.mouserLoggerPrinter.bboxUniquePoints);
 		}
 
@@ -406,7 +429,7 @@ public class MouseLogger implements IMouseBehaviour {
 	 * @return nearest Entity if any
 	 */
 	private Optional<EntityTutos> getMatchingEntities(Vector3f beginRay, Vector3f endRay) {
-		Map<EntityTutos, Vector3f> entitiesViewPosition = this.entities.stream()
+		Map<EntityTutos, Vector3f> entitiesViewPosition = this.entitiesByGeom.stream()
 				.collect(Collectors.toMap(Function.identity(), EntityTutos::getPositions));
 		TreeMap<Float, EntityTutos> result = entitiesViewPosition.entrySet().stream().filter(entry -> {
 			EntityTutos entity = entry.getKey();
