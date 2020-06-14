@@ -6,8 +6,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 /**
- * Do not use Keyboard library, (lwjgl 2 compatible). use GLFW instead 
- * english keyboard.
+ * Stores executables mapped to input and execute when input is triggered
  * @author chezmoi
  *
  */
@@ -15,16 +14,21 @@ public abstract class InputListeners {
 	protected HashMap<Integer, List<Runnable>> runnersOnPress;
 	protected HashMap<Integer, List<Runnable>> runnersOnUiquePress;
 	protected HashMap<Integer, List<Runnable>> runnersOnRelease;
-	protected UserInputHandler userInputListener;
+	protected InputHandler inputHandler;
 	protected Logger logger;
 
 	protected InputListeners() {
-		userInputListener = UserInputHandler.create();
+		inputHandler = InputHandler.create();
 		this.runnersOnPress = new HashMap<>();
 		this.runnersOnUiquePress = new HashMap<>();
 		this.runnersOnRelease = new HashMap<>();
 		this.logger = Logger.getLogger("GenericInputListeners");
 	}
+	
+	/**
+	 * Update inputs states received every frame 
+	 */
+	protected abstract void updateUserInputs();
 
 	/**
 	 * Add a function to be executed while input is pressed.
@@ -72,25 +76,21 @@ public abstract class InputListeners {
 		this.runnersOnRelease.clear();
 	}
 
-	public UserInputHandler getUserInputHandler() {
-		return this.userInputListener;
-	}
-
-	public void listen() {
+	protected void execute() {
 		for (Integer glfwInput : this.runnersOnPress.keySet()) {
-			if (userInputListener.activateOnPress(glfwInput)) {
+			if (inputHandler.activateOnPress(glfwInput)) {
 				run(this.runnersOnPress.getOrDefault(glfwInput, new ArrayList<>()));
 			}
 		}
 
 		for (Integer glfwInput : this.runnersOnUiquePress.keySet()) {
-			if (userInputListener.activateOnPressOneTime(glfwInput)) {
+			if (inputHandler.activateOnPressOneTime(glfwInput)) {
 				run(this.runnersOnUiquePress.getOrDefault(glfwInput, new ArrayList<>()));
 			}
 		}
 		
 		for (Integer glfwInput : this.runnersOnRelease.keySet()) {
-			if (userInputListener.activateOnReleaseOnce(glfwInput)) {
+			if (inputHandler.activateOnReleaseOnce(glfwInput)) {
 				run(this.runnersOnRelease.getOrDefault(glfwInput, new ArrayList<>()));
 			}
 		}

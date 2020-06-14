@@ -1,11 +1,11 @@
 package toolbox.mousePicker;
 
-import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Logger;
 
+import org.lwjgl.glfw.GLFW;
 import org.lwjglx.util.vector.Matrix4f;
 import org.lwjglx.util.vector.Vector2f;
 import org.lwjglx.util.vector.Vector3f;
@@ -13,7 +13,7 @@ import org.lwjglx.util.vector.Vector4f;
 
 import entities.Camera;
 import inputListeners.MouseInputListener;
-import inputListeners.UserInputHandler;
+import inputListeners.PlayerInputListener;
 import renderEngine.DisplayManager;
 import toolbox.Maths;
 import toolbox.mousePicker.MouseBehaviour.IMouseBehaviour;
@@ -24,15 +24,21 @@ public class MousePicker {
 	private Camera camera;
 	private Logger logger;
 	private List<IMouseBehaviour> mouseBehaviours;
-	private MouseInputListener mouseInputListener;
+	private MouseInputListener mouseListener;
 
-	public MousePicker(Camera cam, Matrix4f projection, MouseInputListener mouseInputListener) {
+	public MousePicker(Camera cam, Matrix4f projection, PlayerInputListener inputListener) {
 		this.camera = cam;
 		this.projectionMatrix = projection;
 		this.viewMatrix = Maths.createViewMatrix(cam);
 		this.logger = Logger.getLogger("MousePicker");
 		this.mouseBehaviours = new ArrayList<>();
-		this.mouseInputListener = mouseInputListener;
+		Optional<MouseInputListener> listener = inputListener.getMouse();
+		if(listener.isPresent()){
+			this.mouseListener = listener.get();
+		}
+		else {
+			throw new IllegalStateException("please specify a mouse listener to use this functionality");
+		}
 	}
 
 	public void update() {
@@ -40,7 +46,8 @@ public class MousePicker {
 		// currentRay has coordinate near world(0,0,0) : has to be used as a delta to
 		// apply to camera position.
 		Vector3f currentRay = calculateMouseRay();
-		this.mouseInputListener.addRunnerOnUniquePress(GLFW_MOUSE_BUTTON_LEFT, () -> log());
+		this.mouseListener.addRunnerOnUniquePress(GLFW.GLFW_MOUSE_BUTTON_LEFT, this::log);
+		
 
 		for (IMouseBehaviour behaviour : mouseBehaviours) {
 			behaviour.process(currentRay);
@@ -48,9 +55,8 @@ public class MousePicker {
 	}
 
 	private void log() {
-		UserInputHandler inputHandler = this.mouseInputListener.getUserInputHandler();
-		float mouseX = inputHandler.getMouseXpos();
-		float mouseY = inputHandler.getMouseYpos();
+		float mouseX = this.mouseListener.getMouseXpos();
+		float mouseY = this.mouseListener.getMouseYpos();
 		System.out.println("ViewPort Space [" + mouseX + ", " + mouseY + "]");
 		Vector2f normalizedCoords = getNormalizedDeviceCoords(mouseX, mouseY);
 		System.out.println("Normalized device Space [" + normalizedCoords.x + ", " + normalizedCoords.y + "]");
@@ -70,9 +76,8 @@ public class MousePicker {
 	}
 
 	private Vector3f calculateMouseRay() {
-		UserInputHandler inputHandler = this.mouseInputListener.getUserInputHandler();
-		float mouseX = inputHandler.getMouseXpos();
-		float mouseY = inputHandler.getMouseYpos();
+		float mouseX = this.mouseListener.getMouseXpos();
+		float mouseY = this.mouseListener.getMouseYpos();
 		Vector2f normalizedCoords = getNormalizedDeviceCoords(mouseX, mouseY);
 		Vector4f clipCoords = new Vector4f(normalizedCoords.x, normalizedCoords.y, -1f, 1f); // pointing into the screen
 		Vector4f eyeCoords = toEyeCoords(clipCoords);
