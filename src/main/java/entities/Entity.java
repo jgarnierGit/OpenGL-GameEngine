@@ -15,11 +15,12 @@ import renderEngine.RenderingParameters;
  */
 public abstract class Entity {
 	private Vector3f position;
-	private float rotX, rotY, rotZ;
+	private float rotX;
+	private float rotY;
+	private float rotZ;
 	private float scale;
 	
 	private List<Vector3f> boundingBox;
-	private List<RenderingParameters> renderingParameters;
 	
 	public Entity(Vector3f positions, float rotX, float rotY, float rotZ, float scale) {
 		this.position = positions;
@@ -28,7 +29,6 @@ public abstract class Entity {
 		this.rotZ = rotZ;
 		this.scale = scale;
 		this.boundingBox = new ArrayList<>();
-		this.renderingParameters = new ArrayList<>();
 	}
 	
 	public void increasePosition(float dx, float dy, float dz) {
@@ -41,23 +41,6 @@ public abstract class Entity {
 		this.rotX+= dx;
 		this.rotY+=dy;
 		this.rotZ+=dz;
-	}
-	
-	public void addRenderingParameters(RenderingParameters renderingParameters) {
-		this.renderingParameters.add(renderingParameters);
-	}
-	
-	public List<RenderingParameters> getRenderingParameters() {
-		return this.renderingParameters;
-	}
-	
-	public Optional<RenderingParameters> getRenderingParameters(String alias) {
-		for(RenderingParameters param : this.renderingParameters) {
-			if(param.getAlias().equals(alias)) {
-				return Optional.of(param);
-			}
-		}
-		return Optional.empty();
 	}
 	
 	public void setBoundingBox(List<Vector3f> boundingBox) {
