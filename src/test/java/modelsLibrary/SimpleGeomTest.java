@@ -77,7 +77,7 @@ class SimpleGeomTest {
 		@Test
 		@DisplayName("Copy geom using model must have fields if new signature reference")
 		void testCopyGeomSignatures() {
-			geom2.copy(geom, alias2);
+			geom2.setCopyParams(geom, alias2, Mockito.mock(Entity.class));
 			assertNotSame(geom.getColors(), geom2.getColors());
 			assertNotSame(geom.getPoints(), geom2.getPoints());
 			assertSame(geom.getDimension(), geom2.getDimension());
@@ -87,7 +87,7 @@ class SimpleGeomTest {
 		@Test
 		@DisplayName("Copy default RenderingParameter on new geom must have fields if new signature reference")
 		void testCopyDefaultRenderingPamaterSignatures() {
-			geom2.copy(geom, alias2);
+			geom2.setCopyParams(geom, alias2, Mockito.mock(Entity.class));
 			RenderingParameters geom2Params = geom2.getRenderingParameters();
 			geom2Params.setRenderMode(1);
 			geom2Params.renderAfter("toto");
@@ -118,7 +118,7 @@ class SimpleGeomTest {
 				geom.renderingParameters.setRenderMode(2);
 				geom.renderingParameters.renderBefore("test");
 				geom.renderingParameters.addEntity(positionEntity, 0, 0, 0, 1);
-				geom2.copy(geom, alias2);
+				geom2.setCopyParams(geom, alias2,Mockito.mock(Entity.class));
 				geom2Params = geom2.getRenderingParameters();
 				geom2Params.setRenderMode(1);
 				geom2Params.renderAfter("toto");
