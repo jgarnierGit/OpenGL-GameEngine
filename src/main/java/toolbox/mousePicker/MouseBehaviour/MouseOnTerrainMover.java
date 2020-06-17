@@ -2,7 +2,7 @@ package toolbox.mousePicker.MouseBehaviour;
 
 import org.lwjglx.util.vector.Vector3f;
 
-import entities.Camera;
+import camera.CameraEntity;
 import modelsLibrary.Terrain;
 import renderEngine.MasterRenderer;
 
@@ -13,11 +13,11 @@ import renderEngine.MasterRenderer;
  */
 public class MouseOnTerrainMover implements IMouseBehaviour  {
 	private Terrain terrain;
-	private Camera camera;
+	private CameraEntity camera;
 	private Vector3f currentTerrainPoint;
 	private Vector3f camPos;
 	
-	public MouseOnTerrainMover(Terrain terrain, Camera camera) {
+	public MouseOnTerrainMover(Terrain terrain, CameraEntity camera) {
 		this.terrain = terrain;
 		this.camera = camera;
 	}

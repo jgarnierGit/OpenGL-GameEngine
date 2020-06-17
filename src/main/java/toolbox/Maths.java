@@ -4,7 +4,7 @@ import org.lwjglx.util.vector.Matrix4f;
 import org.lwjglx.util.vector.Vector2f;
 import org.lwjglx.util.vector.Vector3f;
 
-import entities.Camera;
+import camera.CameraEntity;
 
 public class Maths {
 	
@@ -31,27 +31,6 @@ public class Maths {
 		Matrix4f.rotate((float) Math.toRadians(rz), new Vector3f(0,0,1), matrix, matrix);
 		Matrix4f.scale(new Vector3f(scale,scale,scale), matrix, matrix);
 		return matrix;
-	}
-	
-	/**
-	 * Rotate and then translate an identity matrix in order to create View Matrix.
-	 * apply inverse camera translation to each object.
-	 * w row = [-TranslM.x, -TranslM.y, -TranslM.z, 1]
-	 * w col = [0, 0, 0, 1]
-	 * @param camera
-	 * @return [IdMatrix] * [RotMatrix] * [TranslMatrix]
-	 */
-	public static Matrix4f createViewMatrix(Camera camera) {
-		Matrix4f viewMatrix = new Matrix4f();
-		viewMatrix.setIdentity();
-		Matrix4f.rotate((float) Math.toRadians(camera.getPitch()), new Vector3f(1,0,0), viewMatrix, viewMatrix);
-		Matrix4f.rotate((float) Math.toRadians(camera.getYaw()), new Vector3f(0,1,0), viewMatrix, viewMatrix);
-		Matrix4f.rotate((float) Math.toRadians(camera.getRoll()), new Vector3f(0,0,1), viewMatrix, viewMatrix);
-		Vector3f cameraPos =  camera.getPosition();
-		// set negative camera position which will be applied to each objects.
-		Vector3f negativeCameraPos = new Vector3f(-cameraPos.x,-cameraPos.y,-cameraPos.z);
-		Matrix4f.translate(negativeCameraPos, viewMatrix, viewMatrix);
-		return viewMatrix;
 	}
 	
 	public static float barryCentric(Vector3f p1, Vector3f p2, Vector3f p3, Vector2f pos) {

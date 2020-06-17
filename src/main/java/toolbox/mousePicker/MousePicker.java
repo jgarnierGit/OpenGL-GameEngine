@@ -11,7 +11,7 @@ import org.lwjglx.util.vector.Vector2f;
 import org.lwjglx.util.vector.Vector3f;
 import org.lwjglx.util.vector.Vector4f;
 
-import entities.Camera;
+import camera.CameraEntity;
 import inputListeners.MouseInputListener;
 import inputListeners.PlayerInputListener;
 import renderEngine.DisplayManager;
@@ -21,15 +21,15 @@ import toolbox.mousePicker.MouseBehaviour.IMouseBehaviour;
 public class MousePicker {
 	private Matrix4f projectionMatrix;
 	private Matrix4f viewMatrix;
-	private Camera camera;
+	private CameraEntity camera;
 	private Logger logger;
 	private List<IMouseBehaviour> mouseBehaviours;
 	private MouseInputListener mouseListener;
 
-	public MousePicker(Camera cam, Matrix4f projection, PlayerInputListener inputListener) {
+	public MousePicker(CameraEntity cam, Matrix4f projection, PlayerInputListener inputListener) {
 		this.camera = cam;
 		this.projectionMatrix = projection;
-		this.viewMatrix = Maths.createViewMatrix(cam);
+		this.viewMatrix = cam.getViewMatrix();
 		this.logger = Logger.getLogger("MousePicker");
 		this.mouseBehaviours = new ArrayList<>();
 		Optional<MouseInputListener> listener = inputListener.getMouse();
@@ -42,7 +42,7 @@ public class MousePicker {
 	}
 
 	public void update() {
-		viewMatrix = Maths.createViewMatrix(camera);
+		viewMatrix = camera.getViewMatrix();
 		// currentRay has coordinate near world(0,0,0) : has to be used as a delta to
 		// apply to camera position.
 		Vector3f currentRay = calculateMouseRay();
