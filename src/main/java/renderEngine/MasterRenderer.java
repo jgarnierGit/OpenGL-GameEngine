@@ -12,9 +12,9 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjglx.util.vector.Matrix4f;
 
+import camera.CameraEntity;
 import entities.EntityTutos;
 import entities.Light;
-import entities.Camera;
 import modelsLibrary.SimpleGeom;
 import modelsManager.Model3D;
 import shaderManager.StaticShader;
@@ -54,7 +54,7 @@ public class MasterRenderer {
 	private Draw3DRenderer draw3DRenderer;
 	private Draw2DRenderer draw2DRenderer;
 	private List<Model3D> terrains = new ArrayList<>();
-	private  Camera camera;
+	private  CameraEntity camera;
 	private Loader loader;
 	
 	private SkyboxRenderer skyboxRender;
@@ -63,7 +63,7 @@ public class MasterRenderer {
 	
 	private HashMap<Model3D, List<EntityTutos>> entities = new HashMap<>();
 	
-	private MasterRenderer(Loader loader, Camera camera, StaticShader shader, EntityRenderer renderer,Draw3DRenderer draw3DRenderer, Draw2DRenderer draw2DRenderer, TerrainShader terrainShader) {
+	private MasterRenderer(Loader loader, CameraEntity camera, StaticShader shader, EntityRenderer renderer,Draw3DRenderer draw3DRenderer, Draw2DRenderer draw2DRenderer, TerrainShader terrainShader) {
 		this.loader =loader;
 		this.camera = camera;
 		this.draw3DRenderer = draw3DRenderer;
@@ -73,7 +73,7 @@ public class MasterRenderer {
 		this.terrainShader = terrainShader;
 	}
 	
-	public static MasterRenderer create(Camera camera) throws IOException {
+	public static MasterRenderer create(CameraEntity camera) throws IOException {
 		StaticShader shader = new StaticShader();
 		enableCulling();
 		Matrix4f projectionMatrix = createProjectionMatrix();

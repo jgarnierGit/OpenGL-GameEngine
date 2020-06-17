@@ -6,7 +6,7 @@ import java.util.List;
 import org.lwjglx.util.vector.Matrix4f;
 import org.lwjglx.util.vector.Vector3f;
 
-import entities.Camera;
+import camera.CameraEntity;
 import entities.Light;
 import renderEngine.Loader.VBOIndex;
 import toolbox.Maths;
@@ -80,8 +80,8 @@ public class TerrainShader extends ShaderProgram{
 		
 	}
 	
-	public void loadViewMatrix(Camera camera) {
-		Matrix4f viewMatrix = Maths.createViewMatrix(camera);
+	public void loadViewMatrix(CameraEntity camera) {
+		Matrix4f viewMatrix = camera.getViewMatrix();
 		super.loadMatrix(location_viewMatrix, viewMatrix);
 	}
 	

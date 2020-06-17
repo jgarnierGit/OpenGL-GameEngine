@@ -8,7 +8,7 @@ import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 import org.lwjglx.util.vector.Matrix4f;
 
-import entities.Camera;
+import camera.CameraEntity;
 import shaderManager.SkyboxShader;
 
 public class SkyboxRenderer {
@@ -77,7 +77,7 @@ private static final float SIZE = 500f;
 		shader.stop();
 	}
 	
-	public void render(Camera camera, float r, float g, float b) {
+	public void render(CameraEntity camera, float r, float g, float b) {
 		shader.start();
 		shader.loadViewMatrix(camera);
 		shader.loadFogColour(r, g, b);

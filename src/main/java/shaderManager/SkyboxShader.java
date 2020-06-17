@@ -5,9 +5,8 @@ import java.io.IOException;
 import org.lwjglx.util.vector.Matrix4f;
 import org.lwjglx.util.vector.Vector3f;
 
-import entities.Camera;
+import camera.CameraEntity;
 import renderEngine.DisplayManager;
-import toolbox.Maths;
 
 public class SkyboxShader  extends ShaderProgram {
 	  private static final String VERTEX_FILE = "skyboxVertexShader.txt";
@@ -39,8 +38,8 @@ public class SkyboxShader  extends ShaderProgram {
 		 * @param scale
 		 * @return
 		 */
-	    public void loadViewMatrix(Camera camera){
-	        Matrix4f matrix = Maths.createViewMatrix(camera);
+	    public void loadViewMatrix(CameraEntity camera){
+	        Matrix4f matrix = camera.getViewMatrix();
 	        matrix.m30 = 0;
 	        matrix.m31 = 0;
 	        matrix.m32 = 0;

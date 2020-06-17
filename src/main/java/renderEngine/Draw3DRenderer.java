@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.lwjgl.opengl.GL11;
 import org.lwjglx.util.vector.Matrix4f;
 
-import entities.Camera;
+import camera.CameraEntity;
 import renderEngine.Loader.VBOIndex;
 import shaderManager.Draw3DShader;
 import toolbox.Maths;
@@ -19,9 +19,9 @@ import toolbox.Maths;
 public class Draw3DRenderer extends DrawRenderer {
 
 	private Draw3DShader draw3DShader;
-	private Camera camera;
+	private CameraEntity camera;
 
-	public Draw3DRenderer(Camera camera, Matrix4f projectionMatrix) throws IOException {
+	public Draw3DRenderer(CameraEntity camera, Matrix4f projectionMatrix) throws IOException {
 		super();
 		this.draw3DShader = new Draw3DShader();
 		this.camera = camera;
@@ -35,7 +35,7 @@ public class Draw3DRenderer extends DrawRenderer {
 		for (RenderingParameters params : renderingParams) {
 			draw3DShader.start();
 			prepare(params.getGeom(), VBOIndex.POSITION_INDEX, Draw3DShader.COLOR_INDEX);
-			Matrix4f viewMatrix = Maths.createViewMatrix(camera);
+			Matrix4f viewMatrix = camera.getViewMatrix();
 			draw3DShader.loadViewMatrix(viewMatrix);
 
 			// Disable distance filtering.
