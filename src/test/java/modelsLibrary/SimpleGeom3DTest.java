@@ -113,7 +113,7 @@ class SimpleGeom3DTest {
 		@Test
 		@DisplayName("get Vectors vertices list")
 		void testgetVertices() {
-			assertEquals(1, geom.getVertices().size());
+			assertEquals(1, geom.buildVerticesList().size());
 		}
 		
 		@Test

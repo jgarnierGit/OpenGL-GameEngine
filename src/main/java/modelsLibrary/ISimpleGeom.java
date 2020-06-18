@@ -36,7 +36,7 @@ public interface ISimpleGeom {
 	 */
 	public float[] getColors();
 
-	public List<? extends Vector> getVertices();
+	public List<? extends Vector> buildVerticesList();
 	
 	/**
 	 * TODO find a better way.

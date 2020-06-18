@@ -57,7 +57,7 @@ public class SimpleGeom2D extends SimpleGeom {
 	public void updateColorByPosition(Vector ref, Vector4f color) {
 		Vector2f v2f = getVector2f(ref);
 		int i=0;
-		for(Vector2f vertice :this.getVertices()) {
+		for(Vector2f vertice :this.buildVerticesList()) {
 			if(vertice.x == v2f.x && vertice.y == v2f.y ) {
 				super.updateColor(i, color);
 			}
@@ -84,7 +84,7 @@ public class SimpleGeom2D extends SimpleGeom {
 	}
 
 	@Override
-	public List<Vector2f> getVertices() {
+	public List<Vector2f> buildVerticesList() {
 		List<Vector2f> vectors = new ArrayList<>();
 		for (int i = 0; i < points.length; i += 2) {
 			vectors.add(new Vector2f(points[i], points[i + 1]));

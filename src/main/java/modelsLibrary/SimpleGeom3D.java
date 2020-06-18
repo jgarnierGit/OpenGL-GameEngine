@@ -15,7 +15,6 @@ import org.lwjglx.util.vector.Vector4f;
 
 import entities.Entity;
 import entities.SimpleEntity;
-import renderEngine.Draw2DRenderer;
 import renderEngine.Draw3DRenderer;
 import renderEngine.Loader;
 import renderEngine.RenderingParameters;
@@ -67,7 +66,7 @@ public class SimpleGeom3D extends SimpleGeom {
 	public void updateColorByPosition(Vector ref, Vector4f color) {
 		Vector3f v3f = getVector3f(ref);
 		int i = 0;
-		for (Vector3f vertice : this.getVertices()) {
+		for (Vector3f vertice : this.buildVerticesList()) {
 			if (vertice.x == v3f.x && vertice.y == v3f.y && vertice.z == v3f.z) {
 				super.updateColor(i, color);
 			}
@@ -92,7 +91,7 @@ public class SimpleGeom3D extends SimpleGeom {
 			throw new IllegalStateException(
 					"invert normals is only available for GL_TRIANGLES, please consider specify a renderMode for this geom");
 		}
-		Iterator<Vector3f> vertices = this.getVertices().iterator();
+		Iterator<Vector3f> vertices = this.buildVerticesList().iterator();
 		ArrayList<Vector3f> invertedVertices = new ArrayList<>();
 
 		while (vertices.hasNext()) {
@@ -117,7 +116,7 @@ public class SimpleGeom3D extends SimpleGeom {
 	}
 
 	@Override
-	public List<Vector3f> getVertices() {
+	public List<Vector3f> buildVerticesList() {
 		List<Vector3f> vectors = new ArrayList<>();
 		for (int i = 0; i < points.length; i += 3) {
 			vectors.add(new Vector3f(points[i], points[i + 1], points[i + 2]));
