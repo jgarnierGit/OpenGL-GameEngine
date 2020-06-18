@@ -167,11 +167,6 @@
 			<classifier>${lwjgl.natives}</classifier>
 		</dependency>
 		<dependency>
-			<groupId>org.joml</groupId>
-			<artifactId>joml</artifactId>
-			<version>${joml.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>java-data-front</groupId>
 			<artifactId>non-maven</artifactId>
 			<version>${version.java-data-front.non-maven}</version>
