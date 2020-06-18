@@ -8,22 +8,24 @@ import camera.Camera;
 import camera.CameraEntity;
 import inputListeners.MouseInputListener;
 import inputListeners.PlayerInputListener;
+import renderEngine.DisplayManager;
+import toolbox.Maths;
 
 public class CameraFreeFly extends Camera {
 	private float speed;
-	private int pitchInput;
-	private int yawInput;
+	private int rotateInput;
+	private int translateInput;
 	
-	private CameraFreeFly(PlayerInputListener inputListener, CameraEntity camera, int glfwPitch, int glfwYaw) {
+	private CameraFreeFly(PlayerInputListener inputListener, CameraEntity camera, int glfwRotateInput, int glfwDeltaTranslation) {
 		super(inputListener, camera);
 		speed = 0;
-		pitchInput= glfwPitch;
-		yawInput = glfwYaw;
+		rotateInput= glfwRotateInput;
+		translateInput = glfwDeltaTranslation;
 		this.camera = camera;
 	}
 	
-	public static CameraFreeFly create(PlayerInputListener inputListener, CameraEntity camera, int glfwPitch, int glfwYaw) {
-		CameraFreeFly cameraBehavior = new CameraFreeFly(inputListener, camera, glfwPitch,glfwYaw);
+	public static CameraFreeFly create(PlayerInputListener inputListener, CameraEntity camera, int glfwRotateInput, int glfwDeltaTranslation) {
+		CameraFreeFly cameraBehavior = new CameraFreeFly(inputListener, camera, glfwRotateInput, glfwDeltaTranslation);
 		cameraBehavior.bindInputHanlder();
 		return cameraBehavior;
 	}
@@ -32,32 +34,48 @@ public class CameraFreeFly extends Camera {
 	@Override
 	public void bindInputHanlder() {
 		inputListener.getMouse().ifPresent(mouseListener -> {
-			mouseListener.addRunnerOnPress(pitchInput, () -> calculatePitch(mouseListener));
-			mouseListener.addRunnerOnPress(yawInput, () -> calculateYaw(mouseListener));
+			mouseListener.addRunnerOnPress(rotateInput, () -> rotate(mouseListener));
+			mouseListener.addRunnerOnPress(translateInput, () -> translate(mouseListener));
 		});
 	}
-	
+
 	/**
-	 * cos(0) = 1; cos(1) = 0 sin(0) = 0; sin(1) = 1 yaw anti-counter clockwise (0 =
-	 * z-forward / x-left) pitch counter clockwise (0 = horizontal)
-	 * 
+	 * cos(0) = 1; cos(1) = 0 sin(0) = 0; sin(1) = 1
 	 * @param terrain
 	 */
 	@Override
 	public void update() {
-		float cameraXDirection = (float) (Math.sin(-Math.toRadians(camera.getYaw()))
-				* Math.cos(Math.toRadians(camera.getPitch())));
-		float cameraZDirection = (float) (Math.cos(-Math.toRadians(camera.getYaw()))
-				* Math.cos(Math.toRadians(camera.getPitch())));
-		float cameraYDirection = (float) (Math.sin(Math.toRadians(camera.getPitch())));
-
-		Vector3f unitVectorCamera = new Vector3f(cameraXDirection, cameraYDirection, cameraZDirection);
+		Vector3f lookAtunitVector = Maths.degreesToCartesianUnitVector(camera.getPitch(), camera.getYaw());
 		calculateSpeed();
-		unitVectorCamera.scale(this.speed);
-		Vector3f newPosition = Vector3f.add(camera.getPosition(), unitVectorCamera, null);
+		lookAtunitVector.scale(this.speed);
+		Vector3f newPosition = Vector3f.add(camera.getPosition(), lookAtunitVector, null);
 		camera.setPosition(newPosition);
 	}
 	
+	private void rotate(MouseInputListener mouseListener) {
+		calculatePitch(mouseListener);
+		calculateYaw(mouseListener);
+	}
+	
+	private void translate(MouseInputListener mouseListener) {
+		translateX(mouseListener);
+		translateY(mouseListener);
+	}
+	
+	private void translateX(MouseInputListener mouseListener) {
+		float deltaX = (mouseListener.getMouseXpos() - DisplayManager.WIDTH/2) * 0.005f;
+		Vector3f worldCoordTranslationX = this.camera.getCoordinatesSystemManager().viewCoordToWorldCoord(this.camera.getViewMatrix(), new Vector3f(deltaX,0,0));
+		Vector3f newPosition = Vector3f.add(camera.getPosition(),worldCoordTranslationX,null);
+		camera.setPosition(newPosition);
+	}
+	
+	private void translateY(MouseInputListener mouseListener) {
+		float deltaY = - (mouseListener.getMouseYpos() - DisplayManager.HEIGHT/2) * 0.005f;
+		Vector3f worldCoordTranslationX = this.camera.getCoordinatesSystemManager().viewCoordToWorldCoord(this.camera.getViewMatrix(), new Vector3f(0,deltaY,0));
+		Vector3f newPosition = Vector3f.add(camera.getPosition(),worldCoordTranslationX,null);
+		camera.setPosition(newPosition);
+	}
+
 	private void calculatePitch(MouseInputListener mouseListener) {
 		float ypos = mouseListener.getMouseDeltaY();
 		float pitch = camera.getPitch() - (-ypos * 0.5f);
@@ -69,6 +87,8 @@ public class CameraFreeFly extends Camera {
 		float yaw = camera.getYaw() + xpos * 0.5f;
 		camera.setYaw(yaw);
 	}
+	
+
 	
 	private void calculateSpeed() {
 		this.inputListener.getMouse().ifPresent(mouseListener -> {

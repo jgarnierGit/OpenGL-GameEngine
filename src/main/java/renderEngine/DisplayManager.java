@@ -16,13 +16,16 @@ public class DisplayManager {
 
 	public static final int WIDTH = 1280; //for debug
 	public static final int HEIGHT = 720;//for debug
+	public static final float ASPECT_RATIO = (float) WIDTH / (float) HEIGHT;
 	private static final String TITLE = "Our First Display";
 	public static long WINDOW_ID;
 	
 	private static double lastFrameTime;
 	private static float delta;
 	
-	
+	private DisplayManager() {
+		//hidden constructor
+	}
 	/**
 	 * Creates a display window on which we can render our game. The dimensions
 	 * of the window are determined by setting the display mode. By using
@@ -87,6 +90,10 @@ public class DisplayManager {
 
 	}
 	
+	/**
+	 * make debugging harder as time is still running with breakpoint
+	 * @return
+	 */
 	public static float getFrameTimeSeconds(){
 		return delta;
 	}

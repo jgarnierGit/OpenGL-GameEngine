@@ -3,7 +3,7 @@ package camera;
 import org.lwjglx.util.vector.Matrix4f;
 import org.lwjglx.util.vector.Vector3f;
 
-import renderEngine.GameBehavior;
+import toolbox.CoordinatesSystemManager;
 
 public class CameraEntity {
 	private float pitch;
@@ -11,13 +11,15 @@ public class CameraEntity {
 	private float roll;
 	private Vector3f position;
 	private Matrix4f viewMatrix;
-	private GameBehavior cameraBehavior;
+	CoordinatesSystemManager coordinatesSystemManager;
 	
-	public CameraEntity(Vector3f position, int pitch, int yaw, int roll) {
+	
+	public CameraEntity(Vector3f position, int pitch, int yaw, int roll, CoordinatesSystemManager coordinatesSystemManager) {
 		this.position = position;
 		this.pitch = pitch;
 		this.yaw = yaw;
 		this.roll = roll;
+		this.coordinatesSystemManager = coordinatesSystemManager;
 		this.viewMatrix = new Matrix4f();
 	}
 
@@ -103,6 +105,10 @@ public class CameraEntity {
 	
 	public Matrix4f getViewMatrix() {
 		return this.viewMatrix;
+	}
+	
+	public CoordinatesSystemManager getCoordinatesSystemManager() {
+		return coordinatesSystemManager;
 	}
 	
 }

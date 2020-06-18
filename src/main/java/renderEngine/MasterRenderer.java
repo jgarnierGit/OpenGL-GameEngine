@@ -21,31 +21,10 @@ import shaderManager.StaticShader;
 import shaderManager.TerrainShader;
 
 public class MasterRenderer {
-	private static final float FOV = 70f;
-	private static final float NEAR_PLANE = 0.1f;
-	private static final float FAR_PLANE = 1000;
 	private static final float RED = 0.55f;
 	private static final float BLUE = 0.64f;
 	private static final float GREEN = 0.75f;
-	private static final float ASPECT_RATIO = (float) DisplayManager.WIDTH / (float) DisplayManager.HEIGHT;
 	private float time = 0;
-	
-	
-	public static float getNearPlane() {
-		return NEAR_PLANE;
-	}
-
-	public static float getFarPlane() {
-		return FAR_PLANE;
-	}
-	
-	public static float getFOV() {
-		return FOV;
-	}
-	
-	public static float getAspectRatio() {
-		return ASPECT_RATIO;
-	}
 
 	private StaticShader shader;
 	private EntityRenderer renderer;
@@ -54,12 +33,10 @@ public class MasterRenderer {
 	private Draw3DRenderer draw3DRenderer;
 	private Draw2DRenderer draw2DRenderer;
 	private List<Model3D> terrains = new ArrayList<>();
-	private  CameraEntity camera;
+	private CameraEntity camera;
 	private Loader loader;
 	
 	private SkyboxRenderer skyboxRender;
-	
-	private Matrix4f projectionMatrix;
 	
 	private HashMap<Model3D, List<EntityTutos>> entities = new HashMap<>();
 	
@@ -76,11 +53,10 @@ public class MasterRenderer {
 	public static MasterRenderer create(CameraEntity camera) throws IOException {
 		StaticShader shader = new StaticShader();
 		enableCulling();
-		Matrix4f projectionMatrix = createProjectionMatrix();
-		EntityRenderer renderer = new EntityRenderer(shader, projectionMatrix);
-		//terrainRenderer = new TerrainRenderer(terrainShader, projectionMatrix);
-		//skyboxRender = new SkyboxRenderer(loader, projectionMatrix); TODO extract
-		Draw3DRenderer draw3DRenderer = new Draw3DRenderer(camera, projectionMatrix);
+		EntityRenderer renderer = new EntityRenderer(shader, camera.getCoordinatesSystemManager().getProjectionMatrix());
+		//terrainRenderer = new TerrainRenderer(terrainShader, camera.getCoordinatesSystemManager().getProjectionMatrix());
+		//skyboxRender = new SkyboxRenderer(loader, camera.getCoordinatesSystemManager().getProjectionMatrix()); TODO extract
+		Draw3DRenderer draw3DRenderer = new Draw3DRenderer(camera, camera.getCoordinatesSystemManager().getProjectionMatrix());
 		Draw2DRenderer draw2DRenderer = new Draw2DRenderer();
 		TerrainShader terrainShader = new TerrainShader();
 		Loader loader = new Loader();
@@ -94,11 +70,6 @@ public class MasterRenderer {
 	
 	public Draw2DRenderer get2DRenderer() {
 		return this.draw2DRenderer;
-	}
-	
-	
-	public Matrix4f getProjectionMatrix() {
-		return projectionMatrix;
 	}
 	
 	public Loader getLoader() {
@@ -126,6 +97,7 @@ public class MasterRenderer {
 		float aspectRatio = (float) DisplayManager.WIDTH / (float) DisplayManager.HEIGHT;
 		float y_scale = (float)  ((1f / Math.tan(Math.toRadians(time/ 2f))) * aspectRatio);
 		float x_scale = y_scale / aspectRatio;
+		Matrix4f projectionMatrix = camera.getCoordinatesSystemManager().getProjectionMatrix();
 
 		projectionMatrix.m00 = x_scale;
 		projectionMatrix.m11 = y_scale;
@@ -195,21 +167,6 @@ public class MasterRenderer {
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT); // clear the framebuffer
 		GL11.glClearColor(RED, GREEN, BLUE, 1);
 
-	}
-	
-	private static Matrix4f createProjectionMatrix() {
-		float y_scale = (float)  ((1f / Math.tan(Math.toRadians(FOV/ 2f))) * ASPECT_RATIO);
-		float x_scale = y_scale / ASPECT_RATIO;
-		float frustum_length = FAR_PLANE - NEAR_PLANE;
-		
-		Matrix4f projectionMatrix = new Matrix4f();
-		projectionMatrix.m00 = x_scale;
-		projectionMatrix.m11 = y_scale;
-		projectionMatrix.m22 = -((FAR_PLANE + NEAR_PLANE) / frustum_length);
-		projectionMatrix.m23 = -1;
-		projectionMatrix.m32 =  -((2 * NEAR_PLANE * FAR_PLANE) / frustum_length);
-		projectionMatrix.m33 = 0;
-		return projectionMatrix;
 	}
 	
 	

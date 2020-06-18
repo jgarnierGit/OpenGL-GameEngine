@@ -4,7 +4,7 @@ import org.lwjglx.util.vector.Vector3f;
 
 import camera.CameraEntity;
 import modelsLibrary.Terrain;
-import renderEngine.MasterRenderer;
+import toolbox.CoordinatesSystemManager;
 
 /**
  * Ray casting start from max distance : if not subterrain positionned, return, else divide by 2 and affine position until RECURSION_COUNT is reached.
@@ -32,8 +32,8 @@ public class MouseOnTerrainMover implements IMouseBehaviour  {
 	@Override
 	public void process(Vector3f ray) {
 		this.camPos = camera.getPosition();
-		if (intersectionInRange(0, MasterRenderer.getFarPlane(), ray)) {
-			currentTerrainPoint = binarySearch(0, 0, MasterRenderer.getFarPlane(), ray);
+		if (intersectionInRange(0, CoordinatesSystemManager.getFarPlane(), ray)) {
+			currentTerrainPoint = binarySearch(0, 0, CoordinatesSystemManager.getFarPlane(), ray);
 		} else {
 			currentTerrainPoint = null;
 		}

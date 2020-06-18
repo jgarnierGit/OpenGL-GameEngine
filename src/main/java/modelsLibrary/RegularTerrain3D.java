@@ -1,7 +1,6 @@
 package modelsLibrary;
 
 import entities.Entity;
-import entities.SimpleEntity;
 import renderEngine.Draw3DRenderer;
 import renderEngine.Loader;
 

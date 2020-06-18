@@ -2,11 +2,8 @@ package entities;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.lwjglx.util.vector.Vector3f;
-
-import renderEngine.RenderingParameters;
 
 /**
  * Model acn be attached here. Model will be equals to unique points. Model must implements methods to use for as many rendering type as needed;
