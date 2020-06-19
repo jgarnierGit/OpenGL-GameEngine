@@ -1,8 +1,8 @@
 package inputListeners;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Logger;
 
 /**
@@ -11,9 +11,9 @@ import java.util.logging.Logger;
  *
  */
 public abstract class InputListeners {
-	protected HashMap<Integer, List<Runnable>> runnersOnPress;
-	protected HashMap<Integer, List<Runnable>> runnersOnUiquePress;
-	protected HashMap<Integer, List<Runnable>> runnersOnRelease;
+	protected HashMap<Integer, Set<Runnable>> runnersOnPress;
+	protected HashMap<Integer, Set<Runnable>> runnersOnUiquePress;
+	protected HashMap<Integer, Set<Runnable>> runnersOnRelease;
 	protected InputHandler inputHandler;
 	protected Logger logger;
 
@@ -32,41 +32,72 @@ public abstract class InputListeners {
 
 	/**
 	 * Add a function to be executed while input is pressed.
-	 * @param function
+	 * @param glfwInput input to listen
+	 * @param function to execute
 	 */
 	public void addRunnerOnPress(Integer glfwInput, Runnable function) {
-		ArrayList<Runnable> runnables = new ArrayList<>();
-		runnables.add(function);
-		List<Runnable> runnable = this.runnersOnPress.putIfAbsent(glfwInput, runnables);
-		if (runnable != null) {
-			this.runnersOnPress.get(glfwInput).add(function);
-		}
+		add(this.runnersOnPress, glfwInput, function);
+	}
+	
+	/**
+	 * Remove function binding from On pressed event.
+	 * @param glfwInput GLFW.* input to listen
+	 * @param function to execute
+	 */
+	public void removeRunnerOnPress(Integer glfwInput, Runnable function) {
+		remove(this.runnersOnPress, glfwInput, function);
 	}
 	
 	/**
 	 * Add a function to be executed just once when input is pressed.
-	 * @param Integer GLFW.*
-	 * @param function
+	 * @param glfwInput GLFW.* input to listen
+	 * @param function to execute
 	 */
 	public void addRunnerOnUniquePress(Integer glfwInput, Runnable function) {
-		ArrayList<Runnable> runnables = new ArrayList<>();
-		runnables.add(function);
-		List<Runnable> runnable = this.runnersOnUiquePress.putIfAbsent(glfwInput, runnables);
-		if (runnable != null) {
-			this.runnersOnUiquePress.get(glfwInput).add(function);
-		}
+		add(this.runnersOnUiquePress, glfwInput, function);
 	}
 	
 	/**
+	 * Remove function binding from On unique pressed event.
+	 * @param glfwInput GLFW.* input to listen
+	 * @param function to execute
+	 */
+	public void removeRunnerOnUniquePress(Integer glfwInput, Runnable function) {
+		remove(this.runnersOnUiquePress, glfwInput, function);
+	}
+
+	/**
 	 * Add a function to be executed just once when input is released.
-	 * @param function
+	 * @param glfwInput GLFW.* input to listen
+	 * @param function to execute
 	 */
 	public void addRunnerOnRelease(Integer glfwInput, Runnable function) {
-		ArrayList<Runnable> runnables = new ArrayList<>();
+		add(this.runnersOnRelease, glfwInput, function);
+	}
+	
+	/**
+	 * Remove function binding from On release event.
+	 * @param glfwInput GLFW.* input to listen
+	 * @param function to execute
+	 */
+	public void removeRunnerOnRelease(Integer glfwInput, Runnable function) {
+		remove(this.runnersOnRelease, glfwInput, function);
+	}
+	
+	private void remove(HashMap<Integer, Set<Runnable>> runners, Integer glfwInput, Runnable function) {
+		Set<Runnable> runnables = runners.get(glfwInput);
+		if(runnables == null) {
+			return;
+		}
+		boolean removed = runnables.remove(function);
+	}
+	
+	private void add(HashMap<Integer, Set<Runnable>> runners, Integer glfwInput, Runnable function) {
+		Set<Runnable> runnables = new HashSet<>();
 		runnables.add(function);
-		List<Runnable> runnable = this.runnersOnRelease.putIfAbsent(glfwInput, runnables);
+		Set<Runnable> runnable = runners.putIfAbsent(glfwInput, runnables);
 		if (runnable != null) {
-			this.runnersOnRelease.get(glfwInput).add(function);
+			boolean added = runners.get(glfwInput).add(function);
 		}
 	}
 
@@ -79,24 +110,24 @@ public abstract class InputListeners {
 	protected void execute() {
 		for (Integer glfwInput : this.runnersOnPress.keySet()) {
 			if (inputHandler.activateOnPress(glfwInput)) {
-				run(this.runnersOnPress.getOrDefault(glfwInput, new ArrayList<>()));
+				run(this.runnersOnPress.getOrDefault(glfwInput, new HashSet<>()));
 			}
 		}
 
 		for (Integer glfwInput : this.runnersOnUiquePress.keySet()) {
 			if (inputHandler.activateOnPressOneTime(glfwInput)) {
-				run(this.runnersOnUiquePress.getOrDefault(glfwInput, new ArrayList<>()));
+				run(this.runnersOnUiquePress.getOrDefault(glfwInput, new HashSet<>()));
 			}
 		}
 		
 		for (Integer glfwInput : this.runnersOnRelease.keySet()) {
 			if (inputHandler.activateOnReleaseOnce(glfwInput)) {
-				run(this.runnersOnRelease.getOrDefault(glfwInput, new ArrayList<>()));
+				run(this.runnersOnRelease.getOrDefault(glfwInput, new HashSet<>()));
 			}
 		}
 	}
 
-	private void run(List<Runnable> runnables) {
+	private void run(Set<Runnable> runnables) {
 		for (Runnable runner : runnables) {
 			runner.run();
 		}

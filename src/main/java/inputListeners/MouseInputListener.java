@@ -73,7 +73,6 @@ public class MouseInputListener extends InputListeners {
 		glfwSetMouseButtonCallback(DisplayManager.WINDOW_ID, (long window, int key, int action, int mods) -> {
 			// no GLFW_REPEAT for mouse inputs
 			if (action == GLFW_PRESS) {
-				logger.log(Level.INFO, "pressed "+ key);
 				this.inputHandler.updateInputStatus(key, true);
 				this.inputHandler.updateInputReleasableStatus(key, true);
 			} else {

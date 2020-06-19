@@ -110,5 +110,10 @@ public class CameraEntity {
 	public CoordinatesSystemManager getCoordinatesSystemManager() {
 		return coordinatesSystemManager;
 	}
+
+	public void increasePitch(float deltaDegree) {
+		this.pitch += deltaDegree;
+		
+	}
 	
 }

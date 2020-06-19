@@ -14,6 +14,8 @@ import toolbox.Maths;
 public class CameraFreeFly extends Camera {
 	private float speed;
 	private int rotateInput;
+	private Runnable rotateRunnable;
+	private Runnable translateRunnable;
 	private int translateInput;
 	
 	private CameraFreeFly(PlayerInputListener inputListener, CameraEntity camera, int glfwRotateInput, int glfwDeltaTranslation) {
@@ -21,7 +23,8 @@ public class CameraFreeFly extends Camera {
 		speed = 0;
 		rotateInput= glfwRotateInput;
 		translateInput = glfwDeltaTranslation;
-		this.camera = camera;
+		rotateRunnable = null;
+		translateRunnable = null;
 	}
 	
 	public static CameraFreeFly create(PlayerInputListener inputListener, CameraEntity camera, int glfwRotateInput, int glfwDeltaTranslation) {
@@ -34,8 +37,26 @@ public class CameraFreeFly extends Camera {
 	@Override
 	public void bindInputHanlder() {
 		inputListener.getMouse().ifPresent(mouseListener -> {
-			mouseListener.addRunnerOnPress(rotateInput, () -> rotate(mouseListener));
-			mouseListener.addRunnerOnPress(translateInput, () -> translate(mouseListener));
+			initMouseRunnable(mouseListener);
+			mouseListener.addRunnerOnPress(rotateInput, rotateRunnable);
+			mouseListener.addRunnerOnPress(translateInput, translateRunnable);
+		});
+	}
+	
+	private void initMouseRunnable(MouseInputListener mouseListener) {
+		if(rotateRunnable == null) {
+			rotateRunnable = () -> rotate(mouseListener);
+		}
+		if(translateRunnable == null) {
+			translateRunnable = () -> translate(mouseListener);
+		}
+	}
+	
+	@Override
+	public void unbindInputHanlder() {
+		inputListener.getMouse().ifPresent(mouseListener -> {
+			mouseListener.removeRunnerOnPress(rotateInput, rotateRunnable);
+			mouseListener.removeRunnerOnPress(translateInput, translateRunnable);
 		});
 	}
 
@@ -45,11 +66,11 @@ public class CameraFreeFly extends Camera {
 	 */
 	@Override
 	public void update() {
-		Vector3f lookAtunitVector = Maths.degreesToCartesianUnitVector(camera.getPitch(), camera.getYaw());
+		Vector3f lookAtunitVector = Maths.degreesToCartesianUnitVector(cameraEntity.getPitch(), cameraEntity.getYaw());
 		calculateSpeed();
 		lookAtunitVector.scale(this.speed);
-		Vector3f newPosition = Vector3f.add(camera.getPosition(), lookAtunitVector, null);
-		camera.setPosition(newPosition);
+		Vector3f newPosition = Vector3f.add(cameraEntity.getPosition(), lookAtunitVector, null);
+		cameraEntity.setPosition(newPosition);
 	}
 	
 	private void rotate(MouseInputListener mouseListener) {
@@ -64,28 +85,28 @@ public class CameraFreeFly extends Camera {
 	
 	private void translateX(MouseInputListener mouseListener) {
 		float deltaX = (mouseListener.getMouseXpos() - DisplayManager.WIDTH/2) * 0.005f;
-		Vector3f worldCoordTranslationX = this.camera.getCoordinatesSystemManager().viewCoordToWorldCoord(this.camera.getViewMatrix(), new Vector3f(deltaX,0,0));
-		Vector3f newPosition = Vector3f.add(camera.getPosition(),worldCoordTranslationX,null);
-		camera.setPosition(newPosition);
+		Vector3f worldCoordTranslationX = this.cameraEntity.getCoordinatesSystemManager().viewCoordToWorldCoord(this.cameraEntity.getViewMatrix(), new Vector3f(deltaX,0,0));
+		Vector3f newPosition = Vector3f.add(cameraEntity.getPosition(),worldCoordTranslationX,null);
+		cameraEntity.setPosition(newPosition);
 	}
 	
 	private void translateY(MouseInputListener mouseListener) {
 		float deltaY = - (mouseListener.getMouseYpos() - DisplayManager.HEIGHT/2) * 0.005f;
-		Vector3f worldCoordTranslationX = this.camera.getCoordinatesSystemManager().viewCoordToWorldCoord(this.camera.getViewMatrix(), new Vector3f(0,deltaY,0));
-		Vector3f newPosition = Vector3f.add(camera.getPosition(),worldCoordTranslationX,null);
-		camera.setPosition(newPosition);
+		Vector3f worldCoordTranslationX = this.cameraEntity.getCoordinatesSystemManager().viewCoordToWorldCoord(this.cameraEntity.getViewMatrix(), new Vector3f(0,deltaY,0));
+		Vector3f newPosition = Vector3f.add(cameraEntity.getPosition(),worldCoordTranslationX,null);
+		cameraEntity.setPosition(newPosition);
 	}
 
 	private void calculatePitch(MouseInputListener mouseListener) {
 		float ypos = mouseListener.getMouseDeltaY();
-		float pitch = camera.getPitch() - (-ypos * 0.5f);
-		camera.setPitch(pitch);
+		float pitch = cameraEntity.getPitch() - (-ypos * 0.5f);
+		cameraEntity.setPitch(pitch);
 	}
 
 	private void calculateYaw(MouseInputListener mouseListener) {
 		float xpos = mouseListener.getMouseDeltaX();
-		float yaw = camera.getYaw() + xpos * 0.5f;
-		camera.setYaw(yaw);
+		float yaw = cameraEntity.getYaw() + xpos * 0.5f;
+		cameraEntity.setYaw(yaw);
 	}
 	
 
@@ -97,7 +118,6 @@ public class CameraFreeFly extends Camera {
 				this.speed = 0;
 			} else {
 				if (Math.abs(this.speed) < Math.abs(inputScroll) / 10) {
-					logger.log(Level.INFO, " " + this.speed + " " + inputScroll);
 					float speed = inputScroll * 0.05f;
 					this.speed += speed;
 				}

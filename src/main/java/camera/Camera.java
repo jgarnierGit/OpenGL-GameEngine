@@ -4,11 +4,11 @@ import inputListeners.InputInteractable;
 import inputListeners.PlayerInputListener;
 
 public abstract class Camera extends InputInteractable implements CameraBehavior {
-	protected CameraEntity camera;
+	protected CameraEntity cameraEntity;
 
 	public Camera(PlayerInputListener inputListener, CameraEntity camera) {
 		super(inputListener);
-		this.camera = camera;
+		this.cameraEntity = camera;
 	}
 
 }
