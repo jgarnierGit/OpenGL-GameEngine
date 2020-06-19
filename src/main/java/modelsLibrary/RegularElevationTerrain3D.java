@@ -41,12 +41,12 @@ public class RegularElevationTerrain3D extends RegularTerrain3D{
 	}
 	
 	@Override
-	public Optional<Float> getHeight(float worldX, float worldZ) {
-		if(worldX < this.origineX || worldX > (this.origineX + this.size) || worldZ < this.origineZ || worldZ > (this.origineZ + this.size)) {
+	public Optional<Float> getHeight(Vector3f worldPosition) {
+		if(worldPosition.x < this.origineX || worldPosition.x > (this.origineX + this.size) || worldPosition.z < this.origineZ || worldPosition.z > (this.origineZ + this.size)) {
 			return Optional.empty();
 		}
-		float terrainX = worldX - this.origineX;
-		float terrainZ = worldZ - this.origineZ;
+		float terrainX = worldPosition.x - this.origineX;
+		float terrainZ = worldPosition.z - this.origineZ;
 		float gridSquareSize = this.size / ((float)heights.length-1);
 		int gridX = (int) Math.floor(terrainX / gridSquareSize);
 		int gridZ = (int) Math.floor(terrainZ / gridSquareSize);

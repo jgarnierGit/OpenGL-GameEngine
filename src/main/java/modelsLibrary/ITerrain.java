@@ -2,6 +2,8 @@ package modelsLibrary;
 
 import java.util.Optional;
 
+import org.lwjglx.util.vector.Vector3f;
+
 public interface ITerrain {
 	
 	/**
@@ -10,5 +12,6 @@ public interface ITerrain {
 	 * @param worldZ
 	 * @return elevation if coordinates intersects terrain, empty Optional else
 	 */
-	public Optional<Float> getHeight(float worldX, float worldZ);
+	public Optional<Float> getHeight(Vector3f worldPosition);
+	
 }
