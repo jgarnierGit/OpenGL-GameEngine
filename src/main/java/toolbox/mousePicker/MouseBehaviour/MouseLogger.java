@@ -22,12 +22,16 @@ import entities.Camera;
 import entities.Entity;
 import entities.EntityTutos;
 import inputListeners.MouseInputListener;
+import modelsLibrary.Face;
 import modelsLibrary.SimpleGeom;
 import renderEngine.Loader;
 import renderEngine.MasterRenderer;
 import renderEngine.RenderingParameters;
 import toolbox.CoordinatesSystemManager;
 import toolbox.Maths;
+import utils.IntersectionResult;
+import utils.MeasureResult;
+import utils.SpatialComparator;
 
 public class MouseLogger implements IMouseBehaviour {
 	private Map<SimpleGeom, List<Entity>> entitiesByGeom;
@@ -67,7 +71,7 @@ public class MouseLogger implements IMouseBehaviour {
 
 		this.camPos = camera.getPosition();
 		this.mouserLoggerPrinter.setCameraPosition(this.camPos);
-		this.viewMatrix = Maths.createViewMatrix(camera);
+		this.viewMatrix = camera.getViewMatrix();
 		this.coordSysManager.setViewMatrix(this.viewMatrix);
 
 		filterEntitiesByCameraClip();
@@ -129,54 +133,23 @@ public class MouseLogger implements IMouseBehaviour {
 			Vector3f rtfWorld = Vector3f.add(entity.getPositions(), bbox.get(5), null);
 			Vector3f lbfWorld = Vector3f.add(entity.getPositions(), bbox.get(6), null);
 			Vector3f rbfWorld = Vector3f.add(entity.getPositions(), bbox.get(7), null);
-			List<Vector3f> vectorsAsFaces = Arrays.asList(ltnWorld,lbnWorld,rbnWorld,ltfWorld,lbfWorld,lbnWorld,rtnWorld,rbnWorld,rbfWorld,
-					rtfWorld,rbfWorld,lbfWorld,ltfWorld,ltnWorld,rtnWorld,rbnWorld,rbfWorld,lbfWorld);
+			List<Face> vectorsAsFaces = Arrays.asList(new Face(ltnWorld,lbnWorld,rbnWorld),new Face(ltfWorld,lbfWorld,lbnWorld),
+					new Face(rtnWorld,rbnWorld,rbfWorld),new Face(rtfWorld,rbfWorld,lbfWorld), new Face(ltfWorld,ltnWorld,rtnWorld),
+					new Face(rbnWorld,rbfWorld,lbfWorld));
 			
 			boolean added = false;
-			for(int i=0; i<vectorsAsFaces.size();i+=3) {
-				Vector3f originFace = vectorsAsFaces.get(i+1);
-				Vector3f uPoint = vectorsAsFaces.get(i);
-				Vector3f vPoint = vectorsAsFaces.get(i+2);
-				// getting length of a face from camera.
-				Vector3f nearFromCamera = Vector3f.sub(originFace, camPos, null);
-				// getting normal from a face.
-				Vector3f nearPlaneU2 = Vector3f.sub(uPoint, originFace, null);
-				Vector3f nearPlaneV2 = Vector3f.sub(vPoint, originFace, null);
-				Vector3f nearNormal = Vector3f.cross(nearPlaneU2, nearPlaneV2, null);
-				nearNormal.normalise();
-				// getting ratio to apply
-				float cosThetaFromNormal = Vector3f.dot(nearFromCamera, nearNormal);
-				float cosThetaFromRay = Vector3f.dot(this.ray, nearNormal);
-				float k = cosThetaFromNormal / cosThetaFromRay;
-				Vector3f intersect = new Vector3f(this.ray.x, this.ray.y, this.ray.z);
-				intersect.scale(k);
-				Vector3f rayIntersectToWorld = Vector3f.add(camPos, intersect, null);
-				if(k >= 0) {
-					double roundedRayX = Math.floor(rayIntersectToWorld.x *100);
-					double roundedRayY =  Math.floor(rayIntersectToWorld.y *100);
-					double roundedRayZ =  Math.floor(rayIntersectToWorld.z *100);
-					double uPointX =  Math.floor(uPoint.x *100);
-					double uPointY =  Math.floor(uPoint.y *100);
-					double uPointZ =  Math.floor(uPoint.z *100);
-					double vPointX =  Math.floor(vPoint.x *100);
-					double vPointY =  Math.floor(vPoint.y *100);
-					double vPointZ =  Math.floor(vPoint.z *100);
-					if(roundedRayX >= Math.min(uPointX, vPointX) && roundedRayX <= Math.max(uPointX, vPointX) && 
-							roundedRayY >= Math.min(uPointY, vPointY) && roundedRayY <= Math.max(uPointY, vPointY) && 
-									roundedRayZ >= Math.min(uPointZ, vPointZ) && roundedRayZ <= Math.max(uPointZ, vPointZ)) {
-						this.mouserLoggerPrinter.print3DVectors("3DClipped",
-								Arrays.asList(camPos, Vector3f.add(camPos, intersect, null)), null, GL11.GL_POINTS);
-						this.mouserLoggerPrinter.print3DVectors("3DClippedRef",
-								Arrays.asList(originFace, Vector3f.add(camPos, intersect, null)), new Vector4f(0,0,0,1), GL11.GL_LINES);
-						if(!added) {
-							added = true;
-							filteredByDistanceEntities.put(intersect.length(), entity);
-						}
-					}
+
+			List<IntersectionResult> intersectResult = SpatialComparator.getProjectionOverEntity(camPos, this.ray, vectorsAsFaces, new Vector3f(0,0,0));
+			intersectResult.forEach(result -> {
+				this.mouserLoggerPrinter.print3DVectors("3DClipped",
+						Arrays.asList(camPos, result.getProjectedPosition()), null, GL11.GL_POINTS);
+				this.mouserLoggerPrinter.print3DVectors("3DClippedRef",
+						Arrays.asList(result.getFace().p1, result.getProjectedPosition()), new Vector4f(0,0,0,1), GL11.GL_LINES);
+				if(!added) {
+					added = true;
+					filteredByDistanceEntities.put(Vector3f.sub(result.getFace().p1, result.getProjectedPosition(), null).length(), entity);
 				}
-			}
-			
-			
+			});	
 			// end
 
 		//	filteredEntities = oldway(entity, MouseRayWorldCoord, ltnWorld, rtnWorld, lbnWorld, rbnWorld, ltfWorld,

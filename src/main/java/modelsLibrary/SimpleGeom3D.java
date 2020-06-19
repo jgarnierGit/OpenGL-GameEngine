@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.NotImplementedException;
 import org.lwjgl.opengl.GL11;
 import org.lwjglx.util.vector.Vector;
 import org.lwjglx.util.vector.Vector3f;
@@ -129,5 +130,31 @@ public class SimpleGeom3D extends SimpleGeom {
 			throw new IllegalArgumentException("Vector3f excepted, got " + point.getClass());
 		}
 		return (Vector3f) point;
+	}
+
+	public List<Face> getFaces() {
+		if(!this.getRenderingParameters().getRenderMode().isPresent()) {
+			throw new IllegalStateException("No rendering mode set, cannot construct faces. Please specify one of the GL11.GL_TRIANGLES* mode.");
+		}
+		int mode = this.getRenderingParameters().getRenderMode().get();
+		List<Face> faces = new ArrayList<>();
+		List<Vector3f> vertices = this.buildVerticesList();
+		switch(mode) {
+		case GL11.GL_TRIANGLES:
+			for(int i=0; i < vertices.size(); i+=3) {
+				faces.add(new Face(vertices.get(i), vertices.get(i+1), vertices.get(i+2)));
+			}
+			break;
+		case GL11.GL_TRIANGLE_STRIP:
+			for(int i=0; i < vertices.size()-2; i++) {
+				faces.add(new Face(vertices.get(i), vertices.get(i+1), vertices.get(i+2)));
+			}
+			break;
+		case GL11.GL_TRIANGLE_FAN:
+			throw new NotImplementedException();
+			default:
+				throw new IllegalStateException(mode + ": Rendering mode not allowed to construct faces. Please specify one of the GL11.GL_TRIANGLES* mode.");	
+		}
+		return faces;
 	}
 }
