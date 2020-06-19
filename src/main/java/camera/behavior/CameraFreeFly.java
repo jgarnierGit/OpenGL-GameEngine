@@ -1,7 +1,5 @@
 package camera.behavior;
 
-import java.util.logging.Level;
-
 import org.lwjglx.util.vector.Vector3f;
 
 import camera.Camera;
@@ -31,6 +29,16 @@ public class CameraFreeFly extends Camera {
 		CameraFreeFly cameraBehavior = new CameraFreeFly(inputListener, camera, glfwRotateInput, glfwDeltaTranslation);
 		cameraBehavior.bindInputHanlder();
 		return cameraBehavior;
+	}
+	
+	@Override
+	public void stopMoving() {
+		speed= 0;
+		inputListener.getMouse().ifPresent(mouseListener -> {
+			mouseListener.resetScrollDelta();
+			mouseListener.resetMouseXDelta();
+			mouseListener.resetMouseYDelta();
+		});
 	}
 	
 	//TODO find a way to pass mouseListener as param. maybe builder.
@@ -124,5 +132,4 @@ public class CameraFreeFly extends Camera {
 			}
 		});
 	}
-
 }

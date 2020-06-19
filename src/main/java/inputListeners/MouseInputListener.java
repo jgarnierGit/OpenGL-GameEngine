@@ -93,4 +93,18 @@ public class MouseInputListener extends InputListeners {
 		});
 	}
 
+	public void resetScrollDelta() {
+		scrollValue = 0;
+	}
+
+	public void resetMouseXDelta() {
+		mouseXposition = 0;
+		lastMouseXPos = 0;
+	}
+
+	public void resetMouseYDelta() {
+		mouseYposition = 0;
+		lastMouseYPos = 0;
+	}
+
 }

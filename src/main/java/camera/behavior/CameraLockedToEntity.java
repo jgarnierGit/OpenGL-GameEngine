@@ -11,7 +11,9 @@ import inputListeners.PlayerInputListener;
 public class CameraLockedToEntity extends Camera {
 	private int rotateInput;
 	private float distanceToEntity;
+	private final float distanceToEntityRef;
 	private float angleAroundPlayer;
+	private final float angleAroundPlayerRef;
 	private Runnable rotateRunnable;
 	private Entity entity;
 
@@ -20,7 +22,9 @@ public class CameraLockedToEntity extends Camera {
 		super(inputListener, camera);
 		rotateInput = glfwRotateInput;
 		this.distanceToEntity = distanceToEntity;
+		this.distanceToEntityRef = distanceToEntity;
 		this.angleAroundPlayer = angleAroundPlayer;
+		this.angleAroundPlayerRef = angleAroundPlayer;
 		this.entity = entity;
 		rotateRunnable = null;
 	}
@@ -51,6 +55,17 @@ public class CameraLockedToEntity extends Camera {
 	public void update() {
 		calculateZoom();
 		updatePosition();
+	}
+	
+	@Override
+	public void stopMoving() {
+		inputListener.getMouse().ifPresent(mouseListener -> {
+			mouseListener.resetScrollDelta();
+			mouseListener.resetMouseXDelta();
+			mouseListener.resetMouseYDelta();
+		});
+		this.distanceToEntity = this.distanceToEntityRef;
+		this.angleAroundPlayer = this.angleAroundPlayerRef;
 	}
 
 	private void updatePosition() {
@@ -124,5 +139,4 @@ public class CameraLockedToEntity extends Camera {
 			this.distanceToEntity -= zoomLevel;
 		});
 	}
-
 }
