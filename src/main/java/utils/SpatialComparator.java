@@ -26,40 +26,93 @@ public class SpatialComparator {
 	private SpatialComparator() {
 		// hidden constructor
 	}
+	
+	public static List<Entity> filterEntitiesByValueEquality(float value, Axis axis, List<Entity> entities){
+		BiPredicate<Vector3f, Vector3f> predicate = null;
+		Vector3f position = null;
+		switch(axis) {
+		case X:
+			predicate = (ref, test) -> ref.x == test.x;
+			position = new Vector3f(value,0,0);
+			break;
+		case Y:
+			predicate = (ref, test) -> ref.y == test.y;
+			position = new Vector3f(0,value,0);
+			break;
+		case Z: 
+			predicate = (ref, test) -> ref.z == test.z;
+			position = new Vector3f(0,0,value);
+			break;
+		default:
+			throw new IllegalArgumentException(axis + " is unknown");
+		}
+		return getFilteredEntity(predicate, position, entities);
+	}
 
 	/**
-	 * TODO set as param strictly equals or not.
 	 * 
 	 * @param positions reference world position
 	 * @param direction filter entities over this world direction
+	 * @param operator
 	 * @param entities  to filter over
 	 * @return Entity if exists Optional.empty else
 	 */
-	public static List<Entity> filterEntitiesByDirection(Vector3f positions, Direction direction,
+	public static List<Entity> filterEntitiesByDirection(Vector3f positions, Direction direction, Operator operator,
 			List<Entity> entities) {
 		BiPredicate<Vector3f, Vector3f> predicate = null;
-		switch (direction) {
-		case BOTTOM:
-			predicate = (ref, test) -> ref.y >= test.y;
+		switch (operator) {
+		case EXCLUSIVE:
+			switch (direction) {
+			case BOTTOM:
+				predicate = (ref, test) -> ref.y > test.y;
+				break;
+			case TOP:
+				predicate = (ref, test) -> ref.y < test.y;
+				break;
+			case WEST:
+				predicate = (ref, test) -> ref.x < test.x;
+				break;
+			case EAST:
+				predicate = (ref, test) -> ref.x > test.x;
+				break;
+			case SOUTH:
+				predicate = (ref, test) -> ref.z > test.z;
+				break;
+			case NORTH:
+				predicate = (ref, test) -> ref.z < test.z;
+				break;
+			default:
+				throw new IllegalArgumentException(direction + " is unknown");
+			}
 			break;
-		case TOP:
-			predicate = (ref, test) -> ref.y <= test.y;
-			break;
-		case WEST:
-			predicate = (ref, test) -> ref.x <= test.x;
-			break;
-		case EAST:
-			predicate = (ref, test) -> ref.x >= test.x;
-			break;
-		case SOUTH:
-			predicate = (ref, test) -> ref.z >= test.z;
-			break;
-		case NORTH:
-			predicate = (ref, test) -> ref.z <= test.z;
+		case INCLUSIVE:
+			switch (direction) {
+			case BOTTOM:
+				predicate = (ref, test) -> ref.y >= test.y;
+				break;
+			case TOP:
+				predicate = (ref, test) -> ref.y <= test.y;
+				break;
+			case WEST:
+				predicate = (ref, test) -> ref.x <= test.x;
+				break;
+			case EAST:
+				predicate = (ref, test) -> ref.x >= test.x;
+				break;
+			case SOUTH:
+				predicate = (ref, test) -> ref.z >= test.z;
+				break;
+			case NORTH:
+				predicate = (ref, test) -> ref.z <= test.z;
+				break;
+			default:
+				throw new IllegalArgumentException(direction + " is unknown");
+			}
 			break;
 		default:
-			throw new IllegalArgumentException(direction + " is unknown");
+			throw new IllegalArgumentException(operator + " is unknown");
 		}
+		
 		return getFilteredEntity(predicate, positions, entities);
 	}
 

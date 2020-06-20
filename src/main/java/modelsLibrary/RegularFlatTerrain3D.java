@@ -11,6 +11,7 @@ import renderEngine.Draw3DRenderer;
 import renderEngine.Loader;
 import renderEngine.MasterRenderer;
 import utils.Direction;
+import utils.Operator;
 import utils.SpatialComparator;
 
 public class RegularFlatTerrain3D extends RegularTerrain3D {
@@ -69,7 +70,7 @@ public class RegularFlatTerrain3D extends RegularTerrain3D {
 	@Override
 	public Optional<Float> getHeight(Vector3f worldPosition) {
 		List<Entity> filteredTerrainEntities = SpatialComparator.filterEntitiesByDirection(worldPosition,
-				Direction.BOTTOM, this.getRenderingParameters().getEntities());
+				Direction.BOTTOM, Operator.INCLUSIVE, this.getRenderingParameters().getEntities());
 		if (filteredTerrainEntities.isEmpty()) {
 			return Optional.empty();
 		}
