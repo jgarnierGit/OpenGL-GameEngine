@@ -1,4 +1,4 @@
-package modelsLibrary;
+package modelsLibrary.terrain;
 
 import java.io.IOException;
 import java.util.List;
@@ -8,6 +8,7 @@ import org.lwjglx.util.vector.Vector3f;
 
 import entities.Entity;
 import entities.SimpleEntity;
+import modelsLibrary.SimpleGeom3D;
 import renderEngine.Draw3DRenderer;
 import renderEngine.Loader;
 import renderEngine.MasterRenderer;

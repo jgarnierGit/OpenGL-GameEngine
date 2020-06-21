@@ -1,9 +1,11 @@
-package modelsLibrary;
+package modelsLibrary.terrain;
 
 import java.io.IOException;
 import java.util.logging.Logger;
 
 import entities.Entity;
+import modelsLibrary.SimpleGeom3D;
+import modelsLibrary.SimpleGeom3DBuilder;
 import renderEngine.Draw3DRenderer;
 import renderEngine.Loader;
 

@@ -1,4 +1,4 @@
-package modelsLibrary;
+package modelsLibrary.terrain;
 
 import java.io.IOException;
 import java.util.Optional;

@@ -9,7 +9,7 @@ import org.lwjgl.opengl.GL30;
 import org.lwjglx.util.vector.Matrix4f;
 import org.lwjglx.util.vector.Vector3f;
 
-import modelsLibrary.Terrain;
+import modelsLibrary.terrain.Terrain;
 import modelsManager.MTLUtils;
 import modelsManager.MaterialMapper;
 import modelsManager.Model3D;

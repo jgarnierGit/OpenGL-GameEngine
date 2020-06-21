@@ -1,8 +1,10 @@
-package modelsLibrary;
+package modelsLibrary.terrain;
 
 import java.util.Optional;
 
 import org.lwjglx.util.vector.Vector3f;
+
+import modelsLibrary.GeomContainer;
 
 public interface ITerrain extends GeomContainer{
 	
