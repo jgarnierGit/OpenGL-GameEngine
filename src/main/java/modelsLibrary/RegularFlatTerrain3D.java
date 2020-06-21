@@ -1,5 +1,6 @@
 package modelsLibrary;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,14 +22,14 @@ public class RegularFlatTerrain3D extends RegularTerrain3D {
 	private static final int X_INDEX = 0;
 	private static final int Z_INDEX = 0;
 
-	private RegularFlatTerrain3D(Loader loader, Draw3DRenderer draw3dRenderer, String alias, float size,
-			Entity entity) {
-		super(loader, draw3dRenderer, alias, size, FLAT_DEFINITION,entity);
+	private RegularFlatTerrain3D(Loader loader, Draw3DRenderer draw3dRenderer, String alias, float size, Entity entity)
+			throws IOException {
+		super(loader, draw3dRenderer, alias, size, FLAT_DEFINITION, entity);
 		height = entity.getPositions().y;
 	}
 
 	public static RegularFlatTerrain3D generateRegular(MasterRenderer masterRenderer, String alias, float size, float x,
-			float z, float elevation) {
+			float z, float elevation) throws IOException {
 		SimpleEntity entity = new SimpleEntity(new Vector3f(x, elevation, z), 0, 0, 0, 1);
 		RegularFlatTerrain3D terrain = new RegularFlatTerrain3D(masterRenderer.getLoader(),
 				masterRenderer.get3DRenderer(), alias, size, entity);
@@ -44,7 +45,7 @@ public class RegularFlatTerrain3D extends RegularTerrain3D {
 						terrain.height, entity.getPositions().z + ((stepz + 1) * (size / FLAT_DEFINITION)));
 				SimpleGeom3D terrainGeom = terrain.getSimpleGeom();
 				if ((stepx + stepz) % 2 == 0) {
-					
+
 					terrainGeom.addPoint(frontLeft);
 					terrainGeom.addPoint(frontRight);
 					terrainGeom.addPoint(farLeft);
@@ -77,22 +78,22 @@ public class RegularFlatTerrain3D extends RegularTerrain3D {
 			return Optional.empty();
 		}
 		Optional<Entity> nearestEntity = Optional.empty();
-		for(Entity entityTerrain : filteredTerrainEntities) {
+		for (Entity entityTerrain : filteredTerrainEntities) {
 			List<Vector3f> vertices = this.terrain.buildVerticesList();
 			Vector3f worldFrontLeft = Vector3f.add(entityTerrain.getPositions(), vertices.get(0), null);
 			Vector3f worldFarRight = Vector3f.add(entityTerrain.getPositions(), vertices.get(vertices.size() - 1),
 					null);
 			if (worldPosition.x >= worldFrontLeft.x && worldPosition.x <= worldFarRight.x
 					&& worldPosition.z >= worldFrontLeft.z && worldPosition.z <= worldFarRight.z) {
-				if(!nearestEntity.isPresent()) {
+				if (!nearestEntity.isPresent()) {
 					nearestEntity = Optional.of(entityTerrain);
 					continue;
 				}
-				if(nearestEntity.get().getPositions().y < entityTerrain.getPositions().y) {
+				if (nearestEntity.get().getPositions().y < entityTerrain.getPositions().y) {
 					nearestEntity = Optional.of(entityTerrain);
 				}
 			}
-		}		
+		}
 		return nearestEntity.map(entity -> entity.getPositions().y);
 	}
 }

@@ -18,12 +18,13 @@ import org.lwjglx.util.vector.Matrix4f;
 import org.lwjglx.util.vector.Vector3f;
 import org.lwjglx.util.vector.Vector4f;
 
-import entities.Camera;
+import camera.CameraEntity;
 import entities.Entity;
 import entities.EntityTutos;
 import inputListeners.MouseInputListener;
 import modelsLibrary.Face;
-import modelsLibrary.RawGeom;
+import modelsLibrary.ISimpleGeom;
+import renderEngine.DisplayManager;
 import renderEngine.Loader;
 import renderEngine.MasterRenderer;
 import renderEngine.RenderingParameters;
@@ -34,8 +35,8 @@ import utils.MeasureResult;
 import utils.SpatialComparator;
 
 public class MouseLogger implements IMouseBehaviour {
-	private Map<RawGeom, List<Entity>> entitiesByGeom;
-	private Camera camera;
+	private Map<ISimpleGeom, List<Entity>> entitiesByGeom;
+	private CameraEntity camera;
 	private MouserLoggerPrinter mouserLoggerPrinter;
 	private Matrix4f viewMatrix;
 	private Vector3f camPos;
@@ -43,11 +44,11 @@ public class MouseLogger implements IMouseBehaviour {
 	private MouseInputListener mouseInputListener;
 	private Vector3f ray;
 
-	public MouseLogger(Camera camera, MasterRenderer masterRenderer, Loader loader,
+	public MouseLogger(CameraEntity camera, MasterRenderer masterRenderer, Loader loader,
 			MouseInputListener mouseInputListener) {
 		this.entitiesByGeom = new HashMap<>();
 		this.camera = camera;
-		this.coordSysManager = new CoordinatesSystemManager(masterRenderer.getProjectionMatrix());
+		this.coordSysManager = camera.getCoordinatesSystemManager();
 		this.mouseInputListener = mouseInputListener;
 		this.mouserLoggerPrinter = new MouserLoggerPrinter(loader, masterRenderer, this.coordSysManager);
 	}
@@ -58,7 +59,7 @@ public class MouseLogger implements IMouseBehaviour {
 		this.mouseInputListener.addRunnerOnUniquePress(GLFW_MOUSE_BUTTON_LEFT, () -> processPicking());
 	}
 
-	public void processEntity(RawGeom geom) {
+	public void processEntity(ISimpleGeom geom) {
 		this.entitiesByGeom.put(geom, new ArrayList<>(geom.getRenderingParameters().getEntities()));
 	}
 
@@ -72,7 +73,6 @@ public class MouseLogger implements IMouseBehaviour {
 		this.camPos = camera.getPosition();
 		this.mouserLoggerPrinter.setCameraPosition(this.camPos);
 		this.viewMatrix = camera.getViewMatrix();
-		this.coordSysManager.setViewMatrix(this.viewMatrix);
 
 		filterEntitiesByCameraClip();
 		generateBoundingBoxes();
@@ -86,8 +86,8 @@ public class MouseLogger implements IMouseBehaviour {
 		this.mouserLoggerPrinter.printFilterByRayProximity(entities, rayFromCamera, largeRay);
 		}
 		filterEntitiesByBboxIntersection();
-		RawGeom bboxPlain = null;
-		for (RawGeom entity : this.entitiesByGeom.keySet()) {
+		ISimpleGeom bboxPlain = null;
+		for (ISimpleGeom entity : this.entitiesByGeom.keySet()) {
 			if("bboxEntitiesPlainCategColor".equals(entity.getRenderingParameters().getAlias())) {
 				bboxPlain = entity;
 			}
@@ -96,7 +96,7 @@ public class MouseLogger implements IMouseBehaviour {
 
 		this.mouserLoggerPrinter.printCameraBBox();
 		List<String> aliases = Arrays.asList("bboxEntities", "bboxEntitiesPlainCategColor");
-		for(Entry<RawGeom,List<Entity>> entry : this.entitiesByGeom.entrySet()) {
+		for(Entry<ISimpleGeom,List<Entity>> entry : this.entitiesByGeom.entrySet()) {
 			if(aliases.contains(entry.getKey().getRenderingParameters().getAlias())) {
 				this.mouserLoggerPrinter.updateTransparency(entry.getKey(),entry.getValue());
 			}
@@ -104,7 +104,7 @@ public class MouseLogger implements IMouseBehaviour {
 		if(!this.entitiesByGeom.isEmpty()) {
 			//TODO if I want to override color from an entity, it means it must process set separation and creation.
 			List<String> aliasesToSelect = Arrays.asList("bboxEntitiesPlainCategColor");
-			for(Entry<RawGeom,List<Entity>> entry : this.entitiesByGeom.entrySet()) {
+			for(Entry<ISimpleGeom,List<Entity>> entry : this.entitiesByGeom.entrySet()) {
 				if(aliasesToSelect.contains(entry.getKey().getRenderingParameters().getAlias())) {
 					this.mouserLoggerPrinter.flemme(entry.getKey(),Arrays.asList(entry.getValue().get(0)));
 				}
@@ -121,7 +121,7 @@ public class MouseLogger implements IMouseBehaviour {
 		Vector3f MouseRayWorldCoord = Vector3f.add(camPos, this.ray, null);
 		TreeMap<Float, Entity> filteredByDistanceEntities = new TreeMap<>();
 		ArrayList<Entity> filteredEntities = new ArrayList<>();
-		for(RawGeom geom : this.entitiesByGeom) {
+		for(ISimpleGeom geom : this.entitiesByGeom) {
 
 		for (Entity entity : geom.getRenderingParameters().getEntities()) {
 			List<Vector3f> bbox = entity.getBoundingBox();
@@ -169,23 +169,23 @@ public class MouseLogger implements IMouseBehaviour {
 		// TODO try to define a new Vector3f which provides methods to transform point
 		// to different coordinates system.
 		Vector3f ltnClipped = coordSysManager.objectToClipSpace(
-				coordSysManager.objectToProjectionMatrix(coordSysManager.objectToViewCoord(ltnWorld)));
+				coordSysManager.objectToProjectionMatrix(coordSysManager.objectToViewCoord(this.viewMatrix, ltnWorld)));
 		Vector3f rtnClipped = coordSysManager.objectToClipSpace(
-				coordSysManager.objectToProjectionMatrix(coordSysManager.objectToViewCoord(rtnWorld)));
+				coordSysManager.objectToProjectionMatrix(coordSysManager.objectToViewCoord(this.viewMatrix, rtnWorld)));
 		Vector3f lbnClipped = coordSysManager.objectToClipSpace(
-				coordSysManager.objectToProjectionMatrix(coordSysManager.objectToViewCoord(lbnWorld)));
+				coordSysManager.objectToProjectionMatrix(coordSysManager.objectToViewCoord(this.viewMatrix, lbnWorld)));
 		Vector3f rbnClipped = coordSysManager.objectToClipSpace(
-				coordSysManager.objectToProjectionMatrix(coordSysManager.objectToViewCoord(rbnWorld)));
+				coordSysManager.objectToProjectionMatrix(coordSysManager.objectToViewCoord(this.viewMatrix, rbnWorld)));
 		Vector3f ltfClipped = coordSysManager.objectToClipSpace(
-				coordSysManager.objectToProjectionMatrix(coordSysManager.objectToViewCoord(ltfWorld)));
+				coordSysManager.objectToProjectionMatrix(coordSysManager.objectToViewCoord(this.viewMatrix, ltfWorld)));
 		Vector3f rtfClipped = coordSysManager.objectToClipSpace(
-				coordSysManager.objectToProjectionMatrix(coordSysManager.objectToViewCoord(rtfWorld)));
+				coordSysManager.objectToProjectionMatrix(coordSysManager.objectToViewCoord(this.viewMatrix, rtfWorld)));
 		Vector3f lbfClipped = coordSysManager.objectToClipSpace(
-				coordSysManager.objectToProjectionMatrix(coordSysManager.objectToViewCoord(lbfWorld)));
+				coordSysManager.objectToProjectionMatrix(coordSysManager.objectToViewCoord(this.viewMatrix, lbfWorld)));
 		Vector3f rbfClipped = coordSysManager.objectToClipSpace(
-				coordSysManager.objectToProjectionMatrix(coordSysManager.objectToViewCoord(rbfWorld)));
+				coordSysManager.objectToProjectionMatrix(coordSysManager.objectToViewCoord(this.viewMatrix, rbfWorld)));
 		Vector3f mouseClipped = coordSysManager.objectToClipSpace(
-				coordSysManager.objectToProjectionMatrix(coordSysManager.objectToViewCoord(MouseRayWorldCoord)));
+				coordSysManager.objectToProjectionMatrix(coordSysManager.objectToViewCoord(this.viewMatrix, MouseRayWorldCoord)));
 		List<Vector3f> clippedCoords = Arrays.asList(ltnClipped, rtnClipped, lbnClipped, rbnClipped, ltfClipped,
 				rtfClipped, lbfClipped, rbfClipped, mouseClipped);
 
@@ -378,8 +378,8 @@ public class MouseLogger implements IMouseBehaviour {
 
 	private Optional<EntityTutos> rayMarching(Vector3f mouseCoord, Float startPointDistance, Float distance) {
 		Vector3f beginRay = getPointOnRay(mouseCoord, startPointDistance);
-		if (distance > MasterRenderer.getFarPlane()) {
-			distance = MasterRenderer.getFarPlane();
+		if (distance > CoordinatesSystemManager.getFarPlane()) {
+			distance = CoordinatesSystemManager.getFarPlane();
 			Vector3f endRay = getPointOnRay(mouseCoord, distance);
 			this.mouserLoggerPrinter.getRay3D().addPoint(endRay);
 			return getMatchingEntities(beginRay, endRay);
@@ -463,11 +463,11 @@ public class MouseLogger implements IMouseBehaviour {
 				maxY = maxRayCast.y + (maxRayCast.y - minRayCast.y);
 			}
 			// cap to max rendered distance.
-			if (maxZ > MasterRenderer.getFarPlane()) { // TODO cannot be just a coordinate. as to be a distance
+			if (maxZ > CoordinatesSystemManager.getFarPlane()) { // TODO cannot be just a coordinate. as to be a distance
 														// calculated by vector.
-				maxZ = MasterRenderer.getFarPlane();
-				maxX = (maxRayCast.x * (MasterRenderer.getFarPlane() / maxRayCast.z));
-				maxY = (maxRayCast.y * (MasterRenderer.getFarPlane() / maxRayCast.z));
+				maxZ = CoordinatesSystemManager.getFarPlane();
+				maxX = (maxRayCast.x * (CoordinatesSystemManager.getFarPlane() / maxRayCast.z));
+				maxY = (maxRayCast.y * (CoordinatesSystemManager.getFarPlane() / maxRayCast.z));
 			}
 			Vector3f rayCastingLonger = new Vector3f(maxX, maxY, maxZ);
 			return filterInDistance(filteredEntities, maxRayCast, rayCastingLonger, ++iteration, gotResult);

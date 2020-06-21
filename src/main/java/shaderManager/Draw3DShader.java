@@ -7,15 +7,29 @@ import org.lwjglx.util.vector.Matrix4f;
 import renderEngine.Loader.VBOIndex;
 
 public class Draw3DShader extends ShaderProgram {
-	private static final String VERTEX_FILE= "rayVertexShader.txt";
-	private static final String FRAGMENT_FILE= "rayFragmentShader.txt";
+	private static final String VERTEX_FILE = "rayVertexShader.txt";
+	private static final String FRAGMENT_FILE = "rayFragmentShader.txt";
 	public static final int COLOR_INDEX = 1;
 	private int location_transformationMatrix;
 	private int projectionMatrix;
 	private int location_viewMatrix;
-	
-	public Draw3DShader() throws IOException {
-		super(VERTEX_FILE,FRAGMENT_FILE);
+
+	private static Draw3DShader defaultDraw3DShader = null;
+
+	private Draw3DShader(String vertexFile, String fragmentFile) throws IOException {
+		super(vertexFile, fragmentFile);
+	}
+
+	public static Draw3DShader createDefault() throws IOException {
+		if (defaultDraw3DShader == null) {
+			defaultDraw3DShader = new Draw3DShader(VERTEX_FILE, FRAGMENT_FILE);
+		}
+		return defaultDraw3DShader;
+	}
+
+	public static Draw3DShader create(String vertexFile, String fragmentFile) throws IOException {
+		Draw3DShader shader = new Draw3DShader(vertexFile, fragmentFile);
+		return shader;
 	}
 
 	@Override
@@ -34,9 +48,9 @@ public class Draw3DShader extends ShaderProgram {
 	public void loadTransformationMatrix(Matrix4f transformationMatrix) {
 		super.loadMatrix(location_transformationMatrix, transformationMatrix);
 	}
-	
+
 	public void loadProjectionMatrix(Matrix4f projection) {
-		super.loadMatrix(projectionMatrix,projection);
+		super.loadMatrix(projectionMatrix, projection);
 	}
 
 	public void loadViewMatrix(Matrix4f viewMatrix) {

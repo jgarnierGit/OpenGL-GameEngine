@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.Buffer;
 import java.nio.FloatBuffer;
+import java.util.logging.Logger;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
@@ -19,10 +20,12 @@ public abstract class ShaderProgram {
 	 private int programID;
 	    private int vertexShaderID;
 	    private int fragmentShaderID;
+	    private Logger logger;
 	    
 	    private static FloatBuffer matrixBuffer = BufferUtils.createFloatBuffer(16);
 	     
 	    public ShaderProgram(String vertexFile,String fragmentFile) throws IOException{
+	    	logger = Logger.getLogger("ShaderProgram");
 	        vertexShaderID = loadShader(vertexFile,GL20.GL_VERTEX_SHADER);
 	        fragmentShaderID = loadShader(fragmentFile,GL20.GL_FRAGMENT_SHADER);
 	        programID = GL20.glCreateProgram();
@@ -93,7 +96,7 @@ public abstract class ShaderProgram {
 	        GL20.glBindAttribLocation(programID, attribute, variableName);
 	    }
 	     
-	    private static int loadShader(String pathFile, int type) throws IOException{
+	    private int loadShader(String pathFile, int type) throws IOException{
 	        StringBuilder shaderSource = new StringBuilder();
 	        try(InputStream fileStream = ShaderProgram.class.getResourceAsStream(pathFile)){
 	        	InputStreamReader fileReader = new InputStreamReader(fileStream);
@@ -106,7 +109,7 @@ public abstract class ShaderProgram {
 	        	bufferedFileReader.close();
 	        	fileReader.close();
 	        }catch(NullPointerException e) {
-	        	System.err.println("File not found:"+ pathFile.toString());
+	        	logger.severe("File not found "+ pathFile);
 	        }
 	        	
 	        int shaderID = GL20.glCreateShader(type);

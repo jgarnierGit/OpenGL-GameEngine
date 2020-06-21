@@ -13,11 +13,13 @@ import org.lwjglx.util.vector.Vector3f;
 import org.lwjglx.util.vector.Vector4f;
 
 import entities.Entity;
-import entities.EntityTutos;
 import entities.SimpleEntity;
 import modelsLibrary.ISimpleGeom;
+import shaderManager.Draw3DShader;
+import shaderManager.ShaderProgram;
 
-public class RenderingParameters implements IRenderingParameters{
+public class RenderingParameters implements IRenderingParameters {
+	private ShaderProgram shader;
 	private Optional<Integer> glRenderMode;
 	private HashMap<Integer, Boolean> glStatesRendering;
 	private ISimpleGeom simpleGeom;
@@ -27,11 +29,14 @@ public class RenderingParameters implements IRenderingParameters{
 	private String destinationOrderAlias;
 	private Boolean renderAfter;
 	protected Logger logger;
-	
+
 	private Optional<Vector4f> overridedColors;
 	private HashMap<Vector, Vector4f> overrideColorsAtIndex;
 
-	private RenderingParameters(Entity entity) {
+	RenderingParameters(ShaderProgram shader, ISimpleGeom simpleGeom, String alias, Entity entity) {
+		this.simpleGeom = simpleGeom;
+		this.shader = shader;
+		this.alias = alias;
 		this.glStatesRendering = new HashMap<>();
 		this.entities = new ArrayList<>();
 		this.entities.add(entity);
@@ -41,89 +46,92 @@ public class RenderingParameters implements IRenderingParameters{
 		this.skipEntities = false;
 		this.renderAfter = null;
 		this.destinationOrderAlias = "";
-		this.logger = Logger.getLogger("RenderingParameters");
 	}
-	/**
-	 * TODO try to break circular reference
-	 * hide this constructor, only way to get a RenderingParameters is by SimpleGeom
-	 * @param simpleGeom
-	 */
-	public RenderingParameters(ISimpleGeom simpleGeom, String alias, Entity entity) {
-		this(entity);
-		this.simpleGeom = simpleGeom;
-		this.alias= alias; 
+
+	public static RenderingParameters create(ShaderProgram shader, ISimpleGeom simpleGeom, String alias,
+			Entity entity) {
+		RenderingParameters param = new RenderingParameters(shader, simpleGeom, alias, entity);
+		param.logger = Logger.getLogger("RenderingParameters");
+		return param;
 	}
-	
+
 	/**
 	 * Prepare a renderingParameter with same presets as given renderingParameter.
 	 * Does not apply overridedColors, overrideColorsAtIndex.
+	 * 
 	 * @param toClone
 	 * @param geomToApply
 	 * @param alias
 	 */
-	public static RenderingParameters copy(RenderingParameters toClone, ISimpleGeom geomToApply, String alias, Entity entity) {
-		RenderingParameters cloned = new RenderingParameters(geomToApply, alias, entity);
+	public static RenderingParameters copy(RenderingParameters toClone, ISimpleGeom geomToApply, String alias,
+			Entity entity) {
+		RenderingParameters cloned = new RenderingParameters(toClone.shader, geomToApply, alias, entity);
 		cloned.destinationOrderAlias = toClone.destinationOrderAlias;
-		if(toClone.glRenderMode.isPresent()) {
+		if (toClone.glRenderMode.isPresent()) {
 			cloned.glRenderMode = Optional.ofNullable(toClone.glRenderMode.get());
 		}
 		cloned.glStatesRendering.putAll(toClone.glStatesRendering);
 		cloned.renderAfter = toClone.renderAfter;
 		return cloned;
 	}
-	
+
 	/**
-	 * Use direct vertices coordinates to render.
-	 * This must be used only for unique objects.
+	 * Use direct vertices coordinates to render. This must be used only for unique
+	 * objects.
 	 */
 	public void doNotUseEntities() {
 		skipEntities = true;
 	}
-	
-	
+
 	public boolean isNotUsingEntities() {
 		return this.skipEntities;
 	}
-	
+
 	@Override
 	public void setAlias(String alias) {
 		this.alias = alias;
 	}
+
 	@Override
 	public String getAlias() {
 		return this.alias;
 	}
+
 	@Override
 	public String getDestinationOrderAlias() {
 		return this.destinationOrderAlias;
 	}
+
 	@Override
 	public Optional<Boolean> isDestinationPositionAfter() {
 		return Optional.ofNullable(this.renderAfter);
 	}
+
 	@Override
 	public void renderBefore(String alias) {
-		this.destinationOrderAlias=alias;
+		this.destinationOrderAlias = alias;
 		this.renderAfter = false;
 	}
+
 	@Override
 	public void renderAfter(String alias) {
-		this.destinationOrderAlias=alias;
+		this.destinationOrderAlias = alias;
 		this.renderAfter = true;
 	}
 
 	public ISimpleGeom getGeom() {
 		return this.simpleGeom;
 	}
-	
+
 	/**
 	 * Set new color to apply for entire geom.
+	 * 
 	 * @param color
 	 */
 	public void overrideEachColor(Vector4f color) {
 		this.overridedColors = Optional.ofNullable(color);
 	}
-	
+
 	/**
 	 * first applies global color changes, then unitary color changes.
 	 */
@@ -131,46 +139,52 @@ public class RenderingParameters implements IRenderingParameters{
 		this.overridedColors.ifPresent(color -> {
 			simpleGeom.setColor(color);
 		});
-		
+
 		this.overrideColorsAtIndex.forEach((position, color) -> {
 			simpleGeom.updateColorByPosition(position, color);
 		});
 		simpleGeom.reloadVao();
 	}
-	
-	public Optional<Vector4f> getOverridedColors(){
+
+	public Optional<Vector4f> getOverridedColors() {
 		return this.overridedColors;
 	}
+
 	/**
-	 * Set color replacement for specified vertice index.
-	 * Replace color if index was already set.
+	 * Set color replacement for specified vertice index. Replace color if index was
+	 * already set.
+	 * 
 	 * @param position
 	 * @param color
 	 */
 	public void overrideColorAtIndex(Vector position, Vector4f color) {
 		this.overrideColorsAtIndex.put(position, color);
 	}
-	
+
 	/**
-	 * Add same world transformation (position/rotation/scale) as entity to apply for geom.
+	 * Add same world transformation (position/rotation/scale) as entity to apply
+	 * for geom.
+	 * 
 	 * @param entity
 	 */
 	public void addEntity(Entity entity) {
-		this.addEntity(entity.getPositions(),entity.getRotX(),entity.getRotY(),entity.getRotZ(),entity.getScale());
+		this.addEntity(entity.getPositions(), entity.getRotX(), entity.getRotY(), entity.getRotZ(), entity.getScale());
 	}
 
 	/**
-	 * Create entity with world transformation (position/rotation/scale) to apply for geom.
+	 * Create entity with world transformation (position/rotation/scale) to apply
+	 * for geom.
+	 * 
 	 * @param positions override position given by entity
-	 * @param rotX override rotX given by entity
-	 * @param rotY override rotY given by entity
-	 * @param rotZ override rotZ given by entity
-	 * @param scale override scale given by entity
+	 * @param rotX      override rotX given by entity
+	 * @param rotY      override rotY given by entity
+	 * @param rotZ      override rotZ given by entity
+	 * @param scale     override scale given by entity
 	 */
 	public void addEntity(Vector3f positions, float rotX, float rotY, float rotZ, float scale) {
 		entities.add(new SimpleEntity(positions, rotX, rotY, rotZ, scale));
 	}
-	
+
 	public List<Entity> getEntities() {
 		return this.entities;
 	}
@@ -190,15 +204,16 @@ public class RenderingParameters implements IRenderingParameters{
 	 * add GL constant to render current object. Each renderMode added are rendered
 	 * simultaneously.
 	 * 
-	 * TODO only GL_POINTS is compatibles with other ones. Transfer from GL_LINES to GL_TRIANGLES needs new points ordering.
+	 * TODO only GL_POINTS is compatibles with other ones. Transfer from GL_LINES to
+	 * GL_TRIANGLES needs new points ordering.
 	 * 
 	 * @param glRenderMode (GL11.GL_POINTS / GL_LINES / GL_TRIANGLES and subtypes)
 	 */
 	public void setRenderMode(int glRenderMode) {
 		this.glRenderMode = Optional.ofNullable(glRenderMode);
 	}
-	
-	public Map<Integer, Boolean> getStatesRendering(){
+
+	public Map<Integer, Boolean> getStatesRendering() {
 		return this.glStatesRendering;
 	}
 
@@ -216,8 +231,7 @@ public class RenderingParameters implements IRenderingParameters{
 	}
 
 	/**
-	 * TODO hide from this interface.
-	 * Unset each Gl_State when rendering is done.
+	 * TODO hide from this interface. Unset each Gl_State when rendering is done.
 	 */
 	public void disableRenderOptions() {
 		glStatesRendering.forEach((glState, doActivate) -> {
@@ -248,7 +262,7 @@ public class RenderingParameters implements IRenderingParameters{
 	public void reset() {
 		this.entities = new ArrayList<>();
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -257,9 +271,10 @@ public class RenderingParameters implements IRenderingParameters{
 		return result;
 	}
 
-	//FIXME don't know if this is really helpful. To retreive a RenderingParam I still need to compare based on an alias.
+	// FIXME don't know if this is really helpful. To retreive a RenderingParam I
+	// still need to compare based on an alias.
 	@Override
-	public boolean equals(Object obj) { 
+	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
 		if (!(obj instanceof RenderingParameters))
@@ -282,20 +297,26 @@ public class RenderingParameters implements IRenderingParameters{
 	}
 
 	public void overrideGlobalTransparency(float transparency) {
-		this.overridedColors = Optional.of(new Vector4f(-1f,-1f,-1f,transparency));
+		this.overridedColors = Optional.of(new Vector4f(-1f, -1f, -1f, transparency));
 	}
+
 	public void renderLast() {
-		this.renderAfter=true;
-		this.destinationOrderAlias="";
+		this.renderAfter = true;
+		this.destinationOrderAlias = "";
 	}
+
 	public void renderFirst() {
-		this.renderAfter=false;
-		this.destinationOrderAlias="";
+		this.renderAfter = false;
+		this.destinationOrderAlias = "";
 	}
+
 	public void resetRenderingOrder() {
-		this.renderAfter=null;
-		this.destinationOrderAlias="";
+		this.renderAfter = null;
+		this.destinationOrderAlias = "";
 	}
-	
-	
+
+	public ShaderProgram getShader() {
+		return this.shader;
+	}
+
 }

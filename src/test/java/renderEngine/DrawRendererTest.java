@@ -23,6 +23,7 @@ import entities.Entity;
 import modelsLibrary.ISimpleGeom;
 import modelsLibrary.RawGeom;
 import modelsLibrary.SimpleGeom;
+import shaderManager.ShaderProgram;
 
 /**
  * * don't know when to use beforeAll... * Parameterized could have been
@@ -46,7 +47,7 @@ class DrawRendererTest {
 	SimpleGeom firstGeomMock;
 	SimpleGeom secondGeomMock;
 	SimpleGeom thirdGeomMock;
-	
+
 	Logger spyLogger;
 
 	@BeforeEach
@@ -57,9 +58,12 @@ class DrawRendererTest {
 		secondGeomMock = Mockito.mock(SimpleGeom.class, Mockito.CALLS_REAL_METHODS);
 		thirdGeomMock = Mockito.mock(SimpleGeom.class, Mockito.CALLS_REAL_METHODS);
 
-		Whitebox.setInternalState(firstGeomMock, "renderingParameters", new RenderingParameters(firstGeomMock, "",Mockito.mock(Entity.class)));
-		Whitebox.setInternalState(secondGeomMock, "renderingParameters", new RenderingParameters(secondGeomMock, "",Mockito.mock(Entity.class)));
-		Whitebox.setInternalState(thirdGeomMock, "renderingParameters", new RenderingParameters(thirdGeomMock, "",Mockito.mock(Entity.class)));
+		Whitebox.setInternalState(firstGeomMock, "renderingParameters", new RenderingParameters(
+				Mockito.mock(ShaderProgram.class), firstGeomMock, "", Mockito.mock(Entity.class)));
+		Whitebox.setInternalState(secondGeomMock, "renderingParameters", new RenderingParameters(
+				Mockito.mock(ShaderProgram.class), secondGeomMock, "", Mockito.mock(Entity.class)));
+		Whitebox.setInternalState(thirdGeomMock, "renderingParameters", new RenderingParameters(
+				Mockito.mock(ShaderProgram.class), thirdGeomMock, "", Mockito.mock(Entity.class)));
 		RawGeom firstRawGeomMock = Mockito.mock(RawGeom.class, Mockito.CALLS_REAL_METHODS);
 		Mockito.when(firstRawGeomMock.getVaoId()).thenReturn(1);
 		Whitebox.setInternalState(firstGeomMock, "rawGeom", firstRawGeomMock);
@@ -69,13 +73,13 @@ class DrawRendererTest {
 		RawGeom thirdRawGeomMock = Mockito.mock(RawGeom.class, Mockito.CALLS_REAL_METHODS);
 		Mockito.when(thirdRawGeomMock.getVaoId()).thenReturn(3);
 		Whitebox.setInternalState(thirdGeomMock, "rawGeom", thirdRawGeomMock);
-		
+
 		geoms.add(firstGeomMock);
 		geoms.add(secondGeomMock);
 		geoms.add(thirdGeomMock);
 		renderer = Mockito.mock(DrawRenderer.class, Mockito.CALLS_REAL_METHODS);
 		renderer.geoms = geoms.stream().map(simpleGeom -> (ISimpleGeom) simpleGeom).collect(Collectors.toList());
-		
+
 		Logger logger = Logger.getLogger("DrawRendererTests");
 		this.spyLogger = Mockito.spy(logger);
 		renderer.logger = spyLogger;
@@ -119,9 +123,11 @@ class DrawRendererTest {
 			@Test
 			@DisplayName("Must have first geom first")
 			void testOrderingGeomsWithoutParamsFirstGeomFirst() {
-				assertEquals(firstGeomMock.getRawGeom().getVaoId(), renderingParams.get(0).getGeom().getRawGeom().getVaoId(),
+				assertEquals(firstGeomMock.getRawGeom().getVaoId(),
+						renderingParams.get(0).getGeom().getRawGeom().getVaoId(),
 						"expected first geom to be first in output");
-				assertEquals(secondGeomMock.getRawGeom().getVaoId(), renderingParams.get(1).getGeom().getRawGeom().getVaoId(),
+				assertEquals(secondGeomMock.getRawGeom().getVaoId(),
+						renderingParams.get(1).getGeom().getRawGeom().getVaoId(),
 						"expected second geom to be second in output");
 			}
 		}
@@ -180,9 +186,11 @@ class DrawRendererTest {
 				@Test
 				@DisplayName("Must have first geom first")
 				void testOrderingGeomsWithoutParamsFirstGeomFirst() {
-					assertEquals(firstGeomMock.getRawGeom().getVaoId(), renderingParams.get(0).getGeom().getRawGeom().getVaoId(),
+					assertEquals(firstGeomMock.getRawGeom().getVaoId(),
+							renderingParams.get(0).getGeom().getRawGeom().getVaoId(),
 							"expected first geom to be first in output");
-					assertEquals(secondGeomMock.getRawGeom().getVaoId(), renderingParams.get(1).getGeom().getRawGeom().getVaoId(),
+					assertEquals(secondGeomMock.getRawGeom().getVaoId(),
+							renderingParams.get(1).getGeom().getRawGeom().getVaoId(),
 							"expected second geom to be second in output");
 				}
 			}
@@ -206,16 +214,17 @@ class DrawRendererTest {
 					}
 
 					/**
-					 * TODO check logger action
-					 * A; B->?; C result: A;B;C
+					 * TODO check logger action A; B->?; C result: A;B;C
 					 */
 					@Test
 					@DisplayName("Unknown alias should throws Exception")
 					void testUnknownAliasException() {
 						secondParam.renderBefore("unknown");
 						renderingParams = renderer.getOrderedRenderingParameters();
-						assertEquals(firstGeomMock.getRawGeom().getVaoId(), renderingParams.get(0).getGeom().getRawGeom().getVaoId());
-						assertEquals(secondGeomMock.getRawGeom().getVaoId(), renderingParams.get(1).getGeom().getRawGeom().getVaoId());
+						assertEquals(firstGeomMock.getRawGeom().getVaoId(),
+								renderingParams.get(0).getGeom().getRawGeom().getVaoId());
+						assertEquals(secondGeomMock.getRawGeom().getVaoId(),
+								renderingParams.get(1).getGeom().getRawGeom().getVaoId());
 					}
 
 					/**
@@ -227,8 +236,10 @@ class DrawRendererTest {
 						secondParam.renderBefore(secondAlias);
 						renderingParams = renderer.getOrderedRenderingParameters();
 						assertEquals(3, renderingParams.size());
-						assertEquals(firstGeomMock.getRawGeom().getVaoId(), renderingParams.get(0).getGeom().getRawGeom().getVaoId());
-						assertEquals(secondGeomMock.getRawGeom().getVaoId(), renderingParams.get(1).getGeom().getRawGeom().getVaoId());
+						assertEquals(firstGeomMock.getRawGeom().getVaoId(),
+								renderingParams.get(0).getGeom().getRawGeom().getVaoId());
+						assertEquals(secondGeomMock.getRawGeom().getVaoId(),
+								renderingParams.get(1).getGeom().getRawGeom().getVaoId());
 					}
 
 					/**
@@ -240,8 +251,10 @@ class DrawRendererTest {
 						secondParam.renderAfter(secondAlias);
 						renderingParams = renderer.getOrderedRenderingParameters();
 						assertEquals(3, renderingParams.size());
-						assertEquals(firstGeomMock.getRawGeom().getVaoId(), renderingParams.get(0).getGeom().getRawGeom().getVaoId());
-						assertEquals(secondGeomMock.getRawGeom().getVaoId(), renderingParams.get(1).getGeom().getRawGeom().getVaoId());
+						assertEquals(firstGeomMock.getRawGeom().getVaoId(),
+								renderingParams.get(0).getGeom().getRawGeom().getVaoId());
+						assertEquals(secondGeomMock.getRawGeom().getVaoId(),
+								renderingParams.get(1).getGeom().getRawGeom().getVaoId());
 					}
 
 					/**
@@ -266,10 +279,12 @@ class DrawRendererTest {
 						secondParam.renderAfter(firstAlias);
 						renderingParams = renderer.getOrderedRenderingParameters();
 						assertEquals(3, renderingParams.size());
-						assertEquals(firstGeomMock.getRawGeom().getVaoId(), renderingParams.get(0).getGeom().getRawGeom().getVaoId());
-						assertEquals(secondGeomMock.getRawGeom().getVaoId(), renderingParams.get(1).getGeom().getRawGeom().getVaoId());
+						assertEquals(firstGeomMock.getRawGeom().getVaoId(),
+								renderingParams.get(0).getGeom().getRawGeom().getVaoId());
+						assertEquals(secondGeomMock.getRawGeom().getVaoId(),
+								renderingParams.get(1).getGeom().getRawGeom().getVaoId());
 					}
-					
+
 					/**
 					 * A->C(before); B; C result: [A,B,C]
 					 */
@@ -309,8 +324,10 @@ class DrawRendererTest {
 						secondParam.renderBefore(secondAlias);
 						renderingParams = renderer.getOrderedRenderingParameters();
 						assertEquals(3, renderingParams.size());
-						assertEquals(firstGeomMock.getRawGeom().getVaoId(), renderingParams.get(0).getGeom().getRawGeom().getVaoId());
-						assertEquals(secondGeomMock.getRawGeom().getVaoId(), renderingParams.get(1).getGeom().getRawGeom().getVaoId());
+						assertEquals(firstGeomMock.getRawGeom().getVaoId(),
+								renderingParams.get(0).getGeom().getRawGeom().getVaoId());
+						assertEquals(secondGeomMock.getRawGeom().getVaoId(),
+								renderingParams.get(1).getGeom().getRawGeom().getVaoId());
 					}
 
 					/**
@@ -323,8 +340,10 @@ class DrawRendererTest {
 						secondParam.renderAfter(secondAlias);
 						renderingParams = renderer.getOrderedRenderingParameters();
 						assertEquals(3, renderingParams.size());
-						assertEquals(firstGeomMock.getRawGeom().getVaoId(), renderingParams.get(0).getGeom().getRawGeom().getVaoId());
-						assertEquals(secondGeomMock.getRawGeom().getVaoId(), renderingParams.get(1).getGeom().getRawGeom().getVaoId());
+						assertEquals(firstGeomMock.getRawGeom().getVaoId(),
+								renderingParams.get(0).getGeom().getRawGeom().getVaoId());
+						assertEquals(secondGeomMock.getRawGeom().getVaoId(),
+								renderingParams.get(1).getGeom().getRawGeom().getVaoId());
 					}
 
 					/**
@@ -353,8 +372,10 @@ class DrawRendererTest {
 						secondParam.renderAfter(firstAlias);
 						renderingParams = renderer.getOrderedRenderingParameters();
 						assertEquals(3, renderingParams.size());
-						assertEquals(firstGeomMock.getRawGeom().getVaoId(), renderingParams.get(0).getGeom().getRawGeom().getVaoId());
-						assertEquals(secondGeomMock.getRawGeom().getVaoId(), renderingParams.get(1).getGeom().getRawGeom().getVaoId());
+						assertEquals(firstGeomMock.getRawGeom().getVaoId(),
+								renderingParams.get(0).getGeom().getRawGeom().getVaoId());
+						assertEquals(secondGeomMock.getRawGeom().getVaoId(),
+								renderingParams.get(1).getGeom().getRawGeom().getVaoId());
 					}
 				}
 			}
@@ -389,10 +410,10 @@ class DrawRendererTest {
 		@Nested
 		@DisplayName("Simple case [A,B,C]")
 		class SimpleCases {
-			
+
 			@Nested
 			@DisplayName("Single movement")
-			class SingleMovement{
+			class SingleMovement {
 				/**
 				 * A; B->A(before); C result: [B,A,C]
 				 */
@@ -401,9 +422,12 @@ class DrawRendererTest {
 				void testReferencePreviousAsBefore() {
 					secondParam.renderBefore(firstAlias);
 					renderingParams = renderer.getOrderedRenderingParameters();
-					assertEquals(secondGeomMock.getRawGeom().getVaoId(), renderingParams.get(0).getGeom().getRawGeom().getVaoId());
-					assertEquals(firstGeomMock.getRawGeom().getVaoId(), renderingParams.get(1).getGeom().getRawGeom().getVaoId());
-					assertEquals(thirdGeomMock.getRawGeom().getVaoId(), renderingParams.get(2).getGeom().getRawGeom().getVaoId());
+					assertEquals(secondGeomMock.getRawGeom().getVaoId(),
+							renderingParams.get(0).getGeom().getRawGeom().getVaoId());
+					assertEquals(firstGeomMock.getRawGeom().getVaoId(),
+							renderingParams.get(1).getGeom().getRawGeom().getVaoId());
+					assertEquals(thirdGeomMock.getRawGeom().getVaoId(),
+							renderingParams.get(2).getGeom().getRawGeom().getVaoId());
 				}
 
 				/**
@@ -417,7 +441,7 @@ class DrawRendererTest {
 					assertTrue(renderingParams.indexOf(thirdGeomMock.getRenderingParameters()) < renderingParams
 							.indexOf(secondGeomMock.getRenderingParameters()), renderingParams.toString());
 				}
-				
+
 				/**
 				 * A; B; C->B(before) result: [A,C,B]
 				 */
@@ -429,7 +453,7 @@ class DrawRendererTest {
 					assertTrue(renderingParams.indexOf(thirdGeomMock.getRenderingParameters()) < renderingParams
 							.indexOf(secondGeomMock.getRenderingParameters()), renderingParams.toString());
 				}
-				
+
 				/**
 				 * A->B(after); B; C result: [B,A,C]
 				 */
@@ -441,7 +465,7 @@ class DrawRendererTest {
 					assertTrue(renderingParams.indexOf(secondGeomMock.getRenderingParameters()) < renderingParams
 							.indexOf(firstGeomMock.getRenderingParameters()), renderingParams.toString());
 				}
-				
+
 				/**
 				 * A->last(); B; C result: [B,C,A]
 				 */
@@ -450,11 +474,14 @@ class DrawRendererTest {
 				void testReferenceToLast() {
 					firstParam.renderLast();
 					renderingParams = renderer.getOrderedRenderingParameters();
-					assertEquals(secondGeomMock.getRawGeom().getVaoId(), renderingParams.get(0).getGeom().getRawGeom().getVaoId());
-					assertEquals(thirdGeomMock.getRawGeom().getVaoId(), renderingParams.get(1).getGeom().getRawGeom().getVaoId());
-					assertEquals(firstGeomMock.getRawGeom().getVaoId(), renderingParams.get(2).getGeom().getRawGeom().getVaoId());
+					assertEquals(secondGeomMock.getRawGeom().getVaoId(),
+							renderingParams.get(0).getGeom().getRawGeom().getVaoId());
+					assertEquals(thirdGeomMock.getRawGeom().getVaoId(),
+							renderingParams.get(1).getGeom().getRawGeom().getVaoId());
+					assertEquals(firstGeomMock.getRawGeom().getVaoId(),
+							renderingParams.get(2).getGeom().getRawGeom().getVaoId());
 				}
-				
+
 				/**
 				 * A; B; C->first() result: [C,A,B]
 				 */
@@ -463,16 +490,19 @@ class DrawRendererTest {
 				void testReferenceToFirst() {
 					thirdParam.renderFirst();
 					renderingParams = renderer.getOrderedRenderingParameters();
-					assertEquals(thirdGeomMock.getRawGeom().getVaoId(), renderingParams.get(0).getGeom().getRawGeom().getVaoId());
-					assertEquals(firstGeomMock.getRawGeom().getVaoId(), renderingParams.get(1).getGeom().getRawGeom().getVaoId());
-					assertEquals(secondGeomMock.getRawGeom().getVaoId(), renderingParams.get(2).getGeom().getRawGeom().getVaoId());
+					assertEquals(thirdGeomMock.getRawGeom().getVaoId(),
+							renderingParams.get(0).getGeom().getRawGeom().getVaoId());
+					assertEquals(firstGeomMock.getRawGeom().getVaoId(),
+							renderingParams.get(1).getGeom().getRawGeom().getVaoId());
+					assertEquals(secondGeomMock.getRawGeom().getVaoId(),
+							renderingParams.get(2).getGeom().getRawGeom().getVaoId());
 				}
 			}
 
 			@Nested
 			@DisplayName("Chaining movement")
 			class ChainingMovement {
-				
+
 				/**
 				 * A->C(after); B->C(before); C result: [B,C,A]
 				 */
@@ -488,7 +518,6 @@ class DrawRendererTest {
 					assertTrue(renderingParams.indexOf(thirdGeomMock.getRenderingParameters()) < renderingParams
 							.indexOf(firstGeomMock.getRenderingParameters()), renderingParams.toString());
 				}
-			
 
 				@Nested
 				class ChainingAfters {
@@ -525,9 +554,9 @@ class DrawRendererTest {
 					}
 
 					/**
-					 * Cycles breaks on first detection TODO try to test logger here 
-					 * apply last modification that forms a cycle
-					 * A->C(after); B; C->A(after) result: [B,A,C] or [A,C,B]
+					 * Cycles breaks on first detection TODO try to test logger here apply last
+					 * modification that forms a cycle A->C(after); B; C->A(after) result: [B,A,C]
+					 * or [A,C,B]
 					 */
 					@Test
 					@DisplayName("CycleFlow : Moving A after C and C after A gives : [B,A,C] or [A,C,B]")
@@ -538,11 +567,11 @@ class DrawRendererTest {
 						assertTrue(renderingParams.indexOf(firstGeomMock.getRenderingParameters()) < renderingParams
 								.indexOf(thirdGeomMock.getRenderingParameters()), renderingParams.toString());
 					}
-					
+
 					/**
-					 * Cycles breaks on first detection TODO try to test logger here
-					 * apply last modification that forms a cycle 
-					 * A->B(after); B->C(after); C->A(after) result: [A,C,B]
+					 * Cycles breaks on first detection TODO try to test logger here apply last
+					 * modification that forms a cycle A->B(after); B->C(after); C->A(after) result:
+					 * [A,C,B]
 					 */
 					@Test
 					@DisplayName("Complex CycleFlow : Moving A after B, B after C, C after A gives : [A,C,B]")
@@ -593,9 +622,8 @@ class DrawRendererTest {
 					}
 
 					/**
-					 * Hard to detect because A is effectively before C.
-					 * apply last modification that forms a cycle
-					 * A->C(before); B; C->A(before) result: [C,A,B]
+					 * Hard to detect because A is effectively before C. apply last modification
+					 * that forms a cycle A->C(before); B; C->A(before) result: [C,A,B]
 					 */
 					@Test
 					@DisplayName("CycleFlow : Moving A before C and C before A gives : [C,A,B]")
@@ -606,12 +634,11 @@ class DrawRendererTest {
 						assertTrue(renderingParams.indexOf(thirdGeomMock.getRenderingParameters()) < renderingParams
 								.indexOf(firstGeomMock.getRenderingParameters()), renderingParams.toString());
 					}
-					
+
 					/**
-					 * Hard to detect because A is effectively before C.
-					 * TODO try to test logger here 
-					 * apply last modification that forms a cycle
-					 * A->C(before);B->A(before); C->B(before) result: [C,B,A]
+					 * Hard to detect because A is effectively before C. TODO try to test logger
+					 * here apply last modification that forms a cycle A->C(before);B->A(before);
+					 * C->B(before) result: [C,B,A]
 					 */
 					@Test
 					@DisplayName("Complex CycleFlow : Moving A before C, C before B, B before A  gives : [C,B,A]")
@@ -626,36 +653,36 @@ class DrawRendererTest {
 								.indexOf(firstGeomMock.getRenderingParameters()), renderingParams.toString());
 					}
 				}
-				
-					/**
-					 * A->last(); B->last(); C result: [C,B,A] or [C,A,B]
-					 */
-					@Test
-					@DisplayName("Moving 2 Params to last position : [C,B,A] or [C,A,B]")
-					void testChainingLast() {
-						firstParam.renderLast();
-						secondParam.renderLast();
-						renderingParams = renderer.getOrderedRenderingParameters();
-						assertTrue(renderingParams.indexOf(thirdGeomMock.getRenderingParameters()) < renderingParams
-								.indexOf(secondGeomMock.getRenderingParameters()), renderingParams.toString());
-						assertTrue(renderingParams.indexOf(thirdGeomMock.getRenderingParameters()) < renderingParams
-								.indexOf(firstGeomMock.getRenderingParameters()), renderingParams.toString());
-					}
-					
-					/**
-					 * A; B->first(); C->first() result: [C,B,A] or [B,C,A]
-					 */
-					@Test
-					@DisplayName("Moving 2 Params to first position : [C,A,B] or [B,C,A]")
-					void testChainingFirst() {
-						thirdParam.renderFirst();
-						secondParam.renderFirst();
-						renderingParams = renderer.getOrderedRenderingParameters();
-						assertTrue(renderingParams.indexOf(thirdGeomMock.getRenderingParameters()) < renderingParams
-								.indexOf(firstGeomMock.getRenderingParameters()), renderingParams.toString());
-						assertTrue(renderingParams.indexOf(secondGeomMock.getRenderingParameters()) < renderingParams
-								.indexOf(firstGeomMock.getRenderingParameters()), renderingParams.toString());
-					}
+
+				/**
+				 * A->last(); B->last(); C result: [C,B,A] or [C,A,B]
+				 */
+				@Test
+				@DisplayName("Moving 2 Params to last position : [C,B,A] or [C,A,B]")
+				void testChainingLast() {
+					firstParam.renderLast();
+					secondParam.renderLast();
+					renderingParams = renderer.getOrderedRenderingParameters();
+					assertTrue(renderingParams.indexOf(thirdGeomMock.getRenderingParameters()) < renderingParams
+							.indexOf(secondGeomMock.getRenderingParameters()), renderingParams.toString());
+					assertTrue(renderingParams.indexOf(thirdGeomMock.getRenderingParameters()) < renderingParams
+							.indexOf(firstGeomMock.getRenderingParameters()), renderingParams.toString());
+				}
+
+				/**
+				 * A; B->first(); C->first() result: [C,B,A] or [B,C,A]
+				 */
+				@Test
+				@DisplayName("Moving 2 Params to first position : [C,A,B] or [B,C,A]")
+				void testChainingFirst() {
+					thirdParam.renderFirst();
+					secondParam.renderFirst();
+					renderingParams = renderer.getOrderedRenderingParameters();
+					assertTrue(renderingParams.indexOf(thirdGeomMock.getRenderingParameters()) < renderingParams
+							.indexOf(firstGeomMock.getRenderingParameters()), renderingParams.toString());
+					assertTrue(renderingParams.indexOf(secondGeomMock.getRenderingParameters()) < renderingParams
+							.indexOf(firstGeomMock.getRenderingParameters()), renderingParams.toString());
+				}
 			}
 		}
 
@@ -667,14 +694,17 @@ class DrawRendererTest {
 			SimpleGeom thirdGeomMockBis;
 
 			@BeforeEach
-			void setUpBeforeEach() throws Exception {				
+			void setUpBeforeEach() throws Exception {
 				firstGeomMockBis = Mockito.mock(SimpleGeom.class, Mockito.CALLS_REAL_METHODS);
 				secondGeomMockBis = Mockito.mock(SimpleGeom.class, Mockito.CALLS_REAL_METHODS);
 				thirdGeomMockBis = Mockito.mock(SimpleGeom.class, Mockito.CALLS_REAL_METHODS);
 
-				Whitebox.setInternalState(firstGeomMockBis, "renderingParameters", new RenderingParameters(firstGeomMockBis, firstAlias,Mockito.mock(Entity.class)));
-				Whitebox.setInternalState(secondGeomMockBis, "renderingParameters", new RenderingParameters(secondGeomMockBis, secondAlias,Mockito.mock(Entity.class)));
-				Whitebox.setInternalState(thirdGeomMockBis, "renderingParameters", new RenderingParameters(thirdGeomMockBis, thirdAlias,Mockito.mock(Entity.class)));
+				Whitebox.setInternalState(firstGeomMockBis, "renderingParameters", new RenderingParameters(
+						Mockito.mock(ShaderProgram.class), firstGeomMockBis, firstAlias, Mockito.mock(Entity.class)));
+				Whitebox.setInternalState(secondGeomMockBis, "renderingParameters", new RenderingParameters(
+						Mockito.mock(ShaderProgram.class), secondGeomMockBis, secondAlias, Mockito.mock(Entity.class)));
+				Whitebox.setInternalState(thirdGeomMockBis, "renderingParameters", new RenderingParameters(
+						Mockito.mock(ShaderProgram.class), thirdGeomMockBis, thirdAlias, Mockito.mock(Entity.class)));
 				RawGeom firstRawGeomMockBis = Mockito.mock(RawGeom.class, Mockito.CALLS_REAL_METHODS);
 				Mockito.when(firstRawGeomMockBis.getVaoId()).thenReturn(4);
 				Whitebox.setInternalState(firstGeomMockBis, "rawGeom", firstRawGeomMockBis);
@@ -684,7 +714,7 @@ class DrawRendererTest {
 				RawGeom thirdRawGeomMockBis = Mockito.mock(RawGeom.class, Mockito.CALLS_REAL_METHODS);
 				Mockito.when(thirdRawGeomMockBis.getVaoId()).thenReturn(6);
 				Whitebox.setInternalState(thirdGeomMockBis, "rawGeom", thirdRawGeomMockBis);
-				
+
 				geoms.add(firstGeomMockBis);
 				geoms.add(secondGeomMockBis);
 				geoms.add(thirdGeomMockBis);
@@ -692,7 +722,7 @@ class DrawRendererTest {
 
 			@Nested
 			@DisplayName("Single movement")
-			class SingleMovement{
+			class SingleMovement {
 				/**
 				 * A->B(after); B; C; A->B(after); B; C result: [B,B,A,A,C,C] (or more lazy
 				 * ordering [B,C,B,A,A,C])
@@ -730,17 +760,18 @@ class DrawRendererTest {
 							renderingParams.indexOf(thirdGeomMock.getRenderingParameters()));
 					assertTrue(maxThirdIndex < minSecondIndex, renderingParams.toString());
 				}
-				
-			}	
+
+			}
 
 			@Nested
 			@DisplayName("Chaining movement")
 			class ChainingMovement {
-				
+
 				@Nested
-				class ChainingAfters{
+				class ChainingAfters {
 					/**
-					 * A->B(after); B; C->A(after); A->B(after); B; C->A(after) result: [B,B,A,A,C,C]
+					 * A->B(after); B; C->A(after); A->B(after); B; C->A(after) result:
+					 * [B,B,A,A,C,C]
 					 */
 					@Test
 					@DisplayName("ReadFlow : Moving As after Bs and Cs after As gives : [B,B,A,A,C,C]")
@@ -754,7 +785,8 @@ class DrawRendererTest {
 						thirdParam.renderAfter(firstAlias);
 
 						renderingParams = renderer.getOrderedRenderingParameters();
-						int maxSecondIndex = Math.max(renderingParams.indexOf(secondGeomMockBis.getRenderingParameters()),
+						int maxSecondIndex = Math.max(
+								renderingParams.indexOf(secondGeomMockBis.getRenderingParameters()),
 								renderingParams.indexOf(secondGeomMock.getRenderingParameters()));
 						int minFirstIndex = Math.min(renderingParams.indexOf(firstGeomMockBis.getRenderingParameters()),
 								renderingParams.indexOf(firstGeomMock.getRenderingParameters()));
@@ -766,9 +798,10 @@ class DrawRendererTest {
 						assertTrue(maxSecondIndex < minFirstIndex, renderingParams.toString());
 						assertTrue(maxFirstIndex < minThirdIndex, renderingParams.toString());
 					}
-					
+
 					/**
-					 * A->B(after); B->C(after); C; A->B(after); B->C(after); C result: [C,C,B,B,A,A]
+					 * A->B(after); B->C(after); C; A->B(after); B->C(after); C result:
+					 * [C,C,B,B,A,A]
 					 */
 					@Test
 					@DisplayName("CrossFlow : Moving As after Bs and Bs after Cs gives : [C,C,B,B,A,A]")
@@ -784,10 +817,12 @@ class DrawRendererTest {
 						renderingParams = renderer.getOrderedRenderingParameters();
 						int maxThirdIndex = Math.max(renderingParams.indexOf(thirdGeomMockBis.getRenderingParameters()),
 								renderingParams.indexOf(thirdGeomMock.getRenderingParameters()));
-						int minSecondIndex = Math.min(renderingParams.indexOf(secondGeomMockBis.getRenderingParameters()),
+						int minSecondIndex = Math.min(
+								renderingParams.indexOf(secondGeomMockBis.getRenderingParameters()),
 								renderingParams.indexOf(secondGeomMock.getRenderingParameters()));
 
-						int maxSecondIndex = Math.max(renderingParams.indexOf(secondGeomMockBis.getRenderingParameters()),
+						int maxSecondIndex = Math.max(
+								renderingParams.indexOf(secondGeomMockBis.getRenderingParameters()),
 								renderingParams.indexOf(secondGeomMock.getRenderingParameters()));
 						int minFirstIndex = Math.min(renderingParams.indexOf(firstGeomMockBis.getRenderingParameters()),
 								renderingParams.indexOf(firstGeomMock.getRenderingParameters()));
@@ -795,10 +830,10 @@ class DrawRendererTest {
 						assertTrue(maxSecondIndex < minFirstIndex, renderingParams.toString());
 					}
 				}
-				
+
 				@Nested
-				class ChainingBefores{
-					
+				class ChainingBefores {
+
 					/**
 					 * A->C(before); B->A(before); C; A->C(before); B->A(before); C result:
 					 * [B,B,A,A,C,C]
@@ -809,13 +844,14 @@ class DrawRendererTest {
 						RenderingParameters firstParamsBis = firstGeomMockBis.getRenderingParameters();
 						firstParam.renderBefore(thirdAlias);
 						firstParamsBis.renderBefore(thirdAlias);
-						
+
 						RenderingParameters secondParamsBis = secondGeomMockBis.getRenderingParameters();
 						secondParam.renderBefore(firstAlias);
 						secondParamsBis.renderBefore(firstAlias);
 
 						renderingParams = renderer.getOrderedRenderingParameters();
-						int maxSecondIndex = Math.max(renderingParams.indexOf(secondGeomMockBis.getRenderingParameters()),
+						int maxSecondIndex = Math.max(
+								renderingParams.indexOf(secondGeomMockBis.getRenderingParameters()),
 								renderingParams.indexOf(secondGeomMock.getRenderingParameters()));
 						int minFirstIndex = Math.min(renderingParams.indexOf(firstGeomMockBis.getRenderingParameters()),
 								renderingParams.indexOf(firstGeomMock.getRenderingParameters()));
@@ -824,11 +860,11 @@ class DrawRendererTest {
 								renderingParams.indexOf(firstGeomMock.getRenderingParameters()));
 						int minThirdIndex = Math.min(renderingParams.indexOf(thirdGeomMockBis.getRenderingParameters()),
 								renderingParams.indexOf(thirdGeomMock.getRenderingParameters()));
-						
+
 						assertTrue(maxSecondIndex < minFirstIndex, renderingParams.toString());
 						assertTrue(maxFirstIndex < minThirdIndex, renderingParams.toString());
 					}
-					
+
 					/**
 					 * A->C(before); B; C->B(before);A->C(before); B; C->B(before) result:
 					 * [A,A,C,C,B,B]
@@ -839,13 +875,13 @@ class DrawRendererTest {
 						RenderingParameters firstParamsBis = firstGeomMockBis.getRenderingParameters();
 						firstParam.renderBefore(thirdAlias);
 						firstParamsBis.renderBefore(thirdAlias);
-						
+
 						RenderingParameters thirdParamsBis = thirdGeomMockBis.getRenderingParameters();
 						thirdParam.renderBefore(secondAlias);
 						thirdParamsBis.renderBefore(secondAlias);
 
 						renderingParams = renderer.getOrderedRenderingParameters();
-						
+
 						int maxfirstIndex = Math.max(renderingParams.indexOf(firstGeomMockBis.getRenderingParameters()),
 								renderingParams.indexOf(firstGeomMock.getRenderingParameters()));
 						int minThirdIndex = Math.min(renderingParams.indexOf(thirdGeomMockBis.getRenderingParameters()),
@@ -853,17 +889,17 @@ class DrawRendererTest {
 
 						int maxThirdIndex = Math.max(renderingParams.indexOf(thirdGeomMockBis.getRenderingParameters()),
 								renderingParams.indexOf(thirdGeomMock.getRenderingParameters()));
-						int minSecondIndex = Math.min(renderingParams.indexOf(secondGeomMockBis.getRenderingParameters()),
+						int minSecondIndex = Math.min(
+								renderingParams.indexOf(secondGeomMockBis.getRenderingParameters()),
 								renderingParams.indexOf(secondGeomMock.getRenderingParameters()));
 						assertTrue(maxfirstIndex < minThirdIndex, renderingParams.toString());
 						assertTrue(maxThirdIndex < minSecondIndex, renderingParams.toString());
 					}
 				}
-			
-			
+
 				@Nested
-				class SpecialCase{
-					
+				class SpecialCase {
+
 					/**
 					 * A->B(after); B; C; A->C(after); B; C result: [B,B,A,A,C,C] (or more lazy
 					 * ordering [B,C,B,A,A,C])
@@ -876,7 +912,8 @@ class DrawRendererTest {
 						firstParamsBis.renderAfter(thirdAlias);
 
 						renderingParams = renderer.getOrderedRenderingParameters();
-						int maxSecondIndex = Math.max(renderingParams.indexOf(secondGeomMockBis.getRenderingParameters()),
+						int maxSecondIndex = Math.max(
+								renderingParams.indexOf(secondGeomMockBis.getRenderingParameters()),
 								renderingParams.indexOf(secondGeomMock.getRenderingParameters()));
 						int minFirstIndex = Math.min(renderingParams.indexOf(firstGeomMockBis.getRenderingParameters()),
 								renderingParams.indexOf(firstGeomMock.getRenderingParameters()));
@@ -885,8 +922,7 @@ class DrawRendererTest {
 				}
 			}
 		}
-	
-}
 
-	
+	}
+
 }

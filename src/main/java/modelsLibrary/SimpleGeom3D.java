@@ -1,5 +1,6 @@
 package modelsLibrary;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -32,27 +33,30 @@ import shaderManager.Draw3DShader;
 public class SimpleGeom3D extends SimpleGeom {
 
 	private SimpleGeom3D() {
-		//hidden
+		// hidden
 	}
-	
-	public static SimpleGeom3D create(Loader loader, Draw3DRenderer draw3DRenderer, String alias, Entity entity) {
+
+	protected static SimpleGeom3D create(Loader loader, Draw3DRenderer draw3DRenderer, Draw3DShader shader, String alias, Entity entity)
+			throws IOException {
 		SimpleGeom3D simpleGeom3D = new SimpleGeom3D();
-		simpleGeom3D.rawGeom = new RawGeom(loader,draw3DRenderer, 3);
-		simpleGeom3D.renderingParameters =  new RenderingParameters(simpleGeom3D, alias, entity);
+		simpleGeom3D.rawGeom = new RawGeom(loader, draw3DRenderer, 3);
+		simpleGeom3D.renderingParameters = RenderingParameters.create(shader, simpleGeom3D, alias, entity);
 		return simpleGeom3D;
 	}
-	
-	public static SimpleGeom3D create(Loader loader, Draw3DRenderer draw3DRenderer, String alias) {
+
+	protected static SimpleGeom3D createWithDefaultEntity(Loader loader, Draw3DRenderer draw3DRenderer, Draw3DShader shader, String alias)
+			throws IOException {
 		SimpleGeom3D simpleGeom3D = new SimpleGeom3D();
-		simpleGeom3D.rawGeom = new RawGeom(loader,draw3DRenderer, 3);
-		simpleGeom3D.renderingParameters =  new RenderingParameters(simpleGeom3D, alias, SimpleEntity.createDefaultEntity());
+		simpleGeom3D.rawGeom = new RawGeom(loader, draw3DRenderer, 3);
+		simpleGeom3D.renderingParameters = RenderingParameters.create(shader, simpleGeom3D, alias,
+				SimpleEntity.createDefaultEntity());
 		return simpleGeom3D;
 	}
 
 	@Override
 	public SimpleGeom3D copy(String alias) {
 		SimpleGeom3D copy = new SimpleGeom3D();
-		copy.rawGeom = new RawGeom(rawGeom.loader,rawGeom.drawRenderer, 3);
+		copy.rawGeom = new RawGeom(rawGeom.loader, rawGeom.drawRenderer, 3);
 		copy.copyValues(this, alias);
 		return copy;
 	}
@@ -102,6 +106,7 @@ public class SimpleGeom3D extends SimpleGeom {
 		ArrayList<Vector3f> invertedVertices = new ArrayList<>();
 
 		while (vertices.hasNext()) {
+			//TODO extract
 			// hardcoded logic for GL_TRIANGLES
 			Vector3f vert0 = vertices.next();
 			Vector3f vert1 = vertices.next();
@@ -139,28 +144,34 @@ public class SimpleGeom3D extends SimpleGeom {
 	}
 
 	public List<Face> getFaces() {
-		if(!this.getRenderingParameters().getRenderMode().isPresent()) {
-			throw new IllegalStateException("No rendering mode set, cannot construct faces. Please specify one of the GL11.GL_TRIANGLES* mode.");
+		if (!this.getRenderingParameters().getRenderMode().isPresent()) {
+			throw new IllegalStateException(
+					"No rendering mode set, cannot construct faces. Please specify one of the GL11.GL_TRIANGLES* mode.");
 		}
 		int mode = this.getRenderingParameters().getRenderMode().get();
 		List<Face> faces = new ArrayList<>();
 		List<Vector3f> vertices = this.buildVerticesList();
-		switch(mode) {
+		switch (mode) {
 		case GL11.GL_TRIANGLES:
-			for(int i=0; i < vertices.size(); i+=3) {
-				faces.add(new Face(vertices.get(i), vertices.get(i+1), vertices.get(i+2)));
+			for (int i = 0; i < vertices.size(); i += 3) {
+				faces.add(new Face(vertices.get(i), vertices.get(i + 1), vertices.get(i + 2)));
 			}
 			break;
 		case GL11.GL_TRIANGLE_STRIP:
-			for(int i=0; i < vertices.size()-2; i++) {
-				faces.add(new Face(vertices.get(i), vertices.get(i+1), vertices.get(i+2)));
+			for (int i = 0; i < vertices.size() - 2; i++) {
+				faces.add(new Face(vertices.get(i), vertices.get(i + 1), vertices.get(i + 2)));
 			}
 			break;
 		case GL11.GL_TRIANGLE_FAN:
 			throw new NotImplementedException();
-			default:
-				throw new IllegalStateException(mode + ": Rendering mode not allowed to construct faces. Please specify one of the GL11.GL_TRIANGLES* mode.");	
+		default:
+			throw new IllegalStateException(mode
+					+ ": Rendering mode not allowed to construct faces. Please specify one of the GL11.GL_TRIANGLES* mode.");
 		}
 		return faces;
+	}
+
+	public Draw3DShader getShader() {
+		return (Draw3DShader) this.renderingParameters.getShader();
 	}
 }

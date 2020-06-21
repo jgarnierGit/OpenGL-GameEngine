@@ -10,24 +10,23 @@ public class CoordinatesSystemManager {
 	private static final float FOV = 70f;
 	private static final float NEAR_PLANE = 0.1f;
 	private static final float FAR_PLANE = 1000;
-	
-	private Matrix4f projectionMatrix;
+
+	private static final Matrix4f PROJECTION_MATRIX = createProjectionMatrix();
 
 	private CoordinatesSystemManager() {
 	}
 
 	public static CoordinatesSystemManager create() {
-		CoordinatesSystemManager coord = new CoordinatesSystemManager();
-		coord.createProjectionMatrix();
-		return coord;
+		return new CoordinatesSystemManager();
 	}
 
-	public Matrix4f getProjectionMatrix() {
-		return this.projectionMatrix;
+	public static Matrix4f getProjectionMatrix() {
+		return PROJECTION_MATRIX;
 	}
-	
+
 	/**
 	 * get Near Plane clip. vertex below this limit are not rendered
+	 * 
 	 * @return
 	 */
 	public static float getNearPlane() {
@@ -36,33 +35,35 @@ public class CoordinatesSystemManager {
 
 	/**
 	 * get Far Plane clip. vertex above this limit are not rendered
+	 * 
 	 * @return
 	 */
 	public static float getFarPlane() {
 		return FAR_PLANE;
 	}
-	
+
 	/**
 	 * FOV
+	 * 
 	 * @return
 	 */
 	public static float getFOV() {
 		return FOV;
 	}
 
-	private Matrix4f createProjectionMatrix() {
+	private static Matrix4f createProjectionMatrix() {
 		float y_scale = (float) ((1f / Math.tan(Math.toRadians(FOV / 2f))) * DisplayManager.ASPECT_RATIO);
 		float x_scale = y_scale / DisplayManager.ASPECT_RATIO;
 		float frustum_length = FAR_PLANE - NEAR_PLANE;
 
-		projectionMatrix = new Matrix4f();
-		projectionMatrix.m00 = x_scale;
-		projectionMatrix.m11 = y_scale;
-		projectionMatrix.m22 = -((FAR_PLANE + NEAR_PLANE) / frustum_length);
-		projectionMatrix.m23 = -1;
-		projectionMatrix.m32 = -((2 * NEAR_PLANE * FAR_PLANE) / frustum_length);
-		projectionMatrix.m33 = 0;
-		return projectionMatrix;
+		Matrix4f projM = new Matrix4f();
+		projM.m00 = x_scale;
+		projM.m11 = y_scale;
+		projM.m22 = -((FAR_PLANE + NEAR_PLANE) / frustum_length);
+		projM.m23 = -1;
+		projM.m32 = -((2 * NEAR_PLANE * FAR_PLANE) / frustum_length);
+		projM.m33 = 0;
+		return projM;
 	}
 
 	/**
@@ -74,7 +75,7 @@ public class CoordinatesSystemManager {
 	 * @return [vector] * [projectionMatrix] (Row major column)
 	 */
 	public Vector4f objectToProjectionMatrix(Vector3f vector) {
-		return Matrix4f.transform(this.projectionMatrix, new Vector4f(vector.x, vector.y, vector.z, 1), null);
+		return Matrix4f.transform(this.PROJECTION_MATRIX, new Vector4f(vector.x, vector.y, vector.z, 1), null);
 	}
 
 	/**

@@ -1,5 +1,6 @@
 package modelsLibrary;
 
+import java.io.IOException;
 import java.util.Optional;
 
 import org.apache.commons.lang3.NotImplementedException;
@@ -15,7 +16,7 @@ public class RegularElevationTerrain3D extends RegularTerrain3D{
 	private float[][] heights;
 
 	public RegularElevationTerrain3D(Loader loader, Draw3DRenderer draw3dRenderer, String alias, int size,
-			int definition, Entity entity) {
+			int definition, Entity entity) throws IOException {
 		super(loader, draw3dRenderer, alias, size, definition,entity);
 		heights = new float[definition][definition];
 	}

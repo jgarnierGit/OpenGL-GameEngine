@@ -18,6 +18,7 @@ import org.mockito.Mockito;
 import renderEngine.Draw2DRenderer;
 import renderEngine.Loader;
 import renderEngine.RenderingParameters;
+import shaderManager.Draw2DShader;
 
 class SimpleGeom2DTest {
 
@@ -26,12 +27,14 @@ class SimpleGeom2DTest {
 	public Loader loader;
 	@Mock
 	public Draw2DRenderer draw2DRenderer;
+	@Mock
+	public Draw2DShader shader;
 
 	@BeforeEach
 	void setUp() throws Exception {
 		loader = Mockito.mock(Loader.class);
 		
-		geom = SimpleGeom2D.create(loader, draw2DRenderer, alias);
+		geom = SimpleGeom2D.create(loader, draw2DRenderer, shader, alias);
 		Mockito.when(loader.loadToVAO(geom.rawGeom.points, geom.rawGeom.dimension)).thenReturn(1);
 	}
 	

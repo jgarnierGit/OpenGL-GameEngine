@@ -13,6 +13,7 @@ import renderEngine.Draw2DRenderer;
 import renderEngine.Loader;
 import renderEngine.RenderingParameters;
 import shaderManager.Draw2DShader;
+import shaderManager.Draw3DShader;
 
 public class SimpleGeom2D extends SimpleGeom {
 	
@@ -20,10 +21,10 @@ public class SimpleGeom2D extends SimpleGeom {
 		//hidden
 	}
 	
-	public static SimpleGeom2D create(Loader loader, Draw2DRenderer draw2DRenderer, String alias) {
+	public static SimpleGeom2D create(Loader loader, Draw2DRenderer draw2DRenderer, Draw2DShader shader, String alias) {
 		SimpleGeom2D simpleGeom2D = new SimpleGeom2D();
 		simpleGeom2D.rawGeom = new RawGeom(loader,draw2DRenderer, 2);
-		simpleGeom2D.renderingParameters =  new RenderingParameters(simpleGeom2D, alias, SimpleEntity.createDefaultEntity());
+		simpleGeom2D.renderingParameters = RenderingParameters.create(shader, simpleGeom2D, alias, SimpleEntity.createDefaultEntity());
 		return simpleGeom2D;
 	}
 
@@ -89,5 +90,9 @@ public class SimpleGeom2D extends SimpleGeom {
 			vectors.add(new Vector2f(rawGeom.points[i], rawGeom.points[i + 1]));
 		}
 		return vectors;
+	}
+	
+	public Draw2DShader getShader() {
+		return (Draw2DShader) this.renderingParameters.getShader();
 	}
 }

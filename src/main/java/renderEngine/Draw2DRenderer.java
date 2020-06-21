@@ -14,16 +14,14 @@ import shaderManager.Draw2DShader;
  *
  */
 public class Draw2DRenderer extends DrawRenderer {
-	private Draw2DShader draw2DShader;
-
 	public Draw2DRenderer() throws IOException {
 		super();
-		this.draw2DShader = new Draw2DShader();
 	}
 
 	@Override
 	public void render() {
 		for (RenderingParameters params : renderingParams) {
+			Draw2DShader draw2DShader = (Draw2DShader) params.getShader();
 			draw2DShader.start();
 			prepare(params.getGeom(), Draw2DShader.COLOR_INDEX, VBOIndex.POSITION_INDEX);
 
@@ -39,6 +37,9 @@ public class Draw2DRenderer extends DrawRenderer {
 
 	@Override
 	public void cleanUp() {
-		draw2DShader.cleanUp();
+		for (RenderingParameters params : renderingParams) {
+			Draw2DShader draw2DShader = (Draw2DShader) params.getShader();
+			draw2DShader.cleanUp();
+		}
 	}
 }

@@ -17,22 +17,17 @@ import toolbox.Maths;
  *
  */
 public class Draw3DRenderer extends DrawRenderer {
-
-	private Draw3DShader draw3DShader;
 	private CameraEntity camera;
 
 	public Draw3DRenderer(CameraEntity camera, Matrix4f projectionMatrix) throws IOException {
 		super();
-		this.draw3DShader = new Draw3DShader();
 		this.camera = camera;
-		draw3DShader.start();
-		draw3DShader.loadProjectionMatrix(projectionMatrix);
-		draw3DShader.stop();
 	}
 
 	@Override
 	public void render() {
 		for (RenderingParameters params : renderingParams) {
+			Draw3DShader draw3DShader = (Draw3DShader) params.getShader();
 			draw3DShader.start();
 			prepare(params.getGeom(), VBOIndex.POSITION_INDEX, Draw3DShader.COLOR_INDEX);
 			Matrix4f viewMatrix = camera.getViewMatrix();
@@ -41,19 +36,19 @@ public class Draw3DRenderer extends DrawRenderer {
 			// Disable distance filtering.
 			GL11.glDisable(GL11.GL_DEPTH);
 			params.enableRenderOptions();
-			if(params.getEntities() == null || params.getEntities().isEmpty()) { // not good at all
+			if (params.getEntities() == null || params.getEntities().isEmpty()) { // not good at all
 				Matrix4f transformationM = new Matrix4f();
 				draw3DShader.loadTransformationMatrix(transformationM);
 				genericDrawRender(params);
-			}
-			else {
+			} else {
 				params.getEntities().forEach(entity -> {
-					Matrix4f transformationM = Maths.createTransformationMatrix(entity.getPositions(), entity.getRotX(), entity.getRotY(), entity.getRotZ(), entity.getScale());
+					Matrix4f transformationM = Maths.createTransformationMatrix(entity.getPositions(), entity.getRotX(),
+							entity.getRotY(), entity.getRotZ(), entity.getScale());
 					draw3DShader.loadTransformationMatrix(transformationM);
 					genericDrawRender(params);
 				});
 			}
-			
+
 			unbindGeom(VBOIndex.POSITION_INDEX, Draw3DShader.COLOR_INDEX);
 			// GL11.glLineWidth(1);
 			params.disableRenderOptions();
@@ -64,7 +59,10 @@ public class Draw3DRenderer extends DrawRenderer {
 
 	@Override
 	public void cleanUp() {
-		draw3DShader.cleanUp();
+		for (RenderingParameters params : renderingParams) {
+			Draw3DShader draw3DShader = (Draw3DShader) params.getShader();
+			draw3DShader.cleanUp();
+		}
 	}
 
 	/**

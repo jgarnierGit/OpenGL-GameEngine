@@ -1,19 +1,21 @@
 package modelsLibrary;
 
+import java.io.IOException;
 import java.util.logging.Logger;
 
 import entities.Entity;
 import renderEngine.Draw3DRenderer;
 import renderEngine.Loader;
 
-public abstract class Terrain3D implements ITerrain{
+public abstract class Terrain3D implements ITerrain {
 	protected SimpleGeom3D terrain;
-	
+
 	protected Logger logger = Logger.getLogger("Terrain3D");
 
-	public Terrain3D(Loader loader, Draw3DRenderer draw3dRenderer, String alias, Entity entity) {
+	public Terrain3D(Loader loader, Draw3DRenderer draw3DRenderer, String alias, Entity entity) throws IOException {
 		super();
-		this.terrain = SimpleGeom3D.create(loader, draw3dRenderer, alias, entity);
+		this.terrain = SimpleGeom3DBuilder.create(loader, draw3DRenderer, alias).withDefaultShader().withEntity(entity)
+				.build();
 	}
 
 	@Override
