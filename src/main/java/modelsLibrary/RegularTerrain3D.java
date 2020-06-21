@@ -12,6 +12,9 @@ public abstract class RegularTerrain3D extends Terrain3D {
 	protected float origineZ;
 	/**
 	 * 
+	 * @param alias 
+	 * @param draw3dRenderer 
+	 * @param loader 
 	 * @param loader
 	 * @param draw3dRenderer
 	 * @param alias

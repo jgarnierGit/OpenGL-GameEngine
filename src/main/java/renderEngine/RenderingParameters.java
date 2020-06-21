@@ -44,6 +44,7 @@ public class RenderingParameters implements IRenderingParameters{
 		this.logger = Logger.getLogger("RenderingParameters");
 	}
 	/**
+	 * TODO try to break circular reference
 	 * hide this constructor, only way to get a RenderingParameters is by SimpleGeom
 	 * @param simpleGeom
 	 */
@@ -51,6 +52,24 @@ public class RenderingParameters implements IRenderingParameters{
 		this(entity);
 		this.simpleGeom = simpleGeom;
 		this.alias= alias; 
+	}
+	
+	/**
+	 * Prepare a renderingParameter with same presets as given renderingParameter.
+	 * Does not apply overridedColors, overrideColorsAtIndex.
+	 * @param toClone
+	 * @param geomToApply
+	 * @param alias
+	 */
+	public static RenderingParameters copy(RenderingParameters toClone, ISimpleGeom geomToApply, String alias, Entity entity) {
+		RenderingParameters cloned = new RenderingParameters(geomToApply, alias, entity);
+		cloned.destinationOrderAlias = toClone.destinationOrderAlias;
+		if(toClone.glRenderMode.isPresent()) {
+			cloned.glRenderMode = Optional.ofNullable(toClone.glRenderMode.get());
+		}
+		cloned.glStatesRendering.putAll(toClone.glStatesRendering);
+		cloned.renderAfter = toClone.renderAfter;
+		return cloned;
 	}
 	
 	/**
@@ -64,26 +83,6 @@ public class RenderingParameters implements IRenderingParameters{
 	
 	public boolean isNotUsingEntities() {
 		return this.skipEntities;
-	}
-	
-	/**
-	 * Prepare a renderingParameter with same presets as given renderingParameter.
-	 * Does not apply overridedColors, overrideColorsAtIndex.
-	 * @param toClone
-	 * @param geomToApply
-	 * @param alias
-	 */
-	public RenderingParameters(RenderingParameters toClone, ISimpleGeom geomToApply, String alias, Entity entity) {
-		this(entity);
-		this.alias= alias; 
-		this.simpleGeom = geomToApply;
-		this.destinationOrderAlias = toClone.destinationOrderAlias;
-		if(toClone.glRenderMode.isPresent()) {
-			 this.glRenderMode = Optional.ofNullable(toClone.glRenderMode.get());
-		}
-		
-		this.glStatesRendering.putAll(toClone.glStatesRendering);
-		this.renderAfter = toClone.renderAfter;
 	}
 	
 	@Override

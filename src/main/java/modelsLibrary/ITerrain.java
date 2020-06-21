@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import org.lwjglx.util.vector.Vector3f;
 
-public interface ITerrain {
+public interface ITerrain extends GeomContainer{
 	
 	/**
 	 * Return Height elevation for given coordinates

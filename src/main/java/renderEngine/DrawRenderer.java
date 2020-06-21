@@ -15,7 +15,7 @@ import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
 import modelsLibrary.ISimpleGeom;
-import modelsLibrary.SimpleGeom;
+import modelsLibrary.RawGeom;
 
 /**
  * Draw primitive 3D objects directly by drawArrays. For heavy objects use
@@ -26,7 +26,7 @@ import modelsLibrary.SimpleGeom;
  *
  */
 public abstract class DrawRenderer implements IDrawRenderer {
-	protected List<SimpleGeom> geoms;
+	protected List<ISimpleGeom> geoms;
 	protected List<RenderingParameters> renderingParams;
 	protected Logger logger;
 
@@ -37,7 +37,7 @@ public abstract class DrawRenderer implements IDrawRenderer {
 	}
 
 	@Override
-	public void process(SimpleGeom geom) {
+	public void process(ISimpleGeom geom) {
 		this.geoms.add(geom);
 	}
 
@@ -68,7 +68,7 @@ public abstract class DrawRenderer implements IDrawRenderer {
 	 * override will be active.
 	 */
 	private void updateOverridingColors() {
-		for (SimpleGeom simpleGeom : this.geoms) {
+		for (ISimpleGeom simpleGeom : this.geoms) {
 			RenderingParameters rParam = simpleGeom.getRenderingParameters();
 			rParam.applyColorOverriding();
 
@@ -90,7 +90,7 @@ public abstract class DrawRenderer implements IDrawRenderer {
 	 * @param colorIndex    GL vertex Attrib array position in VBO?
 	 */
 	protected void prepare(ISimpleGeom geom, int positionIndex, int colorIndex) {
-		GL30.glBindVertexArray(geom.getVaoId());
+		GL30.glBindVertexArray(geom.getRawGeom().getVaoId());
 		GL20.glEnableVertexAttribArray(positionIndex);
 		GL20.glEnableVertexAttribArray(colorIndex);
 	}
@@ -118,7 +118,8 @@ public abstract class DrawRenderer implements IDrawRenderer {
 		// cf https://www.khronos.org/opengl/wiki/Primitive => internal gl logic, hidden
 		// for DrawArrays usage;
 		ISimpleGeom geom = params.getGeom();
-		int verticesCount = geom.getPoints().length / geom.getDimension();
+		RawGeom rawGeom = geom.getRawGeom();
+		int verticesCount = rawGeom.getPoints().length / rawGeom.getDimension();
 		// Add default lineLoop rendering.
 		// GL11.drawArrays can draw points with GL_POINTS, not GL_POINT
 		GL11.glDrawArrays(params.getRenderMode().orElse(GL11.GL_POINTS), 0, verticesCount);
@@ -127,7 +128,7 @@ public abstract class DrawRenderer implements IDrawRenderer {
 	protected List<RenderingParameters> getOrderedRenderingParameters() {
 		LinkedList<RenderingParameters> rawParams = new LinkedList<>();
 		int i = 0;
-		for (SimpleGeom simpleGeom : this.geoms) {
+		for (ISimpleGeom simpleGeom : this.geoms) {
 			RenderingParameters param = simpleGeom.getRenderingParameters();
 			if (param.getAlias().isEmpty()) {
 				param.setAlias("" + i);

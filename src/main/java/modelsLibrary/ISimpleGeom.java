@@ -8,41 +8,14 @@ import org.lwjglx.util.vector.Vector4f;
 import renderEngine.RenderingParameters;
 
 public interface ISimpleGeom {
-	
-	/**
-	 * returns Vertex Array Object Id already binded.
-	 * 
-	 * @return Vertex Array Object Id already binded.
-	 */
-	public int getVaoId();
-
-	/**
-	 * 
-	 * @return dimension count to apply for each vertice.
-	 */
-	public int getDimension();
-
-	/**
-	 * return array of points coordinates.
-	 * 
-	 * @return array of points coordinates.
-	 */
-	public float[] getPoints();
-
-	/**
-	 * return array of colors for each points.
-	 * 
-	 * @return array of colors for each points.
-	 */
-	public float[] getColors();
 
 	public List<? extends Vector> buildVerticesList();
 	
 	/**
-	 * TODO find a better way.
-	 * return a deep copy of geom
-	 * @param alias to identify copy
-	 * @return SimpleGeom
+	 * copy geom and load it in a new Vao
+	 * copy renderingParameters with empty entities list.
+	 * @param alias new alias to use
+	 * @return SimpleGeom a deep copy of geom
 	 */
 	public ISimpleGeom copy(String alias);
 
@@ -76,10 +49,15 @@ public interface ISimpleGeom {
 	public void setColor(Vector4f color);
 
 	/**
+	 * TODO extract to RenderingParameter.
 	 * Reload points coordinates to binded Vertex Buffer Object attached to VAO
 	 */
 	public void reloadVao();
-
+/**
+ * TODO extract this also
+ */
+	public void updateRenderer();
+	
 	/**
 	 * clear points arrays coordinates.
 	 */
@@ -98,5 +76,7 @@ public interface ISimpleGeom {
 	 * Invert normals of every triangles
 	 */
 	public void invertNormals();
+	
+	public RawGeom getRawGeom();
 
 }

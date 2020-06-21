@@ -16,7 +16,7 @@ public class RegularElevationTerrain3D extends RegularTerrain3D{
 
 	public RegularElevationTerrain3D(Loader loader, Draw3DRenderer draw3dRenderer, String alias, int size,
 			int definition, Entity entity) {
-		super(loader, draw3dRenderer, alias, size, definition, entity);
+		super(loader, draw3dRenderer, alias, size, definition,entity);
 		heights = new float[definition][definition];
 	}
 

@@ -23,7 +23,7 @@ import entities.Entity;
 import entities.EntityTutos;
 import inputListeners.MouseInputListener;
 import modelsLibrary.Face;
-import modelsLibrary.SimpleGeom;
+import modelsLibrary.RawGeom;
 import renderEngine.Loader;
 import renderEngine.MasterRenderer;
 import renderEngine.RenderingParameters;
@@ -34,7 +34,7 @@ import utils.MeasureResult;
 import utils.SpatialComparator;
 
 public class MouseLogger implements IMouseBehaviour {
-	private Map<SimpleGeom, List<Entity>> entitiesByGeom;
+	private Map<RawGeom, List<Entity>> entitiesByGeom;
 	private Camera camera;
 	private MouserLoggerPrinter mouserLoggerPrinter;
 	private Matrix4f viewMatrix;
@@ -58,7 +58,7 @@ public class MouseLogger implements IMouseBehaviour {
 		this.mouseInputListener.addRunnerOnUniquePress(GLFW_MOUSE_BUTTON_LEFT, () -> processPicking());
 	}
 
-	public void processEntity(SimpleGeom geom) {
+	public void processEntity(RawGeom geom) {
 		this.entitiesByGeom.put(geom, new ArrayList<>(geom.getRenderingParameters().getEntities()));
 	}
 
@@ -86,8 +86,8 @@ public class MouseLogger implements IMouseBehaviour {
 		this.mouserLoggerPrinter.printFilterByRayProximity(entities, rayFromCamera, largeRay);
 		}
 		filterEntitiesByBboxIntersection();
-		SimpleGeom bboxPlain = null;
-		for (SimpleGeom entity : this.entitiesByGeom.keySet()) {
+		RawGeom bboxPlain = null;
+		for (RawGeom entity : this.entitiesByGeom.keySet()) {
 			if("bboxEntitiesPlainCategColor".equals(entity.getRenderingParameters().getAlias())) {
 				bboxPlain = entity;
 			}
@@ -96,7 +96,7 @@ public class MouseLogger implements IMouseBehaviour {
 
 		this.mouserLoggerPrinter.printCameraBBox();
 		List<String> aliases = Arrays.asList("bboxEntities", "bboxEntitiesPlainCategColor");
-		for(Entry<SimpleGeom,List<Entity>> entry : this.entitiesByGeom.entrySet()) {
+		for(Entry<RawGeom,List<Entity>> entry : this.entitiesByGeom.entrySet()) {
 			if(aliases.contains(entry.getKey().getRenderingParameters().getAlias())) {
 				this.mouserLoggerPrinter.updateTransparency(entry.getKey(),entry.getValue());
 			}
@@ -104,7 +104,7 @@ public class MouseLogger implements IMouseBehaviour {
 		if(!this.entitiesByGeom.isEmpty()) {
 			//TODO if I want to override color from an entity, it means it must process set separation and creation.
 			List<String> aliasesToSelect = Arrays.asList("bboxEntitiesPlainCategColor");
-			for(Entry<SimpleGeom,List<Entity>> entry : this.entitiesByGeom.entrySet()) {
+			for(Entry<RawGeom,List<Entity>> entry : this.entitiesByGeom.entrySet()) {
 				if(aliasesToSelect.contains(entry.getKey().getRenderingParameters().getAlias())) {
 					this.mouserLoggerPrinter.flemme(entry.getKey(),Arrays.asList(entry.getValue().get(0)));
 				}
@@ -121,7 +121,7 @@ public class MouseLogger implements IMouseBehaviour {
 		Vector3f MouseRayWorldCoord = Vector3f.add(camPos, this.ray, null);
 		TreeMap<Float, Entity> filteredByDistanceEntities = new TreeMap<>();
 		ArrayList<Entity> filteredEntities = new ArrayList<>();
-		for(SimpleGeom geom : this.entitiesByGeom) {
+		for(RawGeom geom : this.entitiesByGeom) {
 
 		for (Entity entity : geom.getRenderingParameters().getEntities()) {
 			List<Vector3f> bbox = entity.getBoundingBox();

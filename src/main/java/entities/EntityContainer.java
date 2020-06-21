@@ -2,7 +2,7 @@ package entities;
 
 import java.util.List;
 
-import modelsLibrary.SimpleGeom;
+import modelsLibrary.ISimpleGeom;
 
 /**
  * Simplify entities accessor
@@ -11,5 +11,5 @@ import modelsLibrary.SimpleGeom;
  */
 public interface EntityContainer {
 
-	public List<SimpleGeom> getEntitiesGeom();
+	public List<ISimpleGeom> getEntitiesGeom();
 }

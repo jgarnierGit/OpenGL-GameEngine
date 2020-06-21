@@ -15,7 +15,6 @@ import org.lwjglx.util.vector.Vector4f;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
-import entities.EntityTutos;
 import renderEngine.Draw3DRenderer;
 import renderEngine.Loader;
 import renderEngine.RenderingParameters;
@@ -31,8 +30,8 @@ class SimpleGeom3DTest {
 	@BeforeEach
 	void setUp() throws Exception {
 		loader = Mockito.mock(Loader.class);
-		geom = new SimpleGeom3D(loader,draw3DRenderer, alias);
-		Mockito.when(loader.loadToVAO(geom.points, geom.dimension)).thenReturn(1);
+		geom = SimpleGeom3D.create(loader,draw3DRenderer, alias);
+		Mockito.when(loader.loadToVAO(geom.rawGeom.points, geom.rawGeom.dimension)).thenReturn(1);
 	}
 	
 	@Nested
@@ -41,8 +40,8 @@ class SimpleGeom3DTest {
 		@Test
 		@DisplayName("Empty geom should be empty")
 		void testEmptyGeom(){
-			assertEquals(0, geom.colors.length);
-			assertEquals(0, geom.points.length);
+			assertEquals(0, geom.rawGeom.colors.length);
+			assertEquals(0, geom.rawGeom.points.length);
 			assertNotNull(geom.renderingParameters);
 		}
 		
@@ -50,18 +49,18 @@ class SimpleGeom3DTest {
 		@DisplayName("Adding point copying default color")
 		void testAddPoint() {
 			geom.addPoint(new Vector3f(1, 1, 1));
-			assertEquals(4, geom.colors.length);
-			assertEquals(3, geom.points.length);
-			assertEquals(1.0f, geom.colors[0]);
+			assertEquals(4, geom.rawGeom.colors.length);
+			assertEquals(3, geom.rawGeom.points.length);
+			assertEquals(1.0f, geom.rawGeom.colors[0]);
 		}
 		
 		@Test
 		@DisplayName("Adding a point with color")
 		void testaddPointWithColor() {
 			geom.addPoint(new Vector3f(1, 1, 1), new Vector4f(2,2,2,2));
-			assertEquals(4, geom.colors.length);
-			assertEquals(3, geom.points.length);
-			assertEquals(2, geom.colors[0]);
+			assertEquals(4, geom.rawGeom.colors.length);
+			assertEquals(3, geom.rawGeom.points.length);
+			assertEquals(2, geom.rawGeom.colors[0]);
 		}
 		
 		@Test
@@ -83,31 +82,31 @@ class SimpleGeom3DTest {
 
 		@Test
 		void testInstanciationOk() {
-			assertEquals(4, geom.colors.length);
-			assertEquals(3, geom.points.length);
+			assertEquals(4, geom.rawGeom.colors.length);
+			assertEquals(3, geom.rawGeom.points.length);
 		}
 
 		@Test
 		void testReset() {
 			geom.reset();
-			assertEquals(0, geom.colors.length);
-			assertEquals(0, geom.points.length);
+			assertEquals(0, geom.rawGeom.colors.length);
+			assertEquals(0, geom.rawGeom.points.length);
 		}
 		
 		@Test
 		@DisplayName("Adding a point copying previous color")
 		void testaddPoint() {
 			geom.addPoint(new Vector3f(1, 2, 3));
-			assertEquals(8, geom.colors.length);
-			assertEquals(6, geom.points.length);
+			assertEquals(8, geom.rawGeom.colors.length);
+			assertEquals(6, geom.rawGeom.points.length);
 		}
 		
 		@Test
 		@DisplayName("Adding a point with color")
 		void testaddPointWithColor() {
 			geom.addPoint(new Vector3f(1, 2, 3), new Vector4f(2,2,2,2));
-			assertEquals(8, geom.colors.length);
-			assertEquals(6, geom.points.length);
+			assertEquals(8, geom.rawGeom.colors.length);
+			assertEquals(6, geom.rawGeom.points.length);
 		}
 		
 		@Test
@@ -120,8 +119,8 @@ class SimpleGeom3DTest {
 		@DisplayName("get copied geom with same parameters")
 		void testgetCopiedGeom() {
 			SimpleGeom3D copied = geom.copy("newAlias");
-			assertArrayEquals(copied.getPoints(), geom.getPoints());
-			assertArrayEquals(copied.getColors(), geom.getColors());
+			assertArrayEquals(geom.rawGeom.getPoints(), copied.rawGeom.getPoints());
+			assertArrayEquals(geom.rawGeom.getColors(), copied.rawGeom.getColors());
 		}
 	}
 	

@@ -1,5 +1,6 @@
 package modelsLibrary;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -14,7 +15,6 @@ import org.lwjglx.util.vector.Vector4f;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
-import entities.EntityTutos;
 import renderEngine.Draw2DRenderer;
 import renderEngine.Loader;
 import renderEngine.RenderingParameters;
@@ -31,8 +31,8 @@ class SimpleGeom2DTest {
 	void setUp() throws Exception {
 		loader = Mockito.mock(Loader.class);
 		
-		geom = new SimpleGeom2D(loader, draw2DRenderer, alias);
-		Mockito.when(loader.loadToVAO(geom.points, geom.dimension)).thenReturn(1);
+		geom = SimpleGeom2D.create(loader, draw2DRenderer, alias);
+		Mockito.when(loader.loadToVAO(geom.rawGeom.points, geom.rawGeom.dimension)).thenReturn(1);
 	}
 	
 	@Nested
@@ -41,8 +41,8 @@ class SimpleGeom2DTest {
 		@Test
 		@DisplayName("Empty geom should be empty")
 		void testEmptyGeom(){
-			assertEquals(0, geom.colors.length);
-			assertEquals(0, geom.points.length);
+			assertEquals(0, geom.rawGeom.colors.length);
+			assertEquals(0, geom.rawGeom.points.length);
 			assertNotNull(geom.renderingParameters);
 		}
 		
@@ -50,18 +50,18 @@ class SimpleGeom2DTest {
 		@DisplayName("Adding point copying default color")
 		void testAddPoint() {
 			geom.addPoint(new Vector2f(1, 1));
-			assertEquals(4, geom.colors.length);
-			assertEquals(2, geom.points.length);
-			assertEquals(1.0f, geom.colors[0]);
+			assertEquals(4, geom.rawGeom.colors.length);
+			assertEquals(2, geom.rawGeom.points.length);
+			assertEquals(1.0f, geom.rawGeom.colors[0]);
 		}
 		
 		@Test
 		@DisplayName("Adding a point with color")
 		void testaddPointWithColor() {
 			geom.addPoint(new Vector2f(1, 1), new Vector4f(2,2,2,2));
-			assertEquals(4, geom.colors.length);
-			assertEquals(2, geom.points.length);
-			assertEquals(2, geom.colors[0]);
+			assertEquals(4, geom.rawGeom.colors.length);
+			assertEquals(2, geom.rawGeom.points.length);
+			assertEquals(2, geom.rawGeom.colors[0]);
 		}
 		
 		@Test
@@ -83,37 +83,45 @@ class SimpleGeom2DTest {
 
 		@Test
 		void testInstanciationOk() {
-			assertEquals(4, geom.colors.length);
-			assertEquals(2, geom.points.length);
+			assertEquals(4, geom.rawGeom.colors.length);
+			assertEquals(2, geom.rawGeom.points.length);
 		}
 
 		@Test
 		void testReset() {
 			geom.reset();
-			assertEquals(0, geom.colors.length);
-			assertEquals(0, geom.points.length);
+			assertEquals(0, geom.rawGeom.colors.length);
+			assertEquals(0, geom.rawGeom.points.length);
 		}
 		
 		@Test
 		@DisplayName("Adding a point copying previous color")
 		void testaddPoint() {
 			geom.addPoint(new Vector2f(1, 1));
-			assertEquals(8, geom.colors.length);
-			assertEquals(4, geom.points.length);
+			assertEquals(8, geom.rawGeom.colors.length);
+			assertEquals(4, geom.rawGeom.points.length);
 		}
 		
 		@Test
 		@DisplayName("Adding a point with color")
 		void testaddPointWithColor() {
 			geom.addPoint(new Vector2f(1, 1), new Vector4f(2,2,2,2));
-			assertEquals(8, geom.colors.length);
-			assertEquals(4, geom.points.length);
+			assertEquals(8, geom.rawGeom.colors.length);
+			assertEquals(4, geom.rawGeom.points.length);
 		}
 		
 		@Test
 		@DisplayName("get Vectors vertices list")
 		void testgetVertices() {
 			assertEquals(1, geom.buildVerticesList().size());
+		}
+		
+		@Test
+		@DisplayName("get copied geom with same parameters")
+		void testgetCopiedGeom() {
+			SimpleGeom2D copied = geom.copy("newAlias");
+			assertArrayEquals(geom.rawGeom.getPoints(), copied.rawGeom.getPoints());
+			assertArrayEquals(geom.rawGeom.getColors(), copied.rawGeom.getColors());
 		}
 	}
 	

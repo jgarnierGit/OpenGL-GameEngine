@@ -8,43 +8,42 @@ import org.lwjglx.util.vector.Vector;
 import org.lwjglx.util.vector.Vector2f;
 import org.lwjglx.util.vector.Vector4f;
 
-import entities.Entity;
 import entities.SimpleEntity;
 import renderEngine.Draw2DRenderer;
 import renderEngine.Loader;
+import renderEngine.RenderingParameters;
 import shaderManager.Draw2DShader;
 
 public class SimpleGeom2D extends SimpleGeom {
 	
-	//FIXME 4 constructor is a bit too much.
-	public SimpleGeom2D(Loader loader,Draw2DRenderer draw2DRenderer, String alias, Entity entity) {
-		super(loader, 2, alias, entity);
-		this.drawRenderer = draw2DRenderer;
+	private SimpleGeom2D() {
+		//hidden
 	}
 	
-	private SimpleGeom2D(Loader loader, String alias, Entity entity) {
-		super(loader, 2, alias, entity);
-	}
-	
-	public SimpleGeom2D(Loader loader, Draw2DRenderer draw2DRenderer, String alias) {
-		this(loader, draw2DRenderer, alias, SimpleEntity.createDefaultEntity());
+	public static SimpleGeom2D create(Loader loader, Draw2DRenderer draw2DRenderer, String alias) {
+		SimpleGeom2D simpleGeom2D = new SimpleGeom2D();
+		simpleGeom2D.rawGeom = new RawGeom(loader,draw2DRenderer, 2);
+		simpleGeom2D.renderingParameters =  new RenderingParameters(simpleGeom2D, alias, SimpleEntity.createDefaultEntity());
+		return simpleGeom2D;
 	}
 
 	@Override
 	public SimpleGeom2D copy(String alias) {
-		SimpleGeom2D copy = new SimpleGeom2D(this.loader, alias, SimpleEntity.createDefaultEntity());
-		copy.setCopyParams(this, alias, SimpleEntity.createDefaultEntity());
+		SimpleGeom2D copy = new SimpleGeom2D();
+		copy.rawGeom = new RawGeom(rawGeom.loader,rawGeom.drawRenderer, 2);
+		copy.copyValues(this, alias);
 		return copy;
 	}
+	
 	@Override
 	public void addPoint(Vector point) {
-		duplicateLastColor();
+		rawGeom.duplicateLastColor();
 		addPoint2f(point);
 	}
 	
 	@Override
 	public void addPoint(Vector point, Vector4f color) {
-		addColor(color);
+		rawGeom.addColor(color);
 		addPoint2f(point);
 	}
 	
@@ -59,7 +58,7 @@ public class SimpleGeom2D extends SimpleGeom {
 		int i=0;
 		for(Vector2f vertice :this.buildVerticesList()) {
 			if(vertice.x == v2f.x && vertice.y == v2f.y ) {
-				super.updateColor(i, color);
+				rawGeom.updateColor(i, color);
 			}
 			i++;
 		}
@@ -67,13 +66,13 @@ public class SimpleGeom2D extends SimpleGeom {
 	
 	@Override
 	public void reloadVao() {
-		super.reloadVao(Draw2DShader.COLOR_INDEX);
+		rawGeom.reloadVao(Draw2DShader.COLOR_INDEX);
 	}
 	
 	private void addPoint2f(Vector point) {
 		Vector2f v2f = getVector2f(point);
-		float[] newPoints = ArrayUtils.addAll(points, v2f.x, v2f.y);
-		points = newPoints;
+		float[] newPoints = ArrayUtils.addAll(rawGeom.points, v2f.x, v2f.y);
+		rawGeom.points = newPoints;
 	}
 	
 	private Vector2f getVector2f(Vector point) {
@@ -86,8 +85,8 @@ public class SimpleGeom2D extends SimpleGeom {
 	@Override
 	public List<Vector2f> buildVerticesList() {
 		List<Vector2f> vectors = new ArrayList<>();
-		for (int i = 0; i < points.length; i += 2) {
-			vectors.add(new Vector2f(points[i], points[i + 1]));
+		for (int i = 0; i < rawGeom.points.length; i += 2) {
+			vectors.add(new Vector2f(rawGeom.points[i], rawGeom.points[i + 1]));
 		}
 		return vectors;
 	}

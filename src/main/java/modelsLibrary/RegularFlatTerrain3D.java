@@ -23,7 +23,7 @@ public class RegularFlatTerrain3D extends RegularTerrain3D {
 
 	private RegularFlatTerrain3D(Loader loader, Draw3DRenderer draw3dRenderer, String alias, float size,
 			Entity entity) {
-		super(loader, draw3dRenderer, alias, size, FLAT_DEFINITION, entity);
+		super(loader, draw3dRenderer, alias, size, FLAT_DEFINITION,entity);
 		height = entity.getPositions().y;
 	}
 
@@ -42,22 +42,24 @@ public class RegularFlatTerrain3D extends RegularTerrain3D {
 						terrain.height, entity.getPositions().z + ((stepz + 1) * (size / FLAT_DEFINITION)));
 				Vector3f farRight = new Vector3f(entity.getPositions().x + (stepx + 1) * (size / FLAT_DEFINITION),
 						terrain.height, entity.getPositions().z + ((stepz + 1) * (size / FLAT_DEFINITION)));
+				SimpleGeom3D terrainGeom = terrain.getSimpleGeom();
 				if ((stepx + stepz) % 2 == 0) {
-					terrain.addPoint(frontLeft);
-					terrain.addPoint(frontRight);
-					terrain.addPoint(farLeft);
+					
+					terrainGeom.addPoint(frontLeft);
+					terrainGeom.addPoint(frontRight);
+					terrainGeom.addPoint(farLeft);
 
-					terrain.addPoint(frontRight);
-					terrain.addPoint(farRight);
-					terrain.addPoint(farLeft);
+					terrainGeom.addPoint(frontRight);
+					terrainGeom.addPoint(farRight);
+					terrainGeom.addPoint(farLeft);
 				} else {
-					terrain.addPoint(frontLeft);
-					terrain.addPoint(farLeft);
-					terrain.addPoint(frontRight);
+					terrainGeom.addPoint(frontLeft);
+					terrainGeom.addPoint(farLeft);
+					terrainGeom.addPoint(frontRight);
 
-					terrain.addPoint(frontRight);
-					terrain.addPoint(farLeft);
-					terrain.addPoint(farRight);
+					terrainGeom.addPoint(frontRight);
+					terrainGeom.addPoint(farLeft);
+					terrainGeom.addPoint(farRight);
 
 				}
 
@@ -70,15 +72,15 @@ public class RegularFlatTerrain3D extends RegularTerrain3D {
 	@Override
 	public Optional<Float> getHeight(Vector3f worldPosition) {
 		List<Entity> filteredTerrainEntities = SpatialComparator.filterEntitiesByDirection(worldPosition,
-				Direction.BOTTOM, Operator.INCLUSIVE, this.getRenderingParameters().getEntities());
+				Direction.BOTTOM, Operator.INCLUSIVE, this.terrain.getRenderingParameters().getEntities());
 		if (filteredTerrainEntities.isEmpty()) {
 			return Optional.empty();
 		}
 		Optional<Entity> nearestEntity = Optional.empty();
 		for(Entity entityTerrain : filteredTerrainEntities) {
-			List<Vector3f> vertices = this.buildVerticesList();
+			List<Vector3f> vertices = this.terrain.buildVerticesList();
 			Vector3f worldFrontLeft = Vector3f.add(entityTerrain.getPositions(), vertices.get(0), null);
-			Vector3f worldFarRight = Vector3f.add(entityTerrain.getPositions(), vertices.get(this.buildVerticesList().size() - 1),
+			Vector3f worldFarRight = Vector3f.add(entityTerrain.getPositions(), vertices.get(vertices.size() - 1),
 					null);
 			if (worldPosition.x >= worldFrontLeft.x && worldPosition.x <= worldFarRight.x
 					&& worldPosition.z >= worldFrontLeft.z && worldPosition.z <= worldFarRight.z) {

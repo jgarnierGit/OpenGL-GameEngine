@@ -1,10 +1,10 @@
 package renderEngine;
 
-import modelsLibrary.SimpleGeom;
+import modelsLibrary.ISimpleGeom;
 
 public interface IDrawRenderer {
 
-	public void process(SimpleGeom geom);
+	public void process(ISimpleGeom geom);
 
 	public void cleanUp();
 	public void clearGeom();

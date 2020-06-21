@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,6 +20,8 @@ import org.mockito.MockitoAnnotations;
 import org.powermock.reflect.Whitebox;
 
 import entities.Entity;
+import modelsLibrary.ISimpleGeom;
+import modelsLibrary.RawGeom;
 import modelsLibrary.SimpleGeom;
 
 /**
@@ -51,19 +54,27 @@ class DrawRendererTest {
 		MockitoAnnotations.initMocks(this);
 		geoms = new ArrayList<>();
 		firstGeomMock = Mockito.mock(SimpleGeom.class, Mockito.CALLS_REAL_METHODS);
-		Mockito.when(firstGeomMock.getVaoId()).thenReturn(1);
 		secondGeomMock = Mockito.mock(SimpleGeom.class, Mockito.CALLS_REAL_METHODS);
-		Mockito.when(secondGeomMock.getVaoId()).thenReturn(2);
 		thirdGeomMock = Mockito.mock(SimpleGeom.class, Mockito.CALLS_REAL_METHODS);
-		Mockito.when(thirdGeomMock.getVaoId()).thenReturn(3);
+
 		Whitebox.setInternalState(firstGeomMock, "renderingParameters", new RenderingParameters(firstGeomMock, "",Mockito.mock(Entity.class)));
 		Whitebox.setInternalState(secondGeomMock, "renderingParameters", new RenderingParameters(secondGeomMock, "",Mockito.mock(Entity.class)));
 		Whitebox.setInternalState(thirdGeomMock, "renderingParameters", new RenderingParameters(thirdGeomMock, "",Mockito.mock(Entity.class)));
+		RawGeom firstRawGeomMock = Mockito.mock(RawGeom.class, Mockito.CALLS_REAL_METHODS);
+		Mockito.when(firstRawGeomMock.getVaoId()).thenReturn(1);
+		Whitebox.setInternalState(firstGeomMock, "rawGeom", firstRawGeomMock);
+		RawGeom secondRawGeomMock = Mockito.mock(RawGeom.class, Mockito.CALLS_REAL_METHODS);
+		Mockito.when(secondRawGeomMock.getVaoId()).thenReturn(2);
+		Whitebox.setInternalState(secondGeomMock, "rawGeom", secondRawGeomMock);
+		RawGeom thirdRawGeomMock = Mockito.mock(RawGeom.class, Mockito.CALLS_REAL_METHODS);
+		Mockito.when(thirdRawGeomMock.getVaoId()).thenReturn(3);
+		Whitebox.setInternalState(thirdGeomMock, "rawGeom", thirdRawGeomMock);
+		
 		geoms.add(firstGeomMock);
 		geoms.add(secondGeomMock);
 		geoms.add(thirdGeomMock);
 		renderer = Mockito.mock(DrawRenderer.class, Mockito.CALLS_REAL_METHODS);
-		renderer.geoms = geoms;
+		renderer.geoms = geoms.stream().map(simpleGeom -> (ISimpleGeom) simpleGeom).collect(Collectors.toList());
 		
 		Logger logger = Logger.getLogger("DrawRendererTests");
 		this.spyLogger = Mockito.spy(logger);
@@ -108,9 +119,9 @@ class DrawRendererTest {
 			@Test
 			@DisplayName("Must have first geom first")
 			void testOrderingGeomsWithoutParamsFirstGeomFirst() {
-				assertEquals(firstGeomMock.getVaoId(), renderingParams.get(0).getGeom().getVaoId(),
+				assertEquals(firstGeomMock.getRawGeom().getVaoId(), renderingParams.get(0).getGeom().getRawGeom().getVaoId(),
 						"expected first geom to be first in output");
-				assertEquals(secondGeomMock.getVaoId(), renderingParams.get(1).getGeom().getVaoId(),
+				assertEquals(secondGeomMock.getRawGeom().getVaoId(), renderingParams.get(1).getGeom().getRawGeom().getVaoId(),
 						"expected second geom to be second in output");
 			}
 		}
@@ -169,9 +180,9 @@ class DrawRendererTest {
 				@Test
 				@DisplayName("Must have first geom first")
 				void testOrderingGeomsWithoutParamsFirstGeomFirst() {
-					assertEquals(firstGeomMock.getVaoId(), renderingParams.get(0).getGeom().getVaoId(),
+					assertEquals(firstGeomMock.getRawGeom().getVaoId(), renderingParams.get(0).getGeom().getRawGeom().getVaoId(),
 							"expected first geom to be first in output");
-					assertEquals(secondGeomMock.getVaoId(), renderingParams.get(1).getGeom().getVaoId(),
+					assertEquals(secondGeomMock.getRawGeom().getVaoId(), renderingParams.get(1).getGeom().getRawGeom().getVaoId(),
 							"expected second geom to be second in output");
 				}
 			}
@@ -203,8 +214,8 @@ class DrawRendererTest {
 					void testUnknownAliasException() {
 						secondParam.renderBefore("unknown");
 						renderingParams = renderer.getOrderedRenderingParameters();
-						assertEquals(firstGeomMock.getVaoId(), renderingParams.get(0).getGeom().getVaoId());
-						assertEquals(secondGeomMock.getVaoId(), renderingParams.get(1).getGeom().getVaoId());
+						assertEquals(firstGeomMock.getRawGeom().getVaoId(), renderingParams.get(0).getGeom().getRawGeom().getVaoId());
+						assertEquals(secondGeomMock.getRawGeom().getVaoId(), renderingParams.get(1).getGeom().getRawGeom().getVaoId());
 					}
 
 					/**
@@ -216,8 +227,8 @@ class DrawRendererTest {
 						secondParam.renderBefore(secondAlias);
 						renderingParams = renderer.getOrderedRenderingParameters();
 						assertEquals(3, renderingParams.size());
-						assertEquals(firstGeomMock.getVaoId(), renderingParams.get(0).getGeom().getVaoId());
-						assertEquals(secondGeomMock.getVaoId(), renderingParams.get(1).getGeom().getVaoId());
+						assertEquals(firstGeomMock.getRawGeom().getVaoId(), renderingParams.get(0).getGeom().getRawGeom().getVaoId());
+						assertEquals(secondGeomMock.getRawGeom().getVaoId(), renderingParams.get(1).getGeom().getRawGeom().getVaoId());
 					}
 
 					/**
@@ -229,8 +240,8 @@ class DrawRendererTest {
 						secondParam.renderAfter(secondAlias);
 						renderingParams = renderer.getOrderedRenderingParameters();
 						assertEquals(3, renderingParams.size());
-						assertEquals(firstGeomMock.getVaoId(), renderingParams.get(0).getGeom().getVaoId());
-						assertEquals(secondGeomMock.getVaoId(), renderingParams.get(1).getGeom().getVaoId());
+						assertEquals(firstGeomMock.getRawGeom().getVaoId(), renderingParams.get(0).getGeom().getRawGeom().getVaoId());
+						assertEquals(secondGeomMock.getRawGeom().getVaoId(), renderingParams.get(1).getGeom().getRawGeom().getVaoId());
 					}
 
 					/**
@@ -255,8 +266,8 @@ class DrawRendererTest {
 						secondParam.renderAfter(firstAlias);
 						renderingParams = renderer.getOrderedRenderingParameters();
 						assertEquals(3, renderingParams.size());
-						assertEquals(firstGeomMock.getVaoId(), renderingParams.get(0).getGeom().getVaoId());
-						assertEquals(secondGeomMock.getVaoId(), renderingParams.get(1).getGeom().getVaoId());
+						assertEquals(firstGeomMock.getRawGeom().getVaoId(), renderingParams.get(0).getGeom().getRawGeom().getVaoId());
+						assertEquals(secondGeomMock.getRawGeom().getVaoId(), renderingParams.get(1).getGeom().getRawGeom().getVaoId());
 					}
 					
 					/**
@@ -298,8 +309,8 @@ class DrawRendererTest {
 						secondParam.renderBefore(secondAlias);
 						renderingParams = renderer.getOrderedRenderingParameters();
 						assertEquals(3, renderingParams.size());
-						assertEquals(firstGeomMock.getVaoId(), renderingParams.get(0).getGeom().getVaoId());
-						assertEquals(secondGeomMock.getVaoId(), renderingParams.get(1).getGeom().getVaoId());
+						assertEquals(firstGeomMock.getRawGeom().getVaoId(), renderingParams.get(0).getGeom().getRawGeom().getVaoId());
+						assertEquals(secondGeomMock.getRawGeom().getVaoId(), renderingParams.get(1).getGeom().getRawGeom().getVaoId());
 					}
 
 					/**
@@ -312,8 +323,8 @@ class DrawRendererTest {
 						secondParam.renderAfter(secondAlias);
 						renderingParams = renderer.getOrderedRenderingParameters();
 						assertEquals(3, renderingParams.size());
-						assertEquals(firstGeomMock.getVaoId(), renderingParams.get(0).getGeom().getVaoId());
-						assertEquals(secondGeomMock.getVaoId(), renderingParams.get(1).getGeom().getVaoId());
+						assertEquals(firstGeomMock.getRawGeom().getVaoId(), renderingParams.get(0).getGeom().getRawGeom().getVaoId());
+						assertEquals(secondGeomMock.getRawGeom().getVaoId(), renderingParams.get(1).getGeom().getRawGeom().getVaoId());
 					}
 
 					/**
@@ -342,8 +353,8 @@ class DrawRendererTest {
 						secondParam.renderAfter(firstAlias);
 						renderingParams = renderer.getOrderedRenderingParameters();
 						assertEquals(3, renderingParams.size());
-						assertEquals(firstGeomMock.getVaoId(), renderingParams.get(0).getGeom().getVaoId());
-						assertEquals(secondGeomMock.getVaoId(), renderingParams.get(1).getGeom().getVaoId());
+						assertEquals(firstGeomMock.getRawGeom().getVaoId(), renderingParams.get(0).getGeom().getRawGeom().getVaoId());
+						assertEquals(secondGeomMock.getRawGeom().getVaoId(), renderingParams.get(1).getGeom().getRawGeom().getVaoId());
 					}
 				}
 			}
@@ -390,9 +401,9 @@ class DrawRendererTest {
 				void testReferencePreviousAsBefore() {
 					secondParam.renderBefore(firstAlias);
 					renderingParams = renderer.getOrderedRenderingParameters();
-					assertEquals(secondGeomMock.getVaoId(), renderingParams.get(0).getGeom().getVaoId());
-					assertEquals(firstGeomMock.getVaoId(), renderingParams.get(1).getGeom().getVaoId());
-					assertEquals(thirdGeomMock.getVaoId(), renderingParams.get(2).getGeom().getVaoId());
+					assertEquals(secondGeomMock.getRawGeom().getVaoId(), renderingParams.get(0).getGeom().getRawGeom().getVaoId());
+					assertEquals(firstGeomMock.getRawGeom().getVaoId(), renderingParams.get(1).getGeom().getRawGeom().getVaoId());
+					assertEquals(thirdGeomMock.getRawGeom().getVaoId(), renderingParams.get(2).getGeom().getRawGeom().getVaoId());
 				}
 
 				/**
@@ -439,9 +450,9 @@ class DrawRendererTest {
 				void testReferenceToLast() {
 					firstParam.renderLast();
 					renderingParams = renderer.getOrderedRenderingParameters();
-					assertEquals(secondGeomMock.getVaoId(), renderingParams.get(0).getGeom().getVaoId());
-					assertEquals(thirdGeomMock.getVaoId(), renderingParams.get(1).getGeom().getVaoId());
-					assertEquals(firstGeomMock.getVaoId(), renderingParams.get(2).getGeom().getVaoId());
+					assertEquals(secondGeomMock.getRawGeom().getVaoId(), renderingParams.get(0).getGeom().getRawGeom().getVaoId());
+					assertEquals(thirdGeomMock.getRawGeom().getVaoId(), renderingParams.get(1).getGeom().getRawGeom().getVaoId());
+					assertEquals(firstGeomMock.getRawGeom().getVaoId(), renderingParams.get(2).getGeom().getRawGeom().getVaoId());
 				}
 				
 				/**
@@ -452,9 +463,9 @@ class DrawRendererTest {
 				void testReferenceToFirst() {
 					thirdParam.renderFirst();
 					renderingParams = renderer.getOrderedRenderingParameters();
-					assertEquals(thirdGeomMock.getVaoId(), renderingParams.get(0).getGeom().getVaoId());
-					assertEquals(firstGeomMock.getVaoId(), renderingParams.get(1).getGeom().getVaoId());
-					assertEquals(secondGeomMock.getVaoId(), renderingParams.get(2).getGeom().getVaoId());
+					assertEquals(thirdGeomMock.getRawGeom().getVaoId(), renderingParams.get(0).getGeom().getRawGeom().getVaoId());
+					assertEquals(firstGeomMock.getRawGeom().getVaoId(), renderingParams.get(1).getGeom().getRawGeom().getVaoId());
+					assertEquals(secondGeomMock.getRawGeom().getVaoId(), renderingParams.get(2).getGeom().getRawGeom().getVaoId());
 				}
 			}
 
@@ -656,20 +667,24 @@ class DrawRendererTest {
 			SimpleGeom thirdGeomMockBis;
 
 			@BeforeEach
-			void setUpBeforeEach() throws Exception {
+			void setUpBeforeEach() throws Exception {				
 				firstGeomMockBis = Mockito.mock(SimpleGeom.class, Mockito.CALLS_REAL_METHODS);
-				Mockito.when(firstGeomMockBis.getVaoId()).thenReturn(4);
 				secondGeomMockBis = Mockito.mock(SimpleGeom.class, Mockito.CALLS_REAL_METHODS);
-				Mockito.when(secondGeomMockBis.getVaoId()).thenReturn(5);
 				thirdGeomMockBis = Mockito.mock(SimpleGeom.class, Mockito.CALLS_REAL_METHODS);
-				Mockito.when(thirdGeomMockBis.getVaoId()).thenReturn(6);
-				Whitebox.setInternalState(firstGeomMockBis, "renderingParameters",
-						new RenderingParameters(firstGeomMockBis, firstAlias,Mockito.mock(Entity.class)));
-				Whitebox.setInternalState(secondGeomMockBis, "renderingParameters",
-						new RenderingParameters(secondGeomMockBis, secondAlias,Mockito.mock(Entity.class)));
-				Whitebox.setInternalState(thirdGeomMockBis, "renderingParameters",
-						new RenderingParameters(thirdGeomMockBis, thirdAlias, Mockito.mock(Entity.class)));
 
+				Whitebox.setInternalState(firstGeomMockBis, "renderingParameters", new RenderingParameters(firstGeomMockBis, firstAlias,Mockito.mock(Entity.class)));
+				Whitebox.setInternalState(secondGeomMockBis, "renderingParameters", new RenderingParameters(secondGeomMockBis, secondAlias,Mockito.mock(Entity.class)));
+				Whitebox.setInternalState(thirdGeomMockBis, "renderingParameters", new RenderingParameters(thirdGeomMockBis, thirdAlias,Mockito.mock(Entity.class)));
+				RawGeom firstRawGeomMockBis = Mockito.mock(RawGeom.class, Mockito.CALLS_REAL_METHODS);
+				Mockito.when(firstRawGeomMockBis.getVaoId()).thenReturn(4);
+				Whitebox.setInternalState(firstGeomMockBis, "rawGeom", firstRawGeomMockBis);
+				RawGeom secondRawGeomMockBis = Mockito.mock(RawGeom.class, Mockito.CALLS_REAL_METHODS);
+				Mockito.when(secondRawGeomMockBis.getVaoId()).thenReturn(5);
+				Whitebox.setInternalState(secondGeomMockBis, "rawGeom", secondRawGeomMockBis);
+				RawGeom thirdRawGeomMockBis = Mockito.mock(RawGeom.class, Mockito.CALLS_REAL_METHODS);
+				Mockito.when(thirdRawGeomMockBis.getVaoId()).thenReturn(6);
+				Whitebox.setInternalState(thirdGeomMockBis, "rawGeom", thirdRawGeomMockBis);
+				
 				geoms.add(firstGeomMockBis);
 				geoms.add(secondGeomMockBis);
 				geoms.add(thirdGeomMockBis);

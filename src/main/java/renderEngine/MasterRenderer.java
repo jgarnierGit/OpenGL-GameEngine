@@ -15,7 +15,8 @@ import org.lwjglx.util.vector.Matrix4f;
 import camera.CameraEntity;
 import entities.EntityTutos;
 import entities.Light;
-import modelsLibrary.SimpleGeom;
+import modelsLibrary.ISimpleGeom;
+import modelsLibrary.RawGeom;
 import modelsManager.Model3D;
 import shaderManager.StaticShader;
 import shaderManager.TerrainShader;
@@ -187,7 +188,7 @@ public class MasterRenderer {
 	 * One more optimization must be done in future to not reload unchanged geometries (vertices + colors)
 	 * @param geom
 	 */
-	public void reloadAndprocess(SimpleGeom geom) {
+	public void reloadAndprocess(ISimpleGeom geom) {
 		geom.reloadVao();
 		geom.updateRenderer();
 	}
