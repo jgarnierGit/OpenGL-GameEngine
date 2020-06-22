@@ -9,7 +9,7 @@ import modelsLibrary.ISimpleGeom;
  * @author chezmoi
  *
  */
-public interface EntityContainer {
+public interface GeomContainer {
 
-	public List<ISimpleGeom> getEntitiesGeom();
+	public List<ISimpleGeom> getGeoms();
 }
