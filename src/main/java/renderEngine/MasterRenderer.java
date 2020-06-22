@@ -11,6 +11,7 @@ import java.util.List;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjglx.util.vector.Matrix4f;
+import org.lwjglx.util.vector.Vector4f;
 
 import camera.CameraEntity;
 import entities.EntityTutos;
@@ -114,10 +115,11 @@ public class MasterRenderer {
 		
 	}
 	
-	public void render(List<Light> lights) {
+	public void render(List<Light> lights, Vector4f clipPlane) {
 		//updateProjectionInTime();
 		prepare();
 		shader.start();
+		shader.loadClipPlane(clipPlane);
 		shader.loadSkyColour(RED, GREEN, BLUE);
 		shader.loadViewMatrix(camera);
 		shader.loadLightsColor(lights);
@@ -132,6 +134,9 @@ public class MasterRenderer {
 		//skyboxRender.render(camera,RED, GREEN, BLUE);
 		draw3DRenderer.render();
 		draw2DRenderer.render();
+	}
+	
+	public void clean() {
 		terrains.clear();
 		entities.clear();
 	}
@@ -197,10 +202,5 @@ public class MasterRenderer {
 	public void sendForRendering() {
 		this.draw2DRenderer.sendForRendering();
 		this.draw3DRenderer.sendForRendering();
-	}
-
-	public void clearGeom() {
-		this.draw2DRenderer.clearGeom();
-		this.draw3DRenderer.clearGeom();
 	}
 }

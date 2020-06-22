@@ -26,10 +26,14 @@ uniform float isSelected;
 
 const float density = 0.003; // higher value makes 0.0 value to be reached quicker in a linear transition
 const float gradient = 6; // higher value makes transition beetwen 1.0 to 0.0 visibility smaller
+uniform vec4 planeClipping;
 
 void main(void){
 	// OpenGL convention applied: column major order (readen right to left to apply vec4 * transformationMatrix * viewMatrix * projectionMatrix)
 	vec4 worldPosition = transformationMatrix * vec4(position,1.0);
+	
+	gl_ClipDistance[0] = dot(worldPosition,planeClipping); // specific to clipping plane tuto
+	
 	vec4 positionRelativeToCam = viewMatrix * worldPosition;
 	gl_Position = projectionMatrix * positionRelativeToCam;
 	pass_textureCoords = textureCoords;

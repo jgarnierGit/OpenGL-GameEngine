@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.lwjglx.util.vector.Matrix4f;
 import org.lwjglx.util.vector.Vector3f;
+import org.lwjglx.util.vector.Vector4f;
 
 import camera.CameraEntity;
 import entities.Light;
@@ -29,6 +30,7 @@ public class StaticShader extends ShaderProgram {
 	private int location_skyColour;
 	private int location_useImage;
 	private int location_isSelected;
+	private int location_planeClipping;
 	
 	public StaticShader() throws IOException {
 		super(VERTEX_FILE,FRAGMENT_FILE);
@@ -53,6 +55,7 @@ public class StaticShader extends ShaderProgram {
 		location_useFakeLighting = super.getUniformLocation("useFakeLighting");
 		location_skyColour = super.getUniformLocation("skyColour");
 		location_useImage = super.getUniformLocation("useImage");
+		location_planeClipping = super.getUniformLocation("planeClipping");
 		
 		location_lightColor =  new int[MAX_LIGHT];
 		location_lightPosition = new int[MAX_LIGHT];
@@ -67,6 +70,10 @@ public class StaticShader extends ShaderProgram {
 	
 	public void loadSkyColour(float r, float g, float b) {
 		super.loadVector(location_skyColour, new Vector3f(r,g,b));
+	}
+	
+	public void loadClipPlane(Vector4f plane) {
+		super.loadVector(location_planeClipping, plane);
 	}
 	
 	public void loadFakeLighting(boolean useFakeLighting) {

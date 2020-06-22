@@ -89,8 +89,6 @@ public class MouserLoggerPrinter {
 		}
 		geoms.clear();
 		this.ray3D.reset();
-
-		this.masterRenderer.clearGeom();
 	}
 
 	public void prepareRendering() {
