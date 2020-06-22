@@ -1,6 +1,8 @@
 package shaderManager;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.function.Function;
 
 import org.lwjglx.util.vector.Matrix4f;
 
@@ -16,6 +18,10 @@ public class Draw3DShader extends ShaderProgram {
 
 	private static Draw3DShader defaultDraw3DShader = null;
 
+	private Draw3DShader(Function<String, InputStream> consumer, String vertexFile, String fragmentFile) throws IOException {
+		super(consumer, vertexFile, fragmentFile);
+	}
+	
 	private Draw3DShader(String vertexFile, String fragmentFile) throws IOException {
 		super(vertexFile, fragmentFile);
 	}
@@ -27,8 +33,8 @@ public class Draw3DShader extends ShaderProgram {
 		return defaultDraw3DShader;
 	}
 
-	public static Draw3DShader create(String vertexFile, String fragmentFile) throws IOException {
-		Draw3DShader shader = new Draw3DShader(vertexFile, fragmentFile);
+	public static Draw3DShader create(Function<String, InputStream> consumer, String vertexFile, String fragmentFile) throws IOException {
+		Draw3DShader shader = new Draw3DShader(consumer, vertexFile, fragmentFile);
 		return shader;
 	}
 

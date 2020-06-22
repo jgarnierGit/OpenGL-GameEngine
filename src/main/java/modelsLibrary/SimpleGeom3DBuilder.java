@@ -1,7 +1,9 @@
 package modelsLibrary;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Optional;
+import java.util.function.Function;
 
 import entities.Entity;
 import renderEngine.Draw3DRenderer;
@@ -11,8 +13,9 @@ import toolbox.CoordinatesSystemManager;
 
 public class SimpleGeom3DBuilder {
 	private SimpleGeom3DBuilder() {
-		//hidden
+		// hidden
 	}
+
 	public static class EmptySimpleGeom3DBuilder {
 		public static class ShaderedSimpleGeom3DBuilder {
 			Draw3DShader shader;
@@ -59,8 +62,9 @@ public class SimpleGeom3DBuilder {
 			alias = aliasParam;
 		}
 
-		public ShaderedSimpleGeom3DBuilder withShader(String vertexFile, String fragmentFile) throws IOException {
-			Draw3DShader shader = Draw3DShader.create(vertexFile, fragmentFile);
+		public ShaderedSimpleGeom3DBuilder withShader(Function<String, InputStream> consumer, String vertexFile,
+				String fragmentFile) throws IOException {
+			Draw3DShader shader = Draw3DShader.create(consumer, vertexFile, fragmentFile);
 			return new ShaderedSimpleGeom3DBuilder(loader, draw3DRenderer, alias, shader);
 		}
 

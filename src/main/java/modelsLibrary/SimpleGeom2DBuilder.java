@@ -1,6 +1,8 @@
 package modelsLibrary;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.function.Function;
 
 import renderEngine.Draw2DRenderer;
 import renderEngine.Loader;
@@ -41,8 +43,9 @@ public class SimpleGeom2DBuilder {
 			alias = aliasParam;
 		}
 
-		public ShaderedSimpleGeom2DBuilder withShader(String vertexFile, String fragmentFile) throws IOException {
-			Draw2DShader shader = Draw2DShader.create(vertexFile, fragmentFile);
+		public ShaderedSimpleGeom2DBuilder withShader(Function<String, InputStream> consumer, String vertexFile,
+				String fragmentFile) throws IOException {
+			Draw2DShader shader = Draw2DShader.create(consumer, vertexFile, fragmentFile);
 			return new ShaderedSimpleGeom2DBuilder(loader, draw2DRenderer, alias, shader);
 		}
 
