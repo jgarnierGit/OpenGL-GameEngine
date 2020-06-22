@@ -115,5 +115,9 @@ public class CameraEntity {
 		this.pitch += deltaDegree;
 		
 	}
+
+	public void invertPitch() {
+		this.pitch = - this.pitch;
+	}
 	
 }
