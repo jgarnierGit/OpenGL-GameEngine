@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjglx.util.vector.Matrix4f;
+import org.lwjglx.util.vector.Vector4f;
 
 import camera.CameraEntity;
 import renderEngine.Loader.VBOIndex;
@@ -18,10 +19,15 @@ import toolbox.Maths;
  */
 public class Draw3DRenderer extends DrawRenderer {
 	private CameraEntity camera;
+	private Vector4f clipPlane;
 
 	public Draw3DRenderer(CameraEntity camera, Matrix4f projectionMatrix) throws IOException {
 		super();
 		this.camera = camera;
+	}
+	
+	public void setClipPlane(Vector4f clipPlane) {
+		this.clipPlane = clipPlane;
 	}
 
 	@Override
@@ -29,6 +35,7 @@ public class Draw3DRenderer extends DrawRenderer {
 		for (RenderingParameters params : renderingParams) {
 			Draw3DShader draw3DShader = (Draw3DShader) params.getShader();
 			draw3DShader.start();
+			draw3DShader.loadClipPlane(clipPlane);
 			prepare(params.getGeom(), VBOIndex.POSITION_INDEX, Draw3DShader.COLOR_INDEX);
 			Matrix4f viewMatrix = camera.getViewMatrix();
 			draw3DShader.loadViewMatrix(viewMatrix);

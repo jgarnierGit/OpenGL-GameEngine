@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.function.Function;
 
 import org.lwjglx.util.vector.Matrix4f;
+import org.lwjglx.util.vector.Vector4f;
 
 import renderEngine.Loader.VBOIndex;
 
@@ -15,6 +16,7 @@ public class Draw3DShader extends ShaderProgram {
 	private int location_transformationMatrix;
 	private int projectionMatrix;
 	private int location_viewMatrix;
+	private int location_planeClipping;
 
 	private static Draw3DShader defaultDraw3DShader = null;
 
@@ -43,12 +45,17 @@ public class Draw3DShader extends ShaderProgram {
 		location_transformationMatrix = super.getUniformLocation("transformationMatrix");
 		projectionMatrix = super.getUniformLocation("projectionMatrix");
 		location_viewMatrix = super.getUniformLocation("viewMatrix");
+		location_planeClipping = super.getUniformLocation("planeClipping");
 	}
 
 	@Override
 	protected void bindAttributes() {
 		super.bindAttribute(VBOIndex.POSITION_INDEX, "position");
 		super.bindAttribute(COLOR_INDEX, "color");
+	}
+	
+	public void loadClipPlane(Vector4f plane) {
+		super.loadVector(location_planeClipping, plane);
 	}
 
 	public void loadTransformationMatrix(Matrix4f transformationMatrix) {

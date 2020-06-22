@@ -126,12 +126,14 @@ public class MasterRenderer {
 		renderer.render(entities);
 		shader.stop();
 	/**	terrainShader.start();
+	 * terrainShader.loadClipPlane(clipPlane);
 		terrainShader.loadSkyColour(RED, GREEN, BLUE);
 		terrainShader.loadViewMatrix(camera);
 		terrainShader.loadLightsColor(lights);
 		terrainRenderer.render(terrains);
 		terrainShader.stop();**/
 		//skyboxRender.render(camera,RED, GREEN, BLUE);
+		draw3DRenderer.setClipPlane(clipPlane);
 		draw3DRenderer.render();
 		draw2DRenderer.render();
 	}
