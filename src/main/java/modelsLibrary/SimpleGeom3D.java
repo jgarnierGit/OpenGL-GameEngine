@@ -1,6 +1,5 @@
 package modelsLibrary;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -21,6 +20,7 @@ import renderEngine.Draw3DRenderer;
 import renderEngine.Loader;
 import renderEngine.RenderingParameters;
 import shaderManager.Draw3DShader;
+import shaderManager.Shader3D;
 
 /**
  * SimpleGeom3D can also render 2D as the z component is only used when
@@ -36,16 +36,16 @@ public class SimpleGeom3D extends SimpleGeom {
 		// hidden
 	}
 
-	protected static SimpleGeom3D create(Loader loader, Draw3DRenderer draw3DRenderer, Draw3DShader shader, String alias, Entity entity)
-			throws IOException {
+	protected static SimpleGeom3D create(Loader loader, Draw3DRenderer draw3DRenderer, Shader3D shader, String alias, Entity entity)
+		{
 		SimpleGeom3D simpleGeom3D = new SimpleGeom3D();
 		simpleGeom3D.rawGeom = new RawGeom(loader, draw3DRenderer, 3);
 		simpleGeom3D.renderingParameters = RenderingParameters.create(shader, simpleGeom3D, alias, entity);
 		return simpleGeom3D;
 	}
 
-	protected static SimpleGeom3D createWithDefaultEntity(Loader loader, Draw3DRenderer draw3DRenderer, Draw3DShader shader, String alias)
-			throws IOException {
+	protected static SimpleGeom3D createWithDefaultEntity(Loader loader, Draw3DRenderer draw3DRenderer, Shader3D shader, String alias)
+			{
 		SimpleGeom3D simpleGeom3D = new SimpleGeom3D();
 		simpleGeom3D.rawGeom = new RawGeom(loader, draw3DRenderer, 3);
 		simpleGeom3D.renderingParameters = RenderingParameters.create(shader, simpleGeom3D, alias,

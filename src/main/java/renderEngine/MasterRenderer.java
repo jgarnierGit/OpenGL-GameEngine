@@ -21,6 +21,7 @@ import modelsLibrary.RawGeom;
 import modelsManager.Model3D;
 import shaderManager.StaticShader;
 import shaderManager.TerrainShader;
+import toolbox.CoordinatesSystemManager;
 
 public class MasterRenderer {
 	private static final float RED = 0.55f;
@@ -55,10 +56,10 @@ public class MasterRenderer {
 	public static MasterRenderer create(CameraEntity camera) throws IOException {
 		StaticShader shader = new StaticShader();
 		enableCulling();
-		EntityRenderer renderer = new EntityRenderer(shader, camera.getCoordinatesSystemManager().getProjectionMatrix());
-		//terrainRenderer = new TerrainRenderer(terrainShader, camera.getCoordinatesSystemManager().getProjectionMatrix());
-		//skyboxRender = new SkyboxRenderer(loader, camera.getCoordinatesSystemManager().getProjectionMatrix()); TODO extract
-		Draw3DRenderer draw3DRenderer = new Draw3DRenderer(camera, camera.getCoordinatesSystemManager().getProjectionMatrix());
+		EntityRenderer renderer = new EntityRenderer(shader, CoordinatesSystemManager.getProjectionMatrix());
+		//terrainRenderer = new TerrainRenderer(terrainShader, CoordinatesSystemManager.getProjectionMatrix());
+		//skyboxRender = new SkyboxRenderer(loader, CoordinatesSystemManager.getProjectionMatrix()); TODO extract
+		Draw3DRenderer draw3DRenderer = new Draw3DRenderer(camera, CoordinatesSystemManager.getProjectionMatrix());
 		Draw2DRenderer draw2DRenderer = new Draw2DRenderer();
 		TerrainShader terrainShader = new TerrainShader();
 		Loader loader = new Loader();
@@ -99,7 +100,7 @@ public class MasterRenderer {
 		float aspectRatio = (float) DisplayManager.WIDTH / (float) DisplayManager.HEIGHT;
 		float y_scale = (float)  ((1f / Math.tan(Math.toRadians(time/ 2f))) * aspectRatio);
 		float x_scale = y_scale / aspectRatio;
-		Matrix4f projectionMatrix = camera.getCoordinatesSystemManager().getProjectionMatrix();
+		Matrix4f projectionMatrix = CoordinatesSystemManager.getProjectionMatrix();
 
 		projectionMatrix.m00 = x_scale;
 		projectionMatrix.m11 = y_scale;
@@ -117,11 +118,12 @@ public class MasterRenderer {
 	
 	public void render(List<Light> lights, Vector4f clipPlane) {
 		//updateProjectionInTime();
+		camera.updateViewMatrix();
 		prepare();
 		shader.start();
 		shader.loadClipPlane(clipPlane);
 		shader.loadSkyColour(RED, GREEN, BLUE);
-		shader.loadViewMatrix(camera);
+		shader.loadViewMatrix(camera.getViewMatrix());
 		shader.loadLightsColor(lights);
 		renderer.render(entities);
 		shader.stop();

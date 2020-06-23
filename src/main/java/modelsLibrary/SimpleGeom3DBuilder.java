@@ -1,14 +1,13 @@
 package modelsLibrary;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Optional;
-import java.util.function.Function;
 
 import entities.Entity;
 import renderEngine.Draw3DRenderer;
 import renderEngine.Loader;
 import shaderManager.Draw3DShader;
+import shaderManager.Shader3D;
 import toolbox.CoordinatesSystemManager;
 
 public class SimpleGeom3DBuilder {
@@ -18,14 +17,14 @@ public class SimpleGeom3DBuilder {
 
 	public static class EmptySimpleGeom3DBuilder {
 		public static class ShaderedSimpleGeom3DBuilder {
-			Draw3DShader shader;
+			Shader3D shader;
 			Optional<Entity> entity;
 			Loader loader;
 			Draw3DRenderer draw3DRenderer;
 			String alias;
 
 			public ShaderedSimpleGeom3DBuilder(Loader loader, Draw3DRenderer draw3DRenderer, String alias,
-					Draw3DShader shader) {
+					Shader3D shader) {
 				this.loader = loader;
 				this.draw3DRenderer = draw3DRenderer;
 				this.alias = alias;
@@ -62,9 +61,7 @@ public class SimpleGeom3DBuilder {
 			alias = aliasParam;
 		}
 
-		public ShaderedSimpleGeom3DBuilder withShader(Function<String, InputStream> consumer, String vertexFile,
-				String fragmentFile) throws IOException {
-			Draw3DShader shader = Draw3DShader.create(consumer, vertexFile, fragmentFile);
+		public ShaderedSimpleGeom3DBuilder withShader(Shader3D shader) {
 			return new ShaderedSimpleGeom3DBuilder(loader, draw3DRenderer, alias, shader);
 		}
 
