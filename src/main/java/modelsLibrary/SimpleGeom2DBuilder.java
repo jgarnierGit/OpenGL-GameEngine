@@ -1,14 +1,10 @@
 package modelsLibrary;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.function.Function;
 
 import renderEngine.Draw2DRenderer;
 import renderEngine.Loader;
 import shaderManager.Draw2DShader;
-import shaderManager.Shader2D;
-import shaderManager.Shader3D;
 
 public class SimpleGeom2DBuilder {
 	private SimpleGeom2DBuilder() {
@@ -17,13 +13,13 @@ public class SimpleGeom2DBuilder {
 
 	public static class EmptySimpleGeom2DBuilder {
 		public static class ShaderedSimpleGeom2DBuilder {
-			Shader2D shader;
+			Draw2DShader shader;
 			Loader loader;
 			Draw2DRenderer draw2DRenderer;
 			String alias;
 
 			public ShaderedSimpleGeom2DBuilder(Loader loader, Draw2DRenderer draw2DRenderer, String alias,
-					Shader2D shader) {
+					Draw2DShader shader) {
 				this.loader = loader;
 				this.draw2DRenderer = draw2DRenderer;
 				this.alias = alias;
@@ -45,7 +41,7 @@ public class SimpleGeom2DBuilder {
 			alias = aliasParam;
 		}
 
-		public ShaderedSimpleGeom2DBuilder withShader(Shader2D shader) throws IOException {
+		public ShaderedSimpleGeom2DBuilder withShader(Draw2DShader shader) throws IOException {
 			return new ShaderedSimpleGeom2DBuilder(loader, draw2DRenderer, alias, shader);
 		}
 

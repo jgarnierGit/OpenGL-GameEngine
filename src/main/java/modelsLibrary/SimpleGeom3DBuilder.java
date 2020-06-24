@@ -7,7 +7,6 @@ import entities.Entity;
 import renderEngine.Draw3DRenderer;
 import renderEngine.Loader;
 import shaderManager.Draw3DShader;
-import shaderManager.Shader3D;
 import toolbox.CoordinatesSystemManager;
 
 public class SimpleGeom3DBuilder {
@@ -17,14 +16,14 @@ public class SimpleGeom3DBuilder {
 
 	public static class EmptySimpleGeom3DBuilder {
 		public static class ShaderedSimpleGeom3DBuilder {
-			Shader3D shader;
+			Draw3DShader shader;
 			Optional<Entity> entity;
 			Loader loader;
 			Draw3DRenderer draw3DRenderer;
 			String alias;
 
 			public ShaderedSimpleGeom3DBuilder(Loader loader, Draw3DRenderer draw3DRenderer, String alias,
-					Shader3D shader) {
+					Draw3DShader shader) {
 				this.loader = loader;
 				this.draw3DRenderer = draw3DRenderer;
 				this.alias = alias;
@@ -61,7 +60,7 @@ public class SimpleGeom3DBuilder {
 			alias = aliasParam;
 		}
 
-		public ShaderedSimpleGeom3DBuilder withShader(Shader3D shader) {
+		public ShaderedSimpleGeom3DBuilder withShader(Draw3DShader shader) {
 			return new ShaderedSimpleGeom3DBuilder(loader, draw3DRenderer, alias, shader);
 		}
 

@@ -123,7 +123,7 @@ public class MasterRenderer {
 		shader.start();
 		shader.loadClipPlane(clipPlane);
 		shader.loadSkyColour(RED, GREEN, BLUE);
-		shader.loadViewMatrix(camera.getViewMatrix());
+		shader.loadViewMatrix(camera);
 		shader.loadLightsColor(lights);
 		renderer.render(entities);
 		shader.stop();

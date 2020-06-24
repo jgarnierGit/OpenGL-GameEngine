@@ -13,7 +13,6 @@ import renderEngine.Draw2DRenderer;
 import renderEngine.Loader;
 import renderEngine.RenderingParameters;
 import shaderManager.Draw2DShader;
-import shaderManager.Shader2D;
 
 /**
  * hide direct access
@@ -26,7 +25,7 @@ public class SimpleGeom2D extends SimpleGeom {
 		//hidden
 	}
 	
-	protected static SimpleGeom2D create(Loader loader, Draw2DRenderer draw2DRenderer, Shader2D shader, String alias) {
+	protected static SimpleGeom2D create(Loader loader, Draw2DRenderer draw2DRenderer, Draw2DShader shader, String alias) {
 		SimpleGeom2D simpleGeom2D = new SimpleGeom2D();
 		simpleGeom2D.rawGeom = new RawGeom(loader,draw2DRenderer, 2);
 		simpleGeom2D.renderingParameters = RenderingParameters.create(shader, simpleGeom2D, alias, SimpleEntity.createDefaultEntity());
