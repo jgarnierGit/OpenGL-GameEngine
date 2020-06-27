@@ -23,6 +23,7 @@ import entities.Entity;
 import modelsLibrary.ISimpleGeom;
 import modelsLibrary.RawGeom;
 import modelsLibrary.SimpleGeom;
+import shaderManager.IShader;
 import shaderManager.ShaderProgram;
 
 /**
@@ -59,11 +60,11 @@ class DrawRendererTest {
 		thirdGeomMock = Mockito.mock(SimpleGeom.class, Mockito.CALLS_REAL_METHODS);
 
 		Whitebox.setInternalState(firstGeomMock, "renderingParameters", new RenderingParameters(
-				Mockito.mock(ShaderProgram.class), firstGeomMock, "", Mockito.mock(Entity.class)));
+				Mockito.mock(IShader.class), firstGeomMock, "", Mockito.mock(Entity.class)));
 		Whitebox.setInternalState(secondGeomMock, "renderingParameters", new RenderingParameters(
-				Mockito.mock(ShaderProgram.class), secondGeomMock, "", Mockito.mock(Entity.class)));
+				Mockito.mock(IShader.class), secondGeomMock, "", Mockito.mock(Entity.class)));
 		Whitebox.setInternalState(thirdGeomMock, "renderingParameters", new RenderingParameters(
-				Mockito.mock(ShaderProgram.class), thirdGeomMock, "", Mockito.mock(Entity.class)));
+				Mockito.mock(IShader.class), thirdGeomMock, "", Mockito.mock(Entity.class)));
 		RawGeom firstRawGeomMock = Mockito.mock(RawGeom.class, Mockito.CALLS_REAL_METHODS);
 		Mockito.when(firstRawGeomMock.getVaoId()).thenReturn(1);
 		Whitebox.setInternalState(firstGeomMock, "rawGeom", firstRawGeomMock);
@@ -700,11 +701,11 @@ class DrawRendererTest {
 				thirdGeomMockBis = Mockito.mock(SimpleGeom.class, Mockito.CALLS_REAL_METHODS);
 
 				Whitebox.setInternalState(firstGeomMockBis, "renderingParameters", new RenderingParameters(
-						Mockito.mock(ShaderProgram.class), firstGeomMockBis, firstAlias, Mockito.mock(Entity.class)));
+						Mockito.mock(IShader.class), firstGeomMockBis, firstAlias, Mockito.mock(Entity.class)));
 				Whitebox.setInternalState(secondGeomMockBis, "renderingParameters", new RenderingParameters(
-						Mockito.mock(ShaderProgram.class), secondGeomMockBis, secondAlias, Mockito.mock(Entity.class)));
+						Mockito.mock(IShader.class), secondGeomMockBis, secondAlias, Mockito.mock(Entity.class)));
 				Whitebox.setInternalState(thirdGeomMockBis, "renderingParameters", new RenderingParameters(
-						Mockito.mock(ShaderProgram.class), thirdGeomMockBis, thirdAlias, Mockito.mock(Entity.class)));
+						Mockito.mock(IShader.class), thirdGeomMockBis, thirdAlias, Mockito.mock(Entity.class)));
 				RawGeom firstRawGeomMockBis = Mockito.mock(RawGeom.class, Mockito.CALLS_REAL_METHODS);
 				Mockito.when(firstRawGeomMockBis.getVaoId()).thenReturn(4);
 				Whitebox.setInternalState(firstGeomMockBis, "rawGeom", firstRawGeomMockBis);

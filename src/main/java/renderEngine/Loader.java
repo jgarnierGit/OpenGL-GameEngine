@@ -29,6 +29,8 @@ import modelsManager.ModelUtils;
 import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
 
+import modelsLibrary.CubeTexture;
+
 /**
  * Handles the loading of geometry data into VAOs. It also keeps track of all
  * the created VAOs and VBOs so that they can all be deleted when the game
@@ -131,13 +133,14 @@ public class Loader {
 		return 0;
 	}
 
-	public int loadCubeMap(String[] texturesFiles) {
+	public int loadCubeMap(CubeTexture cubeTexture) {
 		int texID = GL11.glGenTextures();
 		GL13.glActiveTexture(GL13.GL_TEXTURE0);
 		GL11.glBindTexture(GL13.GL_TEXTURE_CUBE_MAP, texID);
-		for (int i = 0; i < texturesFiles.length; i++) {
+		int i=0;
+		for(String textureFile : cubeTexture.getCubeTexture()) {
 			try (InputStream image = Loader.class.getClassLoader()
-					.getResourceAsStream("2D/" + texturesFiles[i] + ".png")) {
+					.getResourceAsStream("2D/" + textureFile + ".png")) {
 				PNGDecoder decoder = new PNGDecoder(image);
 				ByteBuffer imageByteBuffer = ByteBuffer.allocateDirect(4*decoder.getWidth()*decoder.getHeight());
 				decoder.decode(imageByteBuffer, decoder.getWidth()*4,PNGDecoder.RGBA);
@@ -150,8 +153,9 @@ public class Loader {
 				GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
 				GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
 			} catch (IOException e) {
-				System.err.println("[" + texturesFiles[i] + "] not found ");
+				System.err.println("[" + textureFile + "] not found ");
 			}
+			i++;
 		}
 		texturesToClean.add(texID);
 		return texID;

@@ -4,11 +4,12 @@ import java.io.IOException;
 
 import org.lwjglx.util.vector.Matrix4f;
 import org.lwjglx.util.vector.Vector3f;
+import org.lwjglx.util.vector.Vector4f;
 
 import camera.CameraEntity;
 import renderEngine.DisplayManager;
 
-public class SkyboxShader  extends ShaderProgram {
+public class SkyboxShader  extends ShaderProgram implements IShader3D{
 	  private static final String VERTEX_FILE = "skyboxVertexShader.txt";
 	    private static final String FRAGMENT_FILE = "skyboxFragmentShader.txt";
 	    
@@ -27,25 +28,9 @@ public class SkyboxShader  extends ShaderProgram {
 	        super(VERTEX_FILE, FRAGMENT_FILE);
 	    }
 	     
+	    @Override
 	    public void loadProjectionMatrix(Matrix4f matrix){
 	        super.loadMatrix(location_projectionMatrix, matrix);
-	    }
-	 
-	    /**
-		 * in a 4*4 matrix last column is for translation x,y,z. So we set to 0 to be always fixed in a view coordinates system. Rotation is unaffected
-		 * to follow "camera" rotation 
-		 * @param translation
-		 * @param scale
-		 * @return
-		 */
-	    public void loadViewMatrix(CameraEntity camera){
-	        Matrix4f matrix = camera.getViewMatrix();
-	        matrix.m30 = 0;
-	        matrix.m31 = 0;
-	        matrix.m32 = 0;
-	        rotation += ROTATION_SPEED * DisplayManager.getFrameTimeSeconds();
-	        Matrix4f.rotate((float)Math.toRadians(rotation), new Vector3f(0,1,0), matrix, matrix);
-	        super.loadMatrix(location_viewMatrix, matrix);
 	    }
 	    
 	    public void loadFogColour(float r, float g, float b) {
@@ -75,4 +60,32 @@ public class SkyboxShader  extends ShaderProgram {
 	    protected void bindAttributes() {
 	        super.bindAttribute(0, "position");
 	    }
+
+		@Override
+		public void loadTransformationMatrix(Matrix4f transformationMatrix) {
+			//nothing to do
+		}
+
+	    /**
+		 * in a 4*4 matrix last column is for translation x,y,z. So we set to 0 to be always fixed in a view coordinates system. Rotation is unaffected
+		 * to follow "camera" rotation 
+		 * @param translation
+		 * @param scale
+		 * @return
+		 */
+		@Override
+		public void loadViewMatrix(Matrix4f viewMatrix) {
+			  Matrix4f matrix = Matrix4f.load(viewMatrix,null);
+			  	matrix.m30 = 0;
+		        matrix.m31 = 0;
+		        matrix.m32 = 0;
+		        rotation += ROTATION_SPEED * DisplayManager.getFrameTimeSeconds();
+		        Matrix4f.rotate((float)Math.toRadians(rotation), new Vector3f(0,1,0), matrix, matrix);
+		        super.loadMatrix(location_viewMatrix, matrix);
+		}
+
+		@Override
+		public void loadClipPlane(Vector4f plane) {
+			// nothing to do
+		}
 }

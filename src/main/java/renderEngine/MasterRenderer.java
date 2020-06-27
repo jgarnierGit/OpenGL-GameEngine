@@ -23,9 +23,9 @@ import shaderManager.TerrainShader;
 import toolbox.CoordinatesSystemManager;
 
 public class MasterRenderer {
-	private static final float RED = 0.55f;
-	private static final float BLUE = 0.64f;
-	private static final float GREEN = 0.75f;
+	public static final float RED = 0.55f;
+	public static final float BLUE = 0.64f;
+	public static final float GREEN = 0.75f;
 	private float time = 0;
 
 	private StaticShader shader;
@@ -39,8 +39,6 @@ public class MasterRenderer {
 	private Loader loader;
 	
 	private List<DrawRenderer> specificRenderers;
-	
-	private SkyboxRenderer skyboxRender;
 	
 	private HashMap<Model3D, List<EntityTutos>> entities = new HashMap<>();
 	
@@ -59,9 +57,8 @@ public class MasterRenderer {
 		StaticShader shader = new StaticShader();
 		enableCulling();
 		EntityRenderer renderer = new EntityRenderer(shader, CoordinatesSystemManager.getProjectionMatrix());
-		//terrainRenderer = new TerrainRenderer(terrainShader, CoordinatesSystemManager.getProjectionMatrix());
-		//skyboxRender = new SkyboxRenderer(loader, CoordinatesSystemManager.getProjectionMatrix()); TODO extract
-		Draw3DRenderer draw3DRenderer = new Draw3DRenderer(camera, CoordinatesSystemManager.getProjectionMatrix());
+		//terrainRenderer = new TerrainRenderer(terrainShader, CoordinatesSystemManager.getProjectionMatrix());//TODO extract
+		Draw3DRenderer draw3DRenderer = new Draw3DRenderer(camera);
 		Draw2DRenderer draw2DRenderer = new Draw2DRenderer();
 		TerrainShader terrainShader = new TerrainShader();
 		Loader loader = new Loader();
@@ -136,7 +133,6 @@ public class MasterRenderer {
 		terrainShader.loadLightsColor(lights);
 		terrainRenderer.render(terrains);
 		terrainShader.stop();**/
-		//skyboxRender.render(camera,RED, GREEN, BLUE);
 		draw3DRenderer.setClipPlane(clipPlane);
 		draw3DRenderer.render();
 		draw2DRenderer.render();

@@ -1,96 +1,60 @@
 package renderEngine;
 
-import java.io.IOException;
-
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
-import org.lwjglx.util.vector.Matrix4f;
 
 import camera.CameraEntity;
+import modelsLibrary.CubeTexture;
+import renderEngine.Loader.VBOIndex;
 import shaderManager.SkyboxShader;
 
-public class SkyboxRenderer {
-private static final float SIZE = 500f;
+public class SkyboxRenderer extends DrawRenderer {
+	//TODO extract in abstract class specific for 3D
+	private CameraEntity camera;
 	
-	private static final float[] VERTICES = {        
-	    -SIZE,  SIZE, -SIZE,
-	    -SIZE, -SIZE, -SIZE,
-	    SIZE, -SIZE, -SIZE,
-	     SIZE, -SIZE, -SIZE,
-	     SIZE,  SIZE, -SIZE,
-	    -SIZE,  SIZE, -SIZE,
-
-	    -SIZE, -SIZE,  SIZE,
-	    -SIZE, -SIZE, -SIZE,
-	    -SIZE,  SIZE, -SIZE,
-	    -SIZE,  SIZE, -SIZE,
-	    -SIZE,  SIZE,  SIZE,
-	    -SIZE, -SIZE,  SIZE,
-
-	     SIZE, -SIZE, -SIZE,
-	     SIZE, -SIZE,  SIZE,
-	     SIZE,  SIZE,  SIZE,
-	     SIZE,  SIZE,  SIZE,
-	     SIZE,  SIZE, -SIZE,
-	     SIZE, -SIZE, -SIZE,
-
-	    -SIZE, -SIZE,  SIZE,
-	    -SIZE,  SIZE,  SIZE,
-	     SIZE,  SIZE,  SIZE,
-	     SIZE,  SIZE,  SIZE,
-	     SIZE, -SIZE,  SIZE,
-	    -SIZE, -SIZE,  SIZE,
-
-	    -SIZE,  SIZE, -SIZE,
-	     SIZE,  SIZE, -SIZE,
-	     SIZE,  SIZE,  SIZE,
-	     SIZE,  SIZE,  SIZE,
-	    -SIZE,  SIZE,  SIZE,
-	    -SIZE,  SIZE, -SIZE,
-
-	    -SIZE, -SIZE, -SIZE,
-	    -SIZE, -SIZE,  SIZE,
-	     SIZE, -SIZE, -SIZE,
-	     SIZE, -SIZE, -SIZE,
-	    -SIZE, -SIZE,  SIZE,
-	     SIZE, -SIZE,  SIZE
-	};
-	private static String[] TEXTURE_FILES = {"right", "left", "top", "bottom", "back", "front"};
-	private static String[] NIGHT_TEXTURE_FILES = {"nightRight", "nightLeft", "nightTop", "nightBottom", "nightBack", "nightFront"};
-	private int texture;
+	private int dayTexture;
 	private int nightTexture;
-	private int cube;
-	private SkyboxShader shader;
 	private float time = 0;
 	
 	
-	public SkyboxRenderer(Loader loader, Matrix4f projectionMatrix) throws IOException {
-		cube = loader.loadToVAO(VERTICES,3);
-		texture = loader.loadCubeMap(TEXTURE_FILES);
-		nightTexture = loader.loadCubeMap(NIGHT_TEXTURE_FILES);
-		shader = new SkyboxShader();
-		shader.start();
-		shader.loadProjectionMatrix(projectionMatrix);
-		shader.connectTextureUnits();
-		shader.stop();
+	private SkyboxRenderer(CameraEntity camera, int dayTexture, int nightTexture) {
+		this.camera = camera;
+		this.dayTexture = dayTexture;
+		this.nightTexture = nightTexture;
 	}
 	
-	public void render(CameraEntity camera, float r, float g, float b) {
-		shader.start();
-		shader.loadViewMatrix(camera);
-		shader.loadFogColour(r, g, b);
-		GL30.glBindVertexArray(cube);
-		GL20.glEnableVertexAttribArray(0);
-		bindTextures();
-		GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, VERTICES.length);
-		GL20.glDisableVertexAttribArray(0);
-		GL30.glBindVertexArray(0);
-		shader.stop();
+	//TODO extract CubeTexture from DayNight logic
+	public static SkyboxRenderer create(SkyboxShader skyboxShader,CameraEntity camera, CubeTexture skyboxTextureDay, CubeTexture skyboxTextureNight) {
+		SkyboxRenderer renderer = new SkyboxRenderer(camera, skyboxTextureDay.getTextureId(), skyboxTextureNight.getTextureId());
+		skyboxShader.start();
+		skyboxShader.connectTextureUnits();
+		skyboxShader.stop();
+		return renderer;
 	}
 	
-	private void bindTextures(){
+	@Override
+	public void render() {
+		// must find a way to not allow multi rendering for Skybox.
+		for (RenderingParameters params : renderingParams) {
+			SkyboxShader shader = (SkyboxShader) params.getShader();
+			shader.start();
+			shader.loadViewMatrix(camera.getViewMatrix());
+			shader.loadFogColour(MasterRenderer.RED, MasterRenderer.GREEN, MasterRenderer.BLUE);
+			
+			//TODO really.really.really.really ugly
+			prepare(params.getGeom().getRawGeom().getVaoId());
+			dayNightCycle(shader);
+			params.getEntities().forEach(entity -> {
+				genericDrawRender(params);
+			});
+			unbindGeom();
+			shader.stop();
+		}
+	}
+	
+	private void dayNightCycle(SkyboxShader shader){
 		time += DisplayManager.getFrameTimeSeconds() * 1000;
 		time %= 24000; // affecte le reste de la division.
 		int texture1;
@@ -102,14 +66,14 @@ private static final float SIZE = 500f;
 			blendFactor = (time - 0)/(5000 - 0);
 		}else if(time >= 5000 && time < 8000){
 			texture1 = nightTexture;
-			texture2 = texture;
+			texture2 = dayTexture;
 			blendFactor = (time - 5000)/(8000 - 5000);
 		}else if(time >= 8000 && time < 21000){
-			texture1 = texture;
-			texture2 = texture;
+			texture1 = dayTexture;
+			texture2 = dayTexture;
 			blendFactor = (time - 8000)/(21000 - 8000);
 		}else{
-			texture1 = texture;
+			texture1 = dayTexture;
 			texture2 = nightTexture;
 			blendFactor = (time - 21000)/(24000 - 21000);
 		}
@@ -119,6 +83,18 @@ private static final float SIZE = 500f;
 		GL13.glActiveTexture(GL13.GL_TEXTURE1);
 		GL11.glBindTexture(GL13.GL_TEXTURE_CUBE_MAP, texture2);
 		shader.loadBlendFactor(blendFactor);
+	}
+
+	@Override
+	protected void prepare(int vaoId) {
+		GL30.glBindVertexArray(vaoId);
+		GL20.glEnableVertexAttribArray(VBOIndex.POSITION_INDEX);
+	}
+
+	@Override
+	protected void unbindGeom() {
+		GL20.glDisableVertexAttribArray(VBOIndex.POSITION_INDEX);
+		GL30.glBindVertexArray(0);
 	}
 	
 }
