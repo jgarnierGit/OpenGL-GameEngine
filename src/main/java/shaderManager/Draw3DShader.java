@@ -9,7 +9,7 @@ import org.lwjglx.util.vector.Vector4f;
 
 import renderEngine.Loader.VBOIndex;
 
-public class Draw3DShader extends ShaderProgram {
+public class Draw3DShader extends ShaderProgram implements IShader3D {
 	private static final String VERTEX_FILE = "rayVertexShader.txt";
 	private static final String FRAGMENT_FILE = "rayFragmentShader.txt";
 	public static final int COLOR_INDEX = 1;

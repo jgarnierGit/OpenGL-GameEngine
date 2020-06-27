@@ -16,10 +16,11 @@ import org.lwjglx.util.vector.Vector4f;
 
 import entities.Entity;
 import entities.SimpleEntity;
-import renderEngine.Draw3DRenderer;
+import renderEngine.DrawRenderer;
 import renderEngine.Loader;
 import renderEngine.RenderingParameters;
 import shaderManager.Draw3DShader;
+import shaderManager.IShader3D;
 
 /**
  * SimpleGeom3D can also render 2D as the z component is only used when
@@ -35,7 +36,7 @@ public class SimpleGeom3D extends SimpleGeom {
 		// hidden
 	}
 
-	protected static SimpleGeom3D create(Loader loader, Draw3DRenderer draw3DRenderer, Draw3DShader shader, String alias, Entity entity)
+	protected static SimpleGeom3D create(Loader loader, DrawRenderer draw3DRenderer, IShader3D shader, String alias, Entity entity)
 		{
 		SimpleGeom3D simpleGeom3D = new SimpleGeom3D();
 		simpleGeom3D.rawGeom = new RawGeom(loader, draw3DRenderer, 3);
@@ -43,7 +44,7 @@ public class SimpleGeom3D extends SimpleGeom {
 		return simpleGeom3D;
 	}
 
-	protected static SimpleGeom3D createWithDefaultEntity(Loader loader, Draw3DRenderer draw3DRenderer, Draw3DShader shader, String alias)
+	protected static SimpleGeom3D createWithDefaultEntity(Loader loader, DrawRenderer draw3DRenderer, IShader3D shader, String alias)
 			{
 		SimpleGeom3D simpleGeom3D = new SimpleGeom3D();
 		simpleGeom3D.rawGeom = new RawGeom(loader, draw3DRenderer, 3);

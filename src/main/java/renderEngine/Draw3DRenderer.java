@@ -3,12 +3,16 @@ package renderEngine;
 import java.io.IOException;
 
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL15;
+import org.lwjgl.opengl.GL20;
+import org.lwjgl.opengl.GL30;
 import org.lwjglx.util.vector.Matrix4f;
 import org.lwjglx.util.vector.Vector4f;
 
 import camera.CameraEntity;
 import renderEngine.Loader.VBOIndex;
 import shaderManager.Draw3DShader;
+import shaderManager.IShader3D;
 import toolbox.Maths;
 
 /**
@@ -33,10 +37,10 @@ public class Draw3DRenderer extends DrawRenderer {
 	@Override
 	public void render() {
 		for (RenderingParameters params : renderingParams) {
-			Draw3DShader draw3DShader = (Draw3DShader) params.getShader();
+			IShader3D draw3DShader = (IShader3D) params.getShader();
 			draw3DShader.start();
 			draw3DShader.loadClipPlane(clipPlane);
-			prepare(params.getGeom(), VBOIndex.POSITION_INDEX, Draw3DShader.COLOR_INDEX);
+			prepare(params.getGeom().getRawGeom().getVaoId());
 			Matrix4f viewMatrix = camera.getViewMatrix();
 			draw3DShader.loadViewMatrix(viewMatrix);
 
@@ -55,13 +59,27 @@ public class Draw3DRenderer extends DrawRenderer {
 					genericDrawRender(params);
 				});
 			}
-
-			unbindGeom(VBOIndex.POSITION_INDEX, Draw3DShader.COLOR_INDEX);
+			unbindGeom();
 			// GL11.glLineWidth(1);
 			params.disableRenderOptions();
 			GL11.glEnable(GL11.GL_DEPTH);
 			draw3DShader.stop();
 		}
+	}
+
+	@Override
+	protected void prepare(int vaoId) {
+		GL30.glBindVertexArray(vaoId);
+		GL20.glEnableVertexAttribArray(VBOIndex.POSITION_INDEX);
+		GL20.glEnableVertexAttribArray(Draw3DShader.COLOR_INDEX);
+	}
+	
+	@Override
+	protected void unbindGeom() {
+		GL20.glDisableVertexAttribArray(Draw3DShader.COLOR_INDEX);
+		GL20.glDisableVertexAttribArray(VBOIndex.POSITION_INDEX);
+		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+		GL30.glBindVertexArray(0);
 	}
 
 	@Override

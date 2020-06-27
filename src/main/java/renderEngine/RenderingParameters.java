@@ -16,10 +16,11 @@ import entities.Entity;
 import entities.SimpleEntity;
 import modelsLibrary.ISimpleGeom;
 import shaderManager.Draw3DShader;
+import shaderManager.IShader;
 import shaderManager.ShaderProgram;
 
 public class RenderingParameters implements IRenderingParameters {
-	private ShaderProgram shader;
+	private IShader shader;
 	private Optional<Integer> glRenderMode;
 	private HashMap<Integer, Boolean> glStatesRendering;
 	private ISimpleGeom simpleGeom;
@@ -33,7 +34,7 @@ public class RenderingParameters implements IRenderingParameters {
 	private Optional<Vector4f> overridedColors;
 	private HashMap<Vector, Vector4f> overrideColorsAtIndex;
 
-	RenderingParameters(ShaderProgram shader, ISimpleGeom simpleGeom, String alias, Entity entity) {
+	RenderingParameters(IShader shader, ISimpleGeom simpleGeom, String alias, Entity entity) {
 		this.simpleGeom = simpleGeom;
 		this.shader = shader;
 		this.alias = alias;
@@ -48,7 +49,7 @@ public class RenderingParameters implements IRenderingParameters {
 		this.destinationOrderAlias = "";
 	}
 
-	public static RenderingParameters create(ShaderProgram shader, ISimpleGeom simpleGeom, String alias,
+	public static RenderingParameters create(IShader shader, ISimpleGeom simpleGeom, String alias,
 			Entity entity) {
 		RenderingParameters param = new RenderingParameters(shader, simpleGeom, alias, entity);
 		param.logger = Logger.getLogger("RenderingParameters");
@@ -315,7 +316,7 @@ public class RenderingParameters implements IRenderingParameters {
 		this.destinationOrderAlias = "";
 	}
 
-	public ShaderProgram getShader() {
+	public IShader getShader() {
 		return this.shader;
 	}
 

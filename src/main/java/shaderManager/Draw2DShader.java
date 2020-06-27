@@ -6,7 +6,7 @@ import java.util.function.Function;
 
 import renderEngine.Loader.VBOIndex;
 
-public class Draw2DShader extends ShaderProgram {
+public class Draw2DShader extends ShaderProgram implements IShader2D{
 	private static final String VERTEX_FILE = "draw2DVertexShader.txt";
 	private static final String FRAGMENT_FILE = "draw2DFragmentShader.txt";
 	public static final int COLOR_INDEX = 1;

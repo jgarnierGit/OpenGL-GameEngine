@@ -5,8 +5,10 @@ import java.util.Optional;
 
 import entities.Entity;
 import renderEngine.Draw3DRenderer;
+import renderEngine.DrawRenderer;
 import renderEngine.Loader;
 import shaderManager.Draw3DShader;
+import shaderManager.IShader3D;
 import toolbox.CoordinatesSystemManager;
 
 public class SimpleGeom3DBuilder {
@@ -16,14 +18,14 @@ public class SimpleGeom3DBuilder {
 
 	public static class EmptySimpleGeom3DBuilder {
 		public static class ShaderedSimpleGeom3DBuilder {
-			Draw3DShader shader;
+			IShader3D shader;
 			Optional<Entity> entity;
 			Loader loader;
-			Draw3DRenderer draw3DRenderer;
+			DrawRenderer draw3DRenderer;
 			String alias;
-
-			public ShaderedSimpleGeom3DBuilder(Loader loader, Draw3DRenderer draw3DRenderer, String alias,
-					Draw3DShader shader) {
+			//TODO create interface for 3DDrawrenderer.
+			public ShaderedSimpleGeom3DBuilder(Loader loader, DrawRenderer draw3DRenderer, String alias,
+					IShader3D shader) {
 				this.loader = loader;
 				this.draw3DRenderer = draw3DRenderer;
 				this.alias = alias;
@@ -51,16 +53,16 @@ public class SimpleGeom3DBuilder {
 		}
 
 		Loader loader;
-		Draw3DRenderer draw3DRenderer;
+		DrawRenderer draw3DRenderer;
 		String alias;
 
-		public EmptySimpleGeom3DBuilder(Loader loaderParam, Draw3DRenderer draw3DRendererParam, String aliasParam) {
+		public EmptySimpleGeom3DBuilder(Loader loaderParam, DrawRenderer draw3DRendererParam, String aliasParam) {
 			loader = loaderParam;
 			draw3DRenderer = draw3DRendererParam;
 			alias = aliasParam;
 		}
 
-		public ShaderedSimpleGeom3DBuilder withShader(Draw3DShader shader) {
+		public ShaderedSimpleGeom3DBuilder withShader(IShader3D shader) {
 			return new ShaderedSimpleGeom3DBuilder(loader, draw3DRenderer, alias, shader);
 		}
 
@@ -69,7 +71,7 @@ public class SimpleGeom3DBuilder {
 		}
 	}
 
-	public static EmptySimpleGeom3DBuilder create(Loader loader, Draw3DRenderer draw3DRenderer, String alias) {
+	public static EmptySimpleGeom3DBuilder create(Loader loader, DrawRenderer draw3DRenderer, String alias) {
 		return new EmptySimpleGeom3DBuilder(loader, draw3DRenderer, alias);
 	}
 }

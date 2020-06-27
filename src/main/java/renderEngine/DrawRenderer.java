@@ -40,6 +40,27 @@ public abstract class DrawRenderer implements IDrawRenderer {
 	public void process(ISimpleGeom geom) {
 		this.geoms.add(geom);
 	}
+	
+	@Override
+	public void reloadAndprocess(ISimpleGeom geom) {
+		geom.reloadVao();
+		geom.updateRenderer();
+	}
+	
+	/**
+	 * Before we can render a VAO it needs to be made active, and we can do this by
+	 * binding it. We also need to enable the relevant attributes of the VAO, which
+	 * in this case is just attribute 0 where we stored the position data.
+	 * 
+	 * Call prepare at first of render method.
+	 * @param VaoId
+	 */
+	protected abstract void prepare(int vaoId);
+	
+	/**
+	 * Call unbindGeom before leaving render method.
+	 */
+	protected abstract void unbindGeom();
 
 	@Override
 	public void sendForRendering() {
@@ -78,28 +99,6 @@ public abstract class DrawRenderer implements IDrawRenderer {
 	@Override
 	public void clearGeom() {
 		this.geoms.clear();
-	}
-
-	/**
-	 * Before we can render a VAO it needs to be made active, and we can do this by
-	 * binding it. We also need to enable the relevant attributes of the VAO, which
-	 * in this case is just attribute 0 where we stored the position data.
-	 * 
-	 * @param geom          Geom to render
-	 * @param positionIndex GL vertex Attrib array position in VBO?
-	 * @param colorIndex    GL vertex Attrib array position in VBO?
-	 */
-	protected void prepare(ISimpleGeom geom, int positionIndex, int colorIndex) {
-		GL30.glBindVertexArray(geom.getRawGeom().getVaoId());
-		GL20.glEnableVertexAttribArray(positionIndex);
-		GL20.glEnableVertexAttribArray(colorIndex);
-	}
-
-	protected void unbindGeom(int positionIndex, int colorIndex) {
-		GL20.glDisableVertexAttribArray(colorIndex);
-		GL20.glDisableVertexAttribArray(positionIndex);
-		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
-		GL30.glBindVertexArray(0);
 	}
 
 	protected void genericDrawRender(RenderingParameters params) {

@@ -17,7 +17,6 @@ import camera.CameraEntity;
 import entities.EntityTutos;
 import entities.Light;
 import modelsLibrary.ISimpleGeom;
-import modelsLibrary.RawGeom;
 import modelsManager.Model3D;
 import shaderManager.StaticShader;
 import shaderManager.TerrainShader;
@@ -39,6 +38,8 @@ public class MasterRenderer {
 	private CameraEntity camera;
 	private Loader loader;
 	
+	private List<DrawRenderer> specificRenderers;
+	
 	private SkyboxRenderer skyboxRender;
 	
 	private HashMap<Model3D, List<EntityTutos>> entities = new HashMap<>();
@@ -51,6 +52,7 @@ public class MasterRenderer {
 		this.renderer = renderer;
 		this.shader = shader;
 		this.terrainShader = terrainShader;
+		this.specificRenderers = new ArrayList<>();
 	}
 	
 	public static MasterRenderer create(CameraEntity camera) throws IOException {
@@ -138,6 +140,9 @@ public class MasterRenderer {
 		draw3DRenderer.setClipPlane(clipPlane);
 		draw3DRenderer.render();
 		draw2DRenderer.render();
+		for(DrawRenderer drawRenderer : this.specificRenderers) {
+			drawRenderer.render();
+		}
 	}
 	
 	public void clean() {
@@ -169,6 +174,9 @@ public class MasterRenderer {
 	//	terrainShader.cleanUp();
 		draw3DRenderer.cleanUp();
 		draw2DRenderer.cleanUp();
+		for(DrawRenderer drawRenderer : this.specificRenderers) {
+			drawRenderer.cleanUp();
+		}
 		loader.cleanUp();
 	}
 	
@@ -194,6 +202,7 @@ public class MasterRenderer {
 	}
 
 	/**
+	 * @deprecated use reloadAndprocess from specified renderer
 	 * One more optimization must be done in future to not reload unchanged geometries (vertices + colors)
 	 * @param geom
 	 */
@@ -206,5 +215,12 @@ public class MasterRenderer {
 	public void sendForRendering() {
 		this.draw2DRenderer.sendForRendering();
 		this.draw3DRenderer.sendForRendering();
+		for(DrawRenderer drawRenderer : this.specificRenderers) {
+			drawRenderer.sendForRendering();
+		}
+	}
+
+	public void addRenderer(DrawRenderer renderer) {
+		this.specificRenderers.add(renderer);
 	}
 }

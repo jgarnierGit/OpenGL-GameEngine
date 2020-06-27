@@ -12,4 +12,5 @@ public interface IDrawRenderer {
 	public void render();
 
 	public void sendForRendering();
+	public void reloadAndprocess(ISimpleGeom geom);
 }
