@@ -39,14 +39,6 @@ public class Draw2DRenderer extends DrawRenderer {
 	}
 
 	@Override
-	public void cleanUp() {
-		for (RenderingParameters params : renderingParams) {
-			Draw2DShader draw2DShader = (Draw2DShader) params.getShader();
-			draw2DShader.cleanUp();
-		}
-	}
-
-	@Override
 	protected void prepare(int vaoId) {
 		GL30.glBindVertexArray(vaoId);
 		GL20.glEnableVertexAttribArray(Draw2DShader.COLOR_INDEX);

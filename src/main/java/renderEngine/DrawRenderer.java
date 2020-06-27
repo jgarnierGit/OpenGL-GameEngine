@@ -16,6 +16,7 @@ import org.lwjgl.opengl.GL30;
 
 import modelsLibrary.ISimpleGeom;
 import modelsLibrary.RawGeom;
+import shaderManager.Draw2DShader;
 
 /**
  * Draw primitive 3D objects directly by drawArrays. For heavy objects use
@@ -45,6 +46,13 @@ public abstract class DrawRenderer implements IDrawRenderer {
 	public void reloadAndprocess(ISimpleGeom geom) {
 		geom.reloadVao();
 		geom.updateRenderer();
+	}
+	
+	@Override
+	public void cleanUp() {
+		for (RenderingParameters params : renderingParams) {
+			params.getShader().cleanUp();
+		}
 	}
 	
 	/**

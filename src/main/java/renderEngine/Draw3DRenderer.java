@@ -25,7 +25,7 @@ public class Draw3DRenderer extends DrawRenderer {
 	private CameraEntity camera;
 	private Vector4f clipPlane;
 
-	public Draw3DRenderer(CameraEntity camera, Matrix4f projectionMatrix) throws IOException {
+	public Draw3DRenderer(CameraEntity camera){
 		super();
 		this.camera = camera;
 	}
@@ -80,14 +80,6 @@ public class Draw3DRenderer extends DrawRenderer {
 		GL20.glDisableVertexAttribArray(VBOIndex.POSITION_INDEX);
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 		GL30.glBindVertexArray(0);
-	}
-
-	@Override
-	public void cleanUp() {
-		for (RenderingParameters params : renderingParams) {
-			Draw3DShader draw3DShader = (Draw3DShader) params.getShader();
-			draw3DShader.cleanUp();
-		}
 	}
 
 	/**
