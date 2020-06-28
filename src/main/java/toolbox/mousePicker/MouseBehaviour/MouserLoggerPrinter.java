@@ -85,10 +85,10 @@ public class MouserLoggerPrinter {
 
 	public void clear() {
 		for (ISimpleGeom geom : geoms) {
-			geom.reset();
+			geom.clear();
 		}
 		geoms.clear();
-		this.ray3D.reset();
+		this.ray3D.clear();
 	}
 
 	public void prepareRendering() {
@@ -100,7 +100,7 @@ public class MouserLoggerPrinter {
 
 	public void printFilterByRayProximity(List<Entity> orderedList, Vector3f rayPosNormalizedToCam,
 			Vector3f largeRay) {
-		this.raysWorldOrigin.reset();
+		this.raysWorldOrigin.clear();
 		RenderingParameters rayParams = raysWorldOrigin.getRenderingParameters();
 		rayParams.renderFirst();
 		rayParams.setRenderMode(GL11.GL_LINES);
@@ -218,7 +218,7 @@ public class MouserLoggerPrinter {
 	 */
 	public void printCameraBBox() {
 		for (ISimpleGeom point : cameraBboxes) {
-			point.reset();
+			point.clear();
 		}
 		cameraBboxes.clear();
 		/***
@@ -606,38 +606,38 @@ public class MouserLoggerPrinter {
 			Vector3f rbfWorldCoord, Vector3f ltnWorldCoord, Vector3f rtnWorldCoord, Vector3f lbnWorldCoord,
 			Vector3f rbnWorldCoord) {
 		SimpleGeom3D frustrum = SimpleGeom3DBuilder.create(loader, this.masterRenderer.get3DRenderer(), "").withDefaultShader().build();
-		frustrum.addPoint(lbfWorldCoord, frustrum.getRawGeom().getDefaultColor());
-		frustrum.addPoint(ltfWorldCoord, frustrum.getRawGeom().getDefaultColor());
+		frustrum.addPoint(lbfWorldCoord, frustrum.getVAOGeom().getDefaultColor());
+		frustrum.addPoint(ltfWorldCoord, frustrum.getVAOGeom().getDefaultColor());
 
-		frustrum.addPoint(ltfWorldCoord, frustrum.getRawGeom().getDefaultColor());
-		frustrum.addPoint(rtfWorldCoord, frustrum.getRawGeom().getDefaultColor());
+		frustrum.addPoint(ltfWorldCoord, frustrum.getVAOGeom().getDefaultColor());
+		frustrum.addPoint(rtfWorldCoord, frustrum.getVAOGeom().getDefaultColor());
 
-		frustrum.addPoint(rtfWorldCoord, frustrum.getRawGeom().getDefaultColor());
-		frustrum.addPoint(rbfWorldCoord, frustrum.getRawGeom().getDefaultColor());
+		frustrum.addPoint(rtfWorldCoord, frustrum.getVAOGeom().getDefaultColor());
+		frustrum.addPoint(rbfWorldCoord, frustrum.getVAOGeom().getDefaultColor());
 
-		frustrum.addPoint(rbfWorldCoord, frustrum.getRawGeom().getDefaultColor());
-		frustrum.addPoint(lbfWorldCoord, frustrum.getRawGeom().getDefaultColor());
+		frustrum.addPoint(rbfWorldCoord, frustrum.getVAOGeom().getDefaultColor());
+		frustrum.addPoint(lbfWorldCoord, frustrum.getVAOGeom().getDefaultColor());
 
-		frustrum.addPoint(lbfWorldCoord, frustrum.getRawGeom().getDefaultColor());
+		frustrum.addPoint(lbfWorldCoord, frustrum.getVAOGeom().getDefaultColor());
 		frustrum.addPoint(lbnWorldCoord, BOUNDING_BOX_COLOR);
 
 		frustrum.addPoint(lbnWorldCoord, BOUNDING_BOX_COLOR);
 		frustrum.addPoint(rbnWorldCoord, BOUNDING_BOX_COLOR);
 
 		frustrum.addPoint(rbnWorldCoord, BOUNDING_BOX_COLOR);
-		frustrum.addPoint(rbfWorldCoord, frustrum.getRawGeom().getDefaultColor());
+		frustrum.addPoint(rbfWorldCoord, frustrum.getVAOGeom().getDefaultColor());
 
 		frustrum.addPoint(rbnWorldCoord, BOUNDING_BOX_COLOR);
 		frustrum.addPoint(rtnWorldCoord, BOUNDING_BOX_COLOR);
 
 		frustrum.addPoint(rtnWorldCoord, BOUNDING_BOX_COLOR);
-		frustrum.addPoint(rtfWorldCoord, frustrum.getRawGeom().getDefaultColor());
+		frustrum.addPoint(rtfWorldCoord, frustrum.getVAOGeom().getDefaultColor());
 
 		frustrum.addPoint(rtnWorldCoord, BOUNDING_BOX_COLOR);
 		frustrum.addPoint(ltnWorldCoord, BOUNDING_BOX_COLOR);
 
 		frustrum.addPoint(ltnWorldCoord, BOUNDING_BOX_COLOR);
-		frustrum.addPoint(ltfWorldCoord, frustrum.getRawGeom().getDefaultColor());
+		frustrum.addPoint(ltfWorldCoord, frustrum.getVAOGeom().getDefaultColor());
 
 		frustrum.addPoint(ltnWorldCoord, BOUNDING_BOX_COLOR);
 		frustrum.addPoint(lbnWorldCoord, BOUNDING_BOX_COLOR);

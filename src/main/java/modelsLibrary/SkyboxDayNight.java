@@ -35,13 +35,16 @@ public class SkyboxDayNight implements GeomContainer {
 		//TODO automate this binding.
 		masterRenderer.addRenderer(skybox.renderer);
 		skybox.skyboxGeom = SimpleGeom3DBuilder.create(masterRenderer.getLoader(), skybox.renderer, "skybox").withShader(skyboxShader).build();
-		initGeom(skybox);
+		skybox.initGeom();
 		skybox.renderer.reloadAndprocess(skybox.skyboxGeom);
 		skybox.renderer.sendForRendering();
 		return skybox;
 	}
 
-	private static void initGeom(SkyboxDayNight skybox) {
+	private void initGeom() {
+		if (!this.skyboxGeom.getVertices().isEmpty()) {
+			return;
+		}
 		Vector3f lbn = new Vector3f(-SIZE,  -SIZE, -SIZE);
 		Vector3f rbn = new Vector3f(SIZE,  -SIZE, -SIZE);
 		Vector3f ltn = new Vector3f(-SIZE,  SIZE, -SIZE);
@@ -51,54 +54,54 @@ public class SkyboxDayNight implements GeomContainer {
 		Vector3f ltf = new Vector3f(-SIZE,  SIZE, SIZE);
 		Vector3f rtf = new Vector3f(SIZE,  SIZE, SIZE);
 		
-		skybox.skyboxGeom.addPoint(ltn); 
-		skybox.skyboxGeom.addPoint(lbn);
-		skybox.skyboxGeom.addPoint(rbn);
+		this.skyboxGeom.addPoint(ltn); 
+		this.skyboxGeom.addPoint(lbn);
+		this.skyboxGeom.addPoint(rbn);
 		
-		skybox.skyboxGeom.addPoint(rbn);
-		skybox.skyboxGeom.addPoint(rtn);
-		skybox.skyboxGeom.addPoint(ltn);
+		this.skyboxGeom.addPoint(rbn);
+		this.skyboxGeom.addPoint(rtn);
+		this.skyboxGeom.addPoint(ltn);
 				
-		skybox.skyboxGeom.addPoint(lbf);
-		skybox.skyboxGeom.addPoint(lbn);
-		skybox.skyboxGeom.addPoint(ltn);
+		this.skyboxGeom.addPoint(lbf);
+		this.skyboxGeom.addPoint(lbn);
+		this.skyboxGeom.addPoint(ltn);
 		
-		skybox.skyboxGeom.addPoint(ltn);
-		skybox.skyboxGeom.addPoint(ltf);
-		skybox.skyboxGeom.addPoint(lbf);
+		this.skyboxGeom.addPoint(ltn);
+		this.skyboxGeom.addPoint(ltf);
+		this.skyboxGeom.addPoint(lbf);
 				
-		skybox.skyboxGeom.addPoint(rbn);
-		skybox.skyboxGeom.addPoint(rbf);
-		skybox.skyboxGeom.addPoint(rtf);
+		this.skyboxGeom.addPoint(rbn);
+		this.skyboxGeom.addPoint(rbf);
+		this.skyboxGeom.addPoint(rtf);
 		
-		skybox.skyboxGeom.addPoint(rtf);
-		skybox.skyboxGeom.addPoint(rtn);
-		skybox.skyboxGeom.addPoint(rbn);
+		this.skyboxGeom.addPoint(rtf);
+		this.skyboxGeom.addPoint(rtn);
+		this.skyboxGeom.addPoint(rbn);
 				
-		skybox.skyboxGeom.addPoint(lbf);
-		skybox.skyboxGeom.addPoint(ltf);
-		skybox.skyboxGeom.addPoint(rtf);
+		this.skyboxGeom.addPoint(lbf);
+		this.skyboxGeom.addPoint(ltf);
+		this.skyboxGeom.addPoint(rtf);
 		
-		skybox.skyboxGeom.addPoint(rtf);
-		skybox.skyboxGeom.addPoint(rbf);
-		skybox.skyboxGeom.addPoint(lbf);
+		this.skyboxGeom.addPoint(rtf);
+		this.skyboxGeom.addPoint(rbf);
+		this.skyboxGeom.addPoint(lbf);
 				
-		skybox.skyboxGeom.addPoint(ltn);
-		skybox.skyboxGeom.addPoint(rtn);
-		skybox.skyboxGeom.addPoint(rtf);
+		this.skyboxGeom.addPoint(ltn);
+		this.skyboxGeom.addPoint(rtn);
+		this.skyboxGeom.addPoint(rtf);
 		
-		skybox.skyboxGeom.addPoint(rtf);
-		skybox.skyboxGeom.addPoint(ltf);
-		skybox.skyboxGeom.addPoint(ltn);
+		this.skyboxGeom.addPoint(rtf);
+		this.skyboxGeom.addPoint(ltf);
+		this.skyboxGeom.addPoint(ltn);
 				
-		skybox.skyboxGeom.addPoint(lbn);
-		skybox.skyboxGeom.addPoint(lbf);
-		skybox.skyboxGeom.addPoint(rbn);
+		this.skyboxGeom.addPoint(lbn);
+		this.skyboxGeom.addPoint(lbf);
+		this.skyboxGeom.addPoint(rbn);
 		
-		skybox.skyboxGeom.addPoint(rbn);
-		skybox.skyboxGeom.addPoint(lbf);
-		skybox.skyboxGeom.addPoint(rbf);
-		skybox.skyboxGeom.getRenderingParameters().setRenderMode(GL11.GL_TRIANGLES);
+		this.skyboxGeom.addPoint(rbn);
+		this.skyboxGeom.addPoint(lbf);
+		this.skyboxGeom.addPoint(rbf);
+		this.skyboxGeom.getRenderingParameters().setRenderMode(GL11.GL_TRIANGLES);
 	}
 	
 	public void useDefaultTemplate() {

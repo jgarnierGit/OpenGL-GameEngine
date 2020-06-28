@@ -2,7 +2,6 @@ package modelsLibrary;
 
 import java.io.IOException;
 
-import renderEngine.Draw2DRenderer;
 import renderEngine.DrawRenderer;
 import renderEngine.Loader;
 import shaderManager.Draw2DShader;

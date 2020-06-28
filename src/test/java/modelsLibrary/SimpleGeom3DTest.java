@@ -1,6 +1,5 @@
 package modelsLibrary;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -35,7 +34,7 @@ class SimpleGeom3DTest {
 	void setUp() throws Exception {
 		loader = Mockito.mock(Loader.class);
 		geom = SimpleGeom3D.createWithDefaultEntity(loader, draw3DRenderer, shader, alias);
-		Mockito.when(loader.loadToVAO(new VBOContent(1,  geom.rawGeom.dimension, geom.rawGeom.points))).thenReturn(1);
+		Mockito.when(loader.loadToVAO(VBOContent.createEmpty(0, geom.rawGeom.dimension))).thenReturn(1);
 	}
 
 	@Nested
@@ -44,8 +43,8 @@ class SimpleGeom3DTest {
 		@Test
 		@DisplayName("Empty geom should be empty")
 		void testEmptyGeom() {
-			assertEquals(0, geom.rawGeom.colors.length);
-			assertEquals(0, geom.rawGeom.points.length);
+			assertEquals(0, geom.rawGeom.colors.getContent().size());
+			assertEquals(0, geom.rawGeom.points.getContent().size());
 			assertNotNull(geom.renderingParameters);
 		}
 
@@ -53,18 +52,18 @@ class SimpleGeom3DTest {
 		@DisplayName("Adding point copying default color")
 		void testAddPoint() {
 			geom.addPoint(new Vector3f(1, 1, 1));
-			assertEquals(4, geom.rawGeom.colors.length);
-			assertEquals(3, geom.rawGeom.points.length);
-			assertEquals(1.0f, geom.rawGeom.colors[0]);
+			assertEquals(4, geom.rawGeom.colors.getContent().size());
+			assertEquals(3, geom.rawGeom.points.getContent().size());
+			assertEquals(new Float(1), geom.rawGeom.colors.getContent().get(0));
 		}
 
 		@Test
 		@DisplayName("Adding a point with color")
 		void testaddPointWithColor() {
 			geom.addPoint(new Vector3f(1, 1, 1), new Vector4f(2, 2, 2, 2));
-			assertEquals(4, geom.rawGeom.colors.length);
-			assertEquals(3, geom.rawGeom.points.length);
-			assertEquals(2, geom.rawGeom.colors[0]);
+			assertEquals(4, geom.rawGeom.colors.getContent().size());
+			assertEquals(3, geom.rawGeom.points.getContent().size());
+			assertEquals(new Float(2), geom.rawGeom.colors.getContent().get(0));
 		}
 
 		@Test
@@ -88,45 +87,45 @@ class SimpleGeom3DTest {
 
 		@Test
 		void testInstanciationOk() {
-			assertEquals(4, geom.rawGeom.colors.length);
-			assertEquals(3, geom.rawGeom.points.length);
+			assertEquals(4, geom.rawGeom.colors.getContent().size());
+			assertEquals(3, geom.rawGeom.points.getContent().size());
 		}
 
 		@Test
 		void testReset() {
-			geom.reset();
-			assertEquals(0, geom.rawGeom.colors.length);
-			assertEquals(0, geom.rawGeom.points.length);
+			geom.clear();
+			assertEquals(0, geom.rawGeom.colors.getContent().size());
+			assertEquals(0, geom.rawGeom.points.getContent().size());
 		}
 
 		@Test
 		@DisplayName("Adding a point copying previous color")
 		void testaddPoint() {
 			geom.addPoint(new Vector3f(1, 2, 3));
-			assertEquals(8, geom.rawGeom.colors.length);
-			assertEquals(6, geom.rawGeom.points.length);
+			assertEquals(8, geom.rawGeom.colors.getContent().size());
+			assertEquals(6, geom.rawGeom.points.getContent().size());
 		}
 
 		@Test
 		@DisplayName("Adding a point with color")
 		void testaddPointWithColor() {
 			geom.addPoint(new Vector3f(1, 2, 3), new Vector4f(2, 2, 2, 2));
-			assertEquals(8, geom.rawGeom.colors.length);
-			assertEquals(6, geom.rawGeom.points.length);
+			assertEquals(8, geom.rawGeom.colors.getContent().size());
+			assertEquals(6, geom.rawGeom.points.getContent().size());
 		}
 
 		@Test
 		@DisplayName("get Vectors vertices list")
 		void testgetVertices() {
-			assertEquals(1, geom.buildVerticesList().size());
+			assertEquals(1, geom.getVertices().size());
 		}
 
 		@Test
 		@DisplayName("get copied geom with same parameters")
 		void testgetCopiedGeom() {
 			SimpleGeom3D copied = geom.copy("newAlias");
-			assertArrayEquals(geom.rawGeom.getPoints(), copied.rawGeom.getPoints());
-			assertArrayEquals(geom.rawGeom.getColors(), copied.rawGeom.getColors());
+			assertEquals(geom.rawGeom.getPoints().getContent(), copied.rawGeom.getPoints().getContent());
+			assertEquals(geom.rawGeom.getColors().getContent(), copied.rawGeom.getColors().getContent());
 		}
 	}
 

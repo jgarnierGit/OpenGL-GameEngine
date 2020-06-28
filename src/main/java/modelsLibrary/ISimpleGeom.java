@@ -9,7 +9,7 @@ import renderEngine.RenderingParameters;
 
 public interface ISimpleGeom {
 
-	public List<? extends Vector> buildVerticesList();
+	public List<? extends Vector> getVertices();
 	
 	/**
 	 * copy geom and load it in a new Vao
@@ -61,7 +61,7 @@ public interface ISimpleGeom {
 	/**
 	 * clear points arrays coordinates.
 	 */
-	public void reset();
+	public void clear();
 
 	/**
 	 * return the rendering parameters for current geom.
@@ -77,6 +77,6 @@ public interface ISimpleGeom {
 	 */
 	public void invertNormals();
 	
-	public RawGeom getRawGeom();
+	public VAOGeom getVAOGeom();
 
 }

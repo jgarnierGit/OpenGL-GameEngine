@@ -44,7 +44,7 @@ public class SkyboxRenderer extends DrawRenderer {
 			shader.loadFogColour(MasterRenderer.RED, MasterRenderer.GREEN, MasterRenderer.BLUE);
 			
 			//TODO really.really.really.really ugly
-			prepare(params.getGeom().getRawGeom().getVaoId());
+			prepare(params.getGeom().getVAOGeom().getVaoId());
 			dayNightCycle(shader);
 			params.getEntities().forEach(entity -> {
 				genericDrawRender(params);

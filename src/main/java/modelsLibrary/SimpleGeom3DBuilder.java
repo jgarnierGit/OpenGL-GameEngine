@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Optional;
 
 import entities.Entity;
-import renderEngine.Draw3DRenderer;
 import renderEngine.DrawRenderer;
 import renderEngine.Loader;
 import shaderManager.Draw3DShader;
@@ -23,7 +22,8 @@ public class SimpleGeom3DBuilder {
 			Loader loader;
 			DrawRenderer draw3DRenderer;
 			String alias;
-			//TODO create interface for 3DDrawrenderer.
+
+			// TODO create interface for 3DDrawrenderer.
 			public ShaderedSimpleGeom3DBuilder(Loader loader, DrawRenderer draw3DRenderer, String alias,
 					IShader3D shader) {
 				this.loader = loader;
@@ -38,7 +38,7 @@ public class SimpleGeom3DBuilder {
 				return this;
 			}
 
-			public SimpleGeom3D build() throws IOException {
+			public SimpleGeom3D build() {
 				SimpleGeom3D simpleGeom;
 				if (this.entity.isPresent()) {
 					simpleGeom = SimpleGeom3D.create(loader, draw3DRenderer, shader, alias, entity.get());

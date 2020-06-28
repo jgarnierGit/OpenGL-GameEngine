@@ -10,13 +10,9 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL15;
-import org.lwjgl.opengl.GL20;
-import org.lwjgl.opengl.GL30;
 
 import modelsLibrary.ISimpleGeom;
-import modelsLibrary.RawGeom;
-import shaderManager.Draw2DShader;
+import modelsLibrary.VAOGeom;
 
 /**
  * Draw primitive 3D objects directly by drawArrays. For heavy objects use
@@ -41,30 +37,31 @@ public abstract class DrawRenderer implements IDrawRenderer {
 	public void process(ISimpleGeom geom) {
 		this.geoms.add(geom);
 	}
-	
+
 	@Override
 	public void reloadAndprocess(ISimpleGeom geom) {
 		geom.reloadVao();
 		geom.updateRenderer();
 	}
-	
+
 	@Override
 	public void cleanUp() {
 		for (RenderingParameters params : renderingParams) {
 			params.getShader().cleanUp();
 		}
 	}
-	
+
 	/**
 	 * Before we can render a VAO it needs to be made active, and we can do this by
 	 * binding it. We also need to enable the relevant attributes of the VAO, which
 	 * in this case is just attribute 0 where we stored the position data.
 	 * 
 	 * Call prepare at first of render method.
+	 * 
 	 * @param VaoId
 	 */
 	protected abstract void prepare(int vaoId);
-	
+
 	/**
 	 * Call unbindGeom before leaving render method.
 	 */
@@ -79,13 +76,13 @@ public abstract class DrawRenderer implements IDrawRenderer {
 
 	private LinkedList<RenderingParameters> checkForEntitiesPresence() {
 		LinkedList<RenderingParameters> noEmptyParameters = new LinkedList<>();
-		for(RenderingParameters param : renderingParams) {
-			if(!param.isNotUsingEntities() && param.getEntities().isEmpty()) {
-				if(this.logger.isLoggable(Level.INFO)) {
-					this.logger.info(param.getAlias() +" has no entities set, will not be rendered. Tip : This filtering can be bypassed by setting doNotUseEntities to active RenderingParam");
+		for (RenderingParameters param : renderingParams) {
+			if (!param.isNotUsingEntities() && param.getEntities().isEmpty()) {
+				if (this.logger.isLoggable(Level.INFO)) {
+					this.logger.info(param.getAlias()
+							+ " has no entities set, will not be rendered. Tip : This filtering can be bypassed by setting doNotUseEntities to active RenderingParam");
 				}
-			}
-			else {
+			} else {
 				noEmptyParameters.add(param);
 			}
 		}
@@ -110,7 +107,6 @@ public abstract class DrawRenderer implements IDrawRenderer {
 	}
 
 	protected void genericDrawRender(RenderingParameters params) {
-		int dataLength = 0;
 		// GL11.glEnable(GL11.GL_POINT_SMOOTH);
 		GL11.glLineWidth(2); // seems to have a max cap unlike PointSize. for GL_LINES
 		GL11.glPointSize(5); // GL_POINTS
@@ -125,8 +121,8 @@ public abstract class DrawRenderer implements IDrawRenderer {
 		// cf https://www.khronos.org/opengl/wiki/Primitive => internal gl logic, hidden
 		// for DrawArrays usage;
 		ISimpleGeom geom = params.getGeom();
-		RawGeom rawGeom = geom.getRawGeom();
-		int verticesCount = rawGeom.getPoints().length / rawGeom.getDimension();
+		VAOGeom rawGeom = geom.getVAOGeom();
+		int verticesCount = rawGeom.getPoints().getContent().size() / rawGeom.getDimension();
 		// Add default lineLoop rendering.
 		// GL11.drawArrays can draw points with GL_POINTS, not GL_POINT
 		GL11.glDrawArrays(params.getRenderMode().orElse(GL11.GL_POINTS), 0, verticesCount);
@@ -150,7 +146,7 @@ public abstract class DrawRenderer implements IDrawRenderer {
 			return renderingParam.isDestinationPositionAfter().isPresent()
 					&& !renderingParam.getDestinationOrderAlias().equals(renderingParam.getAlias());
 		}).collect(Collectors.toCollection(LinkedList::new));
-		List<RenderingParameters> sortedUniqueParams = transformRelativePositionToIndex(uniqueParams,paramsToMove);
+		List<RenderingParameters> sortedUniqueParams = transformRelativePositionToIndex(uniqueParams, paramsToMove);
 		return orderRawParams(rawParams, sortedUniqueParams);
 	}
 
@@ -178,7 +174,8 @@ public abstract class DrawRenderer implements IDrawRenderer {
 			if (!param.getDestinationOrderAlias().isEmpty()) {
 				boolean isPresent = checkReferencePresence(uniqueParams, param.getDestinationOrderAlias());
 				if (!isPresent) {
-					this.logger.log(Level.WARNING, "reference to " + param.getDestinationOrderAlias() + " is unknown. Will be removed");
+					this.logger.log(Level.WARNING,
+							"reference to " + param.getDestinationOrderAlias() + " is unknown. Will be removed");
 					param.resetRenderingOrder();
 				}
 			}
@@ -195,7 +192,7 @@ public abstract class DrawRenderer implements IDrawRenderer {
 		}
 		return false;
 	}
-	
+
 	private List<RenderingParameters> transformRelativePositionToIndex(LinkedHashSet<RenderingParameters> rawParams,
 			LinkedList<RenderingParameters> paramsToMove) {
 		LinkedList<RenderingParameters> sortedList = new LinkedList<>();
@@ -204,14 +201,12 @@ public abstract class DrawRenderer implements IDrawRenderer {
 			Boolean positionedAfter = param.isDestinationPositionAfter().get();
 			sortedList.remove(param);
 			int index = 0;
-			if(param.getDestinationOrderAlias().isEmpty()) {
+			if (param.getDestinationOrderAlias().isEmpty()) {
 				index = positionedAfter ? sortedList.size() : 0;
+			} else {
+				index = getIndexDestination(sortedList, param.getDestinationOrderAlias(), positionedAfter);
 			}
-			else {
-				index= getIndexDestination(sortedList, param.getDestinationOrderAlias(),
-						positionedAfter);
-			}
-			
+
 			sortedList.add(index, param);
 		}
 		return sortedList;

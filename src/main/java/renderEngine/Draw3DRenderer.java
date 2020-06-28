@@ -1,7 +1,5 @@
 package renderEngine;
 
-import java.io.IOException;
-
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
@@ -25,11 +23,11 @@ public class Draw3DRenderer extends DrawRenderer {
 	private CameraEntity camera;
 	private Vector4f clipPlane;
 
-	public Draw3DRenderer(CameraEntity camera){
+	public Draw3DRenderer(CameraEntity camera) {
 		super();
 		this.camera = camera;
 	}
-	
+
 	public void setClipPlane(Vector4f clipPlane) {
 		this.clipPlane = clipPlane;
 	}
@@ -40,7 +38,7 @@ public class Draw3DRenderer extends DrawRenderer {
 			IShader3D draw3DShader = (IShader3D) params.getShader();
 			draw3DShader.start();
 			draw3DShader.loadClipPlane(clipPlane);
-			prepare(params.getGeom().getRawGeom().getVaoId());
+			prepare(params.getGeom().getVAOGeom().getVaoId());
 			Matrix4f viewMatrix = camera.getViewMatrix();
 			draw3DShader.loadViewMatrix(viewMatrix);
 
@@ -73,7 +71,7 @@ public class Draw3DRenderer extends DrawRenderer {
 		GL20.glEnableVertexAttribArray(VBOIndex.POSITION_INDEX);
 		GL20.glEnableVertexAttribArray(Draw3DShader.COLOR_INDEX);
 	}
-	
+
 	@Override
 	protected void unbindGeom() {
 		GL20.glDisableVertexAttribArray(Draw3DShader.COLOR_INDEX);

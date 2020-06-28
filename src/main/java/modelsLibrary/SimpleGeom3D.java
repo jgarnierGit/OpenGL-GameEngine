@@ -7,7 +7,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.NotImplementedException;
 import org.lwjgl.opengl.GL11;
 import org.lwjglx.util.vector.Vector;
@@ -36,18 +35,18 @@ public class SimpleGeom3D extends SimpleGeom {
 		// hidden
 	}
 
-	protected static SimpleGeom3D create(Loader loader, DrawRenderer draw3DRenderer, IShader3D shader, String alias, Entity entity)
-		{
+	protected static SimpleGeom3D create(Loader loader, DrawRenderer draw3DRenderer, IShader3D shader, String alias,
+			Entity entity) {
 		SimpleGeom3D simpleGeom3D = new SimpleGeom3D();
-		simpleGeom3D.rawGeom = new RawGeom(loader, draw3DRenderer, 3);
+		simpleGeom3D.rawGeom = VAOGeom.create(loader, draw3DRenderer, 3);
 		simpleGeom3D.renderingParameters = RenderingParameters.create(shader, simpleGeom3D, alias, entity);
 		return simpleGeom3D;
 	}
 
-	protected static SimpleGeom3D createWithDefaultEntity(Loader loader, DrawRenderer draw3DRenderer, IShader3D shader, String alias)
-			{
+	protected static SimpleGeom3D createWithDefaultEntity(Loader loader, DrawRenderer draw3DRenderer, IShader3D shader,
+			String alias) {
 		SimpleGeom3D simpleGeom3D = new SimpleGeom3D();
-		simpleGeom3D.rawGeom = new RawGeom(loader, draw3DRenderer, 3);
+		simpleGeom3D.rawGeom = VAOGeom.create(loader, draw3DRenderer, 3);
 		simpleGeom3D.renderingParameters = RenderingParameters.create(shader, simpleGeom3D, alias,
 				SimpleEntity.createDefaultEntity());
 		return simpleGeom3D;
@@ -56,7 +55,7 @@ public class SimpleGeom3D extends SimpleGeom {
 	@Override
 	public SimpleGeom3D copy(String alias) {
 		SimpleGeom3D copy = new SimpleGeom3D();
-		copy.rawGeom = new RawGeom(rawGeom.loader, rawGeom.drawRenderer, 3);
+		copy.rawGeom = VAOGeom.create(rawGeom.loader, rawGeom.drawRenderer, 3);
 		copy.copyValues(this, alias);
 		return copy;
 	}
@@ -77,17 +76,12 @@ public class SimpleGeom3D extends SimpleGeom {
 	public void updateColorByPosition(Vector ref, Vector4f color) {
 		Vector3f v3f = getVector3f(ref);
 		int i = 0;
-		for (Vector3f vertice : this.buildVerticesList()) {
+		for (Vector3f vertice : this.getVertices()) {
 			if (vertice.x == v3f.x && vertice.y == v3f.y && vertice.z == v3f.z) {
 				rawGeom.updateColor(i, color);
 			}
 			i++;
 		}
-	}
-
-	@Override
-	public void reloadVao() {
-		rawGeom.reloadVao(Draw3DShader.COLOR_INDEX);
 	}
 
 	@Override
@@ -102,11 +96,11 @@ public class SimpleGeom3D extends SimpleGeom {
 			throw new IllegalStateException(
 					"invert normals is only available for GL_TRIANGLES, please consider specify a renderMode for this geom");
 		}
-		Iterator<Vector3f> vertices = this.buildVerticesList().iterator();
+		Iterator<Vector3f> vertices = this.getVertices().iterator();
 		ArrayList<Vector3f> invertedVertices = new ArrayList<>();
 
 		while (vertices.hasNext()) {
-			//TODO extract
+			// TODO extract
 			// hardcoded logic for GL_TRIANGLES
 			Vector3f vert0 = vertices.next();
 			Vector3f vert1 = vertices.next();
@@ -118,20 +112,23 @@ public class SimpleGeom3D extends SimpleGeom {
 
 		List<Float> temp = invertedVertices.stream().map(vertice -> Arrays.asList(vertice.x, vertice.y, vertice.z))
 				.flatMap(Collection::stream).collect(Collectors.toList());
-		rawGeom.points = ArrayUtils.toPrimitive(temp.toArray(new Float[invertedVertices.size() * 3]));
+		rawGeom.points.setContent(temp);
 	}
 
 	private void addPoint3f(Vector point) {
 		Vector3f v3f = getVector3f(point);
-		float[] newPoints = ArrayUtils.addAll(rawGeom.points, v3f.x, v3f.y, v3f.z);
-		rawGeom.points = newPoints;
+		List<Float> pointsContent = rawGeom.points.getContent();
+		pointsContent.add(v3f.x);
+		pointsContent.add(v3f.y);
+		pointsContent.add(v3f.z);
 	}
 
 	@Override
-	public List<Vector3f> buildVerticesList() {
+	public List<Vector3f> getVertices() {
 		List<Vector3f> vectors = new ArrayList<>();
-		for (int i = 0; i < rawGeom.points.length; i += 3) {
-			vectors.add(new Vector3f(rawGeom.points[i], rawGeom.points[i + 1], rawGeom.points[i + 2]));
+		List<Float> content = rawGeom.points.getContent();
+		for (int i = 0; i < content.size(); i += 3) {
+			vectors.add(new Vector3f(content.get(i), content.get(i + 1), content.get(i + 2)));
 		}
 		return vectors;
 	}
@@ -150,7 +147,7 @@ public class SimpleGeom3D extends SimpleGeom {
 		}
 		int mode = this.getRenderingParameters().getRenderMode().get();
 		List<Face> faces = new ArrayList<>();
-		List<Vector3f> vertices = this.buildVerticesList();
+		List<Vector3f> vertices = this.getVertices();
 		switch (mode) {
 		case GL11.GL_TRIANGLES:
 			for (int i = 0; i < vertices.size(); i += 3) {

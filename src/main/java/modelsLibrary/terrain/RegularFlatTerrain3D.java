@@ -19,7 +19,7 @@ import utils.SpatialComparator;
 public class RegularFlatTerrain3D extends RegularTerrain3D {
 
 	private float height;
-	private static final int FLAT_DEFINITION = 5;
+	private static final int FLAT_DEFINITION = 1;
 	private static final int X_INDEX = 0;
 	private static final int Z_INDEX = 0;
 
@@ -80,7 +80,7 @@ public class RegularFlatTerrain3D extends RegularTerrain3D {
 		}
 		Optional<Entity> nearestEntity = Optional.empty();
 		for (Entity entityTerrain : filteredTerrainEntities) {
-			List<Vector3f> vertices = this.terrain.buildVerticesList();
+			List<Vector3f> vertices = this.terrain.getVertices();
 			Vector3f worldFrontLeft = Vector3f.add(entityTerrain.getPositions(), vertices.get(0), null);
 			Vector3f worldFarRight = Vector3f.add(entityTerrain.getPositions(), vertices.get(vertices.size() - 1),
 					null);

@@ -6,17 +6,17 @@ import entities.SimpleEntity;
 import renderEngine.RenderingParameters;
 
 public abstract class SimpleGeom implements ISimpleGeom {
-	protected RawGeom rawGeom;
+	protected VAOGeom rawGeom;
 	protected RenderingParameters renderingParameters;
-	
+
 	@Override
 	public void setColor(Vector4f color) {
-		this.rawGeom.setColor(color);
+		this.rawGeom.updateColor(color);
 	}
 
 	@Override
-	public void reset() {
-		this.rawGeom.reset();
+	public void clear() {
+		this.rawGeom.clear();
 		renderingParameters.reset();
 	}
 
@@ -34,14 +34,20 @@ public abstract class SimpleGeom implements ISimpleGeom {
 	public void updateRenderer() {
 		rawGeom.updateRenderer(this);
 	}
-	
+
 	@Override
-	public RawGeom getRawGeom() {
+	public VAOGeom getVAOGeom() {
 		return rawGeom;
 	}
-	
-	protected void copyValues(ISimpleGeom geomRef,String alias) {
-		this.rawGeom.copyRawValues(geomRef.getRawGeom());
-		this.renderingParameters = RenderingParameters.copy(geomRef.getRenderingParameters(), geomRef, alias, SimpleEntity.createDefaultEntity());
+
+	@Override
+	public void reloadVao() {
+		rawGeom.reloadVao();
+	}
+
+	protected void copyValues(ISimpleGeom geomRef, String alias) {
+		this.rawGeom.copyRawValues(geomRef.getVAOGeom());
+		this.renderingParameters = RenderingParameters.copy(geomRef.getRenderingParameters(), geomRef, alias,
+				SimpleEntity.createDefaultEntity());
 	}
 }
