@@ -6,6 +6,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.lwjglx.util.vector.Vector4f;
 
 import entities.Entity;
+import modelsManager.bufferCreator.VBOContent;
 import renderEngine.DrawRenderer;
 import renderEngine.Loader;
 import renderEngine.RenderingParameters;
@@ -46,7 +47,8 @@ public class RawGeom {
 		this.dimension = dimension;
 		this.points = new float[] {};
 		this.colors = new float[] {};
-		this.vaoId = loader.loadToVAO(points, this.dimension);
+		//TODO try to not allocate vaoId to early.
+		this.vaoId = loader.loadToVAO(new VBOContent(1, dimension, this.points));
 		this.drawRenderer = drawRenderer;
 	}
 

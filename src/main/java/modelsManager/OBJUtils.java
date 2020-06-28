@@ -98,9 +98,11 @@ public class OBJUtils {
 	private VBOContent setMaterialContent(OBJDataReferenceUtils objDataReferenceUtils, List<MaterialMapper> materials) {
 		int dimension = 0;
 		int indexCoords = 0;
+		int shaderPosition = 0;
 		float[] coords;
 		if(materials.get(0).getType() == MaterialType.IMAGE) {
 			dimension = 2;
+			shaderPosition = 2;
 			List<OBJTexCoord> textCoordList = objDataReferenceUtils.getTexturesCoordsIndices().stream().map(indice -> {
 						return objDataReferenceUtils.getTextCoordsList().get(indice);
 					}).collect(Collectors.toList());
@@ -111,6 +113,7 @@ public class OBJUtils {
 			}
 		}else {
 			dimension = 4;
+			shaderPosition = 4;
 			List<MaterialMapper> colorsList = objDataReferenceUtils.getColorsIndices().stream().map(indice -> {
 						return objDataReferenceUtils.getMaterialsList().get(indice);
 					}).collect(Collectors.toList());
@@ -130,7 +133,7 @@ public class OBJUtils {
 				}
 			}
 		}
-		return new VBOContent(dimension, coords);
+		return new VBOContent(shaderPosition,dimension, coords);
 	}
 
 	private VBOContent setPositionContent(OBJDataReferenceUtils objDataReferenceUtils) {
@@ -144,7 +147,7 @@ public class OBJUtils {
 			positions[indexCoords++] = vertex.y;
 			positions[indexCoords++] = vertex.z;
 		}
-		return new VBOContent(3, positions);
+		return new VBOContent(1, 3, positions);
 	}
 	
 	private VBOContent setNormalContent(OBJDataReferenceUtils objDataReferenceUtils) {
@@ -158,7 +161,7 @@ public class OBJUtils {
 			normals[indexCoords++] = normal.y;
 			normals[indexCoords++] = normal.z;
 		}
-		return new VBOContent(3, normals);
+		return new VBOContent(3, 3, normals);
 	}
 	
 
@@ -188,11 +191,13 @@ public class OBJUtils {
 		}
 		
 		int materialDimension = 0;
+		int shaderIndex = 0;
 		int indexMat = 0;
 		float[] matList;
 		//TODO absolutly unclear use of parametrized types... change to builder (materials : 2f / 4f/ none], normals : none if no surfacic )
 		if(materials.get(0) instanceof Vector4f) {
 			materialDimension = 4;
+			shaderIndex =4;
 			matList = new float[materials.size() * 4];
 			for(T mat : materials) {
 				Vector4f matV4f = (Vector4f) mat;
@@ -203,6 +208,7 @@ public class OBJUtils {
 			}
 		}else if(materials.get(0) instanceof Vector2f) {
 			materialDimension = 2;
+			shaderIndex =2;
 			matList = new float[materials.size() * 2];
 			for(T mat : materials) {
 				Vector2f matV2f = (Vector2f) mat;
@@ -212,6 +218,7 @@ public class OBJUtils {
 		}
 		else {
 			matList = null;
+			shaderIndex = -1;
 			System.err.println("unsupported type for materials.");
 		}
 		int indexCoords = 0;
@@ -229,7 +236,7 @@ public class OBJUtils {
 			positionsList[indexPositions++] = position.y;
 			positionsList[indexPositions++] = position.z;
 		}
-		return new OBJUtils(indicesList, new VBOContent(3, positionsList), new VBOContent(3, normals), new VBOContent(materialDimension, matList));
+		return new OBJUtils(indicesList, new VBOContent(1,3, positionsList), new VBOContent(3, 3, normals), new VBOContent(shaderIndex, materialDimension, matList));
 	}
 	
 	private OBJUtils(int[] vertexIndices, VBOContent positions2,

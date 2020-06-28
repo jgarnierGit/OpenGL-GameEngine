@@ -11,6 +11,7 @@ import org.lwjgl.opengl.GL30;
 import org.lwjglx.util.vector.Matrix4f;
 
 import entities.GuiTexture;
+import modelsManager.bufferCreator.VBOContent;
 import renderEngine.Loader.VBOIndex;
 import shaderManager.GuiShader;
 import toolbox.Maths;
@@ -22,7 +23,7 @@ public class GuiRenderer {
 	private List<GuiTexture> guis;
 
 	public GuiRenderer(Loader loader) throws IOException {
-		vaoId = loader.loadToVAO(positions,2);
+		vaoId = loader.loadToVAO(new VBOContent(1, 2, positions));
 		shader = new GuiShader();
 		guis = new ArrayList<>();
 	}

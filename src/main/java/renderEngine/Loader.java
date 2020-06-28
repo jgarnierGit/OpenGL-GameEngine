@@ -25,6 +25,7 @@ import org.newdawn.slick.opengl.PNGDecoder;
 import org.newdawn.slick.opengl.PNGDecoder.Format;
 
 import modelsManager.ModelUtils;
+import modelsManager.bufferCreator.VBOContent;
 
 import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
@@ -97,9 +98,9 @@ public class Loader {
 		return vaoID;
 	}
 
-	public int loadToVAO(float[] positions, int dimensions) {
+	public int loadToVAO(VBOContent vbo) {
 		int vaoId = createAndBindVAO();
-		this.storeDataFloatInAttrList(vaoId, VBOIndex.POSITION_INDEX, dimensions, positions);
+		this.storeDataFloatInAttrList(vaoId,vbo.getShaderInputIndex(), vbo.getDimension(), vbo.getContent());
 		unbindVAO();
 		return vaoId;
 	}

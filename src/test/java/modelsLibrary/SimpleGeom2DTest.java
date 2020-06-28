@@ -15,6 +15,7 @@ import org.lwjglx.util.vector.Vector4f;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
+import modelsManager.bufferCreator.VBOContent;
 import renderEngine.Draw2DRenderer;
 import renderEngine.Loader;
 import renderEngine.RenderingParameters;
@@ -35,7 +36,7 @@ class SimpleGeom2DTest {
 		loader = Mockito.mock(Loader.class);
 		
 		geom = SimpleGeom2D.create(loader, draw2DRenderer, shader, alias);
-		Mockito.when(loader.loadToVAO(geom.rawGeom.points, geom.rawGeom.dimension)).thenReturn(1);
+		Mockito.when(loader.loadToVAO(new VBOContent(1,  geom.rawGeom.dimension, geom.rawGeom.points))).thenReturn(1);
 	}
 	
 	@Nested
