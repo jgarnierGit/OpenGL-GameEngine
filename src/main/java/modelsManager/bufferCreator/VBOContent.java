@@ -22,7 +22,7 @@ public class VBOContent {
 	}
 
 	public static VBOContent create(int shaderInputIndex, int dimension, List<Float> content) {
-		if (content.size() != dimension) {
+		if (content.size() % dimension != 0) {
 			throw new IllegalArgumentException(
 					"expected a content of dimension " + dimension + ", got " + content.size());
 		}
