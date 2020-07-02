@@ -1,22 +1,17 @@
 package modelsLibrary;
 
-import org.lwjglx.util.vector.Vector4f;
-
 import entities.SimpleEntity;
+import modelsManager.OBJUtils;
 import renderEngine.RenderingParameters;
 
-public abstract class SimpleGeom implements ISimpleGeom {
-	protected VAOGeom rawGeom;
+public abstract class SimpleGeom implements IRenderableGeom, IEditableGeom {
+	protected VAOGeom vaoGeom;
+	protected GeomEditor geomEditor;
 	protected RenderingParameters renderingParameters;
 
 	@Override
-	public void setColor(Vector4f color) {
-		this.rawGeom.updateColor(color);
-	}
-
-	@Override
 	public void clear() {
-		this.rawGeom.clear();
+		this.vaoGeom.clear();
 		renderingParameters.reset();
 	}
 
@@ -26,28 +21,33 @@ public abstract class SimpleGeom implements ISimpleGeom {
 	}
 
 	@Override
-	public boolean hasTransparency() {
-		return this.rawGeom.hasTransparency();
-	}
-
-	@Override
 	public void updateRenderer() {
-		rawGeom.updateRenderer(this);
+		vaoGeom.updateRenderer(this);
 	}
 
 	@Override
 	public VAOGeom getVAOGeom() {
-		return rawGeom;
+		return vaoGeom;
+	}
+
+	@Override
+	public GeomEditor getGeomEditor() {
+		return this.geomEditor;
 	}
 
 	@Override
 	public void reloadVao() {
-		rawGeom.reloadVao();
+		vaoGeom.reloadVao();
 	}
 
-	protected void copyValues(ISimpleGeom geomRef, String alias) {
-		this.rawGeom.copyRawValues(geomRef.getVAOGeom());
-		this.renderingParameters = RenderingParameters.copy(geomRef.getRenderingParameters(), geomRef, alias,
-				SimpleEntity.createDefaultEntity());
+	@Override
+	public OBJUtils getObjContent() {
+		return this.vaoGeom.objContent;
+	}
+
+	protected void copyValues(IRenderableGeom geomRef, String alias) {
+		this.vaoGeom = VAOGeom.copy(geomRef.getVAOGeom());
+		this.renderingParameters = RenderingParameters.copy(geomRef.getRenderingParameters(), geomRef.getVAOGeom(),
+				alias, SimpleEntity.createDefaultEntity());
 	}
 }

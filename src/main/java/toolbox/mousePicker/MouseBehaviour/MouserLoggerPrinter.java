@@ -2,13 +2,8 @@ package toolbox.mousePicker.MouseBehaviour;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map.Entry;
-
-import javax.swing.event.ListSelectionEvent;
-
 import java.util.Random;
 
 import org.lwjgl.opengl.GL11;
@@ -20,9 +15,7 @@ import org.lwjglx.util.vector.Vector4f;
 
 import entities.Entity;
 import entities.EntityTutos;
-import entities.SimpleEntity;
-import modelsLibrary.ISimpleGeom;
-import modelsLibrary.ISimpleGeom;
+import modelsLibrary.IRenderableGeom;
 import modelsLibrary.SimpleGeom2D;
 import modelsLibrary.SimpleGeom3D;
 import modelsLibrary.SimpleGeom3DBuilder;
@@ -38,11 +31,11 @@ public class MouserLoggerPrinter {
 	private MasterRenderer masterRenderer;
 	// TODO maybe I can hide this too inside an interface
 
-	private List<ISimpleGeom> geoms;
-	private List<ISimpleGeom> cameraBboxes; // keep this one to allow cumulation
+	private List<IRenderableGeom> geoms;
+	private List<IRenderableGeom> cameraBboxes; // keep this one to allow cumulation
 	private SimpleGeom3D raysWorldOrigin;
-	private List<ISimpleGeom> debugPoints;
-	private ISimpleGeom ray3D;
+	private List<IRenderableGeom> debugPoints;
+	private IRenderableGeom ray3D;
 	private Loader loader;
 	private Vector3f camPos;
 	private static final Vector4f BOUNDING_BOX_COLOR = new Vector4f(0.5f, 1.0f, 0.5f, 0.4f);
@@ -59,9 +52,11 @@ public class MouserLoggerPrinter {
 		this.loader = loader;
 		this.coordSysManager = coordSysManager;
 		this.masterRenderer = masterRenderer;
-		this.raysWorldOrigin = SimpleGeom3DBuilder.create(this.loader, this.masterRenderer.get3DRenderer(), "ray").withDefaultShader().build();
+		this.raysWorldOrigin = SimpleGeom3DBuilder.create(this.loader, this.masterRenderer.get3DRenderer(), "ray")
+				.withDefaultShader().build();
 		this.raysWorldOrigin.getRenderingParameters().doNotUseEntities();
-		this.ray3D = SimpleGeom3DBuilder.create(this.loader, this.masterRenderer.get3DRenderer(), "RayPoints").withDefaultShader().build();
+		this.ray3D = SimpleGeom3DBuilder.create(this.loader, this.masterRenderer.get3DRenderer(), "RayPoints")
+				.withDefaultShader().build();
 		this.ray3D.getRenderingParameters().doNotUseEntities();
 
 		Vector3f ltn = new Vector3f(-BOUNDING_BOX, BOUNDING_BOX, -BOUNDING_BOX);
@@ -75,7 +70,7 @@ public class MouserLoggerPrinter {
 		this.bboxUniquePoints = Arrays.asList(ltn, rtn, lbn, rbn, ltf, rtf, lbf, rbf);
 	}
 
-	public ISimpleGeom getRay3D() {
+	public IRenderableGeom getRay3D() {
 		return this.ray3D;
 	}
 
@@ -84,7 +79,7 @@ public class MouserLoggerPrinter {
 	}
 
 	public void clear() {
-		for (ISimpleGeom geom : geoms) {
+		for (IRenderableGeom geom : geoms) {
 			geom.clear();
 		}
 		geoms.clear();
@@ -92,14 +87,13 @@ public class MouserLoggerPrinter {
 	}
 
 	public void prepareRendering() {
-		for (ISimpleGeom geom : geoms) {
+		for (IRenderableGeom geom : geoms) {
 			this.masterRenderer.reloadAndprocess(geom);
 		}
 		this.masterRenderer.sendForRendering();
 	}
 
-	public void printFilterByRayProximity(List<Entity> orderedList, Vector3f rayPosNormalizedToCam,
-			Vector3f largeRay) {
+	public void printFilterByRayProximity(List<Entity> orderedList, Vector3f rayPosNormalizedToCam, Vector3f largeRay) {
 		this.raysWorldOrigin.clear();
 		RenderingParameters rayParams = raysWorldOrigin.getRenderingParameters();
 		rayParams.renderFirst();
@@ -118,7 +112,7 @@ public class MouserLoggerPrinter {
 		geoms.add(raysWorldOrigin);
 	}
 
-	private void buildRaysByEntity(List<ISimpleGeom> orderedList, RenderingParameters rayParams) {
+	private void buildRaysByEntity(List<IRenderableGeom> orderedList, RenderingParameters rayParams) {
 		Vector4f selectedColor = new Vector4f(0, 0, 0, 1);
 		Vector3f originV = new Vector3f(0, 0, 0);
 		Vector3f destV = new Vector3f(1, 1, 1);
@@ -133,57 +127,58 @@ public class MouserLoggerPrinter {
 		// destV.normalise();
 		orderedList.forEach(geom -> {
 			geom.getRenderingParameters().getEntities().forEach(entity -> {
-			Vector3f rayPositionOriginCam = Vector3f.sub(entity.getPositions(), camPos, null);
-			// Vector3f rayPositionOriginCam =
-			// this.coordSysManager.objectToViewCoord(entity.getPositions());
-			rayPositionOriginCam.normalise();
+				Vector3f rayPositionOriginCam = Vector3f.sub(entity.getPositions(), camPos, null);
+				// Vector3f rayPositionOriginCam =
+				// this.coordSysManager.objectToViewCoord(entity.getPositions());
+				rayPositionOriginCam.normalise();
 
-			float objRotx = Vector3f.angle(xAxis, destV);
-			float objRoty = Vector3f.angle(yAxis, destV);
-			float objRotz = Vector3f.angle(zAxis, destV);
-			Vector3f cam = new Vector3f(camPos.x, camPos.y, camPos.z);
-			float rotX = Vector3f.angle(xAxis, rayPositionOriginCam);
-			float rotY = Vector3f.angle(yAxis, rayPositionOriginCam);
-			float rotZ = Vector3f.angle(zAxis, rayPositionOriginCam);
+				float objRotx = Vector3f.angle(xAxis, destV);
+				float objRoty = Vector3f.angle(yAxis, destV);
+				float objRotz = Vector3f.angle(zAxis, destV);
+				Vector3f cam = new Vector3f(camPos.x, camPos.y, camPos.z);
+				float rotX = Vector3f.angle(xAxis, rayPositionOriginCam);
+				float rotY = Vector3f.angle(yAxis, rayPositionOriginCam);
+				float rotZ = Vector3f.angle(zAxis, rayPositionOriginCam);
 
-			// try to get 3 angles from normalized rayPositionOriginCam, to complete rotX,
-			// rotY, rotZ for entity values.
-			// but seems to be meaningless.
-			Vector3f entityPosNormalizedToCam = Maths.normalizeFromOrigin(entity.getPositions(), camPos);
-			// System.out.println("length by point translation : "+
-			// entityPosNormalizedToCam.length());
-			// System.out.println("length of dest from camera : "+
-			// rayPositionOriginCam.length());
+				// try to get 3 angles from normalized rayPositionOriginCam, to complete rotX,
+				// rotY, rotZ for entity values.
+				// but seems to be meaningless.
+				Vector3f entityPosNormalizedToCam = Maths.normalizeFromOrigin(entity.getPositions(), camPos);
+				// System.out.println("length by point translation : "+
+				// entityPosNormalizedToCam.length());
+				// System.out.println("length of dest from camera : "+
+				// rayPositionOriginCam.length());
 
-			float length = rayPositionOriginCam.length();
-			float scaleRatio = -(length + destV.length()) / (destV.length() - length);
-			// System.out.println("ratio size applied :"+ scaleRatio);
-			// destV.scale(scaleRatio);
-			// System.out.println("scale destV length :"+ destV.length());
-			// rayPositionOriginCam.normalise();
-			// camPos.x,camPos.y,camPos.z (float)-(Math.toDegrees(Math.acos(destV.x)))
-			// rayParams.addEntity(new Vector3f(0,0,0),(float) Math.toDegrees(rotX -
-			// objRotx),(float) Math.toDegrees(rotY - objRoty),(float) Math.toDegrees(rotZ -
-			// objRotz), 1);//(float) Math.toDegrees(Math.acos(rayPositionOriginCam.x)),
-			// (float) Math.toDegrees(Math.acos(rayPositionOriginCam.y)), (float)
-			// Math.toDegrees(Math.acos(rayPositionOriginCam.z))
-			// rayParams.addEntity(new Vector3f(0, 0, 0), 0, 0, 0, 5);
-			Vector4f transformedOrigin = applyTransformationMatrix(originV, new Vector3f(0, 0, 0), 0, 0, 0, 5);
-			Vector4f transformedDest = applyTransformationMatrix(destV, new Vector3f(0, 0, 0), 0, 0, 0, 5);
-			Vector4f finalDest = new Vector4f();
-			Vector4f.sub(transformedDest, transformedOrigin, finalDest);
-			// System.out.println("length 1 : "+ finalDest.length());
-			// length is ok when applied with rot and transl
-			// rayParams.addEntity(new Vector3f(50, 100, 1000), (float) 90, (float) 90,
-			// (float) 90, 5);
-			Vector4f transformedOrigin2 = applyTransformationMatrix(originV, new Vector3f(50, 100, 1000), (float) 90,
-					(float) 90, (float) 90, 5);
-			Vector4f transformedDest2 = applyTransformationMatrix(destV, new Vector3f(50, 100, 1000), 90, 90, 90, 5);
-			Vector4f finalDest2 = new Vector4f();
-			Vector4f.sub(transformedDest2, transformedOrigin2, finalDest2);
-			// System.out.println("length 2 : "+ finalDest2.length());
-			
-		});
+				float length = rayPositionOriginCam.length();
+				float scaleRatio = -(length + destV.length()) / (destV.length() - length);
+				// System.out.println("ratio size applied :"+ scaleRatio);
+				// destV.scale(scaleRatio);
+				// System.out.println("scale destV length :"+ destV.length());
+				// rayPositionOriginCam.normalise();
+				// camPos.x,camPos.y,camPos.z (float)-(Math.toDegrees(Math.acos(destV.x)))
+				// rayParams.addEntity(new Vector3f(0,0,0),(float) Math.toDegrees(rotX -
+				// objRotx),(float) Math.toDegrees(rotY - objRoty),(float) Math.toDegrees(rotZ -
+				// objRotz), 1);//(float) Math.toDegrees(Math.acos(rayPositionOriginCam.x)),
+				// (float) Math.toDegrees(Math.acos(rayPositionOriginCam.y)), (float)
+				// Math.toDegrees(Math.acos(rayPositionOriginCam.z))
+				// rayParams.addEntity(new Vector3f(0, 0, 0), 0, 0, 0, 5);
+				Vector4f transformedOrigin = applyTransformationMatrix(originV, new Vector3f(0, 0, 0), 0, 0, 0, 5);
+				Vector4f transformedDest = applyTransformationMatrix(destV, new Vector3f(0, 0, 0), 0, 0, 0, 5);
+				Vector4f finalDest = new Vector4f();
+				Vector4f.sub(transformedDest, transformedOrigin, finalDest);
+				// System.out.println("length 1 : "+ finalDest.length());
+				// length is ok when applied with rot and transl
+				// rayParams.addEntity(new Vector3f(50, 100, 1000), (float) 90, (float) 90,
+				// (float) 90, 5);
+				Vector4f transformedOrigin2 = applyTransformationMatrix(originV, new Vector3f(50, 100, 1000),
+						(float) 90, (float) 90, (float) 90, 5);
+				Vector4f transformedDest2 = applyTransformationMatrix(destV, new Vector3f(50, 100, 1000), 90, 90, 90,
+						5);
+				Vector4f finalDest2 = new Vector4f();
+				Vector4f.sub(transformedDest2, transformedOrigin2, finalDest2);
+				// System.out.println("length 2 : "+ finalDest2.length());
+
+			});
 		});
 
 	}
@@ -217,7 +212,7 @@ public class MouserLoggerPrinter {
 	 * print frustrum bbox
 	 */
 	public void printCameraBBox() {
-		for (ISimpleGeom point : cameraBboxes) {
+		for (IRenderableGeom point : cameraBboxes) {
 			point.clear();
 		}
 		cameraBboxes.clear();
@@ -288,7 +283,7 @@ public class MouserLoggerPrinter {
 		HashMap<Integer, SimpleGeom3D> generatedGeomLineConfiguration = new HashMap<>();
 		HashMap<Integer, SimpleGeom3D> generatedGeomPlainConfiguration = new HashMap<>();
 
-		ISimpleGeom boundingBox = createBboxGeomAsLines(this.bboxUniquePoints.get(4), this.bboxUniquePoints.get(5),
+		IRenderableGeom boundingBox = createBboxGeomAsLines(this.bboxUniquePoints.get(4), this.bboxUniquePoints.get(5),
 				this.bboxUniquePoints.get(6), this.bboxUniquePoints.get(7), this.bboxUniquePoints.get(0),
 				this.bboxUniquePoints.get(1), this.bboxUniquePoints.get(2), this.bboxUniquePoints.get(3));
 		RenderingParameters bboxParam = boundingBox.getRenderingParameters();
@@ -297,9 +292,10 @@ public class MouserLoggerPrinter {
 		bboxParam.addGlState(GL11.GL_BLEND, true);
 		bboxParam.renderBefore("frustrumPlain");
 		// left and right are inverted because I use frustrum generator.
-		ISimpleGeom bboxPlain = createBboxGeomAsTriangles(this.bboxUniquePoints.get(4), this.bboxUniquePoints.get(5),
-				this.bboxUniquePoints.get(6), this.bboxUniquePoints.get(7), this.bboxUniquePoints.get(0),
-				this.bboxUniquePoints.get(1), this.bboxUniquePoints.get(2), this.bboxUniquePoints.get(3));
+		IRenderableGeom bboxPlain = createBboxGeomAsTriangles(this.bboxUniquePoints.get(4),
+				this.bboxUniquePoints.get(5), this.bboxUniquePoints.get(6), this.bboxUniquePoints.get(7),
+				this.bboxUniquePoints.get(0), this.bboxUniquePoints.get(1), this.bboxUniquePoints.get(2),
+				this.bboxUniquePoints.get(3));
 
 		RenderingParameters bboxParamPlain = bboxPlain.getRenderingParameters();
 		bboxParamPlain.setAlias("bboxEntitiesPlainCategColor");
@@ -311,67 +307,67 @@ public class MouserLoggerPrinter {
 		Vector4f outsideColor = new Vector4f(0.85f, 0.2f, 0.25f, 0.4f);
 		Random random = new Random();
 		System.out.println("process over " + entities.size() + " entities");
-			for (Entity entity : entities) {
-				Vector3f worldPositionEntity = entity.getPositions();
+		for (Entity entity : entities) {
+			Vector3f worldPositionEntity = entity.getPositions();
 
-				int indexPoint = 0;
-				int hash = 0;
-				int indexHash = 0;
-				// detect configuration to apply (mix between inside/outside vertices)
-				for (Vector3f point : bboxUniquePoints) {
-					Vector3f worldCoordPoint = Vector3f.add(worldPositionEntity, point, null);
-					Vector3f viewCoordPoint = this.coordSysManager.objectToViewCoord((Vector3f) worldCoordPoint);
-					Vector4f projectedPoint = this.coordSysManager.objectToProjectionMatrix(viewCoordPoint);
-					if (!this.coordSysManager.isInClipSpace(projectedPoint)) {
-						hash += Math.pow(2, indexHash);
+			int indexPoint = 0;
+			int hash = 0;
+			int indexHash = 0;
+			// detect configuration to apply (mix between inside/outside vertices)
+			for (Vector3f point : bboxUniquePoints) {
+				Vector3f worldCoordPoint = Vector3f.add(worldPositionEntity, point, null);
+				Vector3f viewCoordPoint = this.coordSysManager.objectToViewCoord((Vector3f) worldCoordPoint);
+				Vector4f projectedPoint = this.coordSysManager.objectToProjectionMatrix(viewCoordPoint);
+				if (!this.coordSysManager.isInClipSpace(projectedPoint)) {
+					hash += Math.pow(2, indexHash);
+				}
+				indexHash++;
+			}
+			// get or create new configuration and add it an entity
+			SimpleGeom3D boundingBoxOutside = generatedGeomLineConfiguration.get(hash);
+			if (boundingBoxOutside == null) {
+				System.out.println("generate hash : " + hash);
+				boundingBoxOutside = (SimpleGeom3D) boundingBox.copy("bboxEntities");
+				generatedGeomLineConfiguration.put(hash, boundingBoxOutside);
+				int pointHashIndex = 128;
+				int pointIndex = 7;
+				while (hash > 0) {
+					if (hash >= pointHashIndex) {
+						boundingBoxOutside.getPositionsToUpdate(bboxUniquePoints.get(pointIndex), outsideColor);
+						hash -= pointHashIndex;
 					}
-					indexHash++;
+					pointIndex--;
+					pointHashIndex = (int) Math.pow(2, pointIndex);
 				}
-				// get or create new configuration and add it an entity
-				SimpleGeom3D boundingBoxOutside = generatedGeomLineConfiguration.get(hash);
-				if (boundingBoxOutside == null) {
-					System.out.println("generate hash : " + hash);
-					boundingBoxOutside = (SimpleGeom3D) boundingBox.copy("bboxEntities");
-					generatedGeomLineConfiguration.put(hash, boundingBoxOutside);
-					int pointHashIndex = 128;
-					int pointIndex = 7;
-					while (hash > 0) {
-						if (hash >= pointHashIndex) {
-							boundingBoxOutside.updateColorByPosition(bboxUniquePoints.get(pointIndex), outsideColor);
-							hash -= pointHashIndex;
-						}
-						pointIndex--;
-						pointHashIndex = (int) Math.pow(2, pointIndex);
-					}
-					geoms.add(boundingBoxOutside);
-				}
-				// TODO FIXME generating classes over a param affect every Geoms, geoms
-				// generation is not good either.
-				SimpleGeom3D boundingBoxPlaincateg = generatedGeomPlainConfiguration.get(hash);
-				if (boundingBoxPlaincateg == null) {
-					boundingBoxPlaincateg = (SimpleGeom3D) bboxPlain.copy("bboxEntitiesPlainCategColor");
+				geoms.add(boundingBoxOutside);
+			}
+			// TODO FIXME generating classes over a param affect every Geoms, geoms
+			// generation is not good either.
+			SimpleGeom3D boundingBoxPlaincateg = generatedGeomPlainConfiguration.get(hash);
+			if (boundingBoxPlaincateg == null) {
+				boundingBoxPlaincateg = (SimpleGeom3D) bboxPlain.copy("bboxEntitiesPlainCategColor");
 
-					generatedGeomPlainConfiguration.put(hash, boundingBoxPlaincateg);
-					geoms.add(boundingBoxPlaincateg);
-					// TODO debug, rendering params not set.
-					RenderingParameters plainBboxParam = boundingBoxPlaincateg.getRenderingParameters();
-					// plainBboxParam.renderAfter("bboxEntities");
-					boundingBoxPlaincateg.invertNormals();
-					float r = random.nextFloat() % 100;
-					float g = random.nextFloat() % 100;
-					float b = random.nextFloat() % 100;
-					plainBboxParam.overrideEachColor(new Vector4f(r, g, b, 0.4f));
-					plainBboxParam.addGlState(GL11.GL_BLEND, true);
-					System.out.println("colorOverride :" + hash + " " + plainBboxParam.getOverridedColors());
-				}
+				generatedGeomPlainConfiguration.put(hash, boundingBoxPlaincateg);
+				geoms.add(boundingBoxPlaincateg);
+				// TODO debug, rendering params not set.
+				RenderingParameters plainBboxParam = boundingBoxPlaincateg.getRenderingParameters();
+				// plainBboxParam.renderAfter("bboxEntities");
+				boundingBoxPlaincateg.invertNormals();
+				float r = random.nextFloat() % 100;
+				float g = random.nextFloat() % 100;
+				float b = random.nextFloat() % 100;
+				plainBboxParam.overrideEachColor(new Vector4f(r, g, b, 0.4f));
+				plainBboxParam.addGlState(GL11.GL_BLEND, true);
+				System.out.println("colorOverride :" + hash + " " + plainBboxParam.getOverridedColors());
+			}
 
-				RenderingParameters renderParam = boundingBoxOutside.getRenderingParameters();
-				renderParam.addEntity(entity.getPositions(), 0f, 0f, 0f, 1);
+			RenderingParameters renderParam = boundingBoxOutside.getRenderingParameters();
+			renderParam.addEntity(entity.getPositions(), 0f, 0f, 0f, 1);
 
-				RenderingParameters renderParamPlain = boundingBoxPlaincateg.getRenderingParameters();
-				renderParamPlain.addEntity(entity.getPositions(), 0f, 0f, 0f, 1);
+			RenderingParameters renderParamPlain = boundingBoxPlaincateg.getRenderingParameters();
+			renderParamPlain.addEntity(entity.getPositions(), 0f, 0f, 0f, 1);
 
-				// printSelectedBboxIn2D(entity.getPositions(), boundingBox.getVertices());
+			// printSelectedBboxIn2D(entity.getPositions(), boundingBox.getVertices());
 		}
 
 		generatedGeomLineConfiguration.forEach((hash, geom) -> {
@@ -380,11 +376,12 @@ public class MouserLoggerPrinter {
 		});
 	}
 
-	private ISimpleGeom createBboxGeomAsTriangles(Vector3f ltfWorldCoord, Vector3f rtfWorldCoord, Vector3f lbfWorldCoord,
-			Vector3f rbfWorldCoord, Vector3f ltnWorldCoord, Vector3f rtnWorldCoord, Vector3f lbnWorldCoord,
-			Vector3f rbnWorldCoord) {
+	private IRenderableGeom createBboxGeomAsTriangles(Vector3f ltfWorldCoord, Vector3f rtfWorldCoord,
+			Vector3f lbfWorldCoord, Vector3f rbfWorldCoord, Vector3f ltnWorldCoord, Vector3f rtnWorldCoord,
+			Vector3f lbnWorldCoord, Vector3f rbnWorldCoord) {
 		Vector4f cameraTransparency = FRUSTRUM_PLAIN_COLOR;
-		SimpleGeom3D frustrum = SimpleGeom3DBuilder.create(loader, this.masterRenderer.get3DRenderer(), "").withDefaultShader().build();
+		SimpleGeom3D frustrum = SimpleGeom3DBuilder.create(loader, this.masterRenderer.get3DRenderer(), "")
+				.withDefaultShader().build();
 		frustrum.addPoint(rtnWorldCoord, cameraTransparency);
 		frustrum.addPoint(rbnWorldCoord, cameraTransparency);
 		frustrum.addPoint(ltnWorldCoord, cameraTransparency);// T1 near
@@ -436,9 +433,10 @@ public class MouserLoggerPrinter {
 		return frustrum;
 	}
 
-	private ISimpleGeom createBboxGeomAsLines(Vector3f ltf, Vector3f rtf, Vector3f lbf, Vector3f rbf, Vector3f ltn,
+	private IRenderableGeom createBboxGeomAsLines(Vector3f ltf, Vector3f rtf, Vector3f lbf, Vector3f rbf, Vector3f ltn,
 			Vector3f rtn, Vector3f lbn, Vector3f rbn) {
-		SimpleGeom3D boundingBox = SimpleGeom3DBuilder.create(this.loader, this.masterRenderer.get3DRenderer(), "").withDefaultShader().build();
+		SimpleGeom3D boundingBox = SimpleGeom3DBuilder.create(this.loader, this.masterRenderer.get3DRenderer(), "")
+				.withDefaultShader().build();
 
 		boundingBox.addPoint(new Vector3f(lbf), BOUNDING_BOX_COLOR);
 		boundingBox.addPoint(new Vector3f(ltf), BOUNDING_BOX_COLOR);// LEFT-FAR
@@ -511,11 +509,15 @@ public class MouserLoggerPrinter {
 		SimpleGeom2D pointToCartesianSpace = SimpleGeom2D.create(loader, this.masterRenderer.get2DRenderer(),
 				"pointCartesian");
 		SimpleGeom2D nearPlane = SimpleGeom2D.create(loader, this.masterRenderer.get2DRenderer(), "pointNear");
-		nearPlane.addPoint(new Vector2f(-CoordinatesSystemManager.getNearPlane(), -CoordinatesSystemManager.getNearPlane()),
+		nearPlane.addPoint(
+				new Vector2f(-CoordinatesSystemManager.getNearPlane(), -CoordinatesSystemManager.getNearPlane()),
 				new Vector4f(0.56f, 0.91f, 0.84f, 1));
-		nearPlane.addPoint(new Vector2f(CoordinatesSystemManager.getNearPlane(), -CoordinatesSystemManager.getNearPlane()));
-		nearPlane.addPoint(new Vector2f(CoordinatesSystemManager.getNearPlane(), CoordinatesSystemManager.getNearPlane()));
-		nearPlane.addPoint(new Vector2f(-CoordinatesSystemManager.getNearPlane(), CoordinatesSystemManager.getNearPlane()));
+		nearPlane.addPoint(
+				new Vector2f(CoordinatesSystemManager.getNearPlane(), -CoordinatesSystemManager.getNearPlane()));
+		nearPlane.addPoint(
+				new Vector2f(CoordinatesSystemManager.getNearPlane(), CoordinatesSystemManager.getNearPlane()));
+		nearPlane.addPoint(
+				new Vector2f(-CoordinatesSystemManager.getNearPlane(), CoordinatesSystemManager.getNearPlane()));
 		list.forEach(verticeWorldCoord -> {
 			Vector3f worldPoint = Vector3f.add(position, (Vector3f) verticeWorldCoord, null);
 			Vector3f vtxViewCoord = this.coordSysManager.objectToViewCoord(worldPoint);
@@ -551,7 +553,8 @@ public class MouserLoggerPrinter {
 			Vector3f lbfWorldCoord, Vector3f rbfWorldCoord, Vector3f ltnWorldCoord, Vector3f rtnWorldCoord,
 			Vector3f lbnWorldCoord, Vector3f rbnWorldCoord) {
 		Vector4f cameraTransparency = FRUSTRUM_PLAIN_COLOR;
-		SimpleGeom3D frustrum = SimpleGeom3DBuilder.create(loader, this.masterRenderer.get3DRenderer(), "").withDefaultShader().build();
+		SimpleGeom3D frustrum = SimpleGeom3DBuilder.create(loader, this.masterRenderer.get3DRenderer(), "")
+				.withDefaultShader().build();
 		frustrum.addPoint(ltnWorldCoord, cameraTransparency);
 		frustrum.addPoint(lbnWorldCoord, cameraTransparency);
 		frustrum.addPoint(rtnWorldCoord, cameraTransparency);// T1 near
@@ -605,7 +608,8 @@ public class MouserLoggerPrinter {
 	private SimpleGeom3D getFrustrumForLines(Vector3f ltfWorldCoord, Vector3f rtfWorldCoord, Vector3f lbfWorldCoord,
 			Vector3f rbfWorldCoord, Vector3f ltnWorldCoord, Vector3f rtnWorldCoord, Vector3f lbnWorldCoord,
 			Vector3f rbnWorldCoord) {
-		SimpleGeom3D frustrum = SimpleGeom3DBuilder.create(loader, this.masterRenderer.get3DRenderer(), "").withDefaultShader().build();
+		SimpleGeom3D frustrum = SimpleGeom3DBuilder.create(loader, this.masterRenderer.get3DRenderer(), "")
+				.withDefaultShader().build();
 		frustrum.addPoint(lbfWorldCoord, frustrum.getVAOGeom().getDefaultColor());
 		frustrum.addPoint(ltfWorldCoord, frustrum.getVAOGeom().getDefaultColor());
 
@@ -648,14 +652,15 @@ public class MouserLoggerPrinter {
 	 * Create RenderingParameters subset of every RP set containing entity to
 	 * update, then delete it from initial set; TODO extract logic to a more
 	 * suitable class
-	 * @param geom 	   update entities of this geom
+	 * 
+	 * @param geom     update entities of this geom
 	 * @param entities update transparency for every entities given.
 	 * @param aliases  update transparency for specified aliases only. Leave empty
 	 *                 to update every RenderingParameters using this entity.
 	 */
-	public void updateTransparency(ISimpleGeom geom, List<Entity> entities) {
-		HashMap<ISimpleGeom, ISimpleGeom> uniqueGeomMapping = new HashMap<>();
-		ISimpleGeom geomMatched = uniqueGeomMapping.putIfAbsent(geom, geom.copy("rayMatchedBbox"));
+	public void updateTransparency(IRenderableGeom geom, List<Entity> entities) {
+		HashMap<IRenderableGeom, IRenderableGeom> uniqueGeomMapping = new HashMap<>();
+		IRenderableGeom geomMatched = uniqueGeomMapping.putIfAbsent(geom, geom.copy("rayMatchedBbox"));
 		if (geomMatched == null) {
 			geomMatched = uniqueGeomMapping.get(geom);
 			geomMatched.getRenderingParameters().overrideGlobalTransparency(1f);
@@ -665,32 +670,32 @@ public class MouserLoggerPrinter {
 			geomMatched.getRenderingParameters().addEntity(entity.getPositions(), 0, 0, 0, 1);
 			geom.getRenderingParameters().removeEntity(entity);
 		}
-		for (ISimpleGeom entry : uniqueGeomMapping.values()) {
-			geoms.add((ISimpleGeom) entry);
+		for (IRenderableGeom entry : uniqueGeomMapping.values()) {
+			geoms.add((IRenderableGeom) entry);
 		}
 	}
 
 	/**
 	 * FIXME duplicated with updateTransparency
+	 * 
 	 * @param geom
 	 * @param entities
 	 */
-	public void flemme(ISimpleGeom geom, List<Entity> entities) {
-		HashMap<ISimpleGeom, ISimpleGeom> uniqueGeomMapping = new HashMap<>();
-			RenderingParameters param = geom.getRenderingParameters();
-				ISimpleGeom geomMatched = uniqueGeomMapping.putIfAbsent(geom,
-						geom.copy("matchedPicker"));
-				if (geomMatched == null) {
-					geomMatched = uniqueGeomMapping.get(geom);
-					geomMatched.getRenderingParameters().overrideEachColor(new Vector4f(1, 1, 1, 1));
-					geomMatched.getRenderingParameters().renderFirst();
-				}
-				for(Entity entity : entities) {
-					geomMatched.getRenderingParameters().addEntity(entity.getPositions(), 0, 0, 0, 1);
-					param.removeEntity(entity);
-				}
-		for (ISimpleGeom entry : uniqueGeomMapping.values()) {
-			geoms.add((ISimpleGeom) entry);
+	public void flemme(IRenderableGeom geom, List<Entity> entities) {
+		HashMap<IRenderableGeom, IRenderableGeom> uniqueGeomMapping = new HashMap<>();
+		RenderingParameters param = geom.getRenderingParameters();
+		IRenderableGeom geomMatched = uniqueGeomMapping.putIfAbsent(geom, geom.copy("matchedPicker"));
+		if (geomMatched == null) {
+			geomMatched = uniqueGeomMapping.get(geom);
+			geomMatched.getRenderingParameters().overrideEachColor(new Vector4f(1, 1, 1, 1));
+			geomMatched.getRenderingParameters().renderFirst();
+		}
+		for (Entity entity : entities) {
+			geomMatched.getRenderingParameters().addEntity(entity.getPositions(), 0, 0, 0, 1);
+			param.removeEntity(entity);
+		}
+		for (IRenderableGeom entry : uniqueGeomMapping.values()) {
+			geoms.add((IRenderableGeom) entry);
 		}
 	}
 
@@ -712,7 +717,8 @@ public class MouserLoggerPrinter {
 	 * @param glRender
 	 */
 	public void print3DVectors(String alias, List<Vector3f> list, Vector4f color, int glRender) {
-		SimpleGeom3D points = SimpleGeom3DBuilder.create(loader, this.masterRenderer.get3DRenderer(), alias).withDefaultShader().build();
+		SimpleGeom3D points = SimpleGeom3DBuilder.create(loader, this.masterRenderer.get3DRenderer(), alias)
+				.withDefaultShader().build();
 		for (Vector3f vec : list) {
 			if (color != null) {
 				points.addPoint(vec, color);
@@ -731,7 +737,7 @@ public class MouserLoggerPrinter {
 	 * @param entity
 	 * @param normalSize
 	 */
-	public void drawBboxNormals(ISimpleGeom geom, int normalSize) {
+	public void drawBboxNormals(IRenderableGeom geom, int normalSize) {
 		RenderingParameters normalsParams = null;
 		// TODO perform real match with unique geom that will be retreived in many
 		// entities to group normals together
@@ -739,15 +745,15 @@ public class MouserLoggerPrinter {
 		SimpleGeom3D normalsGeom = createNormalsGeom(param, normalSize);
 		normalsParams = normalsGeom.getRenderingParameters();
 		geoms.add(normalsGeom);
-		
-		//FIXME first one will be added twice.
+
+		// FIXME first one will be added twice.
 		for (Entity entity : geom.getRenderingParameters().getEntities()) {
 			normalsParams.addEntity(entity.getPositions(), 0f, 0f, 0f, 1f);
 		}
 	}
 
 	private SimpleGeom3D createNormalsGeom(RenderingParameters param, int normalSize) {
-		final SimpleGeom3D geom = (SimpleGeom3D) param.getGeom();
+		final SimpleGeom3D geom = (SimpleGeom3D) param.getVAOGeom();
 
 		List<Vector3f> vertices = geom.getVertices();
 		if (!param.getRenderMode().isPresent()) {
@@ -769,7 +775,8 @@ public class MouserLoggerPrinter {
 			System.err.println("not allowed renderMode (" + param.getRenderMode()
 					+ ") transformation for normal computation of " + param);
 		}
-		SimpleGeom3D normalsGeom = SimpleGeom3DBuilder.create(loader, this.masterRenderer.get3DRenderer(), "normals").withDefaultShader().build();
+		SimpleGeom3D normalsGeom = SimpleGeom3DBuilder.create(loader, this.masterRenderer.get3DRenderer(), "normals")
+				.withDefaultShader().build();
 
 		int i = 0;
 		for (Vector3f normal : normals) {

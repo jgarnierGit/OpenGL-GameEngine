@@ -2,14 +2,15 @@ package entities;
 
 import java.util.List;
 
-import modelsLibrary.ISimpleGeom;
+import modelsLibrary.IRenderableGeom;
 
 /**
  * Simplify entities accessor
+ * 
  * @author chezmoi
  *
  */
 public interface GeomContainer {
 
-	public List<ISimpleGeom> getGeoms();
+	public List<IRenderableGeom> getGeoms();
 }

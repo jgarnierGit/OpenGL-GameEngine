@@ -1,9 +1,12 @@
 package modelsLibrary.terrain;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Logger;
 
 import entities.Entity;
+import modelsLibrary.IRenderableGeom;
 import modelsLibrary.SimpleGeom3D;
 import modelsLibrary.SimpleGeom3DBuilder;
 import renderEngine.Draw3DRenderer;
@@ -21,7 +24,7 @@ public abstract class Terrain3D implements ITerrain {
 	}
 
 	@Override
-	public SimpleGeom3D getSimpleGeom() {
-		return terrain;
+	public List<IRenderableGeom> getGeoms() {
+		return Arrays.asList(terrain);
 	}
 }

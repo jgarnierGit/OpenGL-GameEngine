@@ -38,16 +38,18 @@ public class SimpleGeom3D extends SimpleGeom {
 	protected static SimpleGeom3D create(Loader loader, DrawRenderer draw3DRenderer, IShader3D shader, String alias,
 			Entity entity) {
 		SimpleGeom3D simpleGeom3D = new SimpleGeom3D();
-		simpleGeom3D.rawGeom = VAOGeom.create(loader, draw3DRenderer, 3);
-		simpleGeom3D.renderingParameters = RenderingParameters.create(shader, simpleGeom3D, alias, entity);
+		simpleGeom3D.vaoGeom = VAOGeom.create(loader, draw3DRenderer, 3);
+		simpleGeom3D.geomEditor = GeomEditor.create(simpleGeom3D);
+		simpleGeom3D.renderingParameters = RenderingParameters.create(shader, simpleGeom3D.vaoGeom, alias, entity);
 		return simpleGeom3D;
 	}
 
 	protected static SimpleGeom3D createWithDefaultEntity(Loader loader, DrawRenderer draw3DRenderer, IShader3D shader,
 			String alias) {
 		SimpleGeom3D simpleGeom3D = new SimpleGeom3D();
-		simpleGeom3D.rawGeom = VAOGeom.create(loader, draw3DRenderer, 3);
-		simpleGeom3D.renderingParameters = RenderingParameters.create(shader, simpleGeom3D, alias,
+		simpleGeom3D.vaoGeom = VAOGeom.create(loader, draw3DRenderer, 3);
+		simpleGeom3D.geomEditor = GeomEditor.create(simpleGeom3D);
+		simpleGeom3D.renderingParameters = RenderingParameters.create(shader, simpleGeom3D.vaoGeom, alias,
 				SimpleEntity.createDefaultEntity());
 		return simpleGeom3D;
 	}
@@ -55,33 +57,32 @@ public class SimpleGeom3D extends SimpleGeom {
 	@Override
 	public SimpleGeom3D copy(String alias) {
 		SimpleGeom3D copy = new SimpleGeom3D();
-		copy.rawGeom = VAOGeom.create(rawGeom.loader, rawGeom.drawRenderer, 3);
 		copy.copyValues(this, alias);
 		return copy;
 	}
 
 	@Override
 	public void addPoint(Vector point) {
-		rawGeom.duplicateLastColor();
 		addPoint3f(point);
 	}
 
 	@Override
 	public void addPoint(Vector point, Vector4f color) {
-		rawGeom.addColor(color);
 		addPoint3f(point);
 	}
 
 	@Override
-	public void updateColorByPosition(Vector ref, Vector4f color) {
+	public List<Integer> getPositionsToUpdate(Vector ref) {
+		ArrayList<Integer> positionsToUpdate = new ArrayList<>();
 		Vector3f v3f = getVector3f(ref);
 		int i = 0;
 		for (Vector3f vertice : this.getVertices()) {
 			if (vertice.x == v3f.x && vertice.y == v3f.y && vertice.z == v3f.z) {
-				rawGeom.updateColor(i, color);
+				positionsToUpdate.add(i);
 			}
 			i++;
 		}
+		return positionsToUpdate;
 	}
 
 	@Override
@@ -112,12 +113,12 @@ public class SimpleGeom3D extends SimpleGeom {
 
 		List<Float> temp = invertedVertices.stream().map(vertice -> Arrays.asList(vertice.x, vertice.y, vertice.z))
 				.flatMap(Collection::stream).collect(Collectors.toList());
-		rawGeom.points.setContent(temp);
+		this.vaoGeom.getPositions().setContent(temp);
 	}
 
 	private void addPoint3f(Vector point) {
 		Vector3f v3f = getVector3f(point);
-		List<Float> pointsContent = rawGeom.points.getContent();
+		List<Float> pointsContent = this.vaoGeom.getPositions().getContent();
 		pointsContent.add(v3f.x);
 		pointsContent.add(v3f.y);
 		pointsContent.add(v3f.z);
@@ -126,7 +127,7 @@ public class SimpleGeom3D extends SimpleGeom {
 	@Override
 	public List<Vector3f> getVertices() {
 		List<Vector3f> vectors = new ArrayList<>();
-		List<Float> content = rawGeom.points.getContent();
+		List<Float> content = this.vaoGeom.getPositions().getContent();
 		for (int i = 0; i < content.size(); i += 3) {
 			vectors.add(new Vector3f(content.get(i), content.get(i + 1), content.get(i + 2)));
 		}

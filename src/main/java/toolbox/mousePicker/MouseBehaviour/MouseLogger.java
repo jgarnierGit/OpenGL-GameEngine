@@ -23,19 +23,16 @@ import entities.Entity;
 import entities.EntityTutos;
 import inputListeners.MouseInputListener;
 import modelsLibrary.Face;
-import modelsLibrary.ISimpleGeom;
-import renderEngine.DisplayManager;
+import modelsLibrary.IRenderableGeom;
 import renderEngine.Loader;
 import renderEngine.MasterRenderer;
-import renderEngine.RenderingParameters;
 import toolbox.CoordinatesSystemManager;
 import toolbox.Maths;
 import utils.IntersectionResult;
-import utils.MeasureResult;
 import utils.SpatialComparator;
 
 public class MouseLogger implements IMouseBehaviour {
-	private Map<ISimpleGeom, List<Entity>> entitiesByGeom;
+	private Map<IRenderableGeom, List<Entity>> entitiesByGeom;
 	private CameraEntity camera;
 	private MouserLoggerPrinter mouserLoggerPrinter;
 	private Matrix4f viewMatrix;
@@ -59,7 +56,7 @@ public class MouseLogger implements IMouseBehaviour {
 		this.mouseInputListener.addRunnerOnUniquePress(GLFW_MOUSE_BUTTON_LEFT, () -> processPicking());
 	}
 
-	public void processEntity(ISimpleGeom geom) {
+	public void processEntity(IRenderableGeom geom) {
 		this.entitiesByGeom.put(geom, new ArrayList<>(geom.getRenderingParameters().getEntities()));
 	}
 
@@ -76,19 +73,19 @@ public class MouseLogger implements IMouseBehaviour {
 
 		filterEntitiesByCameraClip();
 		generateBoundingBoxes();
-		for(List<Entity> entities : this.entitiesByGeom.values()) {
+		for (List<Entity> entities : this.entitiesByGeom.values()) {
 			this.mouserLoggerPrinter.printBoundingBoxes(entities);
 		}
-		
+
 		Vector3f rayFromCamera = getPointOnRay(ray, 1);
 		Vector3f largeRay = getPointOnRay(ray, 1000);
-		for(List<Entity> entities : this.entitiesByGeom.values()) {
-		this.mouserLoggerPrinter.printFilterByRayProximity(entities, rayFromCamera, largeRay);
+		for (List<Entity> entities : this.entitiesByGeom.values()) {
+			this.mouserLoggerPrinter.printFilterByRayProximity(entities, rayFromCamera, largeRay);
 		}
 		filterEntitiesByBboxIntersection();
-		ISimpleGeom bboxPlain = null;
-		for (ISimpleGeom entity : this.entitiesByGeom.keySet()) {
-			if("bboxEntitiesPlainCategColor".equals(entity.getRenderingParameters().getAlias())) {
+		IRenderableGeom bboxPlain = null;
+		for (IRenderableGeom entity : this.entitiesByGeom.keySet()) {
+			if ("bboxEntitiesPlainCategColor".equals(entity.getRenderingParameters().getAlias())) {
 				bboxPlain = entity;
 			}
 		}
@@ -96,21 +93,22 @@ public class MouseLogger implements IMouseBehaviour {
 
 		this.mouserLoggerPrinter.printCameraBBox();
 		List<String> aliases = Arrays.asList("bboxEntities", "bboxEntitiesPlainCategColor");
-		for(Entry<ISimpleGeom,List<Entity>> entry : this.entitiesByGeom.entrySet()) {
-			if(aliases.contains(entry.getKey().getRenderingParameters().getAlias())) {
-				this.mouserLoggerPrinter.updateTransparency(entry.getKey(),entry.getValue());
+		for (Entry<IRenderableGeom, List<Entity>> entry : this.entitiesByGeom.entrySet()) {
+			if (aliases.contains(entry.getKey().getRenderingParameters().getAlias())) {
+				this.mouserLoggerPrinter.updateTransparency(entry.getKey(), entry.getValue());
 			}
 		}
-		if(!this.entitiesByGeom.isEmpty()) {
-			//TODO if I want to override color from an entity, it means it must process set separation and creation.
+		if (!this.entitiesByGeom.isEmpty()) {
+			// TODO if I want to override color from an entity, it means it must process set
+			// separation and creation.
 			List<String> aliasesToSelect = Arrays.asList("bboxEntitiesPlainCategColor");
-			for(Entry<ISimpleGeom,List<Entity>> entry : this.entitiesByGeom.entrySet()) {
-				if(aliasesToSelect.contains(entry.getKey().getRenderingParameters().getAlias())) {
-					this.mouserLoggerPrinter.flemme(entry.getKey(),Arrays.asList(entry.getValue().get(0)));
+			for (Entry<IRenderableGeom, List<Entity>> entry : this.entitiesByGeom.entrySet()) {
+				if (aliasesToSelect.contains(entry.getKey().getRenderingParameters().getAlias())) {
+					this.mouserLoggerPrinter.flemme(entry.getKey(), Arrays.asList(entry.getValue().get(0)));
 				}
 			}
 		}
-		
+
 		filterByRayPromixity(ray);
 
 		// rayCasting(ray);
@@ -121,42 +119,48 @@ public class MouseLogger implements IMouseBehaviour {
 		Vector3f MouseRayWorldCoord = Vector3f.add(camPos, this.ray, null);
 		TreeMap<Float, Entity> filteredByDistanceEntities = new TreeMap<>();
 		ArrayList<Entity> filteredEntities = new ArrayList<>();
-		for(ISimpleGeom geom : this.entitiesByGeom) {
+		for (IRenderableGeom geom : this.entitiesByGeom) {
 
-		for (Entity entity : geom.getRenderingParameters().getEntities()) {
-			List<Vector3f> bbox = entity.getBoundingBox();
-			Vector3f ltnWorld = Vector3f.add(entity.getPositions(), bbox.get(0), null);
-			Vector3f rtnWorld = Vector3f.add(entity.getPositions(), bbox.get(1), null);
-			Vector3f lbnWorld = Vector3f.add(entity.getPositions(), bbox.get(2), null);
-			Vector3f rbnWorld = Vector3f.add(entity.getPositions(), bbox.get(3), null);
-			Vector3f ltfWorld = Vector3f.add(entity.getPositions(), bbox.get(4), null);
-			Vector3f rtfWorld = Vector3f.add(entity.getPositions(), bbox.get(5), null);
-			Vector3f lbfWorld = Vector3f.add(entity.getPositions(), bbox.get(6), null);
-			Vector3f rbfWorld = Vector3f.add(entity.getPositions(), bbox.get(7), null);
-			List<Face> vectorsAsFaces = Arrays.asList(new Face(ltnWorld,lbnWorld,rbnWorld),new Face(ltfWorld,lbfWorld,lbnWorld),
-					new Face(rtnWorld,rbnWorld,rbfWorld),new Face(rtfWorld,rbfWorld,lbfWorld), new Face(ltfWorld,ltnWorld,rtnWorld),
-					new Face(rbnWorld,rbfWorld,lbfWorld));
-			
-			boolean added = false;
+			for (Entity entity : geom.getRenderingParameters().getEntities()) {
+				List<Vector3f> bbox = entity.getBoundingBox();
+				Vector3f ltnWorld = Vector3f.add(entity.getPositions(), bbox.get(0), null);
+				Vector3f rtnWorld = Vector3f.add(entity.getPositions(), bbox.get(1), null);
+				Vector3f lbnWorld = Vector3f.add(entity.getPositions(), bbox.get(2), null);
+				Vector3f rbnWorld = Vector3f.add(entity.getPositions(), bbox.get(3), null);
+				Vector3f ltfWorld = Vector3f.add(entity.getPositions(), bbox.get(4), null);
+				Vector3f rtfWorld = Vector3f.add(entity.getPositions(), bbox.get(5), null);
+				Vector3f lbfWorld = Vector3f.add(entity.getPositions(), bbox.get(6), null);
+				Vector3f rbfWorld = Vector3f.add(entity.getPositions(), bbox.get(7), null);
+				List<Face> vectorsAsFaces = Arrays.asList(new Face(ltnWorld, lbnWorld, rbnWorld),
+						new Face(ltfWorld, lbfWorld, lbnWorld), new Face(rtnWorld, rbnWorld, rbfWorld),
+						new Face(rtfWorld, rbfWorld, lbfWorld), new Face(ltfWorld, ltnWorld, rtnWorld),
+						new Face(rbnWorld, rbfWorld, lbfWorld));
 
-			List<IntersectionResult> intersectResult = SpatialComparator.getProjectionOverEntity(camPos, this.ray, vectorsAsFaces, new Vector3f(0,0,0));
-			intersectResult.forEach(result -> {
-				this.mouserLoggerPrinter.print3DVectors("3DClipped",
-						Arrays.asList(camPos, result.getProjectedPosition()), null, GL11.GL_POINTS);
-				this.mouserLoggerPrinter.print3DVectors("3DClippedRef",
-						Arrays.asList(result.getFace().p1, result.getProjectedPosition()), new Vector4f(0,0,0,1), GL11.GL_LINES);
-				if(!added) {
-					added = true;
-					filteredByDistanceEntities.put(Vector3f.sub(result.getFace().p1, result.getProjectedPosition(), null).length(), entity);
-				}
-			});	
-			// end
+				boolean added = false;
 
-		//	filteredEntities = oldway(entity, MouseRayWorldCoord, ltnWorld, rtnWorld, lbnWorld, rbnWorld, ltfWorld,
-		//			rtfWorld, lbfWorld, rbfWorld);
+				List<IntersectionResult> intersectResult = SpatialComparator.getProjectionOverEntity(camPos, this.ray,
+						vectorsAsFaces, new Vector3f(0, 0, 0));
+				intersectResult.forEach(result -> {
+					this.mouserLoggerPrinter.print3DVectors("3DClipped",
+							Arrays.asList(camPos, result.getProjectedPosition()), null, GL11.GL_POINTS);
+					this.mouserLoggerPrinter.print3DVectors("3DClippedRef",
+							Arrays.asList(result.getFace().p1, result.getProjectedPosition()), new Vector4f(0, 0, 0, 1),
+							GL11.GL_LINES);
+					if (!added) {
+						added = true;
+						filteredByDistanceEntities.put(
+								Vector3f.sub(result.getFace().p1, result.getProjectedPosition(), null).length(),
+								entity);
+					}
+				});
+				// end
+
+				// filteredEntities = oldway(entity, MouseRayWorldCoord, ltnWorld, rtnWorld,
+				// lbnWorld, rbnWorld, ltfWorld,
+				// rtfWorld, lbfWorld, rbfWorld);
+			}
+
 		}
-		
-	}
 		filteredEntities.addAll(filteredByDistanceEntities.values());
 		this.entitiesByGeom = filteredEntities;
 
@@ -184,8 +188,8 @@ public class MouseLogger implements IMouseBehaviour {
 				coordSysManager.objectToProjectionMatrix(coordSysManager.objectToViewCoord(this.viewMatrix, lbfWorld)));
 		Vector3f rbfClipped = coordSysManager.objectToClipSpace(
 				coordSysManager.objectToProjectionMatrix(coordSysManager.objectToViewCoord(this.viewMatrix, rbfWorld)));
-		Vector3f mouseClipped = coordSysManager.objectToClipSpace(
-				coordSysManager.objectToProjectionMatrix(coordSysManager.objectToViewCoord(this.viewMatrix, MouseRayWorldCoord)));
+		Vector3f mouseClipped = coordSysManager.objectToClipSpace(coordSysManager
+				.objectToProjectionMatrix(coordSysManager.objectToViewCoord(this.viewMatrix, MouseRayWorldCoord)));
 		List<Vector3f> clippedCoords = Arrays.asList(ltnClipped, rtnClipped, lbnClipped, rbnClipped, ltfClipped,
 				rtfClipped, lbfClipped, rbfClipped, mouseClipped);
 
@@ -463,8 +467,9 @@ public class MouseLogger implements IMouseBehaviour {
 				maxY = maxRayCast.y + (maxRayCast.y - minRayCast.y);
 			}
 			// cap to max rendered distance.
-			if (maxZ > CoordinatesSystemManager.getFarPlane()) { // TODO cannot be just a coordinate. as to be a distance
-														// calculated by vector.
+			if (maxZ > CoordinatesSystemManager.getFarPlane()) { // TODO cannot be just a coordinate. as to be a
+																	// distance
+				// calculated by vector.
 				maxZ = CoordinatesSystemManager.getFarPlane();
 				maxX = (maxRayCast.x * (CoordinatesSystemManager.getFarPlane() / maxRayCast.z));
 				maxY = (maxRayCast.y * (CoordinatesSystemManager.getFarPlane() / maxRayCast.z));

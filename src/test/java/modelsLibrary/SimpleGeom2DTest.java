@@ -35,7 +35,7 @@ class SimpleGeom2DTest {
 		loader = Mockito.mock(Loader.class);
 
 		geom = SimpleGeom2D.create(loader, draw2DRenderer, shader, alias);
-		Mockito.when(loader.loadToVAO(VBOContent.createEmpty(0, geom.rawGeom.dimension))).thenReturn(1);
+		Mockito.when(loader.loadToVAO(VBOContent.createEmpty(0, 2))).thenReturn(1);
 	}
 
 	@Nested
@@ -44,34 +44,34 @@ class SimpleGeom2DTest {
 		@Test
 		@DisplayName("Empty geom should be empty")
 		void testEmptyGeom() {
-			assertEquals(0, geom.rawGeom.colors.getContent().size());
-			assertEquals(0, geom.rawGeom.points.getContent().size());
+			assertEquals(0, geom.vaoGeom.objContent.getColors().getContent().size());
+			assertEquals(0, geom.vaoGeom.objContent.getPoints().getContent().size());
 			assertNotNull(geom.renderingParameters);
 		}
 
 		@Test
 		@DisplayName("Adding point copying default color")
 		void testAddPoint() {
-			geom.addPoint(new Vector2f(1, 1));
-			assertEquals(4, geom.rawGeom.colors.getContent().size());
-			assertEquals(2, geom.rawGeom.points.getContent().size());
-			assertEquals(new Float(1), geom.rawGeom.colors.getContent().get(0));
+			geom.getGeomEditor().addPoint(new Vector2f(1, 1));
+			assertEquals(4, geom.vaoGeom.objContent.getColors().getContent().size());
+			assertEquals(2, geom.vaoGeom.objContent.getPoints().getContent().size());
+			assertEquals(new Float(1), geom.vaoGeom.objContent.getColors().getContent().get(0));
 		}
 
 		@Test
 		@DisplayName("Adding a point with color")
 		void testaddPointWithColor() {
-			geom.addPoint(new Vector2f(1, 1), new Vector4f(2, 2, 2, 2));
-			assertEquals(4, geom.rawGeom.colors.getContent().size());
-			assertEquals(2, geom.rawGeom.points.getContent().size());
-			assertEquals(new Float(2), geom.rawGeom.colors.getContent().get(0));
+			geom.getGeomEditor().addPoint(new Vector2f(1, 1), new Vector4f(2, 2, 2, 2));
+			assertEquals(4, geom.vaoGeom.objContent.getColors().getContent().size());
+			assertEquals(2, geom.vaoGeom.objContent.getPoints().getContent().size());
+			assertEquals(new Float(2), geom.vaoGeom.objContent.getColors().getContent().get(0));
 		}
 
 		@Test
 		@DisplayName("Adding a vector3f throws exception")
 		void testaddWrongPoint() {
 			assertThrows(IllegalArgumentException.class, () -> {
-				geom.addPoint(new Vector3f(1, 1, 1));
+				geom.getGeomEditor().addPoint(new Vector3f(1, 1, 1));
 			});
 		}
 	}
@@ -82,37 +82,37 @@ class SimpleGeom2DTest {
 		void setUp() throws Exception {
 			RenderingParameters params = geom.getRenderingParameters();
 			params.addEntity(new Vector3f(0, 0, 0), 1, 1, 1, 1);
-			geom.addPoint(new Vector2f(1, 1), new Vector4f(1, 1, 1, 1));
+			geom.getGeomEditor().addPoint(new Vector2f(1, 1), new Vector4f(1, 1, 1, 1));
 
 		}
 
 		@Test
 		void testInstanciationOk() {
-			assertEquals(4, geom.rawGeom.colors.getContent().size());
-			assertEquals(2, geom.rawGeom.points.getContent().size());
+			assertEquals(4, geom.vaoGeom.objContent.getColors().getContent().size());
+			assertEquals(2, geom.vaoGeom.objContent.getPoints().getContent().size());
 		}
 
 		@Test
 		void testReset() {
 			geom.clear();
-			assertEquals(0, geom.rawGeom.colors.getContent().size());
-			assertEquals(0, geom.rawGeom.points.getContent().size());
+			assertEquals(0, geom.vaoGeom.objContent.getColors().getContent().size());
+			assertEquals(0, geom.vaoGeom.objContent.getPoints().getContent().size());
 		}
 
 		@Test
 		@DisplayName("Adding a point copying previous color")
 		void testaddPoint() {
-			geom.addPoint(new Vector2f(1, 1));
-			assertEquals(8, geom.rawGeom.colors.getContent().size());
-			assertEquals(4, geom.rawGeom.points.getContent().size());
+			geom.getGeomEditor().addPoint(new Vector2f(1, 1));
+			assertEquals(8, geom.vaoGeom.objContent.getColors().getContent().size());
+			assertEquals(4, geom.vaoGeom.objContent.getPoints().getContent().size());
 		}
 
 		@Test
 		@DisplayName("Adding a point with color")
 		void testaddPointWithColor() {
-			geom.addPoint(new Vector2f(1, 1), new Vector4f(2, 2, 2, 2));
-			assertEquals(8, geom.rawGeom.colors.getContent().size());
-			assertEquals(4, geom.rawGeom.points.getContent().size());
+			geom.getGeomEditor().addPoint(new Vector2f(1, 1), new Vector4f(2, 2, 2, 2));
+			assertEquals(8, geom.vaoGeom.objContent.getColors().getContent().size());
+			assertEquals(4, geom.vaoGeom.objContent.getPoints().getContent().size());
 		}
 
 		@Test
@@ -125,8 +125,10 @@ class SimpleGeom2DTest {
 		@DisplayName("get copied geom with same parameters")
 		void testgetCopiedGeom() {
 			SimpleGeom2D copied = geom.copy("newAlias");
-			assertEquals(geom.rawGeom.getPoints().getContent(), copied.rawGeom.getPoints().getContent());
-			assertEquals(geom.rawGeom.getColors().getContent(), copied.rawGeom.getColors().getContent());
+			assertEquals(geom.vaoGeom.objContent.getPoints().getContent(),
+					copied.vaoGeom.objContent.getPoints().getContent());
+			assertEquals(geom.vaoGeom.objContent.getColors().getContent(),
+					copied.vaoGeom.objContent.getColors().getContent());
 		}
 	}
 

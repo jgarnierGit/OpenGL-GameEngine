@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import org.lwjglx.util.vector.Vector3f;
 
-import modelsLibrary.GeomContainer;
+import entities.GeomContainer;
 
 public interface ITerrain extends GeomContainer{
 	

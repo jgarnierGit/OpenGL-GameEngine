@@ -8,6 +8,7 @@ import org.lwjglx.util.vector.Vector3f;
 
 import entities.Entity;
 import entities.SimpleEntity;
+import modelsLibrary.IRenderableGeom;
 import modelsLibrary.SimpleGeom3D;
 import renderEngine.Draw3DRenderer;
 import renderEngine.Loader;
@@ -44,7 +45,7 @@ public class RegularFlatTerrain3D extends RegularTerrain3D {
 						terrain.height, entity.getPositions().z + ((stepz + 1) * (size / FLAT_DEFINITION)));
 				Vector3f farRight = new Vector3f(entity.getPositions().x + (stepx + 1) * (size / FLAT_DEFINITION),
 						terrain.height, entity.getPositions().z + ((stepz + 1) * (size / FLAT_DEFINITION)));
-				SimpleGeom3D terrainGeom = terrain.getSimpleGeom();
+				List<IRenderableGeom> terrainGeom = terrain.getGeoms();
 				if ((stepx + stepz) % 2 == 0) {
 
 					terrainGeom.addPoint(frontLeft);

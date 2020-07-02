@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.lwjglx.util.vector.Vector2f;
 import org.lwjglx.util.vector.Vector3f;
 import org.lwjglx.util.vector.Vector4f;
@@ -21,12 +22,76 @@ import com.mokiat.data.front.parser.OBJVertex;
 import modelsManager.bufferCreator.VBOContent;
 
 public class OBJUtils {
-	private final int[] indices;
+	protected int dimension;
+	private final List<Integer> indices;
 	private final VBOContent positions;
 	private final VBOContent material;
 	private final VBOContent normals;
+	private static final int POSITION_INDEX = 0;
+	private static final int COLOR_INDEX = 1;
+	private static final int NORMAL_INDEX = 2;
+	public static final float[] DEFAULT_COLOR = new float[] { 1.0f, 0.0f, 1.0f, 1.0f };
+
+	public OBJUtils(int dimension, VBOContent positions, VBOContent material, VBOContent normals) {
+		this.dimension = dimension;
+		indices = new ArrayList<>();
+		this.positions = positions;
+		this.material = material;
+		this.normals = normals;
+	}
 
 	/**
+	 * 
+	 * @return dimension count to apply for each vertice.
+	 */
+	public int getDimension() {
+		return this.dimension;
+	}
+
+	/**
+	 * return array of points coordinates.
+	 * 
+	 * @return VBOContent of points coordinates.
+	 */
+	public VBOContent getPoints() {
+		return this.positions;
+	}
+
+	/**
+	 * return array of colors for each points.
+	 * 
+	 * @return VBOContent of colors for each points.
+	 */
+	public VBOContent getColors() {
+		return this.material;
+	}
+
+	public VBOContent getNormals() {
+		return this.normals;
+	}
+
+	public List<VBOContent> getVBOs() {
+		return Arrays.asList(positions, material, normals);
+	}
+
+	public Vector4f getDefaultColor() {
+		return new Vector4f(DEFAULT_COLOR[0], DEFAULT_COLOR[1], DEFAULT_COLOR[2], DEFAULT_COLOR[3]);
+	}
+
+	public boolean hasTransparency() {
+		List<Float> content = this.material.getContent();
+		for (int i = 3; i <= content.size(); i += 4) {
+			if (content.get(i) < 1f) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * 
+	 * TODO extract to an OBJImporter class, rewrite
+	 * 
 	 * @param objModel
 	 * @param materialTypes
 	 * @param mtlUtils
@@ -87,10 +152,6 @@ public class OBJUtils {
 		for (int i = 0; i < indicesList.size(); i++) {
 			indices[i] = indicesList.get(i);
 		}
-	}
-
-	public List<VBOContent> getVBOs() {
-		return Arrays.asList(positions, material, normals);
 	}
 
 	private VBOContent setMaterialContent(OBJDataReferenceUtils objDataReferenceUtils, List<MaterialMapper> materials) {
@@ -157,18 +218,26 @@ public class OBJUtils {
 		return VBOContent.create(2, 3, normalsList);
 	}
 
-	public int[] getIndices() {
+	public List<Integer> getIndices() {
 		return this.indices;
 	}
 
+	public int[] getIndicesAsPrimitiveArray() {
+		return ArrayUtils.toPrimitive(this.indices.toArray(new Integer[this.indices.size()]));
+	}
+
+	/**
+	 * TODO evolve this creator to allow pass materials or color step by step
+	 * 
+	 * @param <T>
+	 * @param vertexIndices
+	 * @param positions2
+	 * @param normalsVector
+	 * @param materials
+	 * @return
+	 */
 	public static <T> OBJUtils create(List<Integer> vertexIndices, List<Vector3f> positions2,
 			List<Vector3f> normalsVector, List<T> materials) {
-
-		int[] indicesList = new int[vertexIndices.size()];
-		int indexIndice = 0;
-		for (Integer i : vertexIndices) {
-			indicesList[indexIndice++] = i;
-		}
 
 		int materialDimension = 0;
 		int shaderIndex = 0;
@@ -211,14 +280,32 @@ public class OBJUtils {
 			positionsList.add(position.y);
 			positionsList.add(position.z);
 		}
-		return new OBJUtils(indicesList, VBOContent.create(0, 3, positionsList), VBOContent.create(2, 3, normals),
+		return new OBJUtils(vertexIndices, VBOContent.create(0, 3, positionsList), VBOContent.create(2, 3, normals),
 				VBOContent.create(shaderIndex, materialDimension, matList));
 	}
 
-	private OBJUtils(int[] vertexIndices, VBOContent positions2, VBOContent normalsVector, VBOContent materials) {
+	private OBJUtils(List<Integer> vertexIndices, VBOContent positions2, VBOContent normalsVector,
+			VBOContent materials) {
 		this.indices = vertexIndices;
 		this.positions = positions2;
 		this.normals = normalsVector;
 		this.material = materials;
+	}
+
+	public static OBJUtils createEmpty(int dimension) {
+		VBOContent positions = VBOContent.createEmpty(POSITION_INDEX, dimension);
+		VBOContent material = VBOContent.createEmpty(COLOR_INDEX, 4);
+		VBOContent normals = VBOContent.createEmpty(NORMAL_INDEX, 3);
+		return new OBJUtils(dimension, positions, material, normals);
+	}
+
+	public static OBJUtils copy(OBJUtils objContent) {
+		VBOContent positions = VBOContent.create(objContent.positions.getShaderInputIndex(),
+				objContent.positions.getDimension(), new ArrayList<>(objContent.positions.getContent()));
+		VBOContent material = VBOContent.create(objContent.material.getShaderInputIndex(),
+				objContent.material.getDimension(), new ArrayList<>(objContent.material.getContent()));
+		VBOContent normals = VBOContent.create(objContent.normals.getShaderInputIndex(),
+				objContent.normals.getDimension(), new ArrayList<>(objContent.normals.getContent()));
+		return new OBJUtils(objContent.dimension, positions, material, normals);
 	}
 }

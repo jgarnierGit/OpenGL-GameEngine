@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 import org.lwjgl.opengl.GL11;
 
-import modelsLibrary.ISimpleGeom;
+import modelsLibrary.IRenderableGeom;
 import modelsLibrary.VAOGeom;
 
 /**
@@ -23,23 +23,22 @@ import modelsLibrary.VAOGeom;
  *
  */
 public abstract class DrawRenderer implements IDrawRenderer {
-	protected List<ISimpleGeom> geoms;
+	protected List<IRenderableGeom> geoms;
 	protected List<RenderingParameters> renderingParams;
-	protected Logger logger;
+	protected Logger logger = Logger.getLogger("DrawRenderer");
 
 	public DrawRenderer() {
 		this.geoms = new ArrayList<>();
 		this.renderingParams = new ArrayList<>();
-		this.logger = Logger.getLogger("DrawRenderer");
 	}
 
 	@Override
-	public void process(ISimpleGeom geom) {
+	public void process(IRenderableGeom geom) {
 		this.geoms.add(geom);
 	}
 
 	@Override
-	public void reloadAndprocess(ISimpleGeom geom) {
+	public void reloadAndprocess(IRenderableGeom geom) {
 		geom.reloadVao();
 		geom.updateRenderer();
 	}
@@ -94,10 +93,10 @@ public abstract class DrawRenderer implements IDrawRenderer {
 	 * override will be active.
 	 */
 	private void updateOverridingColors() {
-		for (ISimpleGeom simpleGeom : this.geoms) {
+		for (IRenderableGeom simpleGeom : this.geoms) {
 			RenderingParameters rParam = simpleGeom.getRenderingParameters();
-			rParam.applyColorOverriding();
-
+			rParam.applyColorOverriding(simpleGeom.getGeomEditor());
+			simpleGeom.reloadVao();
 		}
 	}
 
@@ -120,9 +119,8 @@ public abstract class DrawRenderer implements IDrawRenderer {
 	private void renderByVertices(RenderingParameters params) {
 		// cf https://www.khronos.org/opengl/wiki/Primitive => internal gl logic, hidden
 		// for DrawArrays usage;
-		ISimpleGeom geom = params.getGeom();
-		VAOGeom rawGeom = geom.getVAOGeom();
-		int verticesCount = rawGeom.getPoints().getContent().size() / rawGeom.getDimension();
+		VAOGeom geom = params.getVAOGeom();
+		int verticesCount = geom.getPositions().getContent().size() / geom.getPositions().getDimension();
 		// Add default lineLoop rendering.
 		// GL11.drawArrays can draw points with GL_POINTS, not GL_POINT
 		GL11.glDrawArrays(params.getRenderMode().orElse(GL11.GL_POINTS), 0, verticesCount);
@@ -131,7 +129,7 @@ public abstract class DrawRenderer implements IDrawRenderer {
 	protected List<RenderingParameters> getOrderedRenderingParameters() {
 		LinkedList<RenderingParameters> rawParams = new LinkedList<>();
 		int i = 0;
-		for (ISimpleGeom simpleGeom : this.geoms) {
+		for (IRenderableGeom simpleGeom : this.geoms) {
 			RenderingParameters param = simpleGeom.getRenderingParameters();
 			if (param.getAlias().isEmpty()) {
 				param.setAlias("" + i);

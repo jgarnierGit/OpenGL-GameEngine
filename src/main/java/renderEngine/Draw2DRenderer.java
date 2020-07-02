@@ -26,7 +26,7 @@ public class Draw2DRenderer extends DrawRenderer {
 		for (RenderingParameters params : renderingParams) {
 			Draw2DShader draw2DShader = (Draw2DShader) params.getShader();
 			draw2DShader.start();
-			prepare(params.getGeom().getVAOGeom().getVaoId());
+			prepare(params.getVAOGeom().getVaoId());
 
 			// Disable distance filtering.
 			GL11.glDisable(GL11.GL_DEPTH);

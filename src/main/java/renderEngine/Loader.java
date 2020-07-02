@@ -72,7 +72,7 @@ public class Loader {
 	public int loadModelToVAO(ModelUtils modelUtils) {
 		int vaoID = createAndBindVAO();
 		// OBJUtils objUtils, MTLUtils mtlUtils
-		bindIndicesBuffer(vaoID, modelUtils.getOBJUtils().getIndices());
+		bindIndicesBuffer(vaoID, modelUtils.getOBJUtils().getIndicesAsPrimitiveArray());
 		// TODO refactor architecture.
 		for (VBOContent vbo : modelUtils.getOBJUtils().getVBOs()) {
 			storeDataFloatInAttrList(vaoID, vbo.getShaderInputIndex(), vbo.getDimension(),
