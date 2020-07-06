@@ -3,7 +3,7 @@ package toolbox.mousePicker.MouseBehaviour;
 import org.lwjglx.util.vector.Vector3f;
 
 import camera.CameraEntity;
-import modelsLibrary.terrain.Terrain;
+import models.library.terrain.Terrain;
 import toolbox.CoordinatesSystemManager;
 
 /**

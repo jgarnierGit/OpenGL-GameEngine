@@ -15,10 +15,10 @@ import org.lwjglx.util.vector.Vector4f;
 
 import entities.Entity;
 import entities.EntityTutos;
-import modelsLibrary.IRenderableGeom;
-import modelsLibrary.SimpleGeom2D;
-import modelsLibrary.SimpleGeom3D;
-import modelsLibrary.SimpleGeom3DBuilder;
+import models.IRenderableGeom;
+import models.SimpleGeom2D;
+import models.SimpleGeom3D;
+import models.SimpleGeom3DBuilder;
 import renderEngine.DisplayManager;
 import renderEngine.Loader;
 import renderEngine.MasterRenderer;

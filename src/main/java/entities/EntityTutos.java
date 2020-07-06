@@ -2,7 +2,7 @@ package entities;
 
 import org.lwjglx.util.vector.Vector3f;
 
-import modelsManager.Model3D;
+import models.importer.Model3D;
 
 public class EntityTutos extends Entity {
 	private Model3D model;

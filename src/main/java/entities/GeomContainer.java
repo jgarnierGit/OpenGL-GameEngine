@@ -1,8 +1,8 @@
 package entities;
 
-import modelsLibrary.GeomEditor;
-import modelsLibrary.IEditableGeom;
-import modelsLibrary.IRenderableGeom;
+import models.GeomEditor;
+import models.IEditableGeom;
+import models.IRenderableGeom;
 
 /**
  * Simplify entities accessor

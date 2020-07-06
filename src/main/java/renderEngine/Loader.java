@@ -7,9 +7,7 @@ import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -24,10 +22,8 @@ import org.lwjgl.opengl.GL30;
 import org.newdawn.slick.opengl.PNGDecoder;
 import org.newdawn.slick.opengl.TextureLoader;
 
-import modelsLibrary.CubeTexture;
-import modelsManager.ModelUtils;
-import modelsManager.bufferCreator.VBOContent;
-import toolbox.GLTextureIDIncrementer;
+import models.data.CubeTexture;
+import models.data.VBOContent;
 
 /**
  * Handles the loading of geometry data into VAOs. It also keeps track of all

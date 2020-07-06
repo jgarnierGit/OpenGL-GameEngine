@@ -12,7 +12,7 @@ import org.lwjgl.opengl.GL30;
 import org.lwjglx.util.vector.Matrix4f;
 
 import entities.GuiTexture;
-import modelsManager.bufferCreator.VBOContent;
+import models.data.VBOContent;
 import renderEngine.Loader.VBOIndex;
 import shaderManager.GuiShader;
 import toolbox.Maths;

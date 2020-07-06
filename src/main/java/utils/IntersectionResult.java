@@ -2,7 +2,7 @@ package utils;
 
 import org.lwjglx.util.vector.Vector3f;
 
-import modelsLibrary.Face;
+import models.data.Face;
 
 public class IntersectionResult {
 	private Face face;

@@ -15,8 +15,8 @@ import org.lwjgl.opengl.GL20;
 
 import com.mokiat.data.front.parser.MTLMaterial;
 
-import modelsLibrary.IRenderableGeom;
-import modelsLibrary.VAOGeom;
+import models.IRenderableGeom;
+import models.data.VAOGeom;
 import toolbox.GLTextureIDIncrementer;
 
 /**

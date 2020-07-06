@@ -13,11 +13,11 @@ import org.lwjglx.util.vector.Matrix4f;
 import com.mokiat.data.front.parser.MTLMaterial;
 
 import entities.EntityTutos;
-import modelsManager.MTLUtils;
-import modelsManager.MaterialMapper;
-import modelsManager.MaterialType;
-import modelsManager.Model3D;
-import modelsManager.OBJContent;
+import models.data.MaterialType;
+import models.data.OBJContent;
+import models.importer.MTLUtils;
+import models.importer.Model3D;
+import modelsImporter.mokiatMapper.MaterialMapper;
 import renderEngine.Loader.VBOIndex;
 import shaderManager.StaticShader;
 import toolbox.GLTextureIDIncrementer;

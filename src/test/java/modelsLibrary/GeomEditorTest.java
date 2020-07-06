@@ -15,7 +15,11 @@ import org.junit.jupiter.api.Test;
 import org.lwjglx.util.vector.Vector4f;
 import org.mockito.Mockito;
 
-import modelsManager.bufferCreator.VBOContent;
+import models.GeomEditor;
+import models.IEditableGeom;
+import models.SimpleGeom2D;
+import models.SimpleGeom3D;
+import models.data.VBOContent;
 
 class GeomEditorTest {
 	GeomEditor geomEditor;

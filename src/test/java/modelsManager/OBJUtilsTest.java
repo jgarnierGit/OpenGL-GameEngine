@@ -15,7 +15,8 @@ import org.junit.jupiter.api.Test;
 import org.lwjglx.util.vector.Vector3f;
 import org.lwjglx.util.vector.Vector4f;
 
-import modelsLibrary.MaterialContent;
+import models.data.MaterialContent;
+import models.data.OBJContent;
 
 class OBJUtilsTest {
 

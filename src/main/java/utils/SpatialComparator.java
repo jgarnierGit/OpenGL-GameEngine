@@ -7,7 +7,7 @@ import java.util.function.BiPredicate;
 import org.lwjglx.util.vector.Vector3f;
 
 import entities.Entity;
-import modelsLibrary.Face;
+import models.data.Face;
 
 public class SpatialComparator {
 	/**

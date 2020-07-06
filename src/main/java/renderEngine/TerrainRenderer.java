@@ -9,10 +9,10 @@ import org.lwjgl.opengl.GL30;
 import org.lwjglx.util.vector.Matrix4f;
 import org.lwjglx.util.vector.Vector3f;
 
-import modelsLibrary.terrain.Terrain;
-import modelsManager.MTLUtils;
-import modelsManager.MaterialMapper;
-import modelsManager.Model3D;
+import models.importer.MTLUtils;
+import models.importer.Model3D;
+import models.library.terrain.Terrain;
+import modelsImporter.mokiatMapper.MaterialMapper;
 import renderEngine.Loader.VBOIndex;
 import shaderManager.TerrainShader;
 import toolbox.GLTextureIDIncrementer;

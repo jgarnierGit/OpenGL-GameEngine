@@ -1,6 +1,6 @@
 package renderEngine;
 
-import modelsLibrary.IRenderableGeom;
+import models.IRenderableGeom;
 
 public interface IDrawRenderer {
 

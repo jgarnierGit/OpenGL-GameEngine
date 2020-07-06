@@ -14,8 +14,8 @@ import org.lwjglx.util.vector.Vector4f;
 
 import entities.Entity;
 import entities.SimpleEntity;
-import modelsLibrary.GeomEditor;
-import modelsLibrary.VAOGeom;
+import models.GeomEditor;
+import models.data.VAOGeom;
 import shaderManager.IShader;
 
 public class RenderingParameters implements IRenderingParameters {

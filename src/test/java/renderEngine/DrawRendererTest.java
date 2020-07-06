@@ -21,9 +21,9 @@ import org.mockito.MockitoAnnotations;
 import org.powermock.reflect.Whitebox;
 
 import entities.Entity;
-import modelsLibrary.IRenderableGeom;
-import modelsLibrary.SimpleGeom;
-import modelsLibrary.VAOGeom;
+import models.IRenderableGeom;
+import models.data.SimpleGeom;
+import models.data.VAOGeom;
 import shaderManager.IShader;
 
 /**

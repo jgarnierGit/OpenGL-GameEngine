@@ -6,7 +6,7 @@ import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
 import camera.CameraEntity;
-import modelsLibrary.CubeTexture;
+import models.data.CubeTexture;
 import renderEngine.Loader.VBOIndex;
 import shaderManager.SkyboxShader;
 
