@@ -10,9 +10,14 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL13;
+import org.lwjgl.opengl.GL20;
+
+import com.mokiat.data.front.parser.MTLMaterial;
 
 import modelsLibrary.IRenderableGeom;
 import modelsLibrary.VAOGeom;
+import toolbox.GLTextureIDIncrementer;
 
 /**
  * Draw primitive 3D objects directly by drawArrays. For heavy objects use
@@ -109,11 +114,37 @@ public abstract class DrawRenderer implements IDrawRenderer {
 		// GL11.glEnable(GL11.GL_POINT_SMOOTH);
 		GL11.glLineWidth(2); // seems to have a max cap unlike PointSize. for GL_LINES
 		GL11.glPointSize(5); // GL_POINTS
-		renderByVertices(params);
-
+		//must be binded before loading points / indices.
+		bindTextures(params.getVAOGeom().getTextures());
+		if(params.getVAOGeom().getObjContent().getIndices().isEmpty()) {
+			renderByVertices(params);
+		}
+		else {
+			renderByIndices(params.getVAOGeom().getObjContent().getIndicesAsPrimitiveArray());
+		}
 		GL11.glPointSize(1);
 		GL11.glLineWidth(1);
 
+	}
+
+	private void renderByIndices(int[] indicesAsPrimitiveArray) {
+		GL11.glDrawElements(GL11.GL_TRIANGLES, MasterRenderer.storeDataInIntBuffer(indicesAsPrimitiveArray));
+	}
+
+	private void bindTextures(List<Integer> textures) {
+		for (int i = 0; i < textures.size() && i < 33; i++) {
+			/**
+			 * TODO use RenderingParameters.enableRenderOptions().
+			if (texture.getDissolve() < 1.0f || mtlUtils.isHasTransparency()) {
+				MasterRenderer.disableCulling();
+			}
+			**/
+			// shader.loadShineVariable(texture.getSpecularExponent()); TODO reimplement
+			// below link to sampler2D textureSampler in fragmentShader
+			GL13.glActiveTexture(GLTextureIDIncrementer.GL_TEXTURE_IDS.get(i));
+			GL11.glBindTexture(GL11.GL_TEXTURE_2D, textures.get(i));
+		}
+		//GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
 	}
 
 	private void renderByVertices(RenderingParameters params) {

@@ -15,13 +15,15 @@ import org.junit.jupiter.api.Test;
 import org.lwjglx.util.vector.Vector3f;
 import org.lwjglx.util.vector.Vector4f;
 
+import modelsLibrary.MaterialContent;
+
 class OBJUtilsTest {
 
-	OBJUtils objContent;
+	OBJContent objContent;
 
 	@BeforeEach
 	void setUp() throws Exception {
-		objContent = OBJUtils.createEmpty(1);
+		objContent = OBJContent.createEmpty(1);
 	}
 
 	@Test
@@ -29,7 +31,7 @@ class OBJUtilsTest {
 	void testEmptyObjContent() {
 		assertNotNull(objContent.getIndices());
 		assertNotNull(objContent.getPoints());
-		assertNotNull(objContent.getColors());
+		assertNotNull(objContent.getMaterialsContent());
 		assertNotNull(objContent.getNormals());
 		assertEquals(1, objContent.getDimension());
 	}
@@ -39,7 +41,7 @@ class OBJUtilsTest {
 	void testEmptyObjContentHaveRightDimensions() {
 		assertEquals(0, objContent.getIndices().size());
 		assertEquals(1, objContent.getPoints().getDimension());
-		assertEquals(4, objContent.getColors().getDimension());
+		assertEquals(4, objContent.getMaterialsContent().getDimension());
 		assertEquals(3, objContent.getNormals().getDimension());
 	}
 
@@ -58,8 +60,8 @@ class OBJUtilsTest {
 	@Test
 	@DisplayName("Copy over empty ObjContent must not be the same")
 	void testCopyEmpty() {
-		OBJUtils content2 = OBJUtils.copy(objContent);
-		assertNotSame(content2.getColors(), objContent.getColors());
+		OBJContent content2 = OBJContent.copy(objContent);
+		assertNotSame(content2.getMaterialsContent(), objContent.getMaterialsContent());
 		assertNotSame(content2.getIndices(), objContent.getIndices());
 		assertNotSame(content2.getNormals(), objContent.getNormals());
 		assertNotSame(content2.getPoints(), objContent.getPoints());
@@ -76,11 +78,11 @@ class OBJUtilsTest {
 		@Nested
 		@DisplayName("With Color list")
 		class WithColorList {
-			List<Vector4f> materials = Arrays.asList(new Vector4f(0, 0, 0, 0));
+			MaterialContent materials = MaterialContent.createColorContent(0, Arrays.asList(new Vector4f(0, 0, 0, 0)));
 
 			@BeforeEach
 			void setUp() throws Exception {
-				objContent = OBJUtils.create(indices, positions2, normals2, materials);
+				objContent = OBJContent.create(indices, positions2, normals2, materials);
 			}
 
 			@Test

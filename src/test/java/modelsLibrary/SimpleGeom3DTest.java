@@ -43,7 +43,7 @@ class SimpleGeom3DTest {
 		@Test
 		@DisplayName("Empty geom should be empty")
 		void testEmptyGeom() {
-			assertEquals(0, geom.vaoGeom.objContent.getColors().getContent().size());
+			assertEquals(0, geom.vaoGeom.objContent.getMaterialsContent().getContent().size());
 			assertEquals(0, geom.vaoGeom.objContent.getPoints().getContent().size());
 			assertNotNull(geom.renderingParameters);
 		}
@@ -52,18 +52,18 @@ class SimpleGeom3DTest {
 		@DisplayName("Adding point copying default color")
 		void testAddPoint() {
 			geom.getGeomEditor().addPoint(new Vector3f(1, 1, 1));
-			assertEquals(4, geom.vaoGeom.objContent.getColors().getContent().size());
+			assertEquals(4, geom.vaoGeom.objContent.getMaterialsContent().getContent().size());
 			assertEquals(3, geom.vaoGeom.objContent.getPoints().getContent().size());
-			assertEquals(new Float(1), geom.vaoGeom.objContent.getColors().getContent().get(0));
+			assertEquals(new Float(1), geom.vaoGeom.objContent.getMaterialsContent().getContent().get(0));
 		}
 
 		@Test
 		@DisplayName("Adding a point with color")
 		void testaddPointWithColor() {
 			geom.getGeomEditor().addPoint(new Vector3f(1, 1, 1), new Vector4f(2, 2, 2, 2));
-			assertEquals(4, geom.vaoGeom.objContent.getColors().getContent().size());
+			assertEquals(4, geom.vaoGeom.objContent.getMaterialsContent().getContent().size());
 			assertEquals(3, geom.vaoGeom.objContent.getPoints().getContent().size());
-			assertEquals(new Float(2), geom.vaoGeom.objContent.getColors().getContent().get(0));
+			assertEquals(new Float(2), geom.vaoGeom.objContent.getMaterialsContent().getContent().get(0));
 		}
 
 		@Test
@@ -87,14 +87,14 @@ class SimpleGeom3DTest {
 
 		@Test
 		void testInstanciationOk() {
-			assertEquals(4, geom.vaoGeom.objContent.getColors().getContent().size());
+			assertEquals(4, geom.vaoGeom.objContent.getMaterialsContent().getContent().size());
 			assertEquals(3, geom.vaoGeom.objContent.getPoints().getContent().size());
 		}
 
 		@Test
 		void testReset() {
 			geom.clear();
-			assertEquals(0, geom.vaoGeom.objContent.getColors().getContent().size());
+			assertEquals(0, geom.vaoGeom.objContent.getMaterialsContent().getContent().size());
 			assertEquals(0, geom.vaoGeom.objContent.getPoints().getContent().size());
 		}
 
@@ -102,7 +102,7 @@ class SimpleGeom3DTest {
 		@DisplayName("Adding a point copying previous color")
 		void testaddPoint() {
 			geom.getGeomEditor().addPoint(new Vector3f(1, 2, 3));
-			assertEquals(8, geom.vaoGeom.objContent.getColors().getContent().size());
+			assertEquals(8, geom.vaoGeom.objContent.getMaterialsContent().getContent().size());
 			assertEquals(6, geom.vaoGeom.objContent.getPoints().getContent().size());
 		}
 
@@ -110,7 +110,7 @@ class SimpleGeom3DTest {
 		@DisplayName("Adding a point with color")
 		void testaddPointWithColor() {
 			geom.getGeomEditor().addPoint(new Vector3f(1, 2, 3), new Vector4f(2, 2, 2, 2));
-			assertEquals(8, geom.vaoGeom.objContent.getColors().getContent().size());
+			assertEquals(8, geom.vaoGeom.objContent.getMaterialsContent().getContent().size());
 			assertEquals(6, geom.vaoGeom.objContent.getPoints().getContent().size());
 		}
 
@@ -126,8 +126,8 @@ class SimpleGeom3DTest {
 			SimpleGeom3D copied = geom.copy("newAlias");
 			assertEquals(geom.vaoGeom.objContent.getPoints().getContent(),
 					copied.vaoGeom.objContent.getPoints().getContent());
-			assertEquals(geom.vaoGeom.objContent.getColors().getContent(),
-					copied.vaoGeom.objContent.getColors().getContent());
+			assertEquals(geom.vaoGeom.objContent.getMaterialsContent().getContent(),
+					copied.vaoGeom.objContent.getMaterialsContent().getContent());
 		}
 	}
 

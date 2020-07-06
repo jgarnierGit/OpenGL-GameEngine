@@ -8,6 +8,11 @@ import com.mokiat.data.front.error.WFException;
 
 import renderEngine.Loader;
 
+/**
+ * @deprecated use @see SimpleGeom3DBuilder
+ * @author chezmoi
+ *
+ */
 public abstract class Model3D {
 	private int vaoID;
 	private ModelUtils modelUtils; //TODO do not use implementation directly.
@@ -15,7 +20,7 @@ public abstract class Model3D {
 	public void createModel(ModelUtils model, Loader loader) throws WFException, FileNotFoundException, IOException {
 		Objects.requireNonNull(loader);
 		modelUtils = model;
-		vaoID = loader.loadModelToVAO(modelUtils);
+	//	vaoID = loader.loadModelToVAO(modelUtils);
 	}
 
 	/**

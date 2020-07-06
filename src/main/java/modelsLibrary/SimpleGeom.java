@@ -1,7 +1,7 @@
 package modelsLibrary;
 
 import entities.SimpleEntity;
-import modelsManager.OBJUtils;
+import modelsManager.OBJContent;
 import renderEngine.RenderingParameters;
 
 public abstract class SimpleGeom implements IRenderableGeom, IEditableGeom {
@@ -41,7 +41,7 @@ public abstract class SimpleGeom implements IRenderableGeom, IEditableGeom {
 	}
 
 	@Override
-	public OBJUtils getObjContent() {
+	public OBJContent getObjContent() {
 		return this.vaoGeom.objContent;
 	}
 

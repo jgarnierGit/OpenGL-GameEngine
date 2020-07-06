@@ -2,19 +2,29 @@
 
 in vec3 position;
 in vec4 color;
+in vec2 textureCoords;
+//in vec3 normals;
 
 out vec4 pass_color;
+out vec2 pass_textureCoords;
+out float pass_useImage;
+//out vec3 surfaceNormal;
 
 uniform mat4 transformationMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 uniform vec4 planeClipping;
+uniform float useImage;
 
 void main(void){
 	// order of matrices multiplication matters!
 	vec4 worldPosition=  transformationMatrix * vec4(position,1.0);
 	gl_ClipDistance[0] = dot(worldPosition,planeClipping); // specific to clipping plane tuto
 	gl_Position = projectionMatrix * viewMatrix * worldPosition;
-
+	pass_useImage = useImage;
+	pass_textureCoords = textureCoords;
 	pass_color = color;
+	
+	//vec3 actualNormals = normals;
+	//surfaceNormal = (transformationMatrix * vec4(actualNormals,0.0)).xyz;
 }

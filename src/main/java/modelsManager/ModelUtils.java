@@ -3,30 +3,28 @@ package modelsManager;
 import com.mokiat.data.front.parser.MTLLibrary;
 import com.mokiat.data.front.parser.OBJModel;
 
+/**
+ * @deprecated
+ * @author chezmoi
+ *
+ */
 public class ModelUtils {
-	private OBJUtils objUtils;
+	private OBJContent objUtils;
 	private MTLUtils mtlUtils;
 	
-	public ModelUtils(OBJUtils generateTerrain, MTLUtils importTextures) {
+	public ModelUtils(OBJContent generateTerrain, MTLUtils importTextures) {
 		objUtils = generateTerrain;
 		mtlUtils = importTextures;
 	}
 	
-	public ModelUtils(OBJUtils generateTerrain) {
+	public ModelUtils(OBJContent generateTerrain) {
 		objUtils = generateTerrain;
 		mtlUtils = MTLUtils.createEmpty();
 	}
-	public OBJUtils getOBJUtils() {
+	public OBJContent getOBJUtils() {
 		return objUtils;
 	}
 	public MTLUtils getMtlUtils() {
 		return mtlUtils;
 	}
-	public static ModelUtils importModel(OBJModel importOBJ, MTLLibrary importMTL) {
-		MTLUtils mtlUtils = new MTLUtils(importMTL);
-		OBJUtils objUtils = new OBJUtils(importOBJ, mtlUtils);
-		return new ModelUtils(objUtils, mtlUtils);
-	}
-	
-	
 }

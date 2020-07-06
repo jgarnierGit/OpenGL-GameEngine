@@ -88,4 +88,10 @@ public class SkyboxShader  extends ShaderProgram implements IShader3D{
 		public void loadClipPlane(Vector4f plane) {
 			// nothing to do
 		}
+
+		@Override
+		public void setUseImage(boolean useImage) {
+			// TODO Auto-generated method stub
+			
+		}
 }

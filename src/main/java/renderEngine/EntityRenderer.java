@@ -17,7 +17,7 @@ import modelsManager.MTLUtils;
 import modelsManager.MaterialMapper;
 import modelsManager.MaterialType;
 import modelsManager.Model3D;
-import modelsManager.OBJUtils;
+import modelsManager.OBJContent;
 import renderEngine.Loader.VBOIndex;
 import shaderManager.StaticShader;
 import toolbox.GLTextureIDIncrementer;
@@ -58,7 +58,7 @@ public class EntityRenderer {
 		for (Model3D model : entities.keySet()) {
 			prepareTextureModel(model);
 			List<EntityTutos> batch = entities.get(model);
-			OBJUtils objUtil = model.getObjUtils().getOBJUtils();
+			OBJContent objUtil = model.getObjUtils().getOBJUtils();
 			for (EntityTutos entity : batch) {
 				prepareInstance(entity);
 				GL11.glDrawElements(GL11.GL_TRIANGLES,
@@ -71,6 +71,7 @@ public class EntityRenderer {
 	}
 
 	/**
+	 * TODO pipe to Draw3DRenderer.
 	 * TODO do same thing as in TerrainRenderer and maybe refactor to merge the 2
 	 * renderer ? Before we can render a VAO it needs to be made active, and we can
 	 * do this by binding it. We also need to enable the relevant attributes of the
@@ -84,13 +85,13 @@ public class EntityRenderer {
 		GL20.glEnableVertexAttribArray(VBOIndex.NORMAL_INDEX);
 		GL20.glEnableVertexAttribArray(VBOIndex.COLOR_INDEX);
 		MTLUtils mtlUtils = model.getObjUtils().getMtlUtils();
-		shader.setUseImage(mtlUtils.isUsingImage());
+		shader.setUseImage(false);//mtlUtils.isUsingImage()
 		shader.loadFakeLighting(mtlUtils.isUseFakeLighting());
 		// TODO do it MasterRenderer.disableCulling(); if model.isHasTransparency()
 		shader.loadShineVariable(mtlUtils.getSpecularExponent());
 		shader.loadReflectivityVariable(mtlUtils.getReflectivity());
 
-		if (!mtlUtils.isUsingImage()) {
+		if (true) {//!mtlUtils.isUsingImage()
 			useNoTexture();
 		} else if (!model.getObjUtils().getMtlUtils().getMaterials().isEmpty()) {// TODO clarify method calling.
 			bindTextures(mtlUtils);
@@ -106,9 +107,12 @@ public class EntityRenderer {
 		for (int i = 0; i < matList.size() && i < 33; i++) {
 
 			MTLMaterial texture = matList.get(i).getMaterial();
+			/**
+			 * TODO use RenderingParameters.enableRenderOptions().
 			if (texture.getDissolve() < 1.0f || mtlUtils.isHasTransparency()) {
 				MasterRenderer.disableCulling();
 			}
+			**/
 			shader.loadShineVariable(texture.getSpecularExponent());
 			// below link to sampler2D textureSampler in fragmentShader
 			GL13.glActiveTexture(GLTextureIDIncrementer.GL_TEXTURE_IDS.get(i));

@@ -8,6 +8,8 @@ import org.lwjglx.util.vector.Vector3f;
 
 import entities.Entity;
 import entities.SimpleEntity;
+import modelsLibrary.IEditableGeom;
+import modelsLibrary.IGeomEditor;
 import modelsLibrary.IRenderableGeom;
 import modelsLibrary.SimpleGeom3D;
 import renderEngine.Draw3DRenderer;
@@ -24,45 +26,41 @@ public class RegularFlatTerrain3D extends RegularTerrain3D {
 	private static final int X_INDEX = 0;
 	private static final int Z_INDEX = 0;
 
-	private RegularFlatTerrain3D(Loader loader, Draw3DRenderer draw3dRenderer, String alias, float size, Entity entity)
-			throws IOException {
-		super(loader, draw3dRenderer, alias, size, FLAT_DEFINITION, entity);
-		height = entity.getPositions().y;
+	private RegularFlatTerrain3D(SimpleGeom3D terrain, Entity defaultEntity, float size) {
+		super(terrain, defaultEntity, size, FLAT_DEFINITION);
+		height = defaultEntity.getPositions().y;
 	}
 
-	public static RegularFlatTerrain3D generateRegular(MasterRenderer masterRenderer, String alias, float size, float x,
-			float z, float elevation) throws IOException {
-		SimpleEntity entity = new SimpleEntity(new Vector3f(x, elevation, z), 0, 0, 0, 1);
-		RegularFlatTerrain3D terrain = new RegularFlatTerrain3D(masterRenderer.getLoader(),
-				masterRenderer.get3DRenderer(), alias, size, entity);
+	public static RegularFlatTerrain3D generateRegular(SimpleGeom3D terrainGeom, Entity defaultEntity, float size) throws IOException {
+		RegularFlatTerrain3D terrain = new RegularFlatTerrain3D(terrainGeom, defaultEntity, size);
 		for (int stepz = 0; stepz < terrain.definition; stepz++) {
 			for (int stepx = 0; stepx < terrain.definition; stepx++) {
-				Vector3f frontLeft = new Vector3f(entity.getPositions().x + (stepx * (size / FLAT_DEFINITION)),
-						terrain.height, entity.getPositions().z + (stepz * (size / FLAT_DEFINITION)));
-				Vector3f frontRight = new Vector3f(entity.getPositions().x + ((stepx + 1) * (size / FLAT_DEFINITION)),
-						terrain.height, entity.getPositions().z + (stepz * (size / FLAT_DEFINITION)));
-				Vector3f farLeft = new Vector3f(entity.getPositions().x + (stepx * (size / FLAT_DEFINITION)),
-						terrain.height, entity.getPositions().z + ((stepz + 1) * (size / FLAT_DEFINITION)));
-				Vector3f farRight = new Vector3f(entity.getPositions().x + (stepx + 1) * (size / FLAT_DEFINITION),
-						terrain.height, entity.getPositions().z + ((stepz + 1) * (size / FLAT_DEFINITION)));
-				List<IRenderableGeom> terrainGeom = terrain.getGeoms();
+				Vector3f frontLeft = new Vector3f(defaultEntity.getPositions().x + (stepx * (size / FLAT_DEFINITION)),
+						terrain.height, defaultEntity.getPositions().z + (stepz * (size / FLAT_DEFINITION)));
+				Vector3f frontRight = new Vector3f(defaultEntity.getPositions().x + ((stepx + 1) * (size / FLAT_DEFINITION)),
+						terrain.height, defaultEntity.getPositions().z + (stepz * (size / FLAT_DEFINITION)));
+				Vector3f farLeft = new Vector3f(defaultEntity.getPositions().x + (stepx * (size / FLAT_DEFINITION)),
+						terrain.height, defaultEntity.getPositions().z + ((stepz + 1) * (size / FLAT_DEFINITION)));
+				Vector3f farRight = new Vector3f(defaultEntity.getPositions().x + (stepx + 1) * (size / FLAT_DEFINITION),
+						terrain.height, defaultEntity.getPositions().z + ((stepz + 1) * (size / FLAT_DEFINITION)));
+				IGeomEditor terrainGeomEditor = terrain.getGeomEditor();
 				if ((stepx + stepz) % 2 == 0) {
 
-					terrainGeom.addPoint(frontLeft);
-					terrainGeom.addPoint(frontRight);
-					terrainGeom.addPoint(farLeft);
+					terrainGeomEditor.addPoint(frontLeft);
+					terrainGeomEditor.addPoint(frontRight);
+					terrainGeomEditor.addPoint(farLeft);
 
-					terrainGeom.addPoint(frontRight);
-					terrainGeom.addPoint(farRight);
-					terrainGeom.addPoint(farLeft);
+					terrainGeomEditor.addPoint(frontRight);
+					terrainGeomEditor.addPoint(farRight);
+					terrainGeomEditor.addPoint(farLeft);
 				} else {
-					terrainGeom.addPoint(frontLeft);
-					terrainGeom.addPoint(farLeft);
-					terrainGeom.addPoint(frontRight);
+					terrainGeomEditor.addPoint(frontLeft);
+					terrainGeomEditor.addPoint(farLeft);
+					terrainGeomEditor.addPoint(frontRight);
 
-					terrainGeom.addPoint(frontRight);
-					terrainGeom.addPoint(farLeft);
-					terrainGeom.addPoint(farRight);
+					terrainGeomEditor.addPoint(frontRight);
+					terrainGeomEditor.addPoint(farLeft);
+					terrainGeomEditor.addPoint(farRight);
 
 				}
 

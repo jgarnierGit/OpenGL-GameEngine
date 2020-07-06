@@ -13,10 +13,12 @@ public class Draw3DShader extends ShaderProgram implements IShader3D {
 	private static final String VERTEX_FILE = "rayVertexShader.txt";
 	private static final String FRAGMENT_FILE = "rayFragmentShader.txt";
 	public static final int COLOR_INDEX = 1;
+	public static final int TEXTURE_INDEX = 2;
 	private int location_transformationMatrix;
 	private int projectionMatrix;
 	private int location_viewMatrix;
 	private int location_planeClipping;
+	private int location_useImage;
 
 	private static Draw3DShader defaultDraw3DShader = null;
 
@@ -46,12 +48,14 @@ public class Draw3DShader extends ShaderProgram implements IShader3D {
 		projectionMatrix = super.getUniformLocation("projectionMatrix");
 		location_viewMatrix = super.getUniformLocation("viewMatrix");
 		location_planeClipping = super.getUniformLocation("planeClipping");
+		location_useImage = super.getUniformLocation("useImage");
 	}
 
 	@Override
 	protected void bindAttributes() {
 		super.bindAttribute(VBOIndex.POSITION_INDEX, "position");
 		super.bindAttribute(COLOR_INDEX, "color");
+		super.bindAttribute(TEXTURE_INDEX, "textureCoords");
 	}
 	
 	public void loadClipPlane(Vector4f plane) {
@@ -68,5 +72,9 @@ public class Draw3DShader extends ShaderProgram implements IShader3D {
 
 	public void loadViewMatrix(Matrix4f viewMatrix) {
 		super.loadMatrix(location_viewMatrix, viewMatrix);
+	}
+	
+	public void setUseImage(boolean useImage) {
+		super.loadBoolean(location_useImage, useImage);
 	}
 }

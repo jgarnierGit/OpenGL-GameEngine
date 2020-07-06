@@ -3,8 +3,7 @@ package modelsLibrary.terrain;
 import java.io.IOException;
 
 import entities.Entity;
-import renderEngine.Draw3DRenderer;
-import renderEngine.Loader;
+import modelsLibrary.SimpleGeom3D;
 
 public abstract class RegularTerrain3D extends Terrain3D {
 
@@ -15,22 +14,17 @@ public abstract class RegularTerrain3D extends Terrain3D {
 
 	/**
 	 * 
-	 * @param alias
-	 * @param draw3dRenderer
-	 * @param loader
-	 * @param loader
-	 * @param draw3dRenderer
-	 * @param alias
+	 * @param terrain		 terrain geom
+	 * @param entity	     default terrain entity
 	 * @param size           total length of terrain
 	 * @param definition     number of point by sides
 	 * @throws IOException
 	 */
-	public RegularTerrain3D(Loader loader, Draw3DRenderer draw3dRenderer, String alias, float size, int definition,
-			Entity entity) throws IOException {
-		super(loader, draw3dRenderer, alias, entity);
+	public RegularTerrain3D(SimpleGeom3D terrain, Entity defaultEntity, float size, int definition) {
+		super(terrain);
 		this.size = size;
 		this.definition = definition;
-		this.origineX = entity.getPositions().x * size;
-		this.origineZ = entity.getPositions().z * size;
+		this.origineX = defaultEntity.getPositions().x * size;
+		this.origineZ = defaultEntity.getPositions().z * size;
 	}
 }

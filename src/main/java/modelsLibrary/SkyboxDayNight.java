@@ -120,19 +120,28 @@ public class SkyboxDayNight implements GeomContainer {
 
 	public void bindCubeTextureDay(CubeTexture texture) {
 		this.skyboxTextureDay = texture;
-		int textureId = this.loader.loadCubeMap(this.skyboxTextureDay);
+		int textureId = this.loader.loadAndBindCubeMap(this.skyboxTextureDay);
 		this.skyboxTextureDay.setTextureId(textureId);
 	}
 
 	public void bindCubeTextureNight(CubeTexture texture) {
 		this.skyboxTextureNight = texture;
-		int textureId = this.loader.loadCubeMap(this.skyboxTextureNight);
+		int textureId = this.loader.loadAndBindCubeMap(this.skyboxTextureNight);
 		this.skyboxTextureNight.setTextureId(textureId);
 	}
 
 	@Override
-	public List<IRenderableGeom> getGeoms() {
-		// TODO Auto-generated method stub
-		return null;
+	public IEditableGeom getEditableGeom() {
+		return skyboxGeom;
+	}
+
+	@Override
+	public IRenderableGeom getRenderableGeom() {
+		return skyboxGeom;
+	}
+
+	@Override
+	public GeomEditor getGeomEditor() {
+		return skyboxGeom.getGeomEditor();
 	}
 }

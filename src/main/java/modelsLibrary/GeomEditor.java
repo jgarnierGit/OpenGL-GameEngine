@@ -4,10 +4,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.lwjglx.util.vector.Vector;
 import org.lwjglx.util.vector.Vector4f;
 
-import modelsManager.OBJUtils;
+import modelsManager.OBJContent;
 
 public class GeomEditor implements IGeomEditor {
 	private IEditableGeom simpleGeom;
@@ -22,7 +23,7 @@ public class GeomEditor implements IGeomEditor {
 
 	@Override
 	public void setColor(Vector4f color) {
-		List<Float> content = this.simpleGeom.getObjContent().getColors().getContent();
+		List<Float> content = this.simpleGeom.getObjContent().getMaterialsContent().getContent();
 		for (int i = 0; i < content.size(); i += 4) {
 			if (color.x != -1) {
 				content.set(i, color.x);
@@ -41,16 +42,18 @@ public class GeomEditor implements IGeomEditor {
 
 	@Override
 	public boolean hasTransparency() {
-		return this.simpleGeom.getObjContent().hasTransparency();
+		throw new NotImplementedException();
+		// return false;
+		// this.simpleGeom.getObjContent().getMaterials().hasTransparency();
 	}
 
 	protected void updateColor(int index, Vector4f color) {
 		index *= 4;
-		if (index > this.simpleGeom.getObjContent().getColors().getContent().size() - 4) {
+		if (index > this.simpleGeom.getObjContent().getMaterialsContent().getContent().size() - 4) {
 			throw new IllegalArgumentException("incorrect index " + index + " : content size : "
-					+ this.simpleGeom.getObjContent().getColors().getContent().size());
+					+ this.simpleGeom.getObjContent().getMaterialsContent().getContent().size());
 		}
-		List<Float> content = this.simpleGeom.getObjContent().getColors().getContent();
+		List<Float> content = this.simpleGeom.getObjContent().getMaterialsContent().getContent();
 		content.set(index, color.x);
 		content.set(index + 1, color.y);
 		content.set(index + 2, color.z);
@@ -62,10 +65,10 @@ public class GeomEditor implements IGeomEditor {
 	 * element.
 	 */
 	protected void duplicateLastColor() {
-		ArrayList<Float> content = new ArrayList<>(this.simpleGeom.getObjContent().getColors().getContent());
+		ArrayList<Float> content = new ArrayList<>(this.simpleGeom.getObjContent().getMaterialsContent().getContent());
 		if (content.isEmpty()) {
-			this.simpleGeom.getObjContent().getColors().setContent(Arrays.asList(OBJUtils.DEFAULT_COLOR[0],
-					OBJUtils.DEFAULT_COLOR[1], OBJUtils.DEFAULT_COLOR[2], OBJUtils.DEFAULT_COLOR[3]));
+			this.simpleGeom.getObjContent().getMaterialsContent().setContent(Arrays.asList(OBJContent.DEFAULT_COLOR[0],
+					OBJContent.DEFAULT_COLOR[1], OBJContent.DEFAULT_COLOR[2], OBJContent.DEFAULT_COLOR[3]));
 		} else {
 			int lastIndex = content.size();
 			float xDuplicate = content.get(lastIndex - 4);
@@ -76,17 +79,17 @@ public class GeomEditor implements IGeomEditor {
 			content.add(yDuplicate);
 			content.add(zDuplicate);
 			content.add(wDuplicate);
-			this.simpleGeom.getObjContent().getColors().setContent(content);
+			this.simpleGeom.getObjContent().getMaterialsContent().setContent(content);
 		}
 	}
 
 	protected void addColor(Vector4f color) {
-		ArrayList<Float> content = new ArrayList<>(this.simpleGeom.getObjContent().getColors().getContent());
+		ArrayList<Float> content = new ArrayList<>(this.simpleGeom.getObjContent().getMaterialsContent().getContent());
 		content.add(color.x);
 		content.add(color.y);
 		content.add(color.z);
 		content.add(color.w);
-		this.simpleGeom.getObjContent().getColors().setContent(content);
+		this.simpleGeom.getObjContent().getMaterialsContent().setContent(content);
 	}
 
 	@Override

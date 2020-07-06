@@ -1,6 +1,10 @@
 package modelsLibrary;
 
-import modelsManager.OBJUtils;
+import java.util.ArrayList;
+import java.util.List;
+
+import modelsManager.MaterialType;
+import modelsManager.OBJContent;
 import modelsManager.bufferCreator.VBOContent;
 import renderEngine.DrawRenderer;
 import renderEngine.Loader;
@@ -20,25 +24,27 @@ import renderEngine.Loader;
  */
 public class VAOGeom {
 	protected Integer vaoId;
+	protected List<Integer> textureIds;
 	protected Loader loader;
 	protected DrawRenderer drawRenderer;
-	protected OBJUtils objContent;
+	protected OBJContent objContent;
 	// TODO add checked that VBO index must not overlap ?
 
 	public static VAOGeom copy(VAOGeom source) {
 		VAOGeom vaoGeom = VAOGeom.create(source.loader, source.drawRenderer, source.objContent.getDimension());
-		vaoGeom.objContent = OBJUtils.copy(source.objContent);
+		vaoGeom.objContent = OBJContent.copy(source.objContent);
 		return vaoGeom;
 	}
 
 	private VAOGeom(Loader loader2, DrawRenderer drawRenderer) {
 		this.loader = loader2;
 		this.drawRenderer = drawRenderer;
+		this.textureIds = new ArrayList<>();
 	}
 
 	public static VAOGeom create(Loader loader2, DrawRenderer drawRenderer, int dimension) {
 		VAOGeom vaoGeom = new VAOGeom(loader2, drawRenderer);
-		vaoGeom.objContent = OBJUtils.createEmpty(dimension);
+		vaoGeom.objContent = OBJContent.createEmpty(dimension);
 		// TODO try to not allocate vaoId to early.
 		vaoGeom.loadToVAO();
 		return vaoGeom;
@@ -61,6 +67,21 @@ public class VAOGeom {
 				loader.reloadVAO(vaoId, vboContent);
 			}
 		});
+		if(!objContent.getIndices().isEmpty()) {
+			loader.bindIndicesBuffer(vaoId, objContent.getIndicesAsPrimitiveArray());
+		}
+	}
+	
+	public void loadContent(OBJContent objContent) {
+		this.objContent = objContent;
+		loadToVAO();
+		loadTextures();
+	}
+
+	private void loadTextures() {
+		if(objContent.getMaterials().getType() == MaterialType.IMAGE) { //TODO allow binding for BlendedMaterialLibrary
+			this.textureIds.add(loader.loadTexture(objContent.getMaterials().getUrl().get()));
+		}
 	}
 
 	protected void reloadVao() {
@@ -76,7 +97,7 @@ public class VAOGeom {
 	}
 
 	public void clear() {
-		this.objContent = OBJUtils.createEmpty(this.objContent.getDimension());
+		this.objContent = OBJContent.createEmpty(this.objContent.getDimension());
 	}
 
 	public void updateRenderer(IRenderableGeom simpleGeom) {
@@ -85,5 +106,13 @@ public class VAOGeom {
 
 	public VBOContent getPositions() {
 		return this.objContent.getPoints();
+	}
+	
+	public OBJContent getObjContent(){
+		return this.objContent;
+	}
+
+	public List<Integer> getTextures() {
+		return textureIds;
 	}
 }

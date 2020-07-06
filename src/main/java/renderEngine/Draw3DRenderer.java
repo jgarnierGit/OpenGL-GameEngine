@@ -41,7 +41,7 @@ public class Draw3DRenderer extends DrawRenderer {
 			prepare(params.getVAOGeom().getVaoId());
 			Matrix4f viewMatrix = camera.getViewMatrix();
 			draw3DShader.loadViewMatrix(viewMatrix);
-
+			draw3DShader.setUseImage(!params.getVAOGeom().getTextures().isEmpty());
 			// Disable distance filtering.
 			GL11.glDisable(GL11.GL_DEPTH);
 			params.enableRenderOptions();
@@ -70,10 +70,12 @@ public class Draw3DRenderer extends DrawRenderer {
 		GL30.glBindVertexArray(vaoId);
 		GL20.glEnableVertexAttribArray(VBOIndex.POSITION_INDEX);
 		GL20.glEnableVertexAttribArray(Draw3DShader.COLOR_INDEX);
+		GL20.glEnableVertexAttribArray(Draw3DShader.TEXTURE_INDEX);
 	}
 
 	@Override
 	protected void unbindGeom() {
+		GL20.glDisableVertexAttribArray(Draw3DShader.TEXTURE_INDEX);
 		GL20.glDisableVertexAttribArray(Draw3DShader.COLOR_INDEX);
 		GL20.glDisableVertexAttribArray(VBOIndex.POSITION_INDEX);
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);

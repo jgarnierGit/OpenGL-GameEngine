@@ -16,10 +16,12 @@ import com.mokiat.data.front.parser.MTLLibrary;
 
 import entities.Entity;
 import entities.SimpleEntity;
+import modelsLibrary.MaterialContent;
+import modelsLibrary.SimpleGeom3D;
 import modelsManager.BlendedMaterialLibraryBuilder;
 import modelsManager.MTLUtils;
-import modelsManager.Model3DImporter;
-import modelsManager.OBJUtils;
+import modelsManager.OBJContent;
+import modelsManager.OBJImporter;
 import renderEngine.Draw3DRenderer;
 import renderEngine.Loader;
 import renderEngine.MasterRenderer;
@@ -30,39 +32,32 @@ public class RegularElevationTerrain3D extends RegularTerrain3D {
 	private float maxHeight;
 	private static final float MAX_PIXEL_COLOR = 256 * 256 * 256;
 
-	public RegularElevationTerrain3D(Loader loader, Draw3DRenderer draw3dRenderer, String alias, float size,
-			int definition, float amplitude, Entity entity) throws IOException {
-		super(loader, draw3dRenderer, alias, size, definition, entity);
+	public RegularElevationTerrain3D(SimpleGeom3D terrainGeom, Entity entity, int size, int definition, int amplitude) {
+		super(terrainGeom, entity, size, definition);
 		heights = new float[definition][definition];
 		maxHeight = amplitude;
 	}
-
+	
 	/**
 	 * generate a point for each pixel of heightMap
-	 * 
-	 * @param masterRenderer
-	 * @param alias
-	 * @param x
-	 * @param z
-	 * @param elevation
+	 * @param terrainGeom
+	 * @param entity
+	 * @param size
+	 * @param amplitude
 	 * @param heightMap
+	 * @param shaderTextureInputIndex TODO extract
 	 * @return
-	 * @throws IOException
 	 */
-	public static RegularElevationTerrain3D generateRegular(MasterRenderer masterRenderer, String alias, float size,
-			float x, float z, float elevation, float amplitude, String heightMap) throws IOException {
-		SimpleEntity entity = new SimpleEntity(new Vector3f(x, elevation, z), 0, 0, 0, 1);
-
+	public static RegularElevationTerrain3D generateRegular(SimpleGeom3D terrainGeom, Entity entity, int size, int amplitude,
+			String heightMap, int shaderTextureInputIndex) {
 		int definition = getDefinitionFromHeightMap(heightMap);
-
-		RegularElevationTerrain3D terrain = new RegularElevationTerrain3D(masterRenderer.getLoader(),
-				masterRenderer.get3DRenderer(), alias, size, definition, amplitude, entity);
-
-		Optional<OBJUtils> obj = terrain.parseHeightMap(heightMap);
+		RegularElevationTerrain3D terrain = new RegularElevationTerrain3D(terrainGeom, entity, size,definition, amplitude);
+		
+		Optional<OBJContent> obj = terrain.parseHeightMap(shaderTextureInputIndex, heightMap);
 		MTLUtils textures = terrain.importTextures();
 		obj.ifPresent(objUtils -> {
-			OBJUtils objContent = obj.get();
-			// terrain.getSimpleGeom().addPoint(point);
+			OBJContent objContent = obj.get();
+			terrain.getRenderableGeom().getVAOGeom().loadContent(objContent);
 		});
 		throw new NotImplementedException("");
 		/**
@@ -91,7 +86,7 @@ public class RegularElevationTerrain3D extends RegularTerrain3D {
 	}
 
 	private static int getDefinitionFromHeightMap(String heightMap) {
-		try (InputStream fileStream = Model3DImporter.class.getClassLoader().getResourceAsStream("2D/" + heightMap)) {
+		try (InputStream fileStream = OBJImporter.class.getClassLoader().getResourceAsStream("2D/" + heightMap)) {
 			BufferedImage image = ImageIO.read(fileStream);
 			return image.getHeight();
 		} catch (IOException e) {
@@ -100,12 +95,12 @@ public class RegularElevationTerrain3D extends RegularTerrain3D {
 		return -1;
 	}
 
-	private Optional<OBJUtils> parseHeightMap(String heightMap) {
+	private Optional<OBJContent> parseHeightMap(int shaderTextureInputIndex, String heightMap) {
 		ArrayList<Vector3f> positions = new ArrayList<>();
 		ArrayList<Vector3f> normalsVector = new ArrayList<>();
 		ArrayList<Vector2f> textures = new ArrayList<>();
 		ArrayList<Integer> vertexIndices = new ArrayList<>();
-		try (InputStream fileStream = Model3DImporter.class.getClassLoader().getResourceAsStream("2D/" + heightMap)) {
+		try (InputStream fileStream = OBJImporter.class.getClassLoader().getResourceAsStream("2D/" + heightMap)) {
 			BufferedImage image = ImageIO.read(fileStream);
 			for (int i = 0; i < definition; i++) {
 				for (int j = 0; j < definition; j++) {
@@ -138,7 +133,8 @@ public class RegularElevationTerrain3D extends RegularTerrain3D {
 					vertexIndices.add(bottomRight);
 				}
 			}
-			return Optional.of(OBJUtils.create(vertexIndices, positions, normalsVector, textures));
+			MaterialContent content = MaterialContent.createImageContent(shaderTextureInputIndex, textures, heightMap);
+			return Optional.of(OBJContent.create(vertexIndices, positions, normalsVector, content));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -193,5 +189,4 @@ public class RegularElevationTerrain3D extends RegularTerrain3D {
 		}
 		return Optional.of(answer);
 	}
-
 }

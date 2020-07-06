@@ -1,7 +1,7 @@
 package entities;
 
-import java.util.List;
-
+import modelsLibrary.GeomEditor;
+import modelsLibrary.IEditableGeom;
 import modelsLibrary.IRenderableGeom;
 
 /**
@@ -12,5 +12,9 @@ import modelsLibrary.IRenderableGeom;
  */
 public interface GeomContainer {
 
-	public List<IRenderableGeom> getGeoms();
+	public IEditableGeom getEditableGeom();
+
+	public IRenderableGeom getRenderableGeom();
+
+	public GeomEditor getGeomEditor();
 }

@@ -29,7 +29,7 @@ public class MasterRenderer {
 	private float time = 0;
 
 	private StaticShader shader;
-	private EntityRenderer renderer;
+	//private EntityRenderer renderer; TODO remove, will be used in specificRenderers
 	private TerrainRenderer terrainRenderer;
 	private TerrainShader terrainShader;
 	private Draw3DRenderer draw3DRenderer;
@@ -48,7 +48,7 @@ public class MasterRenderer {
 		this.camera = camera;
 		this.draw3DRenderer = draw3DRenderer;
 		this.draw2DRenderer = draw2DRenderer;
-		this.renderer = renderer;
+		//this.renderer = renderer;
 		this.shader = shader;
 		this.terrainShader = terrainShader;
 		this.specificRenderers = new ArrayList<>();
@@ -104,7 +104,7 @@ public class MasterRenderer {
 
 		projectionMatrix.m00 = x_scale;
 		projectionMatrix.m11 = y_scale;
-		renderer.setProjectionMatrix(projectionMatrix);
+		//renderer.setProjectionMatrix(projectionMatrix);
 
 		// float y_scale2 = (float) ((1f / Math.tan(Math.toRadians(-time/ 2f))) *
 		// aspectRatio);
@@ -126,7 +126,7 @@ public class MasterRenderer {
 		shader.loadSkyColour(RED, GREEN, BLUE);
 		shader.loadViewMatrix(camera);
 		shader.loadLightsColor(lights);
-		renderer.render(entities);
+		//renderer.render(entities);
 		shader.stop();
 		/**
 		 * terrainShader.start(); terrainShader.loadClipPlane(clipPlane);
@@ -144,7 +144,7 @@ public class MasterRenderer {
 
 	public void clean() {
 		terrains.clear();
-		entities.clear();
+		//entities.clear();
 	}
 
 	public void processTerrain(Model3D terrain) {
@@ -153,7 +153,7 @@ public class MasterRenderer {
 
 	/**
 	 * TODO adapt logic to process list based on same texture but different models?
-	 * 
+	 * TODO remove, use only specificRenderers
 	 * @param entity
 	 */
 	public void processEntity(EntityTutos entity) {

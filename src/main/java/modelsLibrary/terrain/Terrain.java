@@ -14,12 +14,13 @@ import org.lwjglx.util.vector.Vector3f;
 import com.mokiat.data.front.error.WFException;
 import com.mokiat.data.front.parser.MTLLibrary;
 
+import modelsLibrary.MaterialContent;
 import modelsManager.BlendedMaterialLibraryBuilder;
 import modelsManager.MTLUtils;
 import modelsManager.Model3D;
-import modelsManager.Model3DImporter;
+import modelsManager.OBJImporter;
 import modelsManager.ModelUtils;
-import modelsManager.OBJUtils;
+import modelsManager.OBJContent;
 import renderEngine.Loader;
 import toolbox.Maths;
 
@@ -91,12 +92,12 @@ public class Terrain extends Model3D {
 		return new MTLUtils(mtlLibrary);
 	}
 
-	private OBJUtils generateTerrain(){
+	private OBJContent generateTerrain(){
 		ArrayList<Vector3f> positions = new ArrayList<>();
 		ArrayList<Vector3f> normalsVector = new ArrayList<>();
 		ArrayList<Vector2f> textures = new ArrayList<>();
 		ArrayList<Integer> vertexIndices = new ArrayList<>();
-		try(InputStream fileStream = Model3DImporter.class.getClassLoader().getResourceAsStream("2D/heightmap.png")){
+		try(InputStream fileStream = OBJImporter.class.getClassLoader().getResourceAsStream("2D/heightmap.png")){
 			BufferedImage image = ImageIO.read(fileStream);
 			vertexCount = image.getHeight();
 			heights = new float[vertexCount][vertexCount];
@@ -133,7 +134,8 @@ public class Terrain extends Model3D {
 				vertexIndices.add(bottomRight);
 			}
 		}
-		return OBJUtils.create(vertexIndices,positions,normalsVector,textures);
+
+		return OBJContent.create(vertexIndices,positions,normalsVector,textures);
 	}
 	
 	private static Vector3f calculateNormal(int x, int z, BufferedImage image) {

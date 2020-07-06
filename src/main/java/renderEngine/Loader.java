@@ -6,6 +6,7 @@ import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,6 +27,7 @@ import org.newdawn.slick.opengl.TextureLoader;
 import modelsLibrary.CubeTexture;
 import modelsManager.ModelUtils;
 import modelsManager.bufferCreator.VBOContent;
+import toolbox.GLTextureIDIncrementer;
 
 /**
  * Handles the loading of geometry data into VAOs. It also keeps track of all
@@ -62,34 +64,10 @@ public class Loader {
 	 * position which at this state froze render for <0.5sec
 	 */
 	private Map<Integer, VboManager> vaos = new HashMap<>();
-	private List<Integer> texturesToClean = new ArrayList<>();
-
 	/**
-	 * @deprecated use generic loadToVAO via a special class that manage ModelUtils.
-	 * @param model
-	 * @return VAOId linked to the loaded model.
+	 * String : filePath, Integer : index of loaded texture.
 	 */
-	public int loadModelToVAO(ModelUtils modelUtils) {
-		int vaoID = createAndBindVAO();
-		// OBJUtils objUtils, MTLUtils mtlUtils
-		bindIndicesBuffer(vaoID, modelUtils.getOBJUtils().getIndicesAsPrimitiveArray());
-		// TODO refactor architecture.
-		for (VBOContent vbo : modelUtils.getOBJUtils().getVBOs()) {
-			storeDataFloatInAttrList(vaoID, vbo.getShaderInputIndex(), vbo.getDimension(),
-					vbo.getContentAsPrimitiveArray());
-		}
-		// TODO remove this from loader. is specific usage.
-		if (modelUtils.getMtlUtils().isUsingImage()) {
-			float[] emptyColor = { 0.0f, 0.0f, 0.0f, 0.0f };
-			storeDataFloatInAttrList(vaoID, VBOIndex.COLOR_INDEX, 4, emptyColor);
-		} else {
-			float[] emptyTexture = { 0.0f, 0.0f };
-			storeDataFloatInAttrList(vaoID, VBOIndex.TEXTURE_INDEX, 2, emptyTexture);
-		}
-		unbindVAO();
-		texturesToClean.addAll(modelUtils.getMtlUtils().getTexturesIndexes());
-		return vaoID;
-	}
+	private Map<String, Integer> texturesToClean = new HashMap<>();
 
 	public int loadToVAO(VBOContent vbo) {
 		int vaoId = createAndBindVAO();
@@ -105,22 +83,52 @@ public class Loader {
 				vbo.getContentAsPrimitiveArray());
 		unbindVAO();
 	}
+	
+	/**
+	 * 
+	 * @param vaoID
+	 * @param indices
+	 */
+	public void bindIndicesBuffer(int vaoID, int[] indices) {
+		int vboId = GL15.glGenBuffers();
+		vaos.get(vaoID).addUnmutableVbo(vboId);
+		GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, vboId);
+		IntBuffer buffer = storeDataInIntBuffer(indices);
+		GL15.glBufferData(GL15.GL_ELEMENT_ARRAY_BUFFER, buffer, GL15.GL_STATIC_DRAW);
+		// Deselect (bind to 0) the VBO
+		GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, 0); // necessary if you want a result on a screen
+	}
+	
+	public int loadTexture(Path namePath) {
+		return loadTexture(namePath.getFileName());
+	}
 
-	public int loadTexture(String name) {
-		try (InputStream image = Loader.class.getClassLoader().getResourceAsStream("2D/" + name)) {
+	public int loadTexture(String namePath) {
+		if(texturesToClean.containsKey(namePath)) {
+			return texturesToClean.get(namePath);
+		}
+		try (InputStream image = Loader.class.getClassLoader().getResourceAsStream("2D/" + namePath)) {
 			int id = TextureLoader.getTexture("png", image).getTextureID();
 			GL30.glGenerateMipmap(GL11.GL_TEXTURE_2D);
 			GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
 			GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL14.GL_TEXTURE_LOD_BIAS, -0.4f); // TODO test mipmapping values.
-			texturesToClean.add(id);
+			texturesToClean.put(namePath, id);
 			return id;
 		} catch (IOException e) {
-			System.err.println("[" + name + "] not found ");
+			System.err.println("[" + namePath + "] not found ");
 		}
 		return 0;
 	}
 
-	public int loadCubeMap(CubeTexture cubeTexture) {
+	/**
+	 * TODO add Unit test
+	 * @param cubeTexture
+	 * @return
+	 */
+	public int loadAndBindCubeMap(CubeTexture cubeTexture) {
+		if(texturesToClean.containsKey("GL_TEXTURE_CUBE_MAP_"+ cubeTexture.getTextureId())) {
+			return texturesToClean.get("GL_TEXTURE_CUBE_MAP_"+ cubeTexture.getTextureId());
+		}
 		int texID = GL11.glGenTextures();
 		GL13.glActiveTexture(GL13.GL_TEXTURE0);
 		GL11.glBindTexture(GL13.GL_TEXTURE_CUBE_MAP, texID);
@@ -143,7 +151,7 @@ public class Loader {
 			}
 			i++;
 		}
-		texturesToClean.add(texID);
+		texturesToClean.put("GL_TEXTURE_CUBE_MAP_"+ texID, texID);
 		return texID;
 	}
 
@@ -156,7 +164,7 @@ public class Loader {
 			GL30.glDeleteVertexArrays(vboManager.getKey());
 			vboManager.getValue().clean();
 		}
-		for (int texture : texturesToClean) {// TODO delete.
+		for (int texture : texturesToClean.values()) {
 			GL11.glDeleteTextures(texture);
 		}
 	}
@@ -243,20 +251,7 @@ public class Loader {
 		return buffer;
 	}
 
-	/**
-	 * 
-	 * @param vaoID
-	 * @param indices
-	 */
-	private void bindIndicesBuffer(int vaoID, int[] indices) {
-		int vboId = GL15.glGenBuffers();
-		vaos.get(vaoID).addUnmutableVbo(vboId);
-		GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, vboId);
-		IntBuffer buffer = storeDataInIntBuffer(indices);
-		GL15.glBufferData(GL15.GL_ELEMENT_ARRAY_BUFFER, buffer, GL15.GL_STATIC_DRAW);
-		// Deselect (bind to 0) the VBO
-		GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, 0); // necessary if you want a result on a screen
-	}
+
 
 	/**
 	 * Converts the indices from an int array to an IntBuffer so that they can be

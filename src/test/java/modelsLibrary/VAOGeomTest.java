@@ -10,7 +10,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import modelsManager.OBJUtils;
+import modelsManager.OBJContent;
 import renderEngine.DrawRenderer;
 import renderEngine.Loader;
 
@@ -23,7 +23,7 @@ class VAOGeomTest {
 		loader = Mockito.mock(Loader.class);
 		vaoGeom = VAOGeom.create(loader, Mockito.mock(DrawRenderer.class), 3);
 		Mockito.when(loader.loadToVAO(vaoGeom.getPositions())).thenReturn(1);
-		vaoGeom.objContent = OBJUtils.createEmpty(1);
+		vaoGeom.objContent = OBJContent.createEmpty(1);
 	}
 
 	@Test
@@ -42,7 +42,7 @@ class VAOGeomTest {
 	@Test
 	@DisplayName("Clear must empty VBOs")
 	void testClear() {
-		OBJUtils content = vaoGeom.objContent;
+		OBJContent content = vaoGeom.objContent;
 		vaoGeom.clear();
 		assertNotSame(content, vaoGeom.objContent);
 		assertTrue(vaoGeom.getPositions().getContent().isEmpty());

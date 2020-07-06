@@ -12,4 +12,6 @@ public interface IShader3D extends IShader {
 	public void loadViewMatrix(Matrix4f viewMatrix);
 	
 	public void loadClipPlane(Vector4f plane);
+	
+	public void setUseImage(boolean useImage);
 }

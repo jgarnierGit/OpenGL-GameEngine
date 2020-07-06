@@ -57,10 +57,9 @@ public class TerrainRenderer {
 		GL20.glEnableVertexAttribArray(VBOIndex.POSITION_INDEX);
 		GL20.glEnableVertexAttribArray(VBOIndex.TEXTURE_INDEX);
 		GL20.glEnableVertexAttribArray(VBOIndex.NORMAL_INDEX);
-		if (!model.getObjUtils().getMtlUtils().getMaterials().isEmpty()
-				&& model.getObjUtils().getMtlUtils().isMaterialValid("")) { // TODO delete second check when FIXME on
-																			// MTLUtils is done test with one texture ok
-																			// and many not.
+		// TODO delete second check when FIXME on MTLUtils is done test with one texture ok and many not.
+		if (false) { 
+			//model.getObjUtils().getMtlUtils().getMaterials().isEmpty() && model.getObjUtils().getMtlUtils().isMaterialValid("")
 			bindTextures(model.getObjUtils().getMtlUtils());
 		} else {
 			useNoTexture(0);
@@ -78,7 +77,8 @@ public class TerrainRenderer {
 	private void bindTextures(MTLUtils mtlUtils) {
 		List<MaterialMapper> materialList = mtlUtils.getMaterials();
 		for (int i = 0; i < materialList.size() && i < 33; i++) {
-			if (mtlUtils.isMaterialValid(materialList.get(i).getMaterial().getName())) {
+			if (false) {
+				//mtlUtils.isMaterialValid(materialList.get(i).getMaterial().getName())
 				GL13.glActiveTexture(GLTextureIDIncrementer.GL_TEXTURE_IDS.get(i));
 				GL11.glBindTexture(GL11.GL_TEXTURE_2D, mtlUtils.getTexturesIndexes().get(i));
 			} else {
