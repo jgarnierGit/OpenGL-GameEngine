@@ -15,8 +15,8 @@ import com.mokiat.data.front.error.WFException;
 import com.mokiat.data.front.parser.MTLLibrary;
 
 import importer.ModelUtils;
+import models.data.BlendedMaterialLibraryBuilder;
 import models.data.OBJContent;
-import models.importer.BlendedMaterialLibraryBuilder;
 import models.importer.MTLUtils;
 import models.importer.Model3D;
 import models.importer.OBJImporter;

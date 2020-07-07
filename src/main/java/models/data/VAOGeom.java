@@ -77,8 +77,10 @@ public class VAOGeom {
 	}
 
 	private void loadTextures() {
-		if(objContent.getMaterials().getType() == MaterialType.IMAGE) { //TODO allow binding for BlendedMaterialLibrary
-			this.textureIds.add(loader.loadTexture(objContent.getMaterials().getUrl().get()));
+		if(objContent.getMaterials().getType() == MaterialType.IMAGE) {
+			for(String path :objContent.getMaterials().getUrl()) {
+				this.textureIds.add(loader.loadTexture(path));
+			}
 		}
 	}
 

@@ -4,11 +4,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.lwjglx.util.vector.Vector2f;
 import org.lwjglx.util.vector.Vector3f;
 import org.lwjglx.util.vector.Vector4f;
+
+import com.mokiat.data.front.parser.MTLLibrary;
+import com.mokiat.data.front.parser.MTLMaterial;
 
 /**
  * TODO move to modelsLibrary OBJContent can share multiple textures, but
@@ -156,37 +160,17 @@ public class OBJContent {
 	public static OBJContent copy(OBJContent objContent) {
 		VBOContent positions = VBOContent.create(objContent.positions.getShaderInputIndex(),
 				objContent.positions.getDimension(), new ArrayList<>(objContent.positions.getContent()));
-		MaterialContent material = null;
-		switch (objContent.material.getType()) {
-		case COLOR:
-			List<Vector4f> colorsContent = new ArrayList<>();
-			for (int index = 0; index < objContent.material.getContent().getContent().size(); index += 4) {
-				float x = objContent.material.getContent().getContent().get(index);
-				float y = objContent.material.getContent().getContent().get(index + 1);
-				float z = objContent.material.getContent().getContent().get(index + 2);
-				float w = objContent.material.getContent().getContent().get(index + 3);
-				colorsContent.add(new Vector4f(x, y, z, w));
-			}
-
-			material = MaterialContent.createColorContent(objContent.material.getContent().getShaderInputIndex(),
-					colorsContent);
-			break;
-		case IMAGE:
-			List<Vector2f> textureContent = new ArrayList<>();
-			for (int index = 0; index < objContent.material.getContent().getContent().size(); index += 2) {
-				float x = objContent.material.getContent().getContent().get(index);
-				float y = objContent.material.getContent().getContent().get(index + 1);
-				textureContent.add(new Vector2f(x, y));
-			}
-			material = MaterialContent.createImageContent(objContent.material.getContent().getShaderInputIndex(),
-					textureContent, objContent.material.getUrl().get());
-			break;
-		default:
-			break;
-		}
+		
+		MaterialContent material = MaterialContent.copy(objContent.material);
+		
 		VBOContent normals = VBOContent.create(objContent.normals.getShaderInputIndex(),
 				objContent.normals.getDimension(), new ArrayList<>(objContent.normals.getContent()));
+		
 		ArrayList<Integer> indices = new ArrayList<>(objContent.indices);
 		return new OBJContent(objContent.dimension, indices, positions, material, normals);
+	}
+
+	public void setMaterials(MTLLibrary materials) {
+		material.setUrl(materials.getMaterials().stream().map(MTLMaterial::getName).collect(Collectors.toList()));
 	}
 }

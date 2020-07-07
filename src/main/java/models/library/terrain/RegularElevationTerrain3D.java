@@ -16,9 +16,9 @@ import com.mokiat.data.front.parser.MTLLibrary;
 
 import entities.Entity;
 import models.SimpleGeom3D;
+import models.data.BlendedMaterialLibraryBuilder;
 import models.data.MaterialContent;
 import models.data.OBJContent;
-import models.importer.BlendedMaterialLibraryBuilder;
 import models.importer.MTLUtils;
 import models.importer.OBJImporter;
 import toolbox.Maths;
@@ -37,6 +37,7 @@ public class RegularElevationTerrain3D extends RegularTerrain3D {
 	/**
 	 * generate a point for each pixel of heightMap
 	 * @param terrainGeom
+	 * @param mtlLibrary 
 	 * @param entity
 	 * @param size
 	 * @param amplitude
@@ -44,41 +45,20 @@ public class RegularElevationTerrain3D extends RegularTerrain3D {
 	 * @param shaderTextureInputIndex TODO extract
 	 * @return
 	 */
-	public static RegularElevationTerrain3D generateRegular(SimpleGeom3D terrainGeom, Entity entity, int size, int amplitude,
+	public static RegularElevationTerrain3D generateRegular(SimpleGeom3D terrainGeom, Optional<MTLLibrary> mtlLibrary, Entity entity, int size, int amplitude,
 			String heightMap, int shaderTextureInputIndex) {
 		int definition = getDefinitionFromHeightMap(heightMap);
 		RegularElevationTerrain3D terrain = new RegularElevationTerrain3D(terrainGeom, entity, size,definition, amplitude);
 		
 		Optional<OBJContent> obj = terrain.parseHeightMap(shaderTextureInputIndex, heightMap);
-		MTLUtils textures = terrain.importTextures();
 		obj.ifPresent(objUtils -> {
 			OBJContent objContent = obj.get();
+			mtlLibrary.ifPresent(materials -> {
+				objContent.setMaterials(materials);
+			});
 			terrain.getRenderableGeom().getVAOGeom().loadContent(objContent);
 		});
-		throw new NotImplementedException("");
-		/**
-		 * for(int gz=0;gz<definition;gz++){ for(int gx=0;gx<definition;gx++){
-		 * heights[gx][gz] = 0; Vector3f topLeft = new Vector3f(this.origineX +
-		 * (gx/(float)definition*size),height,this.origineZ +
-		 * (gz/(float)definition*size)); Vector3f topRight = new Vector3f(this.origineX
-		 * + (gx/(float)definition*size),height,this.origineZ +
-		 * ((gz+1)/(float)definition*size)); Vector3f bottomLeft = new
-		 * Vector3f(this.origineX + ((gx+1)/(float)definition*size),height,this.origineZ
-		 * + (gz/(float)definition*size)); Vector3f bottomRight = new
-		 * Vector3f(this.origineX + ((gx+1)/(float)definition*size),height,this.origineZ
-		 * + ((gz+1)/(float)definition*size)); this.addPoint(topLeft);
-		 * this.addPoint(topRight); this.addPoint(bottomLeft);
-		 * 
-		 * this.addPoint(topRight); this.addPoint(bottomRight);
-		 * this.addPoint(bottomLeft); } }
-		 **/
-	}
-
-	private MTLUtils importTextures() {
-		MTLLibrary mtlLibrary = BlendedMaterialLibraryBuilder.create().addTexture("grass.png").addTexture("mud.png")
-				.addTexture("grassFlowers.png").addTexture("path.png").addBlendTexturesAndBuild("blendMap.png");
-
-		return new MTLUtils(mtlLibrary);
+		return terrain;
 	}
 
 	private static int getDefinitionFromHeightMap(String heightMap) {

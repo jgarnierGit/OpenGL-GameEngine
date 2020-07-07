@@ -74,7 +74,6 @@ public class TerrainShader extends ShaderProgram{
 		super.loadInt(location_gTexture,2);
 		super.loadInt(location_bTexture,3);
 		super.loadInt(location_blendMap,4);
-		
 	}
 	
 	public void loadShineVariables(float shineDamper, float reflectivity) {

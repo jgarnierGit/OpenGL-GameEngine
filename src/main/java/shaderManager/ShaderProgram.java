@@ -24,6 +24,12 @@ public abstract class ShaderProgram {
 
 	private static FloatBuffer matrixBuffer = BufferUtils.createFloatBuffer(16);
 
+	/**
+	 * TODO only only constructor can survive...
+	 * @param vertexFile
+	 * @param fragmentFile
+	 * @throws IOException
+	 */
 	public ShaderProgram(String vertexFile, String fragmentFile) throws IOException {
 		logger = Logger.getLogger("ShaderProgram");
 		vertexShaderID = loadShader(ShaderProgram.class::getResourceAsStream, vertexFile, GL20.GL_VERTEX_SHADER);

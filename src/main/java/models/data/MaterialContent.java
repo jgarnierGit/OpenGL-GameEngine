@@ -1,8 +1,8 @@
 package models.data;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import org.lwjglx.util.vector.Vector2f;
 import org.lwjglx.util.vector.Vector4f;
@@ -15,16 +15,16 @@ import org.lwjglx.util.vector.Vector4f;
  *
  */
 public class MaterialContent {
-	private VBOContent materialCoordinates;
+	private VBOContent materialCoontent;
 	private MaterialType type;
-	private Optional<String> url;
+	private List<String> url;
 
 	public VBOContent getContent() {
-		return this.materialCoordinates;
+		return this.materialCoontent;
 	}
 
-	private MaterialContent(VBOContent materialCoordinates, MaterialType type, Optional<String> url) {
-		this.materialCoordinates = materialCoordinates;
+	private MaterialContent(VBOContent materialContent, MaterialType type, List<String> url) {
+		this.materialCoontent = materialContent;
 		this.type = type;
 		this.url = url;
 	}
@@ -36,7 +36,7 @@ public class MaterialContent {
 			coords.add(texture.y);
 		}
 		VBOContent materialCoordinates = VBOContent.create(shaderInputIndex, 2, coords);
-		return new MaterialContent(materialCoordinates, MaterialType.IMAGE, Optional.of(url));
+		return new MaterialContent(materialCoordinates, MaterialType.IMAGE, Arrays.asList(url));
 	}
 
 	public static MaterialContent createColorContent(int shaderInputIndex, List<Vector4f> colors) {
@@ -48,19 +48,29 @@ public class MaterialContent {
 			coords.add(color.w);
 		}
 		VBOContent materialCoordinates = VBOContent.create(shaderInputIndex, 4, coords);
-		return new MaterialContent(materialCoordinates, MaterialType.IMAGE, Optional.empty());
+		return new MaterialContent(materialCoordinates, MaterialType.IMAGE, new ArrayList<>());
 	}
 
 	public static MaterialContent createEmpty(int shaderInputIndex, int dimension) {
 		VBOContent material = VBOContent.createEmpty(shaderInputIndex, dimension);
-		return new MaterialContent(material, MaterialType.NONE, Optional.empty());
+		return new MaterialContent(material, MaterialType.NONE, new ArrayList<>());
 	}
 
 	public MaterialType getType() {
 		return this.type;
 	}
 
-	public Optional<String> getUrl() {
+	public List<String> getUrl() {
 		return this.url;
+	}
+
+	public static MaterialContent copy(MaterialContent material) {
+		List<Float> textureContent = new ArrayList<>(material.getContent().getContent());
+		VBOContent textureVBO =  VBOContent.create(material.getContent().getShaderInputIndex(), material.getContent().getDimension(), textureContent);
+		return new MaterialContent(textureVBO, material.type, material.getUrl());
+	}
+
+	public void setUrl(List<String> materialsUrl) {
+		this.url = new ArrayList<>(materialsUrl);
 	}
 }

@@ -9,9 +9,6 @@ import com.mokiat.data.front.parser.MTLLibrary;
 import models.importer.mokiatMapper.MaterialMapper;
 
 public class MTLUtils {
-	private ArrayList<MaterialMapper> materialMappers;
-	private HashSet<String> texturesList;
-	// TODO delete four below params.
 	private boolean useFakeLighting = false;
 	private boolean hasTransparency = false;
 	private float reflectivity = 0;
@@ -20,9 +17,7 @@ public class MTLUtils {
 	 */
 	private float specularExponent = 0;
 
-	public MTLUtils(MTLLibrary mtlLibrary) {
-		materialMappers = new ArrayList<>();
-		texturesList = new HashSet<>(); // TODO may be put this param in MaterialMapper.
+	public MTLUtils() {
 	}
 
 	public boolean isUseFakeLighting() {
@@ -62,12 +57,8 @@ public class MTLUtils {
 		this.specularExponent = value;
 	}
 
-	public List<MaterialMapper> getMaterials() {
-		return materialMappers;
-	}
-
 	public static MTLUtils createEmpty() {
 		MTLLibrary mtlLibrary = new MTLLibrary();
-		return new MTLUtils(mtlLibrary);
+		return new MTLUtils();
 	}
 }
