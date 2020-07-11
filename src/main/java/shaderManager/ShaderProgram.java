@@ -16,7 +16,7 @@ import org.lwjglx.util.vector.Matrix4f;
 import org.lwjglx.util.vector.Vector3f;
 import org.lwjglx.util.vector.Vector4f;
 
-public abstract class ShaderProgram {
+public abstract class ShaderProgram implements IShader{
 	private int programID;
 	private int vertexShaderID;
 	private int fragmentShaderID;
@@ -92,15 +92,18 @@ public abstract class ShaderProgram {
 		((Buffer) matrixBuffer).flip();
 		GL20.glUniformMatrix4fv(location, false, matrixBuffer);
 	}
-
+	
+	@Override
 	public void start() {
 		GL20.glUseProgram(programID);
 	}
-
+	
+	@Override
 	public void stop() {
 		GL20.glUseProgram(0);
 	}
 
+	@Override
 	public void cleanUp() {
 		stop();
 		GL20.glDetachShader(programID, vertexShaderID);
