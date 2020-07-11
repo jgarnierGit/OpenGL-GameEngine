@@ -5,15 +5,13 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
-import org.lwjgl.opengl.GL20;
-
-import com.mokiat.data.front.parser.MTLMaterial;
 
 import models.IRenderableGeom;
 import models.data.VAOGeom;
@@ -131,8 +129,12 @@ public abstract class DrawRenderer implements IDrawRenderer {
 		GL11.glDrawElements(GL11.GL_TRIANGLES, MasterRenderer.storeDataInIntBuffer(indicesAsPrimitiveArray));
 	}
 
-	private void bindTextures(List<Integer> textures) {
-		for (int i = 0; i < textures.size() && i < 33; i++) {
+	private void bindTextures(Set<Integer> textures) {
+		int i = 0;
+		for(Integer textureIndex : textures) {
+			if(i>= 33) {
+				return;
+			}
 			/**
 			 * TODO use RenderingParameters.enableRenderOptions().
 			if (texture.getDissolve() < 1.0f || mtlUtils.isHasTransparency()) {
@@ -142,7 +144,8 @@ public abstract class DrawRenderer implements IDrawRenderer {
 			// shader.loadShineVariable(texture.getSpecularExponent()); TODO reimplement
 			// below link to sampler2D textureSampler in fragmentShader
 			GL13.glActiveTexture(GLTextureIDIncrementer.GL_TEXTURE_IDS.get(i));
-			GL11.glBindTexture(GL11.GL_TEXTURE_2D, textures.get(i));
+			GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureIndex);
+			i++;
 		}
 		//GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
 	}

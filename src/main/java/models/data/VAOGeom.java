@@ -1,7 +1,8 @@
 package models.data;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import models.IRenderableGeom;
 import renderEngine.DrawRenderer;
@@ -22,7 +23,7 @@ import renderEngine.Loader;
  */
 public class VAOGeom {
 	protected Integer vaoId;
-	protected List<Integer> textureIds;
+	protected Set<Integer> textureIdsLoaded;
 	protected Loader loader;
 	protected DrawRenderer drawRenderer;
 	protected OBJContent objContent;
@@ -37,7 +38,7 @@ public class VAOGeom {
 	private VAOGeom(Loader loader2, DrawRenderer drawRenderer) {
 		this.loader = loader2;
 		this.drawRenderer = drawRenderer;
-		this.textureIds = new ArrayList<>();
+		this.textureIdsLoaded = new HashSet<>();
 	}
 
 	public static VAOGeom create(Loader loader2, DrawRenderer drawRenderer, int dimension) {
@@ -76,10 +77,10 @@ public class VAOGeom {
 		loadTextures();
 	}
 
-	private void loadTextures() {
+	public void loadTextures() {
 		if(objContent.getMaterials().getType() == MaterialType.IMAGE) {
 			for(String path :objContent.getMaterials().getUrl()) {
-				this.textureIds.add(loader.loadTexture(path));
+				this.textureIdsLoaded.add(loader.loadTexture(path));
 			}
 		}
 	}
@@ -112,7 +113,7 @@ public class VAOGeom {
 		return this.objContent;
 	}
 
-	public List<Integer> getTextures() {
-		return textureIds;
+	public Set<Integer> getTextures() {
+		return textureIdsLoaded;
 	}
 }

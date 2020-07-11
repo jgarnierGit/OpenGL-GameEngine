@@ -7,11 +7,9 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.lwjglx.util.vector.Vector2f;
 import org.lwjglx.util.vector.Vector3f;
 import org.lwjglx.util.vector.Vector4f;
 
-import com.mokiat.data.front.parser.MTLLibrary;
 import com.mokiat.data.front.parser.MTLMaterial;
 
 /**
@@ -170,7 +168,7 @@ public class OBJContent {
 		return new OBJContent(objContent.dimension, indices, positions, material, normals);
 	}
 
-	public void setMaterials(MTLLibrary materials) {
-		material.setUrl(materials.getMaterials().stream().map(MTLMaterial::getName).collect(Collectors.toList()));
+	public void setMaterials(IMaterialLibrary materials) {
+		material.setUrl(materials.getMaterialLibrary().getMaterials().stream().map(MTLMaterial::getName).collect(Collectors.toList()));
 	}
 }

@@ -8,27 +8,31 @@ import com.mokiat.data.front.parser.MTLMaterial;
 
 public class BlendedMaterialLibraryBuilder {
 	
-	public static class MixedTexturesBuilder {
-		public List<MTLMaterial> materials = new ArrayList<MTLMaterial>();
+	private BlendedMaterialLibraryBuilder() {
+		//hidden
+	}
+	
+	public static class BlendedMaterialLibraryInBuild {
+		private List<MTLMaterial> materials = new ArrayList<>();
 		
-		public MixedTexturesBuilder addTexture(String textureName) {
+		public BlendedMaterialLibraryInBuild addTexture(String textureName) {
 			MTLMaterial material = new MTLMaterial(textureName);
 			material.setDiffuseTexture(textureName);
 			materials.add(material);
 			return this;
 		}
 		
-		public MTLLibrary addBlendTexturesAndBuild(String textureName) {
+		public BlendedMaterialLibrary addBlendTexturesAndBuild(String textureName) {
 			MTLMaterial material = new MTLMaterial(textureName);
 			material.setDiffuseTexture(textureName);
 			materials.add(material);
 			MTLLibrary library = new MTLLibrary();
 			library.getMaterials().addAll(materials);
-			return library;
+			return new BlendedMaterialLibrary(library);
 		}
 	}
 
-	public static MixedTexturesBuilder create() {
-		return new MixedTexturesBuilder();
+	public static BlendedMaterialLibraryInBuild create() {
+		return new BlendedMaterialLibraryInBuild();
 	}
 }

@@ -17,6 +17,7 @@ import com.mokiat.data.front.parser.MTLLibrary;
 import entities.Entity;
 import models.SimpleGeom3D;
 import models.data.BlendedMaterialLibraryBuilder;
+import models.data.IMaterialLibrary;
 import models.data.MaterialContent;
 import models.data.OBJContent;
 import models.importer.MTLUtils;
@@ -45,7 +46,7 @@ public class RegularElevationTerrain3D extends RegularTerrain3D {
 	 * @param shaderTextureInputIndex TODO extract
 	 * @return
 	 */
-	public static RegularElevationTerrain3D generateRegular(SimpleGeom3D terrainGeom, Optional<MTLLibrary> mtlLibrary, Entity entity, int size, int amplitude,
+	public static RegularElevationTerrain3D generateRegular(SimpleGeom3D terrainGeom, Optional<IMaterialLibrary> mtlLibrary, Entity entity, int size, int amplitude,
 			String heightMap, int shaderTextureInputIndex) {
 		int definition = getDefinitionFromHeightMap(heightMap);
 		RegularElevationTerrain3D terrain = new RegularElevationTerrain3D(terrainGeom, entity, size,definition, amplitude);
