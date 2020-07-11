@@ -52,10 +52,10 @@ public class MouserLoggerPrinter {
 		this.loader = loader;
 		this.coordSysManager = coordSysManager;
 		this.masterRenderer = masterRenderer;
-		this.raysWorldOrigin = SimpleGeom3DBuilder.create(this.loader, this.masterRenderer.get3DRenderer(), "ray")
+		this.raysWorldOrigin = SimpleGeom3DBuilder.create(this.loader, this.masterRenderer.getDefault3DRenderer(), "ray")
 				.withDefaultShader().build();
 		this.raysWorldOrigin.getRenderingParameters().doNotUseEntities();
-		this.ray3D = SimpleGeom3DBuilder.create(this.loader, this.masterRenderer.get3DRenderer(), "RayPoints")
+		this.ray3D = SimpleGeom3DBuilder.create(this.loader, this.masterRenderer.getDefault3DRenderer(), "RayPoints")
 				.withDefaultShader().build();
 		this.ray3D.getRenderingParameters().doNotUseEntities();
 
@@ -84,13 +84,6 @@ public class MouserLoggerPrinter {
 		}
 		geoms.clear();
 		this.ray3D.clear();
-	}
-
-	public void prepareRendering() {
-		for (IRenderableGeom geom : geoms) {
-			this.masterRenderer.reloadAndprocess(geom);
-		}
-		this.masterRenderer.sendForRendering();
 	}
 
 	public void printFilterByRayProximity(List<Entity> orderedList, Vector3f rayPosNormalizedToCam, Vector3f largeRay) {
@@ -380,7 +373,7 @@ public class MouserLoggerPrinter {
 			Vector3f lbfWorldCoord, Vector3f rbfWorldCoord, Vector3f ltnWorldCoord, Vector3f rtnWorldCoord,
 			Vector3f lbnWorldCoord, Vector3f rbnWorldCoord) {
 		Vector4f cameraTransparency = FRUSTRUM_PLAIN_COLOR;
-		SimpleGeom3D frustrum = SimpleGeom3DBuilder.create(loader, this.masterRenderer.get3DRenderer(), "")
+		SimpleGeom3D frustrum = SimpleGeom3DBuilder.create(loader, this.masterRenderer.getDefault3DRenderer(), "")
 				.withDefaultShader().build();
 		frustrum.addPoint(rtnWorldCoord, cameraTransparency);
 		frustrum.addPoint(rbnWorldCoord, cameraTransparency);
@@ -435,7 +428,7 @@ public class MouserLoggerPrinter {
 
 	private IRenderableGeom createBboxGeomAsLines(Vector3f ltf, Vector3f rtf, Vector3f lbf, Vector3f rbf, Vector3f ltn,
 			Vector3f rtn, Vector3f lbn, Vector3f rbn) {
-		SimpleGeom3D boundingBox = SimpleGeom3DBuilder.create(this.loader, this.masterRenderer.get3DRenderer(), "")
+		SimpleGeom3D boundingBox = SimpleGeom3DBuilder.create(this.loader, this.masterRenderer.getDefault3DRenderer(), "")
 				.withDefaultShader().build();
 
 		boundingBox.addPoint(new Vector3f(lbf), BOUNDING_BOX_COLOR);
@@ -504,11 +497,11 @@ public class MouserLoggerPrinter {
 		if (list.isEmpty()) {
 			return;
 		}
-		SimpleGeom2D pointToScreenSpace = SimpleGeom2D.create(loader, this.masterRenderer.get2DRenderer(),
+		SimpleGeom2D pointToScreenSpace = SimpleGeom2D.create(loader, this.masterRenderer.getDefault2DRenderer(),
 				"pointScreenSpace");
-		SimpleGeom2D pointToCartesianSpace = SimpleGeom2D.create(loader, this.masterRenderer.get2DRenderer(),
+		SimpleGeom2D pointToCartesianSpace = SimpleGeom2D.create(loader, this.masterRenderer.getDefault2DRenderer(),
 				"pointCartesian");
-		SimpleGeom2D nearPlane = SimpleGeom2D.create(loader, this.masterRenderer.get2DRenderer(), "pointNear");
+		SimpleGeom2D nearPlane = SimpleGeom2D.create(loader, this.masterRenderer.getDefault2DRenderer(), "pointNear");
 		nearPlane.addPoint(
 				new Vector2f(-CoordinatesSystemManager.getNearPlane(), -CoordinatesSystemManager.getNearPlane()),
 				new Vector4f(0.56f, 0.91f, 0.84f, 1));
@@ -553,7 +546,7 @@ public class MouserLoggerPrinter {
 			Vector3f lbfWorldCoord, Vector3f rbfWorldCoord, Vector3f ltnWorldCoord, Vector3f rtnWorldCoord,
 			Vector3f lbnWorldCoord, Vector3f rbnWorldCoord) {
 		Vector4f cameraTransparency = FRUSTRUM_PLAIN_COLOR;
-		SimpleGeom3D frustrum = SimpleGeom3DBuilder.create(loader, this.masterRenderer.get3DRenderer(), "")
+		SimpleGeom3D frustrum = SimpleGeom3DBuilder.create(loader, this.masterRenderer.getDefault3DRenderer(), "")
 				.withDefaultShader().build();
 		frustrum.addPoint(ltnWorldCoord, cameraTransparency);
 		frustrum.addPoint(lbnWorldCoord, cameraTransparency);
@@ -608,7 +601,7 @@ public class MouserLoggerPrinter {
 	private SimpleGeom3D getFrustrumForLines(Vector3f ltfWorldCoord, Vector3f rtfWorldCoord, Vector3f lbfWorldCoord,
 			Vector3f rbfWorldCoord, Vector3f ltnWorldCoord, Vector3f rtnWorldCoord, Vector3f lbnWorldCoord,
 			Vector3f rbnWorldCoord) {
-		SimpleGeom3D frustrum = SimpleGeom3DBuilder.create(loader, this.masterRenderer.get3DRenderer(), "")
+		SimpleGeom3D frustrum = SimpleGeom3DBuilder.create(loader, this.masterRenderer.getDefault3DRenderer(), "")
 				.withDefaultShader().build();
 		frustrum.addPoint(lbfWorldCoord, frustrum.getVAOGeom().getDefaultColor());
 		frustrum.addPoint(ltfWorldCoord, frustrum.getVAOGeom().getDefaultColor());
@@ -700,7 +693,7 @@ public class MouserLoggerPrinter {
 	}
 
 	public void print2DVectors(List<Vector3f> clippedCoords) {
-		SimpleGeom2D pointsClipped = SimpleGeom2D.create(this.loader, this.masterRenderer.get2DRenderer(), "2DClipped");
+		SimpleGeom2D pointsClipped = SimpleGeom2D.create(this.loader, this.masterRenderer.getDefault2DRenderer(), "2DClipped");
 		for (Vector3f vec : clippedCoords) {
 			pointsClipped.addPoint(new Vector2f(vec.x, vec.y));
 		}
@@ -717,7 +710,7 @@ public class MouserLoggerPrinter {
 	 * @param glRender
 	 */
 	public void print3DVectors(String alias, List<Vector3f> list, Vector4f color, int glRender) {
-		SimpleGeom3D points = SimpleGeom3DBuilder.create(loader, this.masterRenderer.get3DRenderer(), alias)
+		SimpleGeom3D points = SimpleGeom3DBuilder.create(loader, this.masterRenderer.getDefault3DRenderer(), alias)
 				.withDefaultShader().build();
 		for (Vector3f vec : list) {
 			if (color != null) {
@@ -775,7 +768,7 @@ public class MouserLoggerPrinter {
 			System.err.println("not allowed renderMode (" + param.getRenderMode()
 					+ ") transformation for normal computation of " + param);
 		}
-		SimpleGeom3D normalsGeom = SimpleGeom3DBuilder.create(loader, this.masterRenderer.get3DRenderer(), "normals")
+		SimpleGeom3D normalsGeom = SimpleGeom3DBuilder.create(loader, this.masterRenderer.getDefault3DRenderer(), "normals")
 				.withDefaultShader().build();
 
 		int i = 0;

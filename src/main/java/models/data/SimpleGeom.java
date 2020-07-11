@@ -4,6 +4,7 @@ import entities.SimpleEntity;
 import models.GeomEditor;
 import models.IEditableGeom;
 import models.IRenderableGeom;
+import renderEngine.IDrawRenderer;
 import renderEngine.RenderingParameters;
 
 public abstract class SimpleGeom implements IRenderableGeom, IEditableGeom {
@@ -26,6 +27,11 @@ public abstract class SimpleGeom implements IRenderableGeom, IEditableGeom {
 	public void updateRenderer() {
 		vaoGeom.updateRenderer(this);
 	}
+	
+	@Override
+	public IDrawRenderer getRenderer() {
+		return vaoGeom.getRenderer();
+	}
 
 	@Override
 	public VAOGeom getVAOGeom() {
@@ -39,7 +45,7 @@ public abstract class SimpleGeom implements IRenderableGeom, IEditableGeom {
 
 	@Override
 	public void reloadVao() {
-		vaoGeom.reloadVao();
+		vaoGeom.loadToVAO();
 	}
 
 	@Override

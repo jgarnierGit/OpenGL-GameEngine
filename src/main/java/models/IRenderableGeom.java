@@ -5,6 +5,7 @@ import java.util.List;
 import org.lwjglx.util.vector.Vector;
 
 import models.data.VAOGeom;
+import renderEngine.IDrawRenderer;
 import renderEngine.RenderingParameters;
 
 public interface IRenderableGeom {
@@ -30,6 +31,8 @@ public interface IRenderableGeom {
 	 * TODO extract this also
 	 */
 	public void updateRenderer();
+	
+	public IDrawRenderer getRenderer();
 
 	/**
 	 * clear points arrays coordinates.

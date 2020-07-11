@@ -12,7 +12,7 @@ public interface IDrawRenderer {
 
 	public void render();
 
-	public void sendForRendering();
+	public void updateForRendering();
 
-	public void reloadAndprocess(IRenderableGeom geom);
+	public void loadToVAO(IRenderableGeom geom);
 }

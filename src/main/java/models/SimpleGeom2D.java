@@ -11,7 +11,7 @@ import entities.SimpleEntity;
 import models.data.SimpleGeom;
 import models.data.VAOGeom;
 import renderEngine.DrawRenderer;
-import renderEngine.Loader;
+import renderEngine.MasterRenderer;
 import renderEngine.RenderingParameters;
 import shaderManager.Draw2DShader;
 import shaderManager.IShader2D;
@@ -28,9 +28,11 @@ public class SimpleGeom2D extends SimpleGeom {
 		// hidden
 	}
 
-	protected static SimpleGeom2D create(Loader loader, DrawRenderer draw2DRenderer, IShader2D shader, String alias) {
+	protected static SimpleGeom2D create(MasterRenderer masterRenderer, DrawRenderer draw2DRenderer, IShader2D shader,
+			String alias) {
 		SimpleGeom2D simpleGeom2D = new SimpleGeom2D();
-		simpleGeom2D.vaoGeom = VAOGeom.create(loader, draw2DRenderer, 2);
+		masterRenderer.registerRenderer(draw2DRenderer);
+		simpleGeom2D.vaoGeom = VAOGeom.create(masterRenderer.getLoader(), draw2DRenderer, 2);
 		simpleGeom2D.geomEditor = GeomEditor.create(simpleGeom2D);
 		simpleGeom2D.renderingParameters = RenderingParameters.create(shader, simpleGeom2D.getVAOGeom(), alias,
 				SimpleEntity.createDefaultEntity());

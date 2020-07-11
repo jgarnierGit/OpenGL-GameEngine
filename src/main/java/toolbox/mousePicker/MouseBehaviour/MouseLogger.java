@@ -31,6 +31,11 @@ import toolbox.Maths;
 import utils.IntersectionResult;
 import utils.SpatialComparator;
 
+/**
+ * see to use gl_clipdistance
+ * @author chezmoi
+ *
+ */
 public class MouseLogger implements IMouseBehaviour {
 	private Map<IRenderableGeom, List<Entity>> entitiesByGeom;
 	private CameraEntity camera;
@@ -112,7 +117,6 @@ public class MouseLogger implements IMouseBehaviour {
 		filterByRayPromixity(ray);
 
 		// rayCasting(ray);
-		this.mouserLoggerPrinter.prepareRendering();
 	}
 
 	private void filterEntitiesByBboxIntersection() {

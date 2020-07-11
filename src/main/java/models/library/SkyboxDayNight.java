@@ -38,13 +38,11 @@ public class SkyboxDayNight implements GeomContainer {
 		skybox.useDefaultTemplate(); // TODO extract to have a more generic Skybox.
 		skybox.renderer = SkyboxRenderer.create(skyboxShader, camera, skybox.skyboxTextureDay,
 				skybox.skyboxTextureNight);
-		// TODO automate this binding.
-		masterRenderer.addRenderer(skybox.renderer);
-		skybox.skyboxGeom = SimpleGeom3DBuilder.create(masterRenderer.getLoader(), skybox.renderer, "skybox")
+		skybox.skyboxGeom = SimpleGeom3DBuilder.create(masterRenderer, skybox.renderer, "skybox")
 				.withShader(skyboxShader).build();
 		skybox.initGeom();
-		skybox.renderer.reloadAndprocess(skybox.skyboxGeom);
-		skybox.renderer.sendForRendering();
+		//TODO merge what is better between this way and monkey way
+		skybox.renderer.loadToVAO(skybox.skyboxGeom);
 		return skybox;
 	}
 

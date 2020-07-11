@@ -46,9 +46,10 @@ public class RegularElevationTerrain3D extends RegularTerrain3D {
 	 * @param shaderTextureInputIndex TODO extract
 	 * @return
 	 */
-	public static RegularElevationTerrain3D generateRegular(SimpleGeom3D terrainGeom, Optional<IMaterialLibrary> mtlLibrary, Entity entity, int size, int amplitude,
+	public static RegularElevationTerrain3D generateAndLoadRegular(SimpleGeom3D terrainGeom, Optional<IMaterialLibrary> mtlLibrary, Entity entity, int size, int amplitude,
 			String heightMap, int shaderTextureInputIndex) {
 		int definition = getDefinitionFromHeightMap(heightMap);
+
 		RegularElevationTerrain3D terrain = new RegularElevationTerrain3D(terrainGeom, entity, size,definition, amplitude);
 		
 		Optional<OBJContent> obj = terrain.parseHeightMap(shaderTextureInputIndex, heightMap);

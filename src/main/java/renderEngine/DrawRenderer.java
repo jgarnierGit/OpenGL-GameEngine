@@ -41,9 +41,8 @@ public abstract class DrawRenderer implements IDrawRenderer {
 	}
 
 	@Override
-	public void reloadAndprocess(IRenderableGeom geom) {
+	public void loadToVAO(IRenderableGeom geom) {
 		geom.reloadVao();
-		geom.updateRenderer();
 	}
 
 	@Override
@@ -70,7 +69,7 @@ public abstract class DrawRenderer implements IDrawRenderer {
 	protected abstract void unbindGeom();
 
 	@Override
-	public void sendForRendering() {
+	public void updateForRendering() {
 		updateOverridingColors();
 		renderingParams = getOrderedRenderingParameters();
 		renderingParams = checkForEntitiesPresence();

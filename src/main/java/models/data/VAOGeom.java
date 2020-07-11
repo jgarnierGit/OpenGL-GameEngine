@@ -1,11 +1,11 @@
 package models.data;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import models.IRenderableGeom;
 import renderEngine.DrawRenderer;
+import renderEngine.IDrawRenderer;
 import renderEngine.Loader;
 
 /**
@@ -44,8 +44,6 @@ public class VAOGeom {
 	public static VAOGeom create(Loader loader2, DrawRenderer drawRenderer, int dimension) {
 		VAOGeom vaoGeom = new VAOGeom(loader2, drawRenderer);
 		vaoGeom.objContent = OBJContent.createEmpty(dimension);
-		// TODO try to not allocate vaoId to early.
-		vaoGeom.loadToVAO();
 		return vaoGeom;
 	}
 
@@ -85,13 +83,6 @@ public class VAOGeom {
 		}
 	}
 
-	protected void reloadVao() {
-		objContent.getVBOs().forEach(vboContent -> {
-			loader.reloadVAO(vaoId, vboContent);
-			// point, color, material...
-		});
-	}
-
 	@Override
 	public String toString() {
 		return "VAOGeom" + vaoId + " [" + this.objContent.toString() + "]";
@@ -103,6 +94,10 @@ public class VAOGeom {
 
 	public void updateRenderer(IRenderableGeom simpleGeom) {
 		this.drawRenderer.process(simpleGeom);
+	}
+	
+	public IDrawRenderer getRenderer() {
+		return this.drawRenderer;
 	}
 
 	public VBOContent getPositions() {

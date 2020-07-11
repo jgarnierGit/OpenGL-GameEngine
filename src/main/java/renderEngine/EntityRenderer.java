@@ -55,6 +55,11 @@ public class EntityRenderer {
 	 * @param rawModel - The model to be rendered.
 	 */
 	public void render(Map<Model3D, List<EntityTutos>> entities) {
+		shader.start();
+		shader.loadClipPlane(clipPlane);
+		shader.loadSkyColour(MasterRenderer.RED, MasterRenderer.GREEN, MasterRenderer.BLUE);
+		shader.loadViewMatrix(camera);
+		shader.loadLightsColor(lights);
 		for (Model3D model : entities.keySet()) {
 			prepareTextureModel(model);
 			List<EntityTutos> batch = entities.get(model);
@@ -68,6 +73,7 @@ public class EntityRenderer {
 			}
 			unbindTextureModel();
 		}
+		shader.stop();
 	}
 
 	/**

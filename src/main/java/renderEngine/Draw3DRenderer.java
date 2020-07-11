@@ -37,7 +37,7 @@ public class Draw3DRenderer extends DrawRenderer {
 		for (RenderingParameters params : renderingParams) {
 			IShader3D draw3DShader = (IShader3D) params.getShader();
 			draw3DShader.start();
-			draw3DShader.loadClipPlane(clipPlane);
+			draw3DShader.loadClipPlane(clipPlane); //TODO extract this is not generic at all
 			prepare(params.getVAOGeom().getVaoId());
 			Matrix4f viewMatrix = camera.getViewMatrix();
 			draw3DShader.loadViewMatrix(viewMatrix);

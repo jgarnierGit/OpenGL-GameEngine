@@ -106,6 +106,7 @@ public abstract class ShaderProgram implements IShader{
 	@Override
 	public void cleanUp() {
 		stop();
+		//FIXME unbind many times same shaderID
 		GL20.glDetachShader(programID, vertexShaderID);
 		GL20.glDetachShader(programID, fragmentShaderID);
 		GL20.glDeleteShader(vertexShaderID);

@@ -3,77 +3,54 @@ package renderEngine;
 import java.io.IOException;
 import java.nio.Buffer;
 import java.nio.IntBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
-import org.lwjglx.util.vector.Matrix4f;
 import org.lwjglx.util.vector.Vector4f;
 
 import camera.CameraEntity;
-import entities.EntityTutos;
+import entities.GeomContainer;
 import entities.Light;
-import models.IRenderableGeom;
-import models.importer.Model3D;
-import shaderManager.StaticShader;
-import shaderManager.TerrainShader;
-import toolbox.CoordinatesSystemManager;
 
 public class MasterRenderer {
 	public static final float RED = 0.55f;
 	public static final float BLUE = 0.64f;
 	public static final float GREEN = 0.75f;
-	private float time = 0;
 
-	private StaticShader shader;
-	//private EntityRenderer renderer; TODO remove, will be used in specificRenderers
-	private TerrainRenderer terrainRenderer;
-	private TerrainShader terrainShader;
-	private Draw3DRenderer draw3DRenderer;
-	private Draw2DRenderer draw2DRenderer;
-	private List<Model3D> terrains = new ArrayList<>();
+	private Draw3DRenderer defaultDraw3DRenderer;
+	private Draw2DRenderer defaultDraw2DRenderer;
 	private CameraEntity camera;
 	private Loader loader;
 
-	private List<DrawRenderer> specificRenderers;
+	private Set<DrawRenderer> specificRenderers;
 
-	private HashMap<Model3D, List<EntityTutos>> entities = new HashMap<>();
-
-	private MasterRenderer(Loader loader, CameraEntity camera, StaticShader shader, EntityRenderer renderer,
-			Draw3DRenderer draw3DRenderer, Draw2DRenderer draw2DRenderer, TerrainShader terrainShader) {
+	private MasterRenderer(Loader loader, CameraEntity camera,
+			Draw3DRenderer draw3DRenderer, Draw2DRenderer draw2DRenderer) {
 		this.loader = loader;
 		this.camera = camera;
-		this.draw3DRenderer = draw3DRenderer;
-		this.draw2DRenderer = draw2DRenderer;
-		//this.renderer = renderer;
-		this.shader = shader;
-		this.terrainShader = terrainShader;
-		this.specificRenderers = new ArrayList<>();
+		this.defaultDraw3DRenderer = draw3DRenderer;
+		this.defaultDraw2DRenderer = draw2DRenderer;
+		this.specificRenderers = new HashSet<>();
 	}
 
 	public static MasterRenderer create(CameraEntity camera) throws IOException {
-		StaticShader shader = new StaticShader();
 		enableCulling();
-		EntityRenderer renderer = new EntityRenderer(shader, CoordinatesSystemManager.getProjectionMatrix());
-		// terrainRenderer = new TerrainRenderer(terrainShader,
-		// CoordinatesSystemManager.getProjectionMatrix());//TODO extract
 		Draw3DRenderer draw3DRenderer = new Draw3DRenderer(camera);
 		Draw2DRenderer draw2DRenderer = new Draw2DRenderer();
-		TerrainShader terrainShader = new TerrainShader();
 		Loader loader = new Loader();
 
-		return new MasterRenderer(loader, camera, shader, renderer, draw3DRenderer, draw2DRenderer, terrainShader);
+		return new MasterRenderer(loader, camera, draw3DRenderer, draw2DRenderer);
 	}
 
-	public Draw3DRenderer get3DRenderer() {
-		return this.draw3DRenderer;
+	public Draw3DRenderer getDefault3DRenderer() {
+		return this.defaultDraw3DRenderer;
 	}
 
-	public Draw2DRenderer get2DRenderer() {
-		return this.draw2DRenderer;
+	public Draw2DRenderer getDefault2DRenderer() {
+		return this.defaultDraw2DRenderer;
 	}
 
 	public Loader getLoader() {
@@ -94,83 +71,26 @@ public class MasterRenderer {
 		GL11.glDisable(GL11.GL_CULL_FACE);
 	}
 
-	private void updateProjectionInTime() {
-		time += DisplayManager.getFrameTimeSeconds() * 50;
-		time %= 180;
-		float aspectRatio = (float) DisplayManager.WIDTH / (float) DisplayManager.HEIGHT;
-		float y_scale = (float) ((1f / Math.tan(Math.toRadians(time / 2f))) * aspectRatio);
-		float x_scale = y_scale / aspectRatio;
-		Matrix4f projectionMatrix = CoordinatesSystemManager.getProjectionMatrix();
-
-		projectionMatrix.m00 = x_scale;
-		projectionMatrix.m11 = y_scale;
-		//renderer.setProjectionMatrix(projectionMatrix);
-
-		// float y_scale2 = (float) ((1f / Math.tan(Math.toRadians(-time/ 2f))) *
-		// aspectRatio);
-		// float x_scale2 = y_scale / aspectRatio;
-		// projectionMatrix.m00 = y_scale2;
-		// projectionMatrix.m11 = x_scale2;
-		terrainShader.start();
-		terrainShader.loadProjectionMatrix(projectionMatrix);
-		terrainShader.stop();
-
-	}
-
-	public void render(List<Light> lights, Vector4f clipPlane) {
-		// updateProjectionInTime();
+	public void render(List<Light> lights, List<GeomContainer> geomToRender, Vector4f clipPlane) {
 		camera.updateViewMatrix();
 		prepare();
-		shader.start();
-		shader.loadClipPlane(clipPlane);
-		shader.loadSkyColour(RED, GREEN, BLUE);
-		shader.loadViewMatrix(camera);
-		shader.loadLightsColor(lights);
-		//renderer.render(entities);
-		shader.stop();
-		/**
-		 * terrainShader.start(); terrainShader.loadClipPlane(clipPlane);
-		 * terrainShader.loadSkyColour(RED, GREEN, BLUE);
-		 * terrainShader.loadViewMatrix(camera); terrainShader.loadLightsColor(lights);
-		 * terrainRenderer.render(terrains); terrainShader.stop();
-		 **/
-		draw3DRenderer.setClipPlane(clipPlane);
-		draw3DRenderer.render();
-		draw2DRenderer.render();
-		for (DrawRenderer drawRenderer : this.specificRenderers) {
+		//add geom to its renderer queue for rendering
+		Set<IDrawRenderer> renderersToUpdate = new HashSet<>();
+		geomToRender.forEach(geom -> {
+			if(renderersToUpdate.add(geom.getRenderableGeom().getRenderer())) {
+				geom.getRenderableGeom().getRenderer().clearGeom();
+			}
+			geom.getRenderableGeom().updateRenderer();
+		});
+		updateForRendering(renderersToUpdate);
+		//TODO extract it to specific shader? or not can be general setter
+		defaultDraw3DRenderer.setClipPlane(clipPlane); 
+		for (IDrawRenderer drawRenderer : renderersToUpdate) {
 			drawRenderer.render();
 		}
 	}
 
-	public void clean() {
-		terrains.clear();
-		//entities.clear();
-	}
-
-	public void processTerrain(Model3D terrain) {
-		terrains.add(terrain);
-	}
-
-	/**
-	 * TODO adapt logic to process list based on same texture but different models?
-	 * TODO remove, use only specificRenderers
-	 * @param entity
-	 */
-	public void processEntity(EntityTutos entity) {
-		Model3D entityModel = entity.getModel();
-		List<EntityTutos> batch = entities.getOrDefault(entityModel, new ArrayList<>());
-		if (batch.isEmpty()) {
-			entities.put(entityModel, new ArrayList<EntityTutos>(Arrays.asList(entity)));
-		} else {
-			batch.add(entity);
-		}
-	}
-
 	public void cleanUp() {
-		shader.cleanUp();
-		// terrainShader.cleanUp();
-		draw3DRenderer.cleanUp();
-		draw2DRenderer.cleanUp();
 		for (DrawRenderer drawRenderer : this.specificRenderers) {
 			drawRenderer.cleanUp();
 		}
@@ -198,28 +118,13 @@ public class MasterRenderer {
 		return buffer;
 	}
 
-	/**
-	 * @deprecated use reloadAndprocess from specified renderer One more
-	 *             optimization must be done in future to not reload unchanged
-	 *             geometries (vertices + colors)
-	 * @param geom
-	 */
-	public void reloadAndprocess(IRenderableGeom geom) {
-		geom.reloadVao();
-		geom.updateRenderer();
-	}
-
-	// TODO maybe find another way for those 2 methods. delegate to another class to
-	// keep this one clean.
-	public void sendForRendering() {
-		this.draw2DRenderer.sendForRendering();
-		this.draw3DRenderer.sendForRendering();
-		for (DrawRenderer drawRenderer : this.specificRenderers) {
-			drawRenderer.sendForRendering();
+	private void updateForRendering(Set<IDrawRenderer> renderers) {
+		for (IDrawRenderer drawRenderer : renderers) {
+			drawRenderer.updateForRendering();
 		}
 	}
-
-	public void addRenderer(DrawRenderer renderer) {
-		this.specificRenderers.add(renderer);
-	}
+	
+	public void registerRenderer(DrawRenderer renderer) {
+			this.specificRenderers.add(renderer);
+		}
 }
