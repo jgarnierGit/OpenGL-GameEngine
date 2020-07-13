@@ -14,6 +14,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 
 import models.IRenderableGeom;
+import models.data.OBJContent;
 import models.data.VAOGeom;
 import toolbox.GLTextureIDIncrementer;
 
@@ -41,8 +42,13 @@ public abstract class DrawRenderer implements IDrawRenderer {
 	}
 
 	@Override
-	public void loadToVAO(IRenderableGeom geom) {
+	public void reloadGeomToVAO(IRenderableGeom geom) {
 		geom.reloadVao();
+	}
+	
+	@Override
+	public void bindContentToGeomVAO(IRenderableGeom geom, OBJContent geomContent) {
+		geom.bindContentToVAO(geomContent);
 	}
 
 	@Override
@@ -97,8 +103,10 @@ public abstract class DrawRenderer implements IDrawRenderer {
 	private void updateOverridingColors() {
 		for (IRenderableGeom simpleGeom : this.geoms) {
 			RenderingParameters rParam = simpleGeom.getRenderingParameters();
-			rParam.applyColorOverriding(simpleGeom.getGeomEditor());
-			simpleGeom.reloadVao();
+			boolean edited = rParam.applyColorOverriding(simpleGeom.getGeomEditor());
+			if(edited) {
+				simpleGeom.reloadVao();
+			}
 		}
 	}
 

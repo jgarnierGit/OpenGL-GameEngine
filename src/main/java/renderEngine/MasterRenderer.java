@@ -3,6 +3,7 @@ package renderEngine;
 import java.io.IOException;
 import java.nio.Buffer;
 import java.nio.IntBuffer;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -25,7 +26,8 @@ public class MasterRenderer {
 	private CameraEntity camera;
 	private Loader loader;
 
-	private Set<DrawRenderer> specificRenderers;
+	private Set<DrawRenderer> renderers;
+	private Set<IDrawRenderer> activeRenderers;
 
 	private MasterRenderer(Loader loader, CameraEntity camera,
 			Draw3DRenderer draw3DRenderer, Draw2DRenderer draw2DRenderer) {
@@ -33,7 +35,8 @@ public class MasterRenderer {
 		this.camera = camera;
 		this.defaultDraw3DRenderer = draw3DRenderer;
 		this.defaultDraw2DRenderer = draw2DRenderer;
-		this.specificRenderers = new HashSet<>();
+		this.renderers = new HashSet<>();
+		this.activeRenderers = new HashSet<>();
 	}
 
 	public static MasterRenderer create(CameraEntity camera) throws IOException {
@@ -70,28 +73,37 @@ public class MasterRenderer {
 	public static void disableCulling() {
 		GL11.glDisable(GL11.GL_CULL_FACE);
 	}
-
-	public void render(List<Light> lights, List<GeomContainer> geomToRender, Vector4f clipPlane) {
-		camera.updateViewMatrix();
-		prepare();
+	
+	/**
+	 * load datas in each renderers
+	 * @param arrayList
+	 * @param toRender
+	 * @param clipPlane
+	 */
+	public void reloadRenderingDatas(List<Light> arrayList, List<GeomContainer> geomToRender, Vector4f clipPlane) {
 		//add geom to its renderer queue for rendering
-		Set<IDrawRenderer> renderersToUpdate = new HashSet<>();
+		this.activeRenderers.clear();
 		geomToRender.forEach(geom -> {
-			if(renderersToUpdate.add(geom.getRenderableGeom().getRenderer())) {
+			if(activeRenderers.add(geom.getRenderableGeom().getRenderer())) {
 				geom.getRenderableGeom().getRenderer().clearGeom();
 			}
 			geom.getRenderableGeom().updateRenderer();
 		});
-		updateForRendering(renderersToUpdate);
+		updateForRendering(activeRenderers);
 		//TODO extract it to specific shader? or not can be general setter
 		defaultDraw3DRenderer.setClipPlane(clipPlane); 
-		for (IDrawRenderer drawRenderer : renderersToUpdate) {
+	}
+
+	public void render() {
+		camera.updateViewMatrix();
+		prepare();
+		for (IDrawRenderer drawRenderer : activeRenderers) {
 			drawRenderer.render();
 		}
 	}
 
 	public void cleanUp() {
-		for (DrawRenderer drawRenderer : this.specificRenderers) {
+		for (DrawRenderer drawRenderer : this.renderers) {
 			drawRenderer.cleanUp();
 		}
 		loader.cleanUp();
@@ -101,7 +113,6 @@ public class MasterRenderer {
 		GL11.glEnable(GL11.GL_DEPTH_TEST); // test the depth priority
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT); // clear the framebuffer
 		GL11.glClearColor(RED, GREEN, BLUE, 1);
-
 	}
 
 	/**
@@ -125,6 +136,6 @@ public class MasterRenderer {
 	}
 	
 	public void registerRenderer(DrawRenderer renderer) {
-			this.specificRenderers.add(renderer);
+			this.renderers.add(renderer);
 		}
 }

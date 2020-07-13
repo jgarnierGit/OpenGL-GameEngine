@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.lwjglx.util.vector.Vector;
 
+import models.data.OBJContent;
 import models.data.VAOGeom;
 import renderEngine.IDrawRenderer;
 import renderEngine.RenderingParameters;
@@ -26,6 +27,8 @@ public interface IRenderableGeom {
 	 * Vertex Buffer Object attached to VAO
 	 */
 	public void reloadVao();
+	
+	public void bindContentToVAO(OBJContent geomContent);
 
 	/**
 	 * TODO extract this also

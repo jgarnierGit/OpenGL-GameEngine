@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.logging.Logger;
 
@@ -135,15 +136,21 @@ public class RenderingParameters implements IRenderingParameters {
 	 * first applies global color changes, then unitary color changes.
 	 * 
 	 * @param geomEditor
+	 * @return true if any modification applied
 	 */
-	public void applyColorOverriding(GeomEditor geomEditor) {
-		this.overridedColors.ifPresent(color -> {
+	public boolean applyColorOverriding(GeomEditor geomEditor) {
+		boolean edited = false;
+		if(this.overridedColors.isPresent()) {
+			Vector4f color  = this.overridedColors.get();
 			geomEditor.setColor(color);
-		});
+			edited = true;
+		}
 
-		this.overrideColorsAtIndex.forEach((position, color) -> {
-			geomEditor.updateColorByPosition(position, color);
-		});
+		for(Entry<Vector, Vector4f> colorAtPoint : this.overrideColorsAtIndex.entrySet()) {
+			geomEditor.updateColorByPosition(colorAtPoint.getKey(), colorAtPoint.getValue());
+			edited = true;
+		}
+		return edited;
 	}
 
 	public Optional<Vector4f> getOverridedColors() {

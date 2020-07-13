@@ -47,6 +47,10 @@ public abstract class SimpleGeom implements IRenderableGeom, IEditableGeom {
 	public void reloadVao() {
 		vaoGeom.loadToVAO();
 	}
+	
+	public void bindContentToVAO(OBJContent geomContent) {
+		vaoGeom.loadContent(geomContent);
+	}
 
 	@Override
 	public OBJContent getObjContent() {

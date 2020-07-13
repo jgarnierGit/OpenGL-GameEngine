@@ -69,7 +69,7 @@ public class VAOGeom {
 		}
 	}
 	
-	public void loadContent(OBJContent objContent) {
+	protected void loadContent(OBJContent objContent) {
 		this.objContent = objContent;
 		loadToVAO();
 		loadTextures();

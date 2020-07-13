@@ -58,7 +58,8 @@ public class RegularElevationTerrain3D extends RegularTerrain3D {
 			mtlLibrary.ifPresent(materials -> {
 				objContent.setMaterials(materials);
 			});
-			terrain.getRenderableGeom().getVAOGeom().loadContent(objContent);
+			//TODO use directly terrain.getRenderableGeom().bindContentToVAO(geomContent);
+			terrain.getRenderableGeom().getRenderer().bindContentToGeomVAO(terrain.getRenderableGeom(), objContent);
 		});
 		return terrain;
 	}

@@ -31,42 +31,33 @@ public class RegularFlatTerrain3D extends RegularTerrain3D {
 		height = defaultEntity.getPositions().y;
 	}
 
-	public static RegularFlatTerrain3D generateRegular(SimpleGeom3D terrainGeom, Entity defaultEntity, float size) throws IOException {
+	public static RegularFlatTerrain3D generateRegular(SimpleGeom3D terrainGeom, Entity defaultEntity, float size)
+			throws IOException {
 		RegularFlatTerrain3D terrain = new RegularFlatTerrain3D(terrainGeom, defaultEntity, size);
 		for (int stepz = 0; stepz < terrain.definition; stepz++) {
 			for (int stepx = 0; stepx < terrain.definition; stepx++) {
 				Vector3f frontLeft = new Vector3f(defaultEntity.getPositions().x + (stepx * (size / FLAT_DEFINITION)),
 						terrain.height, defaultEntity.getPositions().z + (stepz * (size / FLAT_DEFINITION)));
-				Vector3f frontRight = new Vector3f(defaultEntity.getPositions().x + ((stepx + 1) * (size / FLAT_DEFINITION)),
-						terrain.height, defaultEntity.getPositions().z + (stepz * (size / FLAT_DEFINITION)));
+				Vector3f frontRight = new Vector3f(
+						defaultEntity.getPositions().x + ((stepx + 1) * (size / FLAT_DEFINITION)), terrain.height,
+						defaultEntity.getPositions().z + (stepz * (size / FLAT_DEFINITION)));
 				Vector3f farLeft = new Vector3f(defaultEntity.getPositions().x + (stepx * (size / FLAT_DEFINITION)),
 						terrain.height, defaultEntity.getPositions().z + ((stepz + 1) * (size / FLAT_DEFINITION)));
-				Vector3f farRight = new Vector3f(defaultEntity.getPositions().x + (stepx + 1) * (size / FLAT_DEFINITION),
-						terrain.height, defaultEntity.getPositions().z + ((stepz + 1) * (size / FLAT_DEFINITION)));
+				Vector3f farRight = new Vector3f(
+						defaultEntity.getPositions().x + (stepx + 1) * (size / FLAT_DEFINITION), terrain.height,
+						defaultEntity.getPositions().z + ((stepz + 1) * (size / FLAT_DEFINITION)));
 				IGeomEditor terrainGeomEditor = terrain.getGeomEditor();
-				if ((stepx + stepz) % 2 == 0) {
+				terrainGeomEditor.addPoint(frontLeft);
+				terrainGeomEditor.addPoint(farLeft);
+				terrainGeomEditor.addPoint(frontRight);
 
-					terrainGeomEditor.addPoint(frontLeft);
-					terrainGeomEditor.addPoint(frontRight);
-					terrainGeomEditor.addPoint(farLeft);
-
-					terrainGeomEditor.addPoint(frontRight);
-					terrainGeomEditor.addPoint(farRight);
-					terrainGeomEditor.addPoint(farLeft);
-				} else {
-					terrainGeomEditor.addPoint(frontLeft);
-					terrainGeomEditor.addPoint(farLeft);
-					terrainGeomEditor.addPoint(frontRight);
-
-					terrainGeomEditor.addPoint(frontRight);
-					terrainGeomEditor.addPoint(farLeft);
-					terrainGeomEditor.addPoint(farRight);
-
-				}
-
+				terrainGeomEditor.addPoint(frontRight);
+				terrainGeomEditor.addPoint(farLeft);
+				terrainGeomEditor.addPoint(farRight);
 			}
 		}
-
+		// TODO use directly terrain.getRenderableGeom().bindContentToVAO(geomContent);
+		terrain.getRenderableGeom().getRenderer().reloadGeomToVAO(terrain.getRenderableGeom());
 		return terrain;
 	}
 

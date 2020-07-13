@@ -1,6 +1,7 @@
 package renderEngine;
 
 import models.IRenderableGeom;
+import models.data.OBJContent;
 
 public interface IDrawRenderer {
 
@@ -14,5 +15,7 @@ public interface IDrawRenderer {
 
 	public void updateForRendering();
 
-	public void loadToVAO(IRenderableGeom geom);
+	public void reloadGeomToVAO(IRenderableGeom geom);
+	
+	public void bindContentToGeomVAO(IRenderableGeom geom, OBJContent geomContent);
 }

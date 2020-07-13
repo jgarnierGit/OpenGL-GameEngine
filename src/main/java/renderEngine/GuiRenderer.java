@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
@@ -24,6 +25,7 @@ public class GuiRenderer {
 																								// triangle_strip
 	private GuiShader shader;
 	private List<GuiTexture> guis;
+	private Logger logger = Logger.getLogger("GuiRenderer");
 
 	public GuiRenderer(Loader loader) throws IOException {
 		vaoId = loader.loadToVAO(VBOContent.create(0, 2, positions));

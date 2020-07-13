@@ -184,8 +184,8 @@ public class Loader {
 	 */
 	private int createAndBindVAO() {
 		int vaoID = GL30.glGenVertexArrays();
-		VboManager vaoManager = new VboManager();
-		vaos.put(vaoID, vaoManager);
+		VboManager vboManager = new VboManager();
+		vaos.put(vaoID, vboManager);
 		GL30.glBindVertexArray(vaoID);
 		return vaoID;
 	}
