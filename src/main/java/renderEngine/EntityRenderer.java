@@ -17,7 +17,7 @@ import models.data.MaterialType;
 import models.data.OBJContent;
 import models.importer.MTLUtils;
 import models.importer.Model3D;
-import modelsImporter.mokiatMapper.MaterialMapper;
+import models.importer.mokiatMapper.MaterialMapper;
 import renderEngine.Loader.VBOIndex;
 import shaderManager.StaticShader;
 import toolbox.GLTextureIDIncrementer;

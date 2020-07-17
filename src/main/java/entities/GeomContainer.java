@@ -1,8 +1,8 @@
 package entities;
 
 import models.GeomEditor;
-import models.IEditableGeom;
-import models.IRenderableGeom;
+import models.EditableGeom;
+import models.RenderableGeom;
 
 /**
  * Simplify entities accessor
@@ -12,9 +12,9 @@ import models.IRenderableGeom;
  */
 public interface GeomContainer {
 
-	public IEditableGeom getEditableGeom();
+	public EditableGeom getEditableGeom();
 
-	public IRenderableGeom getRenderableGeom();
+	public RenderableGeom getRenderableGeom();
 
 	public GeomEditor getGeomEditor();
 }

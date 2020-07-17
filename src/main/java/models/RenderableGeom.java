@@ -6,10 +6,10 @@ import org.lwjglx.util.vector.Vector;
 
 import models.data.OBJContent;
 import models.data.VAOGeom;
-import renderEngine.IDrawRenderer;
+import renderEngine.DrawRenderer;
 import renderEngine.RenderingParameters;
 
-public interface IRenderableGeom {
+public interface RenderableGeom {
 
 	public List<? extends Vector> getVertices();
 
@@ -20,7 +20,7 @@ public interface IRenderableGeom {
 	 * @param alias new alias to use
 	 * @return SimpleGeom a deep copy of geom
 	 */
-	public IRenderableGeom copy(String alias);
+	public RenderableGeom copy(String alias);
 
 	/**
 	 * TODO extract to RenderingParameter. Reload points coordinates to binded
@@ -35,7 +35,7 @@ public interface IRenderableGeom {
 	 */
 	public void updateRenderer();
 	
-	public IDrawRenderer getRenderer();
+	public DrawRenderer getRenderer();
 
 	/**
 	 * clear points arrays coordinates.

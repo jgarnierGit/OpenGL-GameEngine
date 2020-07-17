@@ -15,7 +15,7 @@ import org.lwjglx.util.vector.Vector4f;
 
 import entities.Entity;
 import entities.EntityTutos;
-import models.IRenderableGeom;
+import models.RenderableGeom;
 import models.SimpleGeom2D;
 import models.SimpleGeom3D;
 import models.SimpleGeom3DBuilder;
@@ -31,11 +31,11 @@ public class MouserLoggerPrinter {
 	private MasterRenderer masterRenderer;
 	// TODO maybe I can hide this too inside an interface
 
-	private List<IRenderableGeom> geoms;
-	private List<IRenderableGeom> cameraBboxes; // keep this one to allow cumulation
+	private List<RenderableGeom> geoms;
+	private List<RenderableGeom> cameraBboxes; // keep this one to allow cumulation
 	private SimpleGeom3D raysWorldOrigin;
-	private List<IRenderableGeom> debugPoints;
-	private IRenderableGeom ray3D;
+	private List<RenderableGeom> debugPoints;
+	private RenderableGeom ray3D;
 	private Loader loader;
 	private Vector3f camPos;
 	private static final Vector4f BOUNDING_BOX_COLOR = new Vector4f(0.5f, 1.0f, 0.5f, 0.4f);
@@ -70,7 +70,7 @@ public class MouserLoggerPrinter {
 		this.bboxUniquePoints = Arrays.asList(ltn, rtn, lbn, rbn, ltf, rtf, lbf, rbf);
 	}
 
-	public IRenderableGeom getRay3D() {
+	public RenderableGeom getRay3D() {
 		return this.ray3D;
 	}
 
@@ -79,7 +79,7 @@ public class MouserLoggerPrinter {
 	}
 
 	public void clear() {
-		for (IRenderableGeom geom : geoms) {
+		for (RenderableGeom geom : geoms) {
 			geom.clear();
 		}
 		geoms.clear();
@@ -105,7 +105,7 @@ public class MouserLoggerPrinter {
 		geoms.add(raysWorldOrigin);
 	}
 
-	private void buildRaysByEntity(List<IRenderableGeom> orderedList, RenderingParameters rayParams) {
+	private void buildRaysByEntity(List<RenderableGeom> orderedList, RenderingParameters rayParams) {
 		Vector4f selectedColor = new Vector4f(0, 0, 0, 1);
 		Vector3f originV = new Vector3f(0, 0, 0);
 		Vector3f destV = new Vector3f(1, 1, 1);
@@ -205,7 +205,7 @@ public class MouserLoggerPrinter {
 	 * print frustrum bbox
 	 */
 	public void printCameraBBox() {
-		for (IRenderableGeom point : cameraBboxes) {
+		for (RenderableGeom point : cameraBboxes) {
 			point.clear();
 		}
 		cameraBboxes.clear();
@@ -276,7 +276,7 @@ public class MouserLoggerPrinter {
 		HashMap<Integer, SimpleGeom3D> generatedGeomLineConfiguration = new HashMap<>();
 		HashMap<Integer, SimpleGeom3D> generatedGeomPlainConfiguration = new HashMap<>();
 
-		IRenderableGeom boundingBox = createBboxGeomAsLines(this.bboxUniquePoints.get(4), this.bboxUniquePoints.get(5),
+		RenderableGeom boundingBox = createBboxGeomAsLines(this.bboxUniquePoints.get(4), this.bboxUniquePoints.get(5),
 				this.bboxUniquePoints.get(6), this.bboxUniquePoints.get(7), this.bboxUniquePoints.get(0),
 				this.bboxUniquePoints.get(1), this.bboxUniquePoints.get(2), this.bboxUniquePoints.get(3));
 		RenderingParameters bboxParam = boundingBox.getRenderingParameters();
@@ -285,7 +285,7 @@ public class MouserLoggerPrinter {
 		bboxParam.addGlState(GL11.GL_BLEND, true);
 		bboxParam.renderBefore("frustrumPlain");
 		// left and right are inverted because I use frustrum generator.
-		IRenderableGeom bboxPlain = createBboxGeomAsTriangles(this.bboxUniquePoints.get(4),
+		RenderableGeom bboxPlain = createBboxGeomAsTriangles(this.bboxUniquePoints.get(4),
 				this.bboxUniquePoints.get(5), this.bboxUniquePoints.get(6), this.bboxUniquePoints.get(7),
 				this.bboxUniquePoints.get(0), this.bboxUniquePoints.get(1), this.bboxUniquePoints.get(2),
 				this.bboxUniquePoints.get(3));
@@ -369,7 +369,7 @@ public class MouserLoggerPrinter {
 		});
 	}
 
-	private IRenderableGeom createBboxGeomAsTriangles(Vector3f ltfWorldCoord, Vector3f rtfWorldCoord,
+	private RenderableGeom createBboxGeomAsTriangles(Vector3f ltfWorldCoord, Vector3f rtfWorldCoord,
 			Vector3f lbfWorldCoord, Vector3f rbfWorldCoord, Vector3f ltnWorldCoord, Vector3f rtnWorldCoord,
 			Vector3f lbnWorldCoord, Vector3f rbnWorldCoord) {
 		Vector4f cameraTransparency = FRUSTRUM_PLAIN_COLOR;
@@ -426,7 +426,7 @@ public class MouserLoggerPrinter {
 		return frustrum;
 	}
 
-	private IRenderableGeom createBboxGeomAsLines(Vector3f ltf, Vector3f rtf, Vector3f lbf, Vector3f rbf, Vector3f ltn,
+	private RenderableGeom createBboxGeomAsLines(Vector3f ltf, Vector3f rtf, Vector3f lbf, Vector3f rbf, Vector3f ltn,
 			Vector3f rtn, Vector3f lbn, Vector3f rbn) {
 		SimpleGeom3D boundingBox = SimpleGeom3DBuilder.create(this.loader, this.masterRenderer.getDefault3DRenderer(), "")
 				.withDefaultShader().build();
@@ -651,9 +651,9 @@ public class MouserLoggerPrinter {
 	 * @param aliases  update transparency for specified aliases only. Leave empty
 	 *                 to update every RenderingParameters using this entity.
 	 */
-	public void updateTransparency(IRenderableGeom geom, List<Entity> entities) {
-		HashMap<IRenderableGeom, IRenderableGeom> uniqueGeomMapping = new HashMap<>();
-		IRenderableGeom geomMatched = uniqueGeomMapping.putIfAbsent(geom, geom.copy("rayMatchedBbox"));
+	public void updateTransparency(RenderableGeom geom, List<Entity> entities) {
+		HashMap<RenderableGeom, RenderableGeom> uniqueGeomMapping = new HashMap<>();
+		RenderableGeom geomMatched = uniqueGeomMapping.putIfAbsent(geom, geom.copy("rayMatchedBbox"));
 		if (geomMatched == null) {
 			geomMatched = uniqueGeomMapping.get(geom);
 			geomMatched.getRenderingParameters().overrideGlobalTransparency(1f);
@@ -663,8 +663,8 @@ public class MouserLoggerPrinter {
 			geomMatched.getRenderingParameters().addEntity(entity.getPositions(), 0, 0, 0, 1);
 			geom.getRenderingParameters().removeEntity(entity);
 		}
-		for (IRenderableGeom entry : uniqueGeomMapping.values()) {
-			geoms.add((IRenderableGeom) entry);
+		for (RenderableGeom entry : uniqueGeomMapping.values()) {
+			geoms.add((RenderableGeom) entry);
 		}
 	}
 
@@ -674,10 +674,10 @@ public class MouserLoggerPrinter {
 	 * @param geom
 	 * @param entities
 	 */
-	public void flemme(IRenderableGeom geom, List<Entity> entities) {
-		HashMap<IRenderableGeom, IRenderableGeom> uniqueGeomMapping = new HashMap<>();
+	public void flemme(RenderableGeom geom, List<Entity> entities) {
+		HashMap<RenderableGeom, RenderableGeom> uniqueGeomMapping = new HashMap<>();
 		RenderingParameters param = geom.getRenderingParameters();
-		IRenderableGeom geomMatched = uniqueGeomMapping.putIfAbsent(geom, geom.copy("matchedPicker"));
+		RenderableGeom geomMatched = uniqueGeomMapping.putIfAbsent(geom, geom.copy("matchedPicker"));
 		if (geomMatched == null) {
 			geomMatched = uniqueGeomMapping.get(geom);
 			geomMatched.getRenderingParameters().overrideEachColor(new Vector4f(1, 1, 1, 1));
@@ -687,8 +687,8 @@ public class MouserLoggerPrinter {
 			geomMatched.getRenderingParameters().addEntity(entity.getPositions(), 0, 0, 0, 1);
 			param.removeEntity(entity);
 		}
-		for (IRenderableGeom entry : uniqueGeomMapping.values()) {
-			geoms.add((IRenderableGeom) entry);
+		for (RenderableGeom entry : uniqueGeomMapping.values()) {
+			geoms.add((RenderableGeom) entry);
 		}
 	}
 
@@ -730,7 +730,7 @@ public class MouserLoggerPrinter {
 	 * @param entity
 	 * @param normalSize
 	 */
-	public void drawBboxNormals(IRenderableGeom geom, int normalSize) {
+	public void drawBboxNormals(RenderableGeom geom, int normalSize) {
 		RenderingParameters normalsParams = null;
 		// TODO perform real match with unique geom that will be retreived in many
 		// entities to group normals together

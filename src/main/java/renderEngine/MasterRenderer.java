@@ -3,7 +3,6 @@ package renderEngine;
 import java.io.IOException;
 import java.nio.Buffer;
 import java.nio.IntBuffer;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -27,7 +26,7 @@ public class MasterRenderer {
 	private Loader loader;
 
 	private Set<DrawRenderer> renderers;
-	private Set<IDrawRenderer> activeRenderers;
+	private Set<DrawRenderer> activeRenderers;
 
 	private MasterRenderer(Loader loader, CameraEntity camera,
 			Draw3DRenderer draw3DRenderer, Draw2DRenderer draw2DRenderer) {
@@ -97,7 +96,7 @@ public class MasterRenderer {
 	public void render() {
 		camera.updateViewMatrix();
 		prepare();
-		for (IDrawRenderer drawRenderer : activeRenderers) {
+		for (DrawRenderer drawRenderer : activeRenderers) {
 			drawRenderer.render();
 		}
 	}
@@ -129,8 +128,8 @@ public class MasterRenderer {
 		return buffer;
 	}
 
-	private void updateForRendering(Set<IDrawRenderer> renderers) {
-		for (IDrawRenderer drawRenderer : renderers) {
+	private void updateForRendering(Set<DrawRenderer> renderers) {
+		for (DrawRenderer drawRenderer : renderers) {
 			drawRenderer.updateForRendering();
 		}
 	}

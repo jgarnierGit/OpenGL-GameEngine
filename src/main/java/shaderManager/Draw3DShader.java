@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.function.Function;
 
 import org.lwjglx.util.vector.Matrix4f;
+import org.lwjglx.util.vector.Vector2f;
 import org.lwjglx.util.vector.Vector4f;
 
 import renderEngine.Loader.VBOIndex;
@@ -14,11 +15,14 @@ public class Draw3DShader extends ShaderProgram implements IShader3D {
 	private static final String FRAGMENT_FILE = "rayFragmentShader.txt";
 	public static final int COLOR_INDEX = 1;
 	public static final int TEXTURE_INDEX = 2;
+	public static final int NORMAL_INDEX = 3;
 	private int location_transformationMatrix;
 	private int projectionMatrix;
 	private int location_viewMatrix;
 	private int location_planeClipping;
 	private int location_useImage;
+	private int locationNumberOfRows;
+	private int locationOffset;
 
 	private static Draw3DShader defaultDraw3DShader = null;
 
@@ -49,6 +53,8 @@ public class Draw3DShader extends ShaderProgram implements IShader3D {
 		location_viewMatrix = super.getUniformLocation("viewMatrix");
 		location_planeClipping = super.getUniformLocation("planeClipping");
 		location_useImage = super.getUniformLocation("useImage");
+		locationNumberOfRows = super.getUniformLocation("numberOfRows");
+		locationOffset = super.getUniformLocation("offset");
 	}
 
 	@Override
@@ -56,6 +62,7 @@ public class Draw3DShader extends ShaderProgram implements IShader3D {
 		super.bindAttribute(VBOIndex.POSITION_INDEX, "position");
 		super.bindAttribute(COLOR_INDEX, "color");
 		super.bindAttribute(TEXTURE_INDEX, "textureCoords");
+		super.bindAttribute(NORMAL_INDEX, "normals");
 	}
 	
 	public void loadClipPlane(Vector4f plane) {
@@ -76,5 +83,32 @@ public class Draw3DShader extends ShaderProgram implements IShader3D {
 	
 	public void setUseImage(boolean useImage) {
 		super.loadBoolean(location_useImage, useImage);
+	}
+	
+	public void loadNumberOfRows(int numberOfRows) {
+		super.loadFloat(locationNumberOfRows, numberOfRows);
+	}
+	
+	public void loadOffset(int x, int y) {
+		super.loadVector(locationOffset, new Vector2f(x,y));
+	}
+
+	@Override
+	public int getColorShaderIndex() {
+		return COLOR_INDEX;
+	}
+
+	@Override
+	public int getTextureShaderIndex() {
+		return TEXTURE_INDEX;
+	}
+
+	@Override
+	public int getPositionShaderIndex() {
+		return VBOIndex.POSITION_INDEX;
+	}
+	@Override
+	public int getNormalShaderIndex() {
+		return NORMAL_INDEX;
 	}
 }

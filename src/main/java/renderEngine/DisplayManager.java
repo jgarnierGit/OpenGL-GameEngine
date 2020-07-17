@@ -17,6 +17,10 @@ public class DisplayManager {
 	public static final int WIDTH = 1280; //for debug
 	public static final int HEIGHT = 720;//for debug
 	public static final float ASPECT_RATIO = (float) WIDTH / (float) HEIGHT;
+	private static final float FOV = 70f;
+	private static final float NEAR_PLANE = 0.1f;
+	private static final float FAR_PLANE = 1000;
+	
 	private static final String TITLE = "Our First Display";
 	public static long WINDOW_ID;
 	
@@ -117,6 +121,33 @@ public class DisplayManager {
 	 */
 	public static double getCurrentTime() {
 		return glfwGetTime() * 1000;
+	}
+	
+	/**
+	 * get Near Plane clip. vertex below this limit are not rendered
+	 * 
+	 * @return
+	 */
+	public static float getNearPlane() {
+		return NEAR_PLANE;
+	}
+
+	/**
+	 * get Far Plane clip. vertex above this limit are not rendered
+	 * 
+	 * @return
+	 */
+	public static float getFarPlane() {
+		return FAR_PLANE;
+	}
+
+	/**
+	 * FOV
+	 * 
+	 * @return
+	 */
+	public static float getFOV() {
+		return FOV;
 	}
 
 }

@@ -13,6 +13,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.lwjglx.util.vector.Vector2f;
+import org.lwjglx.util.vector.Vector3f;
 import org.lwjglx.util.vector.Vector4f;
 
 import com.mokiat.data.front.error.WFException;
@@ -38,6 +39,7 @@ import models.data.VBOContent;
 import models.importer.mokiatMapper.MaterialMapper;
 import models.importer.mokiatMapper.OBJDataReferenceMapper;
 import models.importer.mokiatMapper.OBJDataReferenceUtils;
+import shaderManager.IShader3D;
 
 /**
  * TODO add a check for triangle configuration.
@@ -73,12 +75,12 @@ public class OBJImporter {
 		}
 	}
 
-	public static OBJContent parse(String objectDescriptor, String textureDescriptor)
+	public static OBJContent parse(IShader3D shader, String objectDescriptor, String textureDescriptor)
 			throws WFException, FileNotFoundException, IOException {
 		OBJImporter importer = new OBJImporter();
 		importer.importOBJ(objectDescriptor);
 		importer.importMTL(textureDescriptor);
-		return importer.parse();
+		return importer.parse(shader);
 	}
 
 	/**
@@ -87,7 +89,7 @@ public class OBJImporter {
 	 * @param materialTypes
 	 * @param mtlUtils
 	 */
-	private OBJContent parse() {
+	private OBJContent parse(IShader3D shader) {
 		List<MaterialMapper> materialMappers = getMaterialMappers();
 		ArrayList<Integer> indicesList = new ArrayList<>();
 		int indicesListSize = 0;
@@ -139,10 +141,10 @@ public class OBJImporter {
 		MaterialContent material;
 		VBOContent normals;
 
-		positions = setPositionContent(objDataReferenceUtils);
-		material = setMaterialContent(objDataReferenceUtils);
+		positions = setPositionContent(shader.getPositionShaderIndex(), objDataReferenceUtils);
+		material = setMaterialContent(shader.getColorShaderIndex(), shader.getTextureShaderIndex(), objDataReferenceUtils);
 		// TODO update to set type for each material of an object
-		normals = setNormalContent(objDataReferenceUtils);
+		normals = setNormalContent(shader.getNormalShaderIndex(), objDataReferenceUtils);
 
 		ArrayList<Integer> indices = new ArrayList<>();
 		for (int i = 0; i < indicesList.size(); i++) {
@@ -172,13 +174,11 @@ public class OBJImporter {
 		return materialMappers;
 	}
 
-	private MaterialContent setMaterialContent(OBJDataReferenceUtils objDataReferenceUtils) {
+	private MaterialContent setMaterialContent(int colorShaderIndex, int textureShaderIndex, OBJDataReferenceUtils objDataReferenceUtils) {
 		MaterialContent matContent;
 
 		if (objDataReferenceUtils.getMaterialType() == MaterialType.IMAGE) {
-			int shaderPosition = 2;// TODO extract
 			List<Vector2f> coords = new ArrayList<>();
-
 			List<OBJTexCoord> textCoordList = objDataReferenceUtils.getTexturesCoordsIndices().stream().map(indice -> {
 				return objDataReferenceUtils.getTextCoordsList().get(indice);
 			}).collect(Collectors.toList());
@@ -186,10 +186,9 @@ public class OBJImporter {
 				coords.add(new Vector2f(textCoord.u, textCoord.v));
 			}
 			Path diffuseUrl = Paths.get(objDataReferenceUtils.getMaterialsList().get(0).getUrl().get());
-			matContent = MaterialContent.createImageContent(shaderPosition, coords,
+			matContent = MaterialContent.createImageContent(textureShaderIndex, coords,
 					diffuseUrl.getFileName().toString());
 		} else {
-			int shaderPosition = 1;// TODO extract
 			List<Vector4f> coords = new ArrayList<>();
 			List<MaterialMapper> colorsList = objDataReferenceUtils.getColorsIndices().stream().map(indice -> {
 				return objDataReferenceUtils.getMaterialsList().get(indice);
@@ -202,36 +201,32 @@ public class OBJImporter {
 					coords.add(new Vector4f(0f, 0f, 0f, 0f));
 				}
 			}
-			matContent = MaterialContent.createColorContent(shaderPosition, coords);
+			matContent = MaterialContent.createColorContent(colorShaderIndex, coords);
 		}
 
 		return matContent;
 	}
 
-	private VBOContent setPositionContent(OBJDataReferenceUtils objDataReferenceUtils) {
+	private VBOContent setPositionContent(int positionShaderIndex, OBJDataReferenceUtils objDataReferenceUtils) {
 		List<OBJVertex> vertices = objDataReferenceUtils.getPositionsIndices().stream().map(indice -> {
 			return objDataReferenceUtils.getVerticesList().get(indice);
 		}).collect(Collectors.toList());
-		List<Float> positionsList = new ArrayList<>();
+		List<Vector3f> positionsList = new ArrayList<>();
 		for (OBJVertex vertex : vertices) {
-			positionsList.add(vertex.x);
-			positionsList.add(vertex.y);
-			positionsList.add(vertex.z);
+			positionsList.add(new Vector3f(vertex.x,vertex.y,vertex.z));
 		}
-		return VBOContent.create(0, 3, positionsList);
+		return VBOContent.create3f(positionShaderIndex, positionsList);
 	}
 
-	private VBOContent setNormalContent(OBJDataReferenceUtils objDataReferenceUtils) {
+	private VBOContent setNormalContent(int normalShaderIndex, OBJDataReferenceUtils objDataReferenceUtils) {
 		List<OBJNormal> normalsListObj = objDataReferenceUtils.getNormalsIndices().stream().map(indice -> {
 			return objDataReferenceUtils.getNormalsList().get(indice);
 		}).collect(Collectors.toList());
 
-		List<Float> normalsList = new ArrayList<>();
+		List<Vector3f> normalsList = new ArrayList<>();
 		for (OBJNormal normal : normalsListObj) {
-			normalsList.add(normal.x);
-			normalsList.add(normal.y);
-			normalsList.add(normal.z);
+			normalsList.add(new Vector3f(normal.x,normal.y,normal.z));
 		}
-		return VBOContent.create(3, 3, normalsList);
+		return VBOContent.create3f(normalShaderIndex, normalsList);
 	}
 }

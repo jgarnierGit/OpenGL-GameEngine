@@ -15,14 +15,14 @@ import org.junit.jupiter.api.Test;
 import org.lwjglx.util.vector.Vector4f;
 import org.mockito.Mockito;
 
-import models.GeomEditor;
-import models.IEditableGeom;
+import models.GeomEditorImpl;
+import models.EditableGeom;
 import models.SimpleGeom2D;
 import models.SimpleGeom3D;
 import models.data.VBOContent;
 
 class GeomEditorTest {
-	GeomEditor geomEditor;
+	GeomEditorImpl geomEditor;
 	SimpleGeom3D geom3D;
 	SimpleGeom2D geom2D;
 	private static final Vector4f COLOR_ADDED = new Vector4f(1f, 2f, 3f, 4f);
@@ -30,7 +30,7 @@ class GeomEditorTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		geomEditor = GeomEditor.create(Mockito.mock(IEditableGeom.class));
+		geomEditor = GeomEditorImpl.create(Mockito.mock(EditableGeom.class));
 	}
 
 	@Test

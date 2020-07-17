@@ -1,11 +1,11 @@
 package models.data;
 
+import java.io.NotActiveException;
 import java.util.HashSet;
 import java.util.Set;
 
-import models.IRenderableGeom;
+import models.RenderableGeom;
 import renderEngine.DrawRenderer;
-import renderEngine.IDrawRenderer;
 import renderEngine.Loader;
 
 /**
@@ -42,9 +42,7 @@ public class VAOGeom {
 	}
 
 	public static VAOGeom create(Loader loader2, DrawRenderer drawRenderer, int dimension) {
-		VAOGeom vaoGeom = new VAOGeom(loader2, drawRenderer);
-		vaoGeom.objContent = OBJContent.createEmpty(dimension);
-		return vaoGeom;
+		return new VAOGeom(loader2, drawRenderer);
 	}
 
 	/**
@@ -88,15 +86,15 @@ public class VAOGeom {
 		return "VAOGeom" + vaoId + " [" + this.objContent.toString() + "]";
 	}
 
-	public void clear() {
-		this.objContent = OBJContent.createEmpty(this.objContent.getDimension());
+	public void clear() throws NotActiveException {
+		throw new NotActiveException("maybe have to clean memory");
 	}
 
-	public void updateRenderer(IRenderableGeom simpleGeom) {
+	public void updateRenderer(RenderableGeom simpleGeom) {
 		this.drawRenderer.process(simpleGeom);
 	}
 	
-	public IDrawRenderer getRenderer() {
+	public DrawRenderer getRenderer() {
 		return this.drawRenderer;
 	}
 

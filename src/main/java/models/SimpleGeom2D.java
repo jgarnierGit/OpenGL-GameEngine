@@ -33,7 +33,7 @@ public class SimpleGeom2D extends SimpleGeom {
 		SimpleGeom2D simpleGeom2D = new SimpleGeom2D();
 		masterRenderer.registerRenderer(draw2DRenderer);
 		simpleGeom2D.vaoGeom = VAOGeom.create(masterRenderer.getLoader(), draw2DRenderer, 2);
-		simpleGeom2D.geomEditor = GeomEditor.create(simpleGeom2D);
+		simpleGeom2D.geomEditor = GeomEditorImpl.create(simpleGeom2D);
 		simpleGeom2D.renderingParameters = RenderingParameters.create(shader, simpleGeom2D.getVAOGeom(), alias,
 				SimpleEntity.createDefaultEntity());
 		return simpleGeom2D;

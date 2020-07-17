@@ -2,16 +2,18 @@ package shaderManager;
 
 import java.io.IOException;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.lwjglx.util.vector.Matrix4f;
 import org.lwjglx.util.vector.Vector3f;
 import org.lwjglx.util.vector.Vector4f;
 
-import camera.CameraEntity;
 import renderEngine.DisplayManager;
+import renderEngine.Loader.VBOIndex;
 
 public class SkyboxShader  extends ShaderProgram implements IShader3D{
 	  private static final String VERTEX_FILE = "skyboxVertexShader.txt";
 	    private static final String FRAGMENT_FILE = "skyboxFragmentShader.txt";
+	    public static final int TEXTURE_INDEX = 1;
 	    
 	    private static final float ROTATION_SPEED = 1;
 	     
@@ -58,7 +60,7 @@ public class SkyboxShader  extends ShaderProgram implements IShader3D{
 	 
 	    @Override
 	    protected void bindAttributes() {
-	        super.bindAttribute(0, "position");
+	        super.bindAttribute(VBOIndex.POSITION_INDEX, "position");
 	    }
 
 		@Override
@@ -87,5 +89,25 @@ public class SkyboxShader  extends ShaderProgram implements IShader3D{
 		@Override
 		public void loadClipPlane(Vector4f plane) {
 			// nothing to do
+		}
+
+		@Override
+		public int getColorShaderIndex() {
+			throw new NotImplementedException();
+		}
+
+		@Override
+		public int getTextureShaderIndex() {
+			return TEXTURE_INDEX;
+		}
+
+		@Override
+		public int getPositionShaderIndex() {
+			return VBOIndex.POSITION_INDEX;
+		}
+
+		@Override
+		public int getNormalShaderIndex() {
+			throw new NotImplementedException();
 		}
 }

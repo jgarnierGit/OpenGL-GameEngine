@@ -13,7 +13,17 @@ public interface IShader3D extends IShader {
 	
 	public void loadClipPlane(Vector4f plane);
 	
-	default public void setUseImage(boolean useImage) {
+	public default void setUseImage(boolean useImage) {
 		//optional
 	}
+	
+	public default void loadOffset(int x, int y) {
+		//optional
+	}
+	
+	public default void loadNumberOfRows(int numberOfRows) {
+		//optional
+	}
+	
+	public int getNormalShaderIndex();
 }

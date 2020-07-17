@@ -2,7 +2,10 @@ package shaderManager;
 
 import java.io.IOException;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.lwjglx.util.vector.Matrix4f;
+
+import renderEngine.Loader.VBOIndex;
 
 public class GuiShader extends ShaderProgram{
 	   
@@ -26,7 +29,22 @@ public class GuiShader extends ShaderProgram{
 
 	@Override
 	protected void bindAttributes() {
-		super.bindAttribute(0, "position");
+		super.bindAttribute(VBOIndex.POSITION_INDEX, "position");
+	}
+
+	@Override
+	public int getColorShaderIndex() {
+		throw new NotImplementedException();
+	}
+
+	@Override
+	public int getTextureShaderIndex() {
+		throw new NotImplementedException();
+	}
+
+	@Override
+	public int getPositionShaderIndex() {
+		return VBOIndex.POSITION_INDEX;
 	}
 
 }

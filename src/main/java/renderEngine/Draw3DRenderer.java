@@ -19,7 +19,7 @@ import toolbox.Maths;
  * @author chezmoi
  *
  */
-public class Draw3DRenderer extends DrawRenderer {
+public class Draw3DRenderer extends DrawRendererCommon {
 	private CameraEntity camera;
 	private Vector4f clipPlane;
 
@@ -38,10 +38,13 @@ public class Draw3DRenderer extends DrawRenderer {
 			IShader3D draw3DShader = (IShader3D) params.getShader();
 			draw3DShader.start();
 			draw3DShader.loadClipPlane(clipPlane); //TODO extract this is not generic at all
+			//FIXME : this form is binding many times same VAOID potentially
 			prepare(params.getVAOGeom().getVaoId());
 			Matrix4f viewMatrix = camera.getViewMatrix();
 			draw3DShader.loadViewMatrix(viewMatrix);
 			draw3DShader.setUseImage(!params.getVAOGeom().getTextures().isEmpty());
+			int numberOfRows = params.getVAOGeom().getObjContent().getMaterials().getNumberOfRows();
+			draw3DShader.loadNumberOfRows(numberOfRows);
 			// Disable distance filtering.
 			GL11.glDisable(GL11.GL_DEPTH);
 			params.enableRenderOptions();
@@ -51,6 +54,7 @@ public class Draw3DRenderer extends DrawRenderer {
 				genericDrawRender(params);
 			} else {
 				params.getEntities().forEach(entity -> {
+					draw3DShader.loadOffset(getTextureXOffset(entity.getTextureAtlasIndex(),numberOfRows), getTExtureYOffset(entity.getTextureAtlasIndex(),numberOfRows));
 					Matrix4f transformationM = Maths.createTransformationMatrix(entity.getPositions(), entity.getRotX(),
 							entity.getRotY(), entity.getRotZ(), entity.getScale());
 					draw3DShader.loadTransformationMatrix(transformationM);
@@ -64,6 +68,22 @@ public class Draw3DRenderer extends DrawRenderer {
 			draw3DShader.stop();
 		}
 	}
+	
+	private int getTextureXOffset(int textureIndex, int numberOfRows){
+		if(numberOfRows == 0) {
+			return 0;
+		}
+		int column = textureIndex%numberOfRows;
+		return column/numberOfRows;
+		}
+
+		private int getTExtureYOffset(int textureIndex, int numberOfRows){
+			if(numberOfRows == 0) {
+				return 0;
+			}
+		int row = textureIndex/numberOfRows;
+		return row/numberOfRows;
+		}
 
 	@Override
 	protected void prepare(int vaoId) {

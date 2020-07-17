@@ -12,7 +12,7 @@ import entities.Light;
 import renderEngine.Loader.VBOIndex;
 import toolbox.Maths;
 
-public class TerrainShader extends ShaderProgram{
+public class TerrainShader extends ShaderProgram  implements IShader3D{
 	private static final int MAX_LIGHT = 4;
 	private static final String VERTEX_FILE= "terrainVertexShader.txt";
 	private static final String FRAGMENT_FILE= "terrainFragmentShader.txt";
@@ -80,16 +80,16 @@ public class TerrainShader extends ShaderProgram{
 		super.loadFloat(location_shineDamper, shineDamper);
 		super.loadFloat(location_reflectivity, reflectivity);	
 	}
-	
+	@Override
 	public void loadClipPlane(Vector4f plane) {
 		super.loadVector(location_planeClipping, plane);
 	}
 	
-	public void loadViewMatrix(CameraEntity camera) {
-		Matrix4f viewMatrix = camera.getViewMatrix();
+	@Override
+	public void loadViewMatrix(Matrix4f viewMatrix) {
 		super.loadMatrix(location_viewMatrix, viewMatrix);
 	}
-	
+	@Override
 	public void loadTransformationMatrix(Matrix4f matrix) {
 		super.loadMatrix(location_transformationMatrix, matrix);
 	}
@@ -98,6 +98,7 @@ public class TerrainShader extends ShaderProgram{
 	 * TODO builder might be a good idea here since loadProjectionMatrix is set only at object construction.
 	 * @param projection
 	 */
+	@Override
 	public void loadProjectionMatrix(Matrix4f projection) {
 		super.loadMatrix(projectionMatrix,projection);
 	}
@@ -120,5 +121,25 @@ public class TerrainShader extends ShaderProgram{
 	public void loadSkyColour(float red, float green, float blue) {
 		super.loadVector(location_skyColour, new Vector3f(red,green,blue));
 		
+	}
+
+	@Override
+	public int getColorShaderIndex() {
+		return VBOIndex.COLOR_INDEX;
+	}
+
+	@Override
+	public int getTextureShaderIndex() {
+		return VBOIndex.TEXTURE_INDEX;
+	}
+
+	@Override
+	public int getPositionShaderIndex() {
+		return VBOIndex.POSITION_INDEX;
+	}
+	
+	@Override
+	public int getNormalShaderIndex() {
+		return VBOIndex.NORMAL_INDEX;
 	}
 }

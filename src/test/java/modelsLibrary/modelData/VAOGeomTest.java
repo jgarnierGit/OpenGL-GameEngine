@@ -12,7 +12,7 @@ import org.mockito.Mockito;
 
 import models.data.OBJContent;
 import models.data.VAOGeom;
-import renderEngine.DrawRenderer;
+import renderEngine.DrawRendererCommon;
 import renderEngine.Loader;
 
 class VAOGeomTest {
@@ -22,7 +22,7 @@ class VAOGeomTest {
 	@BeforeEach
 	void setUp() throws Exception {
 		loader = Mockito.mock(Loader.class);
-		vaoGeom = VAOGeom.create(loader, Mockito.mock(DrawRenderer.class), 3);
+		vaoGeom = VAOGeom.create(loader, Mockito.mock(DrawRendererCommon.class), 3);
 		Mockito.when(loader.loadToVAO(vaoGeom.getPositions())).thenReturn(1);
 		vaoGeom.objContent = OBJContent.createEmpty(1);
 	}

@@ -10,7 +10,7 @@ import models.data.CubeTexture;
 import renderEngine.Loader.VBOIndex;
 import shaderManager.SkyboxShader;
 
-public class SkyboxRenderer extends DrawRenderer {
+public class SkyboxRenderer extends DrawRendererCommon {
 	// TODO extract in abstract class specific for 3D
 	private CameraEntity camera;
 

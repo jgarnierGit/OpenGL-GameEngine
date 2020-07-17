@@ -1,20 +1,26 @@
 package models.data;
 
+import java.io.NotActiveException;
+
 import entities.SimpleEntity;
 import models.GeomEditor;
-import models.IEditableGeom;
-import models.IRenderableGeom;
-import renderEngine.IDrawRenderer;
+import models.EditableGeom;
+import models.RenderableGeom;
+import renderEngine.DrawRenderer;
 import renderEngine.RenderingParameters;
 
-public abstract class SimpleGeom implements IRenderableGeom, IEditableGeom {
+public abstract class SimpleGeom implements RenderableGeom, EditableGeom {
 	protected VAOGeom vaoGeom;
 	protected GeomEditor geomEditor;
 	protected RenderingParameters renderingParameters;
 
 	@Override
 	public void clear() {
-		this.vaoGeom.clear();
+		try {
+			this.vaoGeom.clear();
+		} catch (NotActiveException e) {
+			e.printStackTrace();
+		}
 		renderingParameters.reset();
 	}
 
@@ -29,7 +35,7 @@ public abstract class SimpleGeom implements IRenderableGeom, IEditableGeom {
 	}
 	
 	@Override
-	public IDrawRenderer getRenderer() {
+	public DrawRenderer getRenderer() {
 		return vaoGeom.getRenderer();
 	}
 
@@ -57,7 +63,7 @@ public abstract class SimpleGeom implements IRenderableGeom, IEditableGeom {
 		return this.vaoGeom.objContent;
 	}
 
-	protected void copyValues(IRenderableGeom geomRef, String alias) {
+	protected void copyValues(RenderableGeom geomRef, String alias) {
 		this.vaoGeom = VAOGeom.copy(geomRef.getVAOGeom());
 		this.renderingParameters = RenderingParameters.copy(geomRef.getRenderingParameters(), geomRef.getVAOGeom(),
 				alias, SimpleEntity.createDefaultEntity());

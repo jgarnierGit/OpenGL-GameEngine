@@ -17,9 +17,11 @@ import models.data.VBOContent;
 import renderEngine.Loader.VBOIndex;
 import shaderManager.GuiShader;
 import toolbox.Maths;
+import utils.GeomUtils;
 
 public class GuiRenderer {
 	private final int vaoId;
+	//TODO use default value in MaterialContent
 	private final List<Float> positions = Arrays.asList(-1f, 1f, -1f, -1f, 1f, 1f, 1f, -1f); // construction of quad
 																								// assuming
 																								// triangle_strip
@@ -28,7 +30,7 @@ public class GuiRenderer {
 	private Logger logger = Logger.getLogger("GuiRenderer");
 
 	public GuiRenderer(Loader loader) throws IOException {
-		vaoId = loader.loadToVAO(VBOContent.create(0, 2, positions));
+		vaoId = loader.loadToVAO(VBOContent.create2f(VBOIndex.POSITION_INDEX, GeomUtils.createVector2fList(positions)));
 		shader = new GuiShader();
 		guis = new ArrayList<>();
 	}

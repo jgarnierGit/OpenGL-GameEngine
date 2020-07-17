@@ -11,8 +11,8 @@ import org.lwjglx.util.vector.Vector3f;
 
 import models.importer.MTLUtils;
 import models.importer.Model3D;
+import models.importer.mokiatMapper.MaterialMapper;
 import models.library.terrain.Terrain;
-import modelsImporter.mokiatMapper.MaterialMapper;
 import renderEngine.Loader.VBOIndex;
 import shaderManager.TerrainShader;
 import toolbox.GLTextureIDIncrementer;

@@ -19,6 +19,7 @@ import models.data.Face;
 import models.data.SimpleGeom;
 import models.data.VAOGeom;
 import renderEngine.DrawRenderer;
+import renderEngine.DrawRendererCommon;
 import renderEngine.MasterRenderer;
 import renderEngine.RenderingParameters;
 import shaderManager.Draw3DShader;
@@ -43,7 +44,7 @@ public class SimpleGeom3D extends SimpleGeom {
 		SimpleGeom3D simpleGeom3D = new SimpleGeom3D();
 		masterRenderer.registerRenderer(draw3DRenderer);
 		simpleGeom3D.vaoGeom = VAOGeom.create(masterRenderer.getLoader(), draw3DRenderer, 3);
-		simpleGeom3D.geomEditor = GeomEditor.create(simpleGeom3D);
+		simpleGeom3D.geomEditor = GeomEditorImpl.create(simpleGeom3D);
 		simpleGeom3D.renderingParameters = RenderingParameters.create(shader, simpleGeom3D.vaoGeom, alias, entity);
 		return simpleGeom3D;
 	}
@@ -53,7 +54,7 @@ public class SimpleGeom3D extends SimpleGeom {
 		SimpleGeom3D simpleGeom3D = new SimpleGeom3D();
 		masterRenderer.registerRenderer(draw3DRenderer);
 		simpleGeom3D.vaoGeom = VAOGeom.create(masterRenderer.getLoader(), draw3DRenderer, 3);
-		simpleGeom3D.geomEditor = GeomEditor.create(simpleGeom3D);
+		simpleGeom3D.geomEditor = GeomEditorImpl.create(simpleGeom3D);
 		simpleGeom3D.renderingParameters = RenderingParameters.create(shader, simpleGeom3D.vaoGeom, alias,
 				SimpleEntity.createDefaultEntity());
 		return simpleGeom3D;

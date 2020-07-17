@@ -3,11 +3,11 @@ package models.library.terrain;
 import java.util.logging.Logger;
 
 import models.GeomEditor;
-import models.IEditableGeom;
-import models.IRenderableGeom;
+import models.EditableGeom;
+import models.RenderableGeom;
 import models.SimpleGeom3D;
 
-public abstract class Terrain3D implements ITerrain {
+public abstract class Terrain3D implements Terrain {
 	protected SimpleGeom3D terrain;
 
 	protected Logger logger = Logger.getLogger("Terrain3D");
@@ -17,12 +17,12 @@ public abstract class Terrain3D implements ITerrain {
 	}
 
 	@Override
-	public IEditableGeom getEditableGeom() {
+	public EditableGeom getEditableGeom() {
 		return terrain;
 	}
 	
 	@Override
-	public IRenderableGeom getRenderableGeom() {
+	public RenderableGeom getRenderableGeom() {
 		return terrain;
 	}
 	

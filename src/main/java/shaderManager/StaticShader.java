@@ -13,7 +13,7 @@ import renderEngine.Loader.VBOIndex;
 import toolbox.Maths;
 
 
-public class StaticShader extends ShaderProgram {
+public class StaticShader extends ShaderProgram  implements IShader3D{
 	private static final int MAX_LIGHT = 4;
 	
 	private static final String VERTEX_FILE= "vertexShader.txt";
@@ -93,15 +93,15 @@ public class StaticShader extends ShaderProgram {
 		
 	}
 	
-	public void loadViewMatrix(CameraEntity camera) {
-		Matrix4f viewMatrix = camera.getViewMatrix();
+	@Override
+	public void loadViewMatrix(Matrix4f viewMatrix) {
 		super.loadMatrix(location_viewMatrix, viewMatrix);
 	}
-	
+	@Override
 	public void loadTransformationMatrix(Matrix4f matrix) {
 		super.loadMatrix(location_transformationMatrix, matrix);
 	}
-	
+	@Override
 	public void loadProjectionMatrix(Matrix4f projection) {
 		super.loadMatrix(projectionMatrix,projection);
 	}
@@ -123,5 +123,24 @@ public class StaticShader extends ShaderProgram {
 
 	public void loadSelected(boolean selected) {
 		super.loadBoolean(location_isSelected, selected);
+	}
+
+	@Override
+	public int getColorShaderIndex() {
+		return VBOIndex.COLOR_INDEX;
+	}
+
+	@Override
+	public int getTextureShaderIndex() {
+		return VBOIndex.TEXTURE_INDEX;
+	}
+
+	@Override
+	public int getPositionShaderIndex() {
+		return VBOIndex.POSITION_INDEX;
+	}
+	@Override
+	public int getNormalShaderIndex() {
+		return VBOIndex.NORMAL_INDEX;
 	}
 }

@@ -22,13 +22,13 @@ public class BlendedMaterialLibraryBuilder {
 			return this;
 		}
 		
-		public BlendedMaterialLibrary addBlendTexturesAndBuild(String textureName) {
+		public MaterialLibrary addBlendTexturesAndBuild(String textureName) {
 			MTLMaterial material = new MTLMaterial(textureName);
 			material.setDiffuseTexture(textureName);
 			materials.add(material);
 			MTLLibrary library = new MTLLibrary();
 			library.getMaterials().addAll(materials);
-			return new BlendedMaterialLibrary(library);
+			return new MaterialLibraryImpl(library);
 		}
 	}
 

@@ -21,7 +21,7 @@ import org.mockito.MockitoAnnotations;
 import org.powermock.reflect.Whitebox;
 
 import entities.Entity;
-import models.IRenderableGeom;
+import models.RenderableGeom;
 import models.data.SimpleGeom;
 import models.data.VAOGeom;
 import shaderManager.IShader;
@@ -34,7 +34,7 @@ import shaderManager.IShader;
 class DrawRendererTest {
 
 	List<SimpleGeom> geoms;
-	DrawRenderer renderer;
+	DrawRendererCommon renderer;
 	List<RenderingParameters> renderingParams;
 	@Mock
 	private Loader loader;
@@ -73,8 +73,8 @@ class DrawRendererTest {
 		geoms.add(secondGeomMock);
 		geoms.add(thirdGeomMock);
 		// need to mock as it is an abstract class
-		renderer = Mockito.mock(DrawRenderer.class, Mockito.CALLS_REAL_METHODS);
-		renderer.geoms = geoms.stream().map(simpleGeom -> (IRenderableGeom) simpleGeom).collect(Collectors.toList());
+		renderer = Mockito.mock(DrawRendererCommon.class, Mockito.CALLS_REAL_METHODS);
+		renderer.geoms = geoms.stream().map(simpleGeom -> (RenderableGeom) simpleGeom).collect(Collectors.toList());
 
 		Logger logger = Logger.getLogger("DrawRendererTests");
 		this.spyLogger = Mockito.spy(logger);

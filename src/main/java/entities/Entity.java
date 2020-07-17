@@ -16,6 +16,7 @@ public abstract class Entity {
 	private float rotY;
 	private float rotZ;
 	private float scale;
+	private int textureAtlasIndex;
 	
 	private List<Vector3f> boundingBox;
 	
@@ -26,6 +27,15 @@ public abstract class Entity {
 		this.rotZ = rotZ;
 		this.scale = scale;
 		this.boundingBox = new ArrayList<>();
+		this.textureAtlasIndex = 0;
+	}
+	
+	public void setTextureAtlasIndex(int index) {
+		this.textureAtlasIndex = index;
+	}
+	
+	public int getTextureAtlasIndex() {
+		return this.textureAtlasIndex;
 	}
 	
 	public void increasePosition(float dx, float dy, float dz) {

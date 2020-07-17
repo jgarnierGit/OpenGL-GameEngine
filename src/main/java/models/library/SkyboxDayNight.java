@@ -8,8 +8,8 @@ import org.lwjglx.util.vector.Vector3f;
 import camera.CameraEntity;
 import entities.GeomContainer;
 import models.GeomEditor;
-import models.IEditableGeom;
-import models.IRenderableGeom;
+import models.EditableGeom;
+import models.RenderableGeom;
 import models.SimpleGeom3D;
 import models.SimpleGeom3DBuilder;
 import models.data.CubeTexture;
@@ -134,12 +134,12 @@ public class SkyboxDayNight implements GeomContainer {
 	}
 
 	@Override
-	public IEditableGeom getEditableGeom() {
+	public EditableGeom getEditableGeom() {
 		return skyboxGeom;
 	}
 
 	@Override
-	public IRenderableGeom getRenderableGeom() {
+	public RenderableGeom getRenderableGeom() {
 		return skyboxGeom;
 	}
 

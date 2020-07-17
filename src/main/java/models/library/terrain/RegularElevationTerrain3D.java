@@ -8,20 +8,17 @@ import java.util.Optional;
 
 import javax.imageio.ImageIO;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.lwjglx.util.vector.Vector2f;
 import org.lwjglx.util.vector.Vector3f;
 
-import com.mokiat.data.front.parser.MTLLibrary;
-
 import entities.Entity;
 import models.SimpleGeom3D;
-import models.data.BlendedMaterialLibraryBuilder;
-import models.data.IMaterialLibrary;
 import models.data.MaterialContent;
+import models.data.MaterialLibrary;
 import models.data.OBJContent;
-import models.importer.MTLUtils;
+import models.data.VBOContent;
 import models.importer.OBJImporter;
+import shaderManager.Draw3DShader;
 import toolbox.Maths;
 
 public class RegularElevationTerrain3D extends RegularTerrain3D {
@@ -43,20 +40,19 @@ public class RegularElevationTerrain3D extends RegularTerrain3D {
 	 * @param size
 	 * @param amplitude
 	 * @param heightMap
-	 * @param shaderTextureInputIndex TODO extract
 	 * @return
 	 */
-	public static RegularElevationTerrain3D generateAndLoadRegular(SimpleGeom3D terrainGeom, Optional<IMaterialLibrary> mtlLibrary, Entity entity, int size, int amplitude,
-			String heightMap, int shaderTextureInputIndex) {
+	public static RegularElevationTerrain3D generateAndLoadRegular(SimpleGeom3D terrainGeom, Optional<MaterialLibrary> mtlLibrary, Entity entity, int size, int amplitude,
+			String heightMap) {
 		int definition = getDefinitionFromHeightMap(heightMap);
 
 		RegularElevationTerrain3D terrain = new RegularElevationTerrain3D(terrainGeom, entity, size,definition, amplitude);
 		
-		Optional<OBJContent> obj = terrain.parseHeightMap(shaderTextureInputIndex, heightMap);
+		Optional<OBJContent> obj = terrain.parseHeightMap(terrainGeom.getShader(), heightMap);
 		obj.ifPresent(objUtils -> {
 			OBJContent objContent = obj.get();
 			mtlLibrary.ifPresent(materials -> {
-				objContent.setMaterials(materials);
+				objContent.addMaterialLibrary(materials);
 			});
 			//TODO use directly terrain.getRenderableGeom().bindContentToVAO(geomContent);
 			terrain.getRenderableGeom().getRenderer().bindContentToGeomVAO(terrain.getRenderableGeom(), objContent);
@@ -74,7 +70,7 @@ public class RegularElevationTerrain3D extends RegularTerrain3D {
 		return -1;
 	}
 
-	private Optional<OBJContent> parseHeightMap(int shaderTextureInputIndex, String heightMap) {
+	private Optional<OBJContent> parseHeightMap(Draw3DShader shader, String heightMap) {
 		ArrayList<Vector3f> positions = new ArrayList<>();
 		ArrayList<Vector3f> normalsVector = new ArrayList<>();
 		ArrayList<Vector2f> textures = new ArrayList<>();
@@ -90,7 +86,7 @@ public class RegularElevationTerrain3D extends RegularTerrain3D {
 					heights[j][i] = y;
 					// z + is to the player, - is far from the screen
 					float z = (float) i / ((float) definition - 1) * size;
-					positions.add(new Vector3f(x, y, z));
+					positions.add(new Vector3f(x,y,z));
 					normalsVector.add(calculateNormal(j, i, image));
 					float u = (float) j / ((float) definition - 1);
 					float v = (float) i / ((float) definition - 1);
@@ -112,8 +108,10 @@ public class RegularElevationTerrain3D extends RegularTerrain3D {
 					vertexIndices.add(bottomRight);
 				}
 			}
-			MaterialContent content = MaterialContent.createImageContent(shaderTextureInputIndex, textures, heightMap);
-			return Optional.of(OBJContent.create(vertexIndices, positions, normalsVector, content));
+			MaterialContent content = MaterialContent.createImageContent(shader.getTextureShaderIndex(), textures, heightMap);
+			VBOContent posVBO = VBOContent.create3f(shader.getPositionShaderIndex(),positions);
+			VBOContent normalVBO = VBOContent.create3f(shader.getNormalShaderIndex(), normalsVector);
+			return Optional.of(OBJContent.create(vertexIndices, posVBO, content, normalVBO));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

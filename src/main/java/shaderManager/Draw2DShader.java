@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.function.Function;
 
+import org.apache.commons.lang3.NotImplementedException;
+
 import renderEngine.Loader.VBOIndex;
 
 public class Draw2DShader extends ShaderProgram implements IShader2D{
@@ -43,5 +45,20 @@ public class Draw2DShader extends ShaderProgram implements IShader2D{
 	@Override
 	protected void getAllUniformLocation() {
 		// empty
+	}
+
+	@Override
+	public int getColorShaderIndex() {
+		return COLOR_INDEX;
+	}
+
+	@Override
+	public int getTextureShaderIndex() {
+		throw new NotImplementedException();
+	}
+
+	@Override
+	public int getPositionShaderIndex() {
+		return VBOIndex.POSITION_INDEX;
 	}
 }

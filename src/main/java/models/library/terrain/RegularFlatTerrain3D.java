@@ -8,10 +8,11 @@ import org.lwjglx.util.vector.Vector3f;
 
 import entities.Entity;
 import entities.SimpleEntity;
-import models.IEditableGeom;
-import models.IGeomEditor;
-import models.IRenderableGeom;
+import models.EditableGeom;
+import models.GeomEditor;
+import models.RenderableGeom;
 import models.SimpleGeom3D;
+import models.data.MaterialLibrary;
 import renderEngine.Draw3DRenderer;
 import renderEngine.Loader;
 import renderEngine.MasterRenderer;
@@ -31,8 +32,7 @@ public class RegularFlatTerrain3D extends RegularTerrain3D {
 		height = defaultEntity.getPositions().y;
 	}
 
-	public static RegularFlatTerrain3D generateRegular(SimpleGeom3D terrainGeom, Entity defaultEntity, float size)
-			throws IOException {
+	public static RegularFlatTerrain3D generateRegular(SimpleGeom3D terrainGeom, Optional<MaterialLibrary> materialLibrary, Entity defaultEntity, float size){
 		RegularFlatTerrain3D terrain = new RegularFlatTerrain3D(terrainGeom, defaultEntity, size);
 		for (int stepz = 0; stepz < terrain.definition; stepz++) {
 			for (int stepx = 0; stepx < terrain.definition; stepx++) {
@@ -46,7 +46,7 @@ public class RegularFlatTerrain3D extends RegularTerrain3D {
 				Vector3f farRight = new Vector3f(
 						defaultEntity.getPositions().x + (stepx + 1) * (size / FLAT_DEFINITION), terrain.height,
 						defaultEntity.getPositions().z + ((stepz + 1) * (size / FLAT_DEFINITION)));
-				IGeomEditor terrainGeomEditor = terrain.getGeomEditor();
+				GeomEditor terrainGeomEditor = terrain.getGeomEditor();
 				terrainGeomEditor.addPoint(frontLeft);
 				terrainGeomEditor.addPoint(farLeft);
 				terrainGeomEditor.addPoint(frontRight);
@@ -54,6 +54,13 @@ public class RegularFlatTerrain3D extends RegularTerrain3D {
 				terrainGeomEditor.addPoint(frontRight);
 				terrainGeomEditor.addPoint(farLeft);
 				terrainGeomEditor.addPoint(farRight);
+				
+				// So fucking not user friendly...
+				if(materialLibrary.isPresent()) {
+					
+					terrain.getEditableGeom().getObjContent().setMaterials(terrainGeom.getShader().getColorShaderIndex(), materialLibrary.get());
+					terrain.getRenderableGeom().bindContentToVAO(terrain.getEditableGeom().getObjContent());
+				}
 			}
 		}
 		// TODO use directly terrain.getRenderableGeom().bindContentToVAO(geomContent);

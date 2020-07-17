@@ -7,7 +7,7 @@ import org.lwjglx.util.vector.Vector4f;
 
 import models.data.OBJContent;
 
-public interface IEditableGeom {
+public interface EditableGeom {
 
 	void addPoint(Vector point);
 

@@ -16,7 +16,7 @@ import shaderManager.Draw2DShader;
  * @author chezmoi
  *
  */
-public class Draw2DRenderer extends DrawRenderer {
+public class Draw2DRenderer extends DrawRendererCommon {
 	public Draw2DRenderer() throws IOException {
 		super();
 	}
