@@ -16,14 +16,12 @@ import org.lwjglx.util.vector.Vector4f;
 import entities.Entity;
 import entities.SimpleEntity;
 import models.GeomEditor;
-import models.data.VAOGeom;
 import shaderManager.IShader;
 
 public class RenderingParameters implements IRenderingParameters {
 	private IShader shader;
 	private Optional<Integer> glRenderMode;
 	private HashMap<Integer, Boolean> glStatesRendering;
-	private VAOGeom simpleGeom;
 	private List<Entity> entities;
 	private boolean skipEntities;
 	private String alias;
@@ -34,8 +32,7 @@ public class RenderingParameters implements IRenderingParameters {
 	private Optional<Vector4f> overridedColors;
 	private HashMap<Vector, Vector4f> overrideColorsAtIndex;
 
-	private RenderingParameters(IShader shader, VAOGeom simpleGeom, String alias, Entity entity) {
-		this.simpleGeom = simpleGeom;
+	private RenderingParameters(IShader shader, String alias, Entity entity) {
 		this.shader = shader;
 		this.alias = alias;
 		this.glStatesRendering = new HashMap<>();
@@ -49,8 +46,8 @@ public class RenderingParameters implements IRenderingParameters {
 		this.destinationOrderAlias = "";
 	}
 
-	public static RenderingParameters create(IShader shader, VAOGeom simpleGeom, String alias, Entity entity) {
-		RenderingParameters param = new RenderingParameters(shader, simpleGeom, alias, entity);
+	public static RenderingParameters create(IShader shader, String alias, Entity entity) {
+		RenderingParameters param = new RenderingParameters(shader, alias, entity);
 		param.logger = Logger.getLogger("RenderingParameters");
 		return param;
 	}
@@ -60,12 +57,11 @@ public class RenderingParameters implements IRenderingParameters {
 	 * Does not apply overridedColors, overrideColorsAtIndex.
 	 * 
 	 * @param toClone
-	 * @param geomToApply
 	 * @param alias
+	 * @param entity
 	 */
-	public static RenderingParameters copy(RenderingParameters toClone, VAOGeom geomToApply, String alias,
-			Entity entity) {
-		RenderingParameters cloned = new RenderingParameters(toClone.shader, geomToApply, alias, entity);
+	public static RenderingParameters copy(RenderingParameters toClone, String alias, Entity entity) {
+		RenderingParameters cloned = new RenderingParameters(toClone.shader, alias, entity);
 		cloned.destinationOrderAlias = toClone.destinationOrderAlias;
 		if (toClone.glRenderMode.isPresent()) {
 			cloned.glRenderMode = Optional.ofNullable(toClone.glRenderMode.get());
@@ -119,10 +115,6 @@ public class RenderingParameters implements IRenderingParameters {
 		this.renderAfter = true;
 	}
 
-	public VAOGeom getVAOGeom() {
-		return this.simpleGeom;
-	}
-
 	/**
 	 * Set new color to apply for entire geom.
 	 * 
@@ -140,13 +132,13 @@ public class RenderingParameters implements IRenderingParameters {
 	 */
 	public boolean applyColorOverriding(GeomEditor geomEditor) {
 		boolean edited = false;
-		if(this.overridedColors.isPresent()) {
-			Vector4f color  = this.overridedColors.get();
+		if (this.overridedColors.isPresent()) {
+			Vector4f color = this.overridedColors.get();
 			geomEditor.setColor(color);
 			edited = true;
 		}
 
-		for(Entry<Vector, Vector4f> colorAtPoint : this.overrideColorsAtIndex.entrySet()) {
+		for (Entry<Vector, Vector4f> colorAtPoint : this.overrideColorsAtIndex.entrySet()) {
 			geomEditor.updateColorByPosition(colorAtPoint.getKey(), colorAtPoint.getValue());
 			edited = true;
 		}

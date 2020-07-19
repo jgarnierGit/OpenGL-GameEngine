@@ -8,13 +8,14 @@ import org.lwjglx.util.vector.Vector2f;
 import org.lwjglx.util.vector.Vector4f;
 
 import entities.SimpleEntity;
+import models.data.OBJContent;
 import models.data.SimpleGeom;
 import models.data.VAOGeom;
 import renderEngine.DrawRenderer;
 import renderEngine.MasterRenderer;
 import renderEngine.RenderingParameters;
-import shaderManager.Draw2DShader;
 import shaderManager.IShader2D;
+import utils.GeomUtils;
 
 /**
  * hide direct access
@@ -32,9 +33,12 @@ public class SimpleGeom2D extends SimpleGeom {
 			String alias) {
 		SimpleGeom2D simpleGeom2D = new SimpleGeom2D();
 		masterRenderer.registerRenderer(draw2DRenderer);
-		simpleGeom2D.vaoGeom = VAOGeom.create(masterRenderer.getLoader(), draw2DRenderer, 2);
+		simpleGeom2D.vaoGeom = VAOGeom.create(masterRenderer.getLoader(), draw2DRenderer);
 		simpleGeom2D.geomEditor = GeomEditorImpl.create(simpleGeom2D);
-		simpleGeom2D.renderingParameters = RenderingParameters.create(shader, simpleGeom2D.getVAOGeom(), alias,
+		// by-pass normal shader index.
+		simpleGeom2D.objContent = OBJContent.createEmpty(alias, shader.getPositionShaderIndex(),
+				shader.getColorShaderIndex(), shader.getTextureShaderIndex(), -1);
+		simpleGeom2D.renderingParameters = RenderingParameters.create(shader, alias,
 				SimpleEntity.createDefaultEntity());
 		return simpleGeom2D;
 	}
@@ -77,9 +81,10 @@ public class SimpleGeom2D extends SimpleGeom {
 
 	private void addPoint2f(Vector point) {
 		Vector2f v2f = getVector2f(point);
-		List<Float> pointsContent = this.vaoGeom.getPositions().getContent();
+		List<Float> pointsContent = this.objContent.getPositions().getContent();
 		pointsContent.add(v2f.x);
 		pointsContent.add(v2f.y);
+		this.objContent.getPositions().setContent2f(GeomUtils.createVector2fList(pointsContent));
 	}
 
 	private Vector2f getVector2f(Vector point) {
@@ -92,14 +97,14 @@ public class SimpleGeom2D extends SimpleGeom {
 	@Override
 	public List<Vector2f> getVertices() {
 		List<Vector2f> vectors = new ArrayList<>();
-		List<Float> content = this.vaoGeom.getPositions().getContent();
+		List<Float> content = this.objContent.getPositions().getContent();
 		for (int i = 0; i < content.size(); i += 2) {
 			vectors.add(new Vector2f(content.get(i), content.get(i + 1)));
 		}
 		return vectors;
 	}
 
-	public Draw2DShader getShader() {
-		return (Draw2DShader) this.renderingParameters.getShader();
+	public IShader2D getShader() {
+		return (IShader2D) this.renderingParameters.getShader();
 	}
 }

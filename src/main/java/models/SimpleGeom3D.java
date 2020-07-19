@@ -1,11 +1,8 @@
 package models;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.lwjgl.opengl.GL11;
@@ -16,14 +13,14 @@ import org.lwjglx.util.vector.Vector4f;
 import entities.Entity;
 import entities.SimpleEntity;
 import models.data.Face;
+import models.data.OBJContent;
 import models.data.SimpleGeom;
 import models.data.VAOGeom;
 import renderEngine.DrawRenderer;
-import renderEngine.DrawRendererCommon;
 import renderEngine.MasterRenderer;
 import renderEngine.RenderingParameters;
-import shaderManager.Draw3DShader;
 import shaderManager.IShader3D;
+import utils.GeomUtils;
 
 /**
  * SimpleGeom3D can also render 2D as the z component is only used when
@@ -43,9 +40,11 @@ public class SimpleGeom3D extends SimpleGeom {
 			String alias, Entity entity) {
 		SimpleGeom3D simpleGeom3D = new SimpleGeom3D();
 		masterRenderer.registerRenderer(draw3DRenderer);
-		simpleGeom3D.vaoGeom = VAOGeom.create(masterRenderer.getLoader(), draw3DRenderer, 3);
+		simpleGeom3D.vaoGeom = VAOGeom.create(masterRenderer.getLoader(), draw3DRenderer);
+		simpleGeom3D.objContent = OBJContent.createEmpty(alias, shader.getPositionShaderIndex(),
+				shader.getColorShaderIndex(), shader.getTextureShaderIndex(), shader.getNormalShaderIndex());
 		simpleGeom3D.geomEditor = GeomEditorImpl.create(simpleGeom3D);
-		simpleGeom3D.renderingParameters = RenderingParameters.create(shader, simpleGeom3D.vaoGeom, alias, entity);
+		simpleGeom3D.renderingParameters = RenderingParameters.create(shader, alias, entity);
 		return simpleGeom3D;
 	}
 
@@ -53,9 +52,11 @@ public class SimpleGeom3D extends SimpleGeom {
 			IShader3D shader, String alias) {
 		SimpleGeom3D simpleGeom3D = new SimpleGeom3D();
 		masterRenderer.registerRenderer(draw3DRenderer);
-		simpleGeom3D.vaoGeom = VAOGeom.create(masterRenderer.getLoader(), draw3DRenderer, 3);
+		simpleGeom3D.vaoGeom = VAOGeom.create(masterRenderer.getLoader(), draw3DRenderer);
+		simpleGeom3D.objContent = OBJContent.createEmpty(alias, shader.getPositionShaderIndex(),
+				shader.getColorShaderIndex(), shader.getTextureShaderIndex(), shader.getNormalShaderIndex());
 		simpleGeom3D.geomEditor = GeomEditorImpl.create(simpleGeom3D);
-		simpleGeom3D.renderingParameters = RenderingParameters.create(shader, simpleGeom3D.vaoGeom, alias,
+		simpleGeom3D.renderingParameters = RenderingParameters.create(shader, alias,
 				SimpleEntity.createDefaultEntity());
 		return simpleGeom3D;
 	}
@@ -116,24 +117,22 @@ public class SimpleGeom3D extends SimpleGeom {
 			invertedVertices.add(vert2);
 			invertedVertices.add(vert1);
 		}
-
-		List<Float> temp = invertedVertices.stream().map(vertice -> Arrays.asList(vertice.x, vertice.y, vertice.z))
-				.flatMap(Collection::stream).collect(Collectors.toList());
-		this.vaoGeom.getPositions().setContent(temp);
+		this.objContent.getPositions().setContent3f(invertedVertices);
 	}
 
 	private void addPoint3f(Vector point) {
 		Vector3f v3f = getVector3f(point);
-		List<Float> pointsContent = this.vaoGeom.getPositions().getContent();
+		List<Float> pointsContent = this.objContent.getPositions().getContent();
 		pointsContent.add(v3f.x);
 		pointsContent.add(v3f.y);
 		pointsContent.add(v3f.z);
+		this.objContent.getPositions().setContent3f(GeomUtils.createVector3fList(pointsContent));
 	}
 
 	@Override
 	public List<Vector3f> getVertices() {
 		List<Vector3f> vectors = new ArrayList<>();
-		List<Float> content = this.vaoGeom.getPositions().getContent();
+		List<Float> content = this.objContent.getPositions().getContent();
 		for (int i = 0; i < content.size(); i += 3) {
 			vectors.add(new Vector3f(content.get(i), content.get(i + 1), content.get(i + 2)));
 		}
@@ -175,7 +174,7 @@ public class SimpleGeom3D extends SimpleGeom {
 		return faces;
 	}
 
-	public Draw3DShader getShader() {
-		return (Draw3DShader) this.renderingParameters.getShader();
+	public IShader3D getShader() {
+		return (IShader3D) this.renderingParameters.getShader();
 	}
 }

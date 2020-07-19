@@ -21,36 +21,30 @@ import utils.GeomUtils;
  *
  */
 public class OBJContent {
-	protected int dimension;
 	private final List<Integer> indices;
 	private final VBOContent positions;
 	private final MaterialContent material;
 	private final VBOContent normals;
+	// duplicate alias to facilitate debugging
+	protected final String alias;
 	private Logger logger = Logger.getLogger("OBJContent");
 	public static final float[] DEFAULT_COLOR = new float[] { 1.0f, 0.0f, 1.0f, 1.0f };
 
-	private OBJContent(int dimension, List<Integer> indices, VBOContent positions, MaterialContent material,
-			VBOContent normals) {
-		this.dimension = dimension;
+	private OBJContent(List<Integer> indices, VBOContent positions, MaterialContent material, VBOContent normals,
+			String alias) {
 		this.indices = indices;
 		this.positions = positions;
 		this.material = material;
 		this.normals = normals;
+		this.alias = alias;
 	}
 
-	private OBJContent() {
+	private OBJContent(String alias, int positionShaderIndex, int materialShaderIndex, int normalShaderIndex) {
 		this.indices = new ArrayList<>();
-		positions = null;
-		material = null;
-		normals = null;
-	}
-
-	/**
-	 * 
-	 * @return dimension count to apply for each vertice.
-	 */
-	public int getDimension() {
-		return this.dimension;
+		positions = VBOContent.createEmpty(positionShaderIndex);
+		material = MaterialContent.createEmpty(materialShaderIndex);
+		normals = VBOContent.createEmpty(normalShaderIndex);
+		this.alias = alias;
 	}
 
 	/**
@@ -58,17 +52,8 @@ public class OBJContent {
 	 * 
 	 * @return VBOContent of points coordinates.
 	 */
-	public VBOContent getPoints() {
+	public VBOContent getPositions() {
 		return this.positions;
-	}
-
-	/**
-	 * return array of material coordinates mapping for each points.
-	 * 
-	 * @return VBOContent of colors for each points.
-	 */
-	public VBOContent getMaterialsContent() {
-		return this.material.getContent();
 	}
 
 	public MaterialContent getMaterials() {
@@ -80,7 +65,7 @@ public class OBJContent {
 	}
 
 	public List<VBOContent> getVBOs() {
-		return Arrays.asList(positions, material.getContent(), normals);
+		return Arrays.asList(positions, material.getVBOContent(), normals);
 	}
 
 	public Vector4f getDefaultColor() {
@@ -104,8 +89,8 @@ public class OBJContent {
 	 * @return OBJContent or null if error detected in VBO parameters
 	 */
 	public static OBJContent create(List<Integer> vertexIndices, VBOContent positions, MaterialContent materialContent,
-			VBOContent normals) {
-		OBJContent objContent = new OBJContent();
+			VBOContent normals, String alias) {
+		OBJContent objContent = new OBJContent(alias, -1, -1, -1);
 		boolean error = false;
 		if (positions.getDimension() != 3) {
 			objContent.logger.severe("Position must be Vector3f");
@@ -118,34 +103,45 @@ public class OBJContent {
 		if (error) {
 			return null;
 		}
-		return new OBJContent(positions.getDimension(), vertexIndices, positions, materialContent, normals);
+		return new OBJContent(vertexIndices, positions, materialContent, normals, alias);
 	}
 
 	public static OBJContent copy(OBJContent objContent) {
 		VBOContent positions = null;
-		if(objContent.positions.getDimension() == 2) {
-			positions = VBOContent.create2f(objContent.positions.getShaderInputIndex(), GeomUtils.createVector2fList(objContent.positions.getContent()));
+		if (objContent.positions.getDimension() == 2) {
+			positions = VBOContent.create2f(objContent.positions.getShaderInputIndex(),
+					GeomUtils.createVector2fList(objContent.positions.getContent()));
+		} else if (objContent.positions.getDimension() == 3) {
+			positions = VBOContent.create3f(objContent.positions.getShaderInputIndex(),
+					GeomUtils.createVector3fList(objContent.positions.getContent()));
+		} else {
+			positions = VBOContent.createEmpty(-1);
+			objContent.logger.warning("position shader index desactivated (set to -1) due to unknown dimension : "
+					+ objContent.positions.getDimension());
 		}
-		else if(objContent.positions.getDimension() == 3) {
-			positions = VBOContent.create3f(objContent.positions.getShaderInputIndex(), GeomUtils.createVector3fList(objContent.positions.getContent()));
-		}
-		
+
 		MaterialContent material = MaterialContent.copy(objContent.material);
-		
+
 		VBOContent normals = VBOContent.create3f(objContent.normals.getShaderInputIndex(),
 				GeomUtils.createVector3fList(objContent.normals.getContent()));
 
 		ArrayList<Integer> indices = new ArrayList<>(objContent.indices);
-		return new OBJContent(objContent.dimension, indices, positions, material, normals);
+		return new OBJContent(indices, positions, material, normals, objContent.alias + "");
 	}
-	
+
+	public static OBJContent createEmpty(String alias, int positionShaderIndex, int colorShaderIndex,
+			int textureShaderIndex, int normalShaderIndex) {
+		int materialShaderIndex = textureShaderIndex == -1 ? colorShaderIndex : textureShaderIndex;
+		return new OBJContent(alias, positionShaderIndex, materialShaderIndex, normalShaderIndex);
+	}
+
 	public void addMaterialLibrary(MaterialLibrary materials) {
 		material.setUrls(materials.getMaterialLibrary().getMaterials().stream().map(MTLMaterial::getName)
 				.collect(Collectors.toList()));
 	}
 
 	public void setMaterials(int inputShaderIndex, MaterialLibrary materials) {
-		material.setMaterialAsImage(inputShaderIndex, materials.getMaterialLibrary().getMaterials().stream().map(MTLMaterial::getName)
-				.collect(Collectors.toList()), materials.getNumberOfRows());
+		material.setMaterialAsImage(inputShaderIndex, materials.getMaterialLibrary().getMaterials().stream()
+				.map(MTLMaterial::getName).collect(Collectors.toList()), materials.getNumberOfRows());
 	}
 }

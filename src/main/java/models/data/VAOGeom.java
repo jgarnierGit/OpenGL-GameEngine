@@ -26,13 +26,9 @@ public class VAOGeom {
 	protected Set<Integer> textureIdsLoaded;
 	protected Loader loader;
 	protected DrawRenderer drawRenderer;
-	protected OBJContent objContent;
-	// TODO add checked that VBO index must not overlap ?
 
 	public static VAOGeom copy(VAOGeom source) {
-		VAOGeom vaoGeom = VAOGeom.create(source.loader, source.drawRenderer, source.objContent.getDimension());
-		vaoGeom.objContent = OBJContent.copy(source.objContent);
-		return vaoGeom;
+		return VAOGeom.create(source.loader, source.drawRenderer);
 	}
 
 	private VAOGeom(Loader loader2, DrawRenderer drawRenderer) {
@@ -41,7 +37,7 @@ public class VAOGeom {
 		this.textureIdsLoaded = new HashSet<>();
 	}
 
-	public static VAOGeom create(Loader loader2, DrawRenderer drawRenderer, int dimension) {
+	public static VAOGeom create(Loader loader2, DrawRenderer drawRenderer) {
 		return new VAOGeom(loader2, drawRenderer);
 	}
 
@@ -51,10 +47,13 @@ public class VAOGeom {
 	 * @return Vertex Array Object Id already binded.
 	 */
 	public int getVaoId() {
+		if (vaoId == null) {
+			throw new IllegalStateException("VAOGeom is not loaded in memory");
+		}
 		return vaoId;
 	}
 
-	protected void loadToVAO() {
+	protected void loadToVAO(OBJContent objContent) {
 		objContent.getVBOs().forEach(vboContent -> {
 			if (this.vaoId == null) {
 				this.vaoId = loader.loadToVAO(vboContent);
@@ -62,20 +61,19 @@ public class VAOGeom {
 				loader.reloadVAO(vaoId, vboContent);
 			}
 		});
-		if(!objContent.getIndices().isEmpty()) {
+		if (!objContent.getIndices().isEmpty()) {
 			loader.bindIndicesBuffer(vaoId, objContent.getIndicesAsPrimitiveArray());
 		}
 	}
-	
+
 	protected void loadContent(OBJContent objContent) {
-		this.objContent = objContent;
-		loadToVAO();
-		loadTextures();
+		loadToVAO(objContent);
+		loadTextures(objContent);
 	}
 
-	public void loadTextures() {
-		if(objContent.getMaterials().getType() == MaterialType.IMAGE) {
-			for(String path :objContent.getMaterials().getUrl()) {
+	public void loadTextures(OBJContent objContent) {
+		if (objContent.getMaterials().getType() == MaterialType.IMAGE) {
+			for (String path : objContent.getMaterials().getUrl()) {
 				this.textureIdsLoaded.add(loader.loadTexture(path));
 			}
 		}
@@ -83,7 +81,7 @@ public class VAOGeom {
 
 	@Override
 	public String toString() {
-		return "VAOGeom" + vaoId + " [" + this.objContent.toString() + "]";
+		return "VAOGeom" + vaoId;
 	}
 
 	public void clear() throws NotActiveException {
@@ -93,17 +91,9 @@ public class VAOGeom {
 	public void updateRenderer(RenderableGeom simpleGeom) {
 		this.drawRenderer.process(simpleGeom);
 	}
-	
+
 	public DrawRenderer getRenderer() {
 		return this.drawRenderer;
-	}
-
-	public VBOContent getPositions() {
-		return this.objContent.getPoints();
-	}
-	
-	public OBJContent getObjContent(){
-		return this.objContent;
 	}
 
 	public Set<Integer> getTextures() {

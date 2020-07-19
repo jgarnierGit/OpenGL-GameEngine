@@ -1,21 +1,14 @@
 package models.library.terrain;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
 import org.lwjglx.util.vector.Vector3f;
 
 import entities.Entity;
-import entities.SimpleEntity;
-import models.EditableGeom;
 import models.GeomEditor;
-import models.RenderableGeom;
 import models.SimpleGeom3D;
 import models.data.MaterialLibrary;
-import renderEngine.Draw3DRenderer;
-import renderEngine.Loader;
-import renderEngine.MasterRenderer;
 import utils.Direction;
 import utils.Operator;
 import utils.SpatialComparator;
@@ -32,7 +25,8 @@ public class RegularFlatTerrain3D extends RegularTerrain3D {
 		height = defaultEntity.getPositions().y;
 	}
 
-	public static RegularFlatTerrain3D generateRegular(SimpleGeom3D terrainGeom, Optional<MaterialLibrary> materialLibrary, Entity defaultEntity, float size){
+	public static RegularFlatTerrain3D generateRegular(SimpleGeom3D terrainGeom,
+			Optional<MaterialLibrary> materialLibrary, Entity defaultEntity, float size) {
 		RegularFlatTerrain3D terrain = new RegularFlatTerrain3D(terrainGeom, defaultEntity, size);
 		for (int stepz = 0; stepz < terrain.definition; stepz++) {
 			for (int stepx = 0; stepx < terrain.definition; stepx++) {
@@ -54,17 +48,17 @@ public class RegularFlatTerrain3D extends RegularTerrain3D {
 				terrainGeomEditor.addPoint(frontRight);
 				terrainGeomEditor.addPoint(farLeft);
 				terrainGeomEditor.addPoint(farRight);
-				
+
 				// So fucking not user friendly...
-				if(materialLibrary.isPresent()) {
-					
-					terrain.getEditableGeom().getObjContent().setMaterials(terrainGeom.getShader().getColorShaderIndex(), materialLibrary.get());
+				if (materialLibrary.isPresent()) {
+
+					terrain.getEditableGeom().getObjContent()
+							.setMaterials(terrainGeom.getShader().getTextureShaderIndex(), materialLibrary.get());
 					terrain.getRenderableGeom().bindContentToVAO(terrain.getEditableGeom().getObjContent());
 				}
 			}
 		}
-		// TODO use directly terrain.getRenderableGeom().bindContentToVAO(geomContent);
-		terrain.getRenderableGeom().getRenderer().reloadGeomToVAO(terrain.getRenderableGeom());
+		terrain.getRenderableGeom().reloadVao();
 		return terrain;
 	}
 

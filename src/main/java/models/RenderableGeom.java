@@ -5,11 +5,9 @@ import java.util.List;
 import org.lwjglx.util.vector.Vector;
 
 import models.data.OBJContent;
-import models.data.VAOGeom;
 import renderEngine.DrawRenderer;
-import renderEngine.RenderingParameters;
 
-public interface RenderableGeom {
+public interface RenderableGeom extends Geom {
 
 	public List<? extends Vector> getVertices();
 
@@ -27,30 +25,19 @@ public interface RenderableGeom {
 	 * Vertex Buffer Object attached to VAO
 	 */
 	public void reloadVao();
-	
+
 	public void bindContentToVAO(OBJContent geomContent);
 
 	/**
 	 * TODO extract this also
 	 */
 	public void updateRenderer();
-	
+
 	public DrawRenderer getRenderer();
 
 	/**
 	 * clear points arrays coordinates.
 	 */
 	public void clear();
-
-	/**
-	 * return the rendering parameters for current geom.
-	 * 
-	 * @return the rendering parameters for current geom.
-	 */
-	public RenderingParameters getRenderingParameters();
-
-	public VAOGeom getVAOGeom();
-
-	public GeomEditor getGeomEditor();
 
 }

@@ -5,6 +5,7 @@ import org.lwjgl.opengl.GL30;
 import org.lwjglx.util.vector.Matrix4f;
 
 import entities.Entity;
+import models.RenderableGeom;
 import renderEngine.DrawRendererCommon;
 import renderEngine.RenderingParameters;
 import toolbox.Maths;
@@ -36,9 +37,10 @@ public class ShadowMapEntityRenderer  extends DrawRendererCommon{
 	 */
 	@Override
 	public void render() {
-		for (RenderingParameters params : renderingParams) {
-			prepare(params.getVAOGeom().getVaoId());
-			genericDrawRender(params);
+		for (RenderableGeom geom : geoms) {
+			RenderingParameters params = geom.getRenderingParameters();
+			prepare(geom.getVAOGeom().getVaoId());
+			genericDrawRender(geom);
 			unbindGeom();
 		}
 	}

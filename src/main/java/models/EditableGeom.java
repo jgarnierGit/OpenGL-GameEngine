@@ -5,9 +5,14 @@ import java.util.List;
 import org.lwjglx.util.vector.Vector;
 import org.lwjglx.util.vector.Vector4f;
 
-import models.data.OBJContent;
-
-public interface EditableGeom {
+/**
+ * TODO try to hide this interface from API. Is useful for internal process. or
+ * delete it.
+ * 
+ * @author chezmoi
+ *
+ */
+public interface EditableGeom extends Geom {
 
 	void addPoint(Vector point);
 
@@ -16,7 +21,5 @@ public interface EditableGeom {
 	public List<Integer> getPositionsToUpdate(Vector ref);
 
 	public void invertNormals();
-
-	public OBJContent getObjContent();
 
 }
