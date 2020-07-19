@@ -8,6 +8,7 @@ import org.lwjglx.util.vector.Matrix4f;
 import org.lwjglx.util.vector.Vector4f;
 
 import camera.CameraEntity;
+import models.RenderableGeom;
 import renderEngine.Loader.VBOIndex;
 import shaderManager.Draw3DShader;
 import shaderManager.IShader3D;
@@ -34,16 +35,17 @@ public class Draw3DRenderer extends DrawRendererCommon {
 
 	@Override
 	public void render() {
-		for (RenderingParameters params : renderingParams) {
+		for (RenderableGeom geom : geoms) {
+			RenderingParameters params = geom.getRenderingParameters();
 			IShader3D draw3DShader = (IShader3D) params.getShader();
 			draw3DShader.start();
-			draw3DShader.loadClipPlane(clipPlane); //TODO extract this is not generic at all
-			//FIXME : this form is binding many times same VAOID potentially
-			prepare(params.getVAOGeom().getVaoId());
+			draw3DShader.loadClipPlane(clipPlane); // TODO extract this is not generic at all
+			// FIXME : this form is binding many times same VAOID potentially
+			prepare(geom.getVAOGeom().getVaoId());
 			Matrix4f viewMatrix = camera.getViewMatrix();
 			draw3DShader.loadViewMatrix(viewMatrix);
-			draw3DShader.setUseImage(!params.getVAOGeom().getTextures().isEmpty());
-			int numberOfRows = params.getVAOGeom().getObjContent().getMaterials().getNumberOfRows();
+			draw3DShader.setUseImage(!geom.getVAOGeom().getTextures().isEmpty());
+			int numberOfRows = geom.getObjContent().getMaterials().getNumberOfRows();
 			draw3DShader.loadNumberOfRows(numberOfRows);
 			// Disable distance filtering.
 			GL11.glDisable(GL11.GL_DEPTH);
@@ -51,14 +53,15 @@ public class Draw3DRenderer extends DrawRendererCommon {
 			if (params.getEntities() == null || params.getEntities().isEmpty()) { // not good at all
 				Matrix4f transformationM = new Matrix4f();
 				draw3DShader.loadTransformationMatrix(transformationM);
-				genericDrawRender(params);
+				genericDrawRender(geom);
 			} else {
 				params.getEntities().forEach(entity -> {
-					draw3DShader.loadOffset(getTextureXOffset(entity.getTextureAtlasIndex(),numberOfRows), getTExtureYOffset(entity.getTextureAtlasIndex(),numberOfRows));
+					draw3DShader.loadOffset(getTextureXOffset(entity.getTextureAtlasIndex(), numberOfRows),
+							getTExtureYOffset(entity.getTextureAtlasIndex(), numberOfRows));
 					Matrix4f transformationM = Maths.createTransformationMatrix(entity.getPositions(), entity.getRotX(),
 							entity.getRotY(), entity.getRotZ(), entity.getScale());
 					draw3DShader.loadTransformationMatrix(transformationM);
-					genericDrawRender(params);
+					genericDrawRender(geom);
 				});
 			}
 			unbindGeom();
@@ -68,22 +71,22 @@ public class Draw3DRenderer extends DrawRendererCommon {
 			draw3DShader.stop();
 		}
 	}
-	
-	private int getTextureXOffset(int textureIndex, int numberOfRows){
-		if(numberOfRows == 0) {
+
+	private float getTextureXOffset(int textureIndex, int numberOfRows) {
+		if (numberOfRows == 0) {
 			return 0;
 		}
-		int column = textureIndex%numberOfRows;
-		return column/numberOfRows;
-		}
+		float column = textureIndex % numberOfRows;
+		return column / numberOfRows;
+	}
 
-		private int getTExtureYOffset(int textureIndex, int numberOfRows){
-			if(numberOfRows == 0) {
-				return 0;
-			}
-		int row = textureIndex/numberOfRows;
-		return row/numberOfRows;
+	private float getTExtureYOffset(int textureIndex, int numberOfRows) {
+		if (numberOfRows == 0) {
+			return 0;
 		}
+		float row = textureIndex / numberOfRows;
+		return row / numberOfRows;
+	}
 
 	@Override
 	protected void prepare(int vaoId) {

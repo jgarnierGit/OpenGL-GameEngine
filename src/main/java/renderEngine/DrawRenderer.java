@@ -1,7 +1,6 @@
 package renderEngine;
 
 import models.RenderableGeom;
-import models.data.OBJContent;
 
 public interface DrawRenderer {
 
@@ -12,14 +11,10 @@ public interface DrawRenderer {
 	public void clearGeom();
 
 	/**
-	 * Start rendering by parsing {@see RenderingParameters} list
-	 * then calling {@see DrawRenderer.genericDrawRender(RenderingParameters r)
+	 * Start rendering by parsing {@see RenderableGeom} list then calling
+	 * {@see DrawRenderer.genericDrawRender(RenderableGeom geom)
 	 */
 	public void render();
 
 	public void updateForRendering();
-
-	public void reloadGeomToVAO(RenderableGeom geom);
-	
-	public void bindContentToGeomVAO(RenderableGeom geom, OBJContent geomContent);
 }

@@ -1,4 +1,4 @@
-package modelsManager;
+package models.data;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -15,35 +15,24 @@ import org.junit.jupiter.api.Test;
 import org.lwjglx.util.vector.Vector3f;
 import org.lwjglx.util.vector.Vector4f;
 
-import models.data.MaterialContent;
-import models.data.OBJContent;
-
-class OBJUtilsTest {
-
+class OBJContentTest {
 	OBJContent objContent;
+	String alias;
 
 	@BeforeEach
 	void setUp() throws Exception {
-		objContent = OBJContent.createEmpty(1);
+		alias = "test";
+		objContent = OBJContent.createEmpty(alias,-1,-1,-1,-1);
 	}
 
 	@Test
 	@DisplayName("Empty ObjContent must not contains null")
 	void testEmptyObjContent() {
 		assertNotNull(objContent.getIndices());
-		assertNotNull(objContent.getPoints());
-		assertNotNull(objContent.getMaterialsContent());
+		assertNotNull(objContent.getPositions());
+		assertNotNull(objContent.getMaterials());
 		assertNotNull(objContent.getNormals());
-		assertEquals(1, objContent.getDimension());
-	}
-
-	@Test
-	@DisplayName("Empty ObjContent must have right dimensions")
-	void testEmptyObjContentHaveRightDimensions() {
-		assertEquals(0, objContent.getIndices().size());
-		assertEquals(1, objContent.getPoints().getDimension());
-		assertEquals(4, objContent.getMaterialsContent().getDimension());
-		assertEquals(3, objContent.getNormals().getDimension());
+		assertEquals(alias, objContent.alias);
 	}
 
 	@Test
@@ -62,10 +51,11 @@ class OBJUtilsTest {
 	@DisplayName("Copy over empty ObjContent must not be the same")
 	void testCopyEmpty() {
 		OBJContent content2 = OBJContent.copy(objContent);
-		assertNotSame(content2.getMaterialsContent(), objContent.getMaterialsContent());
+		assertNotSame(content2.getMaterials(), objContent.getMaterials());
 		assertNotSame(content2.getIndices(), objContent.getIndices());
 		assertNotSame(content2.getNormals(), objContent.getNormals());
-		assertNotSame(content2.getPoints(), objContent.getPoints());
+		assertNotSame(content2.getPositions(), objContent.getPositions());
+		assertEquals(alias, objContent.alias);
 	}
 
 	@Nested
@@ -83,7 +73,7 @@ class OBJUtilsTest {
 
 			@BeforeEach
 			void setUp() throws Exception {
-				objContent = OBJContent.create(indices, positions2, normals2, materials);
+				//objContent = OBJContent.create(indices, positions2, normals2, materials);
 			}
 
 			@Test

@@ -7,6 +7,7 @@ import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
+import models.RenderableGeom;
 import renderEngine.Loader.VBOIndex;
 import shaderManager.Draw2DShader;
 
@@ -23,14 +24,15 @@ public class Draw2DRenderer extends DrawRendererCommon {
 
 	@Override
 	public void render() {
-		for (RenderingParameters params : renderingParams) {
+		for (RenderableGeom geom : geoms) {
+			RenderingParameters params = geom.getRenderingParameters();
 			Draw2DShader draw2DShader = (Draw2DShader) params.getShader();
 			draw2DShader.start();
-			prepare(params.getVAOGeom().getVaoId());
+			prepare(geom.getVAOGeom().getVaoId());
 
 			// Disable distance filtering.
 			GL11.glDisable(GL11.GL_DEPTH);
-			genericDrawRender(params);
+			genericDrawRender(geom);
 			// GL11.glLineWidth(1);
 			GL11.glEnable(GL11.GL_DEPTH);
 			draw2DShader.stop();

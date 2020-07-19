@@ -6,6 +6,7 @@ import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
 import camera.CameraEntity;
+import models.RenderableGeom;
 import models.data.CubeTexture;
 import renderEngine.Loader.VBOIndex;
 import shaderManager.SkyboxShader;
@@ -38,17 +39,17 @@ public class SkyboxRenderer extends DrawRendererCommon {
 	@Override
 	public void render() {
 		// must find a way to not allow multi rendering for Skybox.
-		for (RenderingParameters params : renderingParams) {
+		for (RenderableGeom geom : geoms) {
+			RenderingParameters params = geom.getRenderingParameters();
 			SkyboxShader shader = (SkyboxShader) params.getShader();
 			shader.start();
 			shader.loadViewMatrix(camera.getViewMatrix());
 			shader.loadFogColour(MasterRenderer.RED, MasterRenderer.GREEN, MasterRenderer.BLUE);
 
-			// TODO really.really.really.really ugly
-			prepare(params.getVAOGeom().getVaoId());
+			prepare(geom.getVAOGeom().getVaoId());
 			dayNightCycle(shader);
 			params.getEntities().forEach(entity -> {
-				genericDrawRender(params);
+				genericDrawRender(geom);
 			});
 			unbindGeom();
 			shader.stop();

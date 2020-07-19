@@ -10,20 +10,20 @@ public interface IShader3D extends IShader {
 	public void loadProjectionMatrix(Matrix4f projection);
 
 	public void loadViewMatrix(Matrix4f viewMatrix);
-	
+
 	public void loadClipPlane(Vector4f plane);
-	
+
 	public default void setUseImage(boolean useImage) {
-		//optional
+		// optional
 	}
-	
-	public default void loadOffset(int x, int y) {
-		//optional
+
+	public default void loadOffset(float x, float y) {
+		// optional
 	}
-	
+
 	public default void loadNumberOfRows(int numberOfRows) {
-		//optional
+		// optional
 	}
-	
+
 	public int getNormalShaderIndex();
 }

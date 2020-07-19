@@ -43,16 +43,16 @@ class GeomEditorTest {
 	@DisplayName("Duplicate color empty")
 	void TestDuplicateColorEmpty() {
 		geom.duplicateLastColor();
-		assertFalse(geom.colors.getContent().isEmpty());
+		assertFalse(geom.colors.getVBOContent().isEmpty());
 	}
 
 	@Test
 	@DisplayName("Add color on empty list")
 	void TestAddColor() {
 		geom.addColor(COLOR_ADDED);
-		assertFalse(geom.colors.getContent().isEmpty());
-		assertEquals(4, geom.colors.getContent().size());
-		assertEquals(new Float(1), geom.colors.getContent().get(0));
+		assertFalse(geom.colors.getVBOContent().isEmpty());
+		assertEquals(4, geom.colors.getVBOContent().size());
+		assertEquals(new Float(1), geom.colors.getVBOContent().get(0));
 	}
 
 	@Nested
@@ -68,18 +68,18 @@ class GeomEditorTest {
 		@DisplayName("Add color on empty list")
 		void TestAddColor() {
 			geom.addColor(COLOR_ADDED);
-			assertFalse(geom.colors.getContent().isEmpty());
-			assertEquals(8, geom.colors.getContent().size());
-			assertEquals(new Float(1), geom.colors.getContent().get(4));
+			assertFalse(geom.colors.getVBOContent().isEmpty());
+			assertEquals(8, geom.colors.getVBOContent().size());
+			assertEquals(new Float(1), geom.colors.getVBOContent().get(4));
 		}
 
 		@Test
 		@DisplayName("Duplicate color existing")
 		void TestDuplicateColor() {
 			geom.duplicateLastColor();
-			assertFalse(geom.colors.getContent().isEmpty());
-			assertEquals(8, geom.colors.getContent().size());
-			assertEquals(new Float(2), geom.colors.getContent().get(5));
+			assertFalse(geom.colors.getVBOContent().isEmpty());
+			assertEquals(8, geom.colors.getVBOContent().size());
+			assertEquals(new Float(2), geom.colors.getVBOContent().get(5));
 		}
 
 		@Test
@@ -87,8 +87,8 @@ class GeomEditorTest {
 		void testUpdateColorAtIndex() {
 			vaoGeom.addColor(COLOR_ADDED);
 			vaoGeom.updateColor(1, new Vector4f(6f, 5f, 4f, 3f));
-			assertEquals(8, vaoGeom.colors.getContent().size());
-			assertEquals(new Float(6), vaoGeom.colors.getContent().get(4));
+			assertEquals(8, vaoGeom.colors.getVBOContent().size());
+			assertEquals(new Float(6), vaoGeom.colors.getVBOContent().get(4));
 		}
 
 		@Test
@@ -105,11 +105,11 @@ class GeomEditorTest {
 		void testUpdateAllColors() {
 			vaoGeom.addColor(COLOR_ADDED);
 			vaoGeom.updateColor(new Vector4f(6f, 5f, 4f, 3f));
-			assertEquals(8, vaoGeom.colors.getContent().size());
-			assertEquals(new Float(6), vaoGeom.colors.getContent().get(0));
-			assertEquals(new Float(3), vaoGeom.colors.getContent().get(3));
-			assertEquals(new Float(6), vaoGeom.colors.getContent().get(4));
-			assertEquals(new Float(3), vaoGeom.colors.getContent().get(7));
+			assertEquals(8, vaoGeom.colors.getVBOContent().size());
+			assertEquals(new Float(6), vaoGeom.colors.getVBOContent().get(0));
+			assertEquals(new Float(3), vaoGeom.colors.getVBOContent().get(3));
+			assertEquals(new Float(6), vaoGeom.colors.getVBOContent().get(4));
+			assertEquals(new Float(3), vaoGeom.colors.getVBOContent().get(7));
 		}
 
 		@Test
@@ -117,11 +117,11 @@ class GeomEditorTest {
 		void testUpdateColorsNotX() {
 			vaoGeom.addColor(COLOR_ADDED);
 			vaoGeom.updateColor(new Vector4f(-1f, 5f, 4f, 3f));
-			assertEquals(8, vaoGeom.colors.getContent().size());
-			assertEquals(new Float(COLOR_GEOM1.get(0)), vaoGeom.colors.getContent().get(0));
-			assertEquals(new Float(3), vaoGeom.colors.getContent().get(3));
-			assertEquals(new Float(COLOR_ADDED.x), vaoGeom.colors.getContent().get(4));
-			assertEquals(new Float(3), vaoGeom.colors.getContent().get(7));
+			assertEquals(8, vaoGeom.colors.getVBOContent().size());
+			assertEquals(new Float(COLOR_GEOM1.get(0)), vaoGeom.colors.getVBOContent().get(0));
+			assertEquals(new Float(3), vaoGeom.colors.getVBOContent().get(3));
+			assertEquals(new Float(COLOR_ADDED.x), vaoGeom.colors.getVBOContent().get(4));
+			assertEquals(new Float(3), vaoGeom.colors.getVBOContent().get(7));
 		}
 
 		@Test
@@ -129,11 +129,11 @@ class GeomEditorTest {
 		void testUpdateColorsNotY() {
 			vaoGeom.addColor(COLOR_ADDED);
 			vaoGeom.updateColor(new Vector4f(6f, -1f, 4f, 3f));
-			assertEquals(8, vaoGeom.colors.getContent().size());
-			assertEquals(new Float(COLOR_GEOM1.get(1)), vaoGeom.colors.getContent().get(1));
-			assertEquals(new Float(3), vaoGeom.colors.getContent().get(3));
-			assertEquals(new Float(COLOR_ADDED.y), vaoGeom.colors.getContent().get(5));
-			assertEquals(new Float(3), vaoGeom.colors.getContent().get(7));
+			assertEquals(8, vaoGeom.colors.getVBOContent().size());
+			assertEquals(new Float(COLOR_GEOM1.get(1)), vaoGeom.colors.getVBOContent().get(1));
+			assertEquals(new Float(3), vaoGeom.colors.getVBOContent().get(3));
+			assertEquals(new Float(COLOR_ADDED.y), vaoGeom.colors.getVBOContent().get(5));
+			assertEquals(new Float(3), vaoGeom.colors.getVBOContent().get(7));
 		}
 
 		@Test
@@ -141,11 +141,11 @@ class GeomEditorTest {
 		void testUpdateColorsNotZ() {
 			vaoGeom.addColor(COLOR_ADDED);
 			vaoGeom.updateColor(new Vector4f(6f, 5f, -1f, 3f));
-			assertEquals(8, vaoGeom.colors.getContent().size());
-			assertEquals(new Float(COLOR_GEOM1.get(2)), vaoGeom.colors.getContent().get(2));
-			assertEquals(new Float(3), vaoGeom.colors.getContent().get(3));
-			assertEquals(new Float(COLOR_ADDED.z), vaoGeom.colors.getContent().get(6));
-			assertEquals(new Float(3), vaoGeom.colors.getContent().get(7));
+			assertEquals(8, vaoGeom.colors.getVBOContent().size());
+			assertEquals(new Float(COLOR_GEOM1.get(2)), vaoGeom.colors.getVBOContent().get(2));
+			assertEquals(new Float(3), vaoGeom.colors.getVBOContent().get(3));
+			assertEquals(new Float(COLOR_ADDED.z), vaoGeom.colors.getVBOContent().get(6));
+			assertEquals(new Float(3), vaoGeom.colors.getVBOContent().get(7));
 		}
 
 		@Test
@@ -153,11 +153,11 @@ class GeomEditorTest {
 		void testUpdateColorsNotW() {
 			vaoGeom.addColor(COLOR_ADDED);
 			vaoGeom.updateColor(new Vector4f(6f, 5f, 4f, -1f));
-			assertEquals(8, vaoGeom.colors.getContent().size());
-			assertEquals(new Float(COLOR_GEOM1.get(3)), vaoGeom.colors.getContent().get(3));
-			assertEquals(new Float(4), vaoGeom.colors.getContent().get(2));
-			assertEquals(new Float(COLOR_ADDED.w), vaoGeom.colors.getContent().get(7));
-			assertEquals(new Float(4), vaoGeom.colors.getContent().get(6));
+			assertEquals(8, vaoGeom.colors.getVBOContent().size());
+			assertEquals(new Float(COLOR_GEOM1.get(3)), vaoGeom.colors.getVBOContent().get(3));
+			assertEquals(new Float(4), vaoGeom.colors.getVBOContent().get(2));
+			assertEquals(new Float(COLOR_ADDED.w), vaoGeom.colors.getVBOContent().get(7));
+			assertEquals(new Float(4), vaoGeom.colors.getVBOContent().get(6));
 		}
 	}
 

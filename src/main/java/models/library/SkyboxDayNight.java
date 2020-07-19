@@ -41,8 +41,7 @@ public class SkyboxDayNight implements GeomContainer {
 		skybox.skyboxGeom = SimpleGeom3DBuilder.create(masterRenderer, skybox.renderer, "skybox")
 				.withShader(skyboxShader).build();
 		skybox.initGeom();
-		//TODO merge what is better between this way and monkey way
-		skybox.renderer.reloadGeomToVAO(skybox.skyboxGeom);
+		skybox.skyboxGeom.reloadVao();
 		return skybox;
 	}
 

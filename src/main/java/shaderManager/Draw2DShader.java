@@ -4,11 +4,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.function.Function;
 
-import org.apache.commons.lang3.NotImplementedException;
-
 import renderEngine.Loader.VBOIndex;
 
-public class Draw2DShader extends ShaderProgram implements IShader2D{
+public class Draw2DShader extends ShaderProgram implements IShader2D {
 	private static final String VERTEX_FILE = "draw2DVertexShader.txt";
 	private static final String FRAGMENT_FILE = "draw2DFragmentShader.txt";
 	public static final int COLOR_INDEX = 1;
@@ -54,7 +52,7 @@ public class Draw2DShader extends ShaderProgram implements IShader2D{
 
 	@Override
 	public int getTextureShaderIndex() {
-		throw new NotImplementedException();
+		return -1;
 	}
 
 	@Override

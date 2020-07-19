@@ -3,6 +3,7 @@ package shaderManager;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.function.Function;
+import java.util.logging.Logger;
 
 import org.lwjglx.util.vector.Matrix4f;
 import org.lwjglx.util.vector.Vector2f;
@@ -13,6 +14,7 @@ import renderEngine.Loader.VBOIndex;
 public class Draw3DShader extends ShaderProgram implements IShader3D {
 	private static final String VERTEX_FILE = "rayVertexShader.txt";
 	private static final String FRAGMENT_FILE = "rayFragmentShader.txt";
+	private Logger logger = Logger.getLogger("Draw3DShader");
 	public static final int COLOR_INDEX = 1;
 	public static final int TEXTURE_INDEX = 2;
 	public static final int NORMAL_INDEX = 3;
@@ -26,10 +28,11 @@ public class Draw3DShader extends ShaderProgram implements IShader3D {
 
 	private static Draw3DShader defaultDraw3DShader = null;
 
-	private Draw3DShader(Function<String, InputStream> consumer, String vertexFile, String fragmentFile) throws IOException {
+	private Draw3DShader(Function<String, InputStream> consumer, String vertexFile, String fragmentFile)
+			throws IOException {
 		super(consumer, vertexFile, fragmentFile);
 	}
-	
+
 	private Draw3DShader(String vertexFile, String fragmentFile) throws IOException {
 		super(vertexFile, fragmentFile);
 	}
@@ -41,7 +44,8 @@ public class Draw3DShader extends ShaderProgram implements IShader3D {
 		return defaultDraw3DShader;
 	}
 
-	public static Draw3DShader create(Function<String, InputStream> consumer, String vertexFile, String fragmentFile) throws IOException {
+	public static Draw3DShader create(Function<String, InputStream> consumer, String vertexFile, String fragmentFile)
+			throws IOException {
 		Draw3DShader shader = new Draw3DShader(consumer, vertexFile, fragmentFile);
 		return shader;
 	}
@@ -64,33 +68,40 @@ public class Draw3DShader extends ShaderProgram implements IShader3D {
 		super.bindAttribute(TEXTURE_INDEX, "textureCoords");
 		super.bindAttribute(NORMAL_INDEX, "normals");
 	}
-	
+
+	@Override
 	public void loadClipPlane(Vector4f plane) {
 		super.loadVector(location_planeClipping, plane);
 	}
 
+	@Override
 	public void loadTransformationMatrix(Matrix4f transformationMatrix) {
 		super.loadMatrix(location_transformationMatrix, transformationMatrix);
 	}
 
+	@Override
 	public void loadProjectionMatrix(Matrix4f projection) {
 		super.loadMatrix(projectionMatrix, projection);
 	}
 
+	@Override
 	public void loadViewMatrix(Matrix4f viewMatrix) {
 		super.loadMatrix(location_viewMatrix, viewMatrix);
 	}
-	
+
+	@Override
 	public void setUseImage(boolean useImage) {
 		super.loadBoolean(location_useImage, useImage);
 	}
-	
+
+	@Override
 	public void loadNumberOfRows(int numberOfRows) {
 		super.loadFloat(locationNumberOfRows, numberOfRows);
 	}
-	
-	public void loadOffset(int x, int y) {
-		super.loadVector(locationOffset, new Vector2f(x,y));
+
+	@Override
+	public void loadOffset(float x, float y) {
+		super.loadVector(locationOffset, new Vector2f(x, y));
 	}
 
 	@Override
@@ -107,6 +118,7 @@ public class Draw3DShader extends ShaderProgram implements IShader3D {
 	public int getPositionShaderIndex() {
 		return VBOIndex.POSITION_INDEX;
 	}
+
 	@Override
 	public int getNormalShaderIndex() {
 		return NORMAL_INDEX;
