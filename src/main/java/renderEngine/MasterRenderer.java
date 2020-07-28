@@ -12,8 +12,10 @@ import org.lwjgl.opengl.GL11;
 import org.lwjglx.util.vector.Vector4f;
 
 import camera.CameraEntity;
+import entities.Entity;
 import entities.GeomContainer;
 import entities.Light;
+import shadows.ShadowMapMasterRenderer;
 
 public class MasterRenderer {
 	public static final float RED = 0.55f;
@@ -27,15 +29,17 @@ public class MasterRenderer {
 
 	private Set<DrawRenderer> renderers;
 	private Set<DrawRenderer> activeRenderers;
+	private ShadowMapMasterRenderer shadowMasterRenderer;
 
 	private MasterRenderer(Loader loader, CameraEntity camera,
-			Draw3DRenderer draw3DRenderer, Draw2DRenderer draw2DRenderer) {
+			Draw3DRenderer draw3DRenderer, Draw2DRenderer draw2DRenderer, ShadowMapMasterRenderer shadowMasterRenderer) {
 		this.loader = loader;
 		this.camera = camera;
 		this.defaultDraw3DRenderer = draw3DRenderer;
 		this.defaultDraw2DRenderer = draw2DRenderer;
 		this.renderers = new HashSet<>();
 		this.activeRenderers = new HashSet<>();
+		this.shadowMasterRenderer = shadowMasterRenderer;
 	}
 
 	public static MasterRenderer create(CameraEntity camera) throws IOException {
@@ -43,8 +47,8 @@ public class MasterRenderer {
 		Draw3DRenderer draw3DRenderer = new Draw3DRenderer(camera);
 		Draw2DRenderer draw2DRenderer = new Draw2DRenderer();
 		Loader loader = new Loader();
-
-		return new MasterRenderer(loader, camera, draw3DRenderer, draw2DRenderer);
+		ShadowMapMasterRenderer shadowMasterRenderer = new ShadowMapMasterRenderer(camera);
+		return new MasterRenderer(loader, camera, draw3DRenderer, draw2DRenderer, shadowMasterRenderer);
 	}
 
 	public Draw3DRenderer getDefault3DRenderer() {
@@ -100,12 +104,21 @@ public class MasterRenderer {
 			drawRenderer.render();
 		}
 	}
+	
+	public void renderShadowMap(List<GeomContainer> geomToRender, Light sun) {
+		shadowMasterRenderer.render(geomToRender, sun);
+	}
+	
+	public int getShadowMapTexture() {
+		return shadowMasterRenderer.getShadowMap();
+	}
 
 	public void cleanUp() {
 		for (DrawRenderer drawRenderer : this.renderers) {
 			drawRenderer.cleanUp();
 		}
 		loader.cleanUp();
+		shadowMasterRenderer.cleanUp();
 	}
 
 	public void prepare() {

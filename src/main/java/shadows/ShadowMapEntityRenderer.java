@@ -40,7 +40,11 @@ public class ShadowMapEntityRenderer  extends DrawRendererCommon{
 		for (RenderableGeom geom : geoms) {
 			RenderingParameters params = geom.getRenderingParameters();
 			prepare(geom.getVAOGeom().getVaoId());
-			genericDrawRender(geom);
+			params.getEntities().forEach(entity -> {
+				prepareInstance(entity);
+				renderByVertices(geom);
+			});
+			
 			unbindGeom();
 		}
 	}

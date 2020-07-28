@@ -8,13 +8,13 @@ import shaderManager.ShaderProgram;
 
 public class ShadowShader extends ShaderProgram {
 	
-	private static final String VERTEX_FILE = "src/shadows/shadowVertexShader.txt";
-	private static final String FRAGMENT_FILE = "src/shadows/shadowFragmentShader.txt";
+	private static final String VERTEX_FILE = "shadowVertexShader.txt";
+	private static final String FRAGMENT_FILE = "shadowFragmentShader.txt";
 	
 	private int location_mvpMatrix;
 
 	protected ShadowShader() throws IOException {
-		super(VERTEX_FILE, FRAGMENT_FILE);
+		super(ShadowShader.class::getResourceAsStream,VERTEX_FILE, FRAGMENT_FILE);
 	}
 	
 	protected void loadMvpMatrix(Matrix4f mvpMatrix){
@@ -29,6 +29,21 @@ public class ShadowShader extends ShaderProgram {
 	@Override
 	protected void getAllUniformLocation() {
 		location_mvpMatrix = super.getUniformLocation("mvpMatrix");
+	}
+
+	@Override
+	public int getColorShaderIndex() {
+		return -1;
+	}
+
+	@Override
+	public int getTextureShaderIndex() {
+		return -1;
+	}
+
+	@Override
+	public int getPositionShaderIndex() {
+		return 0;
 	}
 
 }

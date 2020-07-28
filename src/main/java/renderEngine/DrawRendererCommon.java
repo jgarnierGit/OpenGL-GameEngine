@@ -160,7 +160,7 @@ public abstract class DrawRendererCommon implements DrawRenderer {
 		// GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
 	}
 
-	private void renderByVertices(RenderableGeom geom) {
+	public void renderByVertices(RenderableGeom geom) {
 		// cf https://www.khronos.org/opengl/wiki/Primitive => internal gl logic, hidden
 		// for DrawArrays usage;
 		OBJContent geomContent = geom.getObjContent();

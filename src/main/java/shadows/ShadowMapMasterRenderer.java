@@ -12,7 +12,6 @@ import org.lwjglx.util.vector.Vector3f;
 import camera.CameraEntity;
 import entities.GeomContainer;
 import entities.Light;
-import models.TexturedModel;
 import renderEngine.DrawRenderer;
 
 /**
@@ -74,13 +73,9 @@ public class ShadowMapMasterRenderer {
 	 */
 	public void render(List<GeomContainer> geomToRender, Light sun) {
 		shadowBox.update();
-		//duplicated from masterRenderer
-		ArrayList<DrawRenderer> activeRenderers = new ArrayList<>();
+		entityRenderer.clearGeom();
 		geomToRender.forEach(geom -> {
-			if(activeRenderers.add(geom.getRenderableGeom().getRenderer())) {
-				geom.getRenderableGeom().getRenderer().clearGeom();
-			}
-			geom.getRenderableGeom().updateRenderer();
+			entityRenderer.process(geom.getRenderableGeom());
 		});
 		
 		Vector3f sunPosition = sun.getPosition();
